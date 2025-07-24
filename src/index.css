@@ -110,14 +110,4 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-bai;
   }
-  
-  /* Typography classes */
-  .text-h1 { @apply text-h1; }
-  .text-h2 { @apply text-h2; }
-  .text-h3 { @apply text-h3; }
-  .text-tag { @apply text-tag; }
-  .text-p1 { @apply text-p1; }
-  .text-p2 { @apply text-p2; }
-  .text-p3 { @apply text-p3; }
-  .text-p4 { @apply text-p4; }
 }
