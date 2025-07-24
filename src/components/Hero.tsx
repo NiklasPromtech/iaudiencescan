@@ -14,7 +14,7 @@ const Hero = () => {
       
       {/* Backdrop Texture */}
       <div
-        className="absolute top-0 right-0 w-[10%] h-[10%] opacity-5 bg-cover bg-center bg-no-repeat"
+        className="absolute top-0 right-0 w-[3%] h-[3%] opacity-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${backdropTexture})` }}
       />
             
