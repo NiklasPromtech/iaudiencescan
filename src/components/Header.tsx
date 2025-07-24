@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
@@ -19,6 +20,9 @@ const Header = () => {
           <a href="#how-it-works" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             How it works
           </a>
+          <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+            Case Studies
+          </Link>
           <a href="#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             FAQ
           </a>
