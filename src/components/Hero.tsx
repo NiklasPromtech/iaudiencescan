@@ -13,11 +13,11 @@ const Hero = () => {
       />
       
       {/* Backdrop Texture */}
-      <div 
-        className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat"
+      <div
+        className="absolute top-0 right-0 w-[30%] h-[30%] opacity-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${backdropTexture})` }}
       />
-      
+            
       {/* Floating Elements */}
       <div className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full animate-float blur-sm" />
       <div className="absolute bottom-40 right-32 w-24 h-24 bg-primary-glow/20 rounded-full animate-float blur-sm" style={{ animationDelay: '1s' }} />
