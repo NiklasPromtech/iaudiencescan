@@ -32,10 +32,10 @@ const FAQ = () => {
     <section id="faq" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-h2 font-bold mb-6">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-p1 text-muted-foreground max-w-3xl mx-auto">
             Everything you need to know about AudienceScan
           </p>
         </div>
@@ -48,10 +48,10 @@ const FAQ = () => {
                 value={`item-${index}`}
                 className="border-2 border-primary/10 rounded-lg px-6 hover:border-primary/30 transition-smooth"
               >
-                <AccordionTrigger className="text-left font-semibold hover:text-primary transition-smooth">
+                <AccordionTrigger className="text-left text-tag font-semibold hover:text-primary transition-smooth">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pt-2">
+                <AccordionContent className="text-p2 text-muted-foreground leading-relaxed pt-2">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

@@ -2,15 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import heroImage from "@/assets/hero-image.jpg";
+import backdropTexture from "@/assets/backdrop-texture.jpg";
 
 const Hero = () => {
   const [tokenAddress, setTokenAddress] = useState("");
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
-      {/* Background Image */}
+      {/* Backdrop Texture */}
       <div 
-        className="absolute inset-0 opacity-10 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${backdropTexture})` }}
+      />
+      
+      {/* Hero Background Image */}
+      <div 
+        className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       />
       
@@ -21,11 +28,11 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+          <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Run Audience Analysis on Any Token in Seconds
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+          <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
             AudienceScan turns blockchain data into real marketing signal. 
             <span className="text-primary font-semibold"> Free analysis for the first 100 projects.</span>
           </p>
@@ -36,37 +43,37 @@ const Hero = () => {
               placeholder="Enter token contract address..."
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value)}
-              className="flex-1 h-12 text-lg border-2 border-primary/20 focus:border-primary"
+              className="flex-1 h-12 text-p2 border-2 border-primary/20 focus:border-primary"
             />
             <Button 
               size="lg"
-              className="bg-gradient-primary hover:shadow-glow animate-pulse-glow px-8 h-12 text-lg font-semibold min-w-[200px]"
+              className="bg-gradient-primary hover:shadow-glow animate-pulse-glow px-8 h-12 text-p2 font-semibold min-w-[200px]"
             >
               Run a Free Scan
             </Button>
           </div>
           
-          <p className="text-sm text-muted-foreground mb-12">
+          <p className="text-p3 text-muted-foreground mb-12">
             No wallet connect needed • Results in under 30 seconds
           </p>
           
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">437+</div>
-              <div className="text-sm text-muted-foreground">Wallets Analyzed</div>
+              <div className="text-h2 font-bold text-primary mb-2">437+</div>
+              <div className="text-p3 text-muted-foreground">Wallets Analyzed</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">436+</div>
-              <div className="text-sm text-muted-foreground">Transactions</div>
+              <div className="text-h2 font-bold text-primary mb-2">436+</div>
+              <div className="text-p3 text-muted-foreground">Transactions</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">1298+</div>
-              <div className="text-sm text-muted-foreground">Tokens Found</div>
+              <div className="text-h2 font-bold text-primary mb-2">1298+</div>
+              <div className="text-p3 text-muted-foreground">Tokens Found</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">728M+</div>
-              <div className="text-sm text-muted-foreground">Transaction Value</div>
+              <div className="text-h2 font-bold text-primary mb-2">728M+</div>
+              <div className="text-p3 text-muted-foreground">Transaction Value</div>
             </div>
           </div>
         </div>

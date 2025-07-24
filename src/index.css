@@ -17,31 +17,31 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 258 100% 68%;
+    --primary: 258 90% 66%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 258 100% 78%;
+    --primary-glow: 270 100% 85%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 270 100% 96%;
+    --secondary-foreground: 258 90% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
 
-    --accent: 258 100% 95%;
-    --accent-foreground: 258 100% 20%;
+    --accent: 270 100% 98%;
+    --accent-foreground: 258 90% 30%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 258 100% 68%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 258 90% 66%;
 
     /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent)));
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
-    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.3);
+    --gradient-primary: linear-gradient(135deg, hsl(258, 90%, 66%), hsl(270, 100%, 85%));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(270, 100%, 98%));
+    --shadow-elegant: 0 10px 30px -10px hsl(258 90% 66% / 0.3);
+    --shadow-glow: 0 0 40px hsl(270 100% 85% / 0.4);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
@@ -108,6 +108,16 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-bai;
   }
+  
+  /* Typography classes */
+  .text-h1 { @apply text-h1; }
+  .text-h2 { @apply text-h2; }
+  .text-h3 { @apply text-h3; }
+  .text-tag { @apply text-tag; }
+  .text-p1 { @apply text-p1; }
+  .text-p2 { @apply text-p2; }
+  .text-p3 { @apply text-p3; }
+  .text-p4 { @apply text-p4; }
 }

@@ -7,13 +7,15 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">A</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">AudienceScan</span>
+            <div className="flex items-center gap-3 mb-4">
+              <img 
+                src="/lovable-uploads/7badbb3e-0d49-4228-97e2-42ebc92a02e0.png" 
+                alt="AudienceScan Logo" 
+                className="h-8 w-8"
+              />
+              <span className="text-h3 font-bold text-foreground">AudienceScan</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-p3 text-muted-foreground leading-relaxed">
               Built by marketers & devs who've scaled Web3 projects. 
               Turn wallet data into marketing signal.
             </p>

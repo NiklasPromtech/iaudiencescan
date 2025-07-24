@@ -16,11 +16,11 @@ const CTA = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6">
+          <h2 className="text-h2 font-bold text-primary-foreground mb-6">
             Ready to Understand Your Audience?
           </h2>
           
-          <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-p1 text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
             Join the first 100 projects to get free audience analysis. 
             Turn your blockchain data into marketing gold.
           </p>
@@ -31,12 +31,12 @@ const CTA = () => {
               placeholder="Enter your email or Telegram handle..."
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 h-12 text-lg bg-primary-foreground/90 border-0 text-foreground placeholder:text-muted-foreground"
+              className="flex-1 h-12 text-p2 bg-primary-foreground/90 border-0 text-foreground placeholder:text-muted-foreground"
             />
             <Button 
               size="lg"
               variant="secondary"
-              className="px-8 h-12 text-lg font-semibold min-w-[200px] bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              className="px-8 h-12 text-p2 font-semibold min-w-[200px] bg-primary-foreground text-primary hover:bg-primary-foreground/90"
             >
               Get Free Analysis
             </Button>
@@ -46,20 +46,20 @@ const CTA = () => {
             <Button 
               size="lg"
               variant="outline"
-              className="px-8 h-12 text-lg font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              className="px-8 h-12 text-p2 font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
             >
               Run Token Scan Now
             </Button>
             <Button 
               size="lg"
               variant="ghost"
-              className="px-8 h-12 text-lg font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+              className="px-8 h-12 text-p2 font-semibold text-primary-foreground hover:bg-primary-foreground/10"
             >
               View Sample Report
             </Button>
           </div>
           
-          <p className="text-sm text-primary-foreground/60 mt-8">
+          <p className="text-p3 text-primary-foreground/60 mt-8">
             No spam, ever. Unsubscribe with one click.
           </p>
         </div>

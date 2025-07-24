@@ -29,10 +29,10 @@ const Features = () => {
     <section id="features" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-h2 font-bold mb-6">
             Powerful Features for Web3 Marketing
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-p1 text-muted-foreground max-w-3xl mx-auto">
             Everything you need to understand and activate your token community
           </p>
         </div>
@@ -46,10 +46,10 @@ const Features = () => {
                     <feature.icon className="w-8 h-8 text-primary-foreground" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-foreground">
+                <h3 className="text-h3 font-semibold mb-4 text-foreground">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-p2 text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </CardContent>

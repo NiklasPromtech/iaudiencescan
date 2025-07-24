@@ -18,6 +18,19 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'bai': ['Bai Jamjuree', 'sans-serif'],
+			},
+			fontSize: {
+				'h1': ['50px', { lineHeight: '1.2', fontWeight: '700' }],
+				'h2': ['35px', { lineHeight: '1.3', fontWeight: '600' }],
+				'h3': ['22px', { lineHeight: '1.4', fontWeight: '600' }],
+				'tag': ['16px', { lineHeight: '1.5', fontWeight: '500' }],
+				'p1': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+				'p2': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
+				'p3': ['14px', { lineHeight: '1.6', fontWeight: '400' }],
+				'p4': ['12px', { lineHeight: '1.6', fontWeight: '400' }],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
