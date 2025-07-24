@@ -35,8 +35,7 @@ const CTA = () => {
             />
             <Button 
               size="lg"
-              variant="secondary"
-              className="px-8 h-12 text-p2 font-semibold min-w-[200px] bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              className="px-8 h-12 text-p2 font-semibold min-w-[200px] bg-white text-primary hover:bg-white/90"
             >
               Get Free Analysis
             </Button>
@@ -45,15 +44,13 @@ const CTA = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               size="lg"
-              variant="outline"
-              className="px-8 h-12 text-p2 font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              className="px-8 h-12 text-p2 font-semibold bg-white text-primary hover:bg-white/90"
             >
               Run Token Scan Now
             </Button>
             <Button 
               size="lg"
-              variant="ghost"
-              className="px-8 h-12 text-p2 font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+              className="px-8 h-12 text-p2 font-semibold bg-white text-primary hover:bg-white/90"
             >
               View Sample Report
             </Button>

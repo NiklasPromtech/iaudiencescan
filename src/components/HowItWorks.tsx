@@ -14,48 +14,52 @@ const HowItWorks = () => {
           </p>
         </div>
         
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 items-center">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 items-center">
             {/* Step 1 */}
-            <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-8 text-center">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary-foreground font-bold">1</span>
-                </div>
-                <h3 className="text-tag font-semibold mb-2">Enter Token Address</h3>
-                <p className="text-p3 text-muted-foreground">Paste any contract address</p>
-              </CardContent>
-            </Card>
-            
-            <div className="hidden md:flex justify-center">
-              <ArrowRight className="w-8 h-8 text-primary" />
+            <div className="flex flex-col items-center">
+              <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm w-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white font-bold">1</span>
+                  </div>
+                  <h3 className="text-tag font-semibold mb-2">Enter Token Address</h3>
+                  <p className="text-p3 text-muted-foreground">Paste any contract address</p>
+                </CardContent>
+              </Card>
+              <div className="hidden md:block mt-4">
+                <ArrowRight className="w-8 h-8 text-primary" />
+              </div>
             </div>
             
             {/* Step 2 */}
-            <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-8 text-center">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary-foreground font-bold">2</span>
-                </div>
-                <h3 className="text-tag font-semibold mb-2">AI Analysis</h3>
-                <p className="text-p3 text-muted-foreground">We scan wallet behaviors</p>
-              </CardContent>
-            </Card>
-            
-            <div className="hidden md:flex justify-center">
-              <ArrowRight className="w-8 h-8 text-primary" />
+            <div className="flex flex-col items-center">
+              <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm w-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white font-bold">2</span>
+                  </div>
+                  <h3 className="text-tag font-semibold mb-2">AI Analysis</h3>
+                  <p className="text-p3 text-muted-foreground">We scan wallet behaviors</p>
+                </CardContent>
+              </Card>
+              <div className="hidden md:block mt-4">
+                <ArrowRight className="w-8 h-8 text-primary" />
+              </div>
             </div>
             
             {/* Step 3 */}
-            <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-8 text-center">
-                <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary-foreground font-bold">3</span>
-                </div>
-                <h3 className="text-tag font-semibold mb-2">Get Insights</h3>
-                <p className="text-p3 text-muted-foreground">Actionable marketing data</p>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col items-center">
+              <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm w-full">
+                <CardContent className="p-8 text-center">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-white font-bold">3</span>
+                  </div>
+                  <h3 className="text-tag font-semibold mb-2">Get Insights</h3>
+                  <p className="text-p3 text-muted-foreground">Actionable marketing data</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
           
           <div className="text-center mt-16">

@@ -1,11 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import heroImage from "@/assets/hero-image.jpg";
 import backdropTexture from "@/assets/backdrop-texture.jpg";
 
 const Hero = () => {
-  const [tokenAddress, setTokenAddress] = useState("");
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
@@ -36,19 +33,13 @@ const Hero = () => {
             Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
           </p>
           
-          {/* CTA Form */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 max-w-2xl mx-auto">
-            <Input
-              placeholder="Add token address..."
-              value={tokenAddress}
-              onChange={(e) => setTokenAddress(e.target.value)}
-              className="flex-1 h-12 text-p2 border-2 border-primary/20 focus:border-primary"
-            />
+          {/* CTA Button */}
+          <div className="flex justify-center mb-8">
             <Button 
               size="lg"
-              className="bg-gradient-primary hover:shadow-glow px-8 h-12 text-p2 font-semibold min-w-[120px]"
+              className="bg-primary text-white hover:bg-primary/90 px-12 h-14 text-p1 font-semibold"
             >
-              SEARCH
+              Go to App
             </Button>
           </div>
           
@@ -65,19 +56,19 @@ const Hero = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="text-h2 font-bold text-primary mb-2">437+</div>
+              <div className="text-h2 font-bold text-primary mb-2">847K+</div>
               <div className="text-p3 text-muted-foreground">Wallets Analyzed</div>
             </div>
             <div className="text-center">
-              <div className="text-h2 font-bold text-primary mb-2">436+</div>
+              <div className="text-h2 font-bold text-primary mb-2">2.1M+</div>
               <div className="text-p3 text-muted-foreground">Transactions</div>
             </div>
             <div className="text-center">
-              <div className="text-h2 font-bold text-primary mb-2">1298+</div>
+              <div className="text-h2 font-bold text-primary mb-2">125K+</div>
               <div className="text-p3 text-muted-foreground">Tokens Found</div>
             </div>
             <div className="text-center">
-              <div className="text-h2 font-bold text-primary mb-2">728M+</div>
+              <div className="text-h2 font-bold text-primary mb-2">$4.2B+</div>
               <div className="text-p3 text-muted-foreground">Transaction Value</div>
             </div>
           </div>
