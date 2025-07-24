@@ -27,7 +27,7 @@ const HowItWorks = () => {
                   <p className="text-p3 text-muted-foreground">Paste any contract address</p>
                 </CardContent>
               </Card>
-              <div className="hidden md:block mt-4">
+                            <div className="hidden md:block mt-4">
                 <ArrowRight className="w-8 h-8 text-primary" />
               </div>
             </div>
