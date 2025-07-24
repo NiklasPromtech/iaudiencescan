@@ -14,8 +14,8 @@ const Hero = () => {
       
       {/* Backdrop Texture */}
       <div
-        className="absolute top-0 right-0 w-16 h-16 opacity-5 bg-no-repeat"
-        style={{ backgroundImage: `url(${backdropTexture})`, backgroundSize: '32px 32px' }}
+        className="absolute top-0 right-0 w-4 h-4 opacity-5 bg-no-repeat"
+        style={{ backgroundImage: `url(${backdropTexture})`, backgroundSize: '16px 16px' }}
       />
             
       {/* Floating Elements */}
