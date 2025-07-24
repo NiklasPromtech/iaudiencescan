@@ -28,7 +28,7 @@ const Header = () => {
             <img 
               src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
               alt="Generate Audience" 
-              className="w-[72px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-[228px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
             />
         </div>
       </div>
