@@ -44,15 +44,6 @@ const Hero = () => {
           </div>
           
           
-          <div className="absolute bottom-8 right-8">
-            <a href="#" className="text-p3 text-muted-foreground hover:text-primary transition-smooth flex items-center gap-2">
-              Sample of how to make a scan
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </a>
-          </div>
-          
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
             <div className="text-center">
