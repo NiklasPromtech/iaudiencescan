@@ -15,7 +15,7 @@ const CaseStudies = () => {
         metric: "CPA"
       },
       improvement: "84% lower CPA using AudienceScan",
-      screenshot: "DV360 - Screenshot (GoBob).png"
+      screenshot: "/lovable-uploads/f613b86d-553e-46a0-8589-8a06a49093c0.png"
     },
     {
       title: "Telegram Campaign – Token-Based Channel Targeting", 
@@ -27,19 +27,19 @@ const CaseStudies = () => {
         metric: "CPA"
       },
       improvement: "66% more cost-efficient using AudienceScan",
-      screenshot: "Telegram - Screenshot (RWA).png"
+      screenshot: "/lovable-uploads/ada45400-38d0-4a2f-866f-2f252b37200b.png"
     },
     {
       title: "X Campaign – BSC Token Targeting for Lead Gen",
       summary: "We scanned the client's official token on BSC, using it to drive influencer signups.",
       clientType: "Web3 platform helping micro-influencers earn revenue.",
       results: {
-        leads: "659 vs. 36",
-        subscriptions: "93 vs. 8",
-        costPerSub: "€13.11 vs. €31.25"
+        audienceScan: "€13.11",
+        baseline: "€31.25",
+        metric: "Cost per Subscription"
       },
       improvement: "3× more conversions at 60% lower cost",
-      screenshot: "X - Screenshot (ChirpPad).png"
+      screenshot: "/lovable-uploads/42492af3-11d2-4f8a-9447-3cd163ffa1c2.png"
     }
   ];
 
@@ -94,22 +94,6 @@ const CaseStudies = () => {
                             </div>
                           </>
                         )}
-                        {study.results.leads && (
-                          <>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Leads:</span>
-                              <span className="font-semibold text-foreground">{study.results.leads}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Subscriptions:</span>
-                              <span className="font-semibold text-foreground">{study.results.subscriptions}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Cost per Subscription:</span>
-                              <span className="font-semibold text-foreground">{study.results.costPerSub}</span>
-                            </div>
-                          </>
-                        )}
                       </div>
                     </div>
 
@@ -121,12 +105,16 @@ const CaseStudies = () => {
                     </div>
                   </div>
 
-                  <div className="bg-muted/20 rounded-lg p-4 border border-border/50">
-                    <div className="text-center text-muted-foreground">
-                      <div className="aspect-video bg-muted/50 rounded border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
-                        <span className="text-p3">{study.screenshot}</span>
+                  <div className="bg-card/30 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
+                    <div className="text-center">
+                      <div className="overflow-hidden rounded-lg border border-border/50 bg-background/50">
+                        <img 
+                          src={study.screenshot} 
+                          alt="Campaign Screenshot"
+                          className="w-full h-auto object-contain max-h-80"
+                        />
                       </div>
-                      <p className="text-p3 mt-2">Campaign Screenshot</p>
+                      <p className="text-p3 mt-3 text-muted-foreground font-medium">Campaign Performance Data</p>
                     </div>
                   </div>
                 </div>
