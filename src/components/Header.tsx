@@ -26,7 +26,7 @@ const Header = () => {
 
         <div className="flex items-center">
           <Button className="bg-primary text-white hover:bg-primary/90 transition-smooth text-p2 font-medium">
-            Scan a token
+            Generate Audience
           </Button>
         </div>
       </div>

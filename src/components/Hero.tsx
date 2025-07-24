@@ -39,7 +39,7 @@ const Hero = () => {
               size="lg"
               className="bg-primary text-white hover:bg-primary/90 px-12 h-14 text-p1 font-semibold"
             >
-              Go to App
+              Generate Audience
             </Button>
           </div>
           
