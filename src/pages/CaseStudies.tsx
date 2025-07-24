@@ -69,66 +69,68 @@ const CaseStudies = () => {
 
           <div className="grid gap-8 md:gap-12">
             {caseStudies.map((study, index) => (
-              <Card key={index} className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
-                <div className="grid lg:grid-cols-3 gap-8">
-                  {/* Left Section - Content */}
-                  <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center gap-4 mb-6">
-                      <img 
-                        src={study.logo} 
-                        alt={`${study.platform} logo`}
-                        className="w-12 h-12 object-contain"
-                      />
-                      <h2 className="text-h3 font-bold text-foreground">
-                        {study.title}
-                      </h2>
-                    </div>
-                    
-                    <div className="mb-6">
-                      <h3 className="text-p2 font-semibold mb-2 text-foreground">Summary:</h3>
-                      <p className="text-p2 text-muted-foreground mb-4">
-                        {study.summary}
-                      </p>
+              <div key={index} className="space-y-6">
+                <Card className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
+                  <div className="grid lg:grid-cols-3 gap-8">
+                    {/* Left Section - Content */}
+                    <div className="lg:col-span-2 space-y-6">
+                      <div className="flex items-center gap-4 mb-6">
+                        <img 
+                          src={study.logo} 
+                          alt={`${study.platform} logo`}
+                          className="w-12 h-12 object-contain"
+                        />
+                        <h2 className="text-h3 font-bold text-foreground">
+                          {study.title}
+                        </h2>
+                      </div>
                       
-                      <h3 className="text-p2 font-semibold mb-2 text-foreground">Client Type:</h3>
-                      <p className="text-p2 text-muted-foreground">
-                        {study.clientType}
-                      </p>
+                      <div className="mb-6">
+                        <h3 className="text-p2 font-semibold mb-2 text-foreground">Summary:</h3>
+                        <p className="text-p2 text-muted-foreground mb-4">
+                          {study.summary}
+                        </p>
+                        
+                        <h3 className="text-p2 font-semibold mb-2 text-foreground">Client Type:</h3>
+                        <p className="text-p2 text-muted-foreground">
+                          {study.clientType}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h3 className="text-p2 font-semibold mb-4 text-foreground">Results:</h3>
+                        <div className="space-y-2 text-p2">
+                          {study.results.metric && (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">AudienceScan {study.results.metric}:</span>
+                                <span className="font-semibold text-primary">{study.results.audienceScan}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Baseline {study.results.metric}:</span>
+                                <span className="font-semibold text-foreground">{study.results.baseline}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-p2 font-semibold mb-4 text-foreground">Results:</h3>
-                      <div className="space-y-2 text-p2">
-                        {study.results.metric && (
-                          <>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">AudienceScan {study.results.metric}:</span>
-                              <span className="font-semibold text-primary">{study.results.audienceScan}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Baseline {study.results.metric}:</span>
-                              <span className="font-semibold text-foreground">{study.results.baseline}</span>
-                            </div>
-                          </>
-                        )}
+                    {/* Right Section - Large Purple Result Box */}
+                    <div className="lg:col-span-1 flex flex-col justify-center">
+                      <div className="bg-gradient-to-br from-primary to-primary/80 p-8 rounded-2xl text-center text-white shadow-lg">
+                        <Check className="w-8 h-8 mx-auto mb-4 opacity-90" />
+                        <h3 className="text-h4 font-bold mb-3">Key Result</h3>
+                        <p className="text-lg font-semibold leading-relaxed">
+                          {study.improvement}
+                        </p>
                       </div>
                     </div>
                   </div>
+                </Card>
 
-                  {/* Right Section - Large Purple Result Box */}
-                  <div className="lg:col-span-1 flex flex-col justify-center">
-                    <div className="bg-gradient-to-br from-primary to-primary/80 p-8 rounded-2xl text-center text-white shadow-lg">
-                      <Check className="w-8 h-8 mx-auto mb-4 opacity-90" />
-                      <h3 className="text-h4 font-bold mb-3">Key Result</h3>
-                      <p className="text-lg font-semibold leading-relaxed">
-                        {study.improvement}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Section - Screenshot */}
-                <div className="mt-8 bg-card/30 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
+                {/* Screenshot Section - Outside the card for better visibility */}
+                <div className="bg-card/30 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
                   <div className="text-center">
                     <div className="overflow-hidden rounded-lg border border-border/50 bg-background/50">
                       <img 
@@ -140,7 +142,7 @@ const CaseStudies = () => {
                     <p className="text-p3 mt-3 text-muted-foreground font-medium">Campaign Performance Data</p>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
