@@ -29,33 +29,38 @@ const Hero = () => {
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Run Audience Analysis on Any Token in Seconds
+            Turn any token into a data-backed crypto audience
           </h1>
           
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
-            AudienceScan turns blockchain data into real marketing signal. 
-            <span className="text-primary font-semibold"> Free analysis for the first 100 projects.</span>
+            Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
           </p>
           
           {/* CTA Form */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 max-w-2xl mx-auto">
             <Input
-              placeholder="Enter token contract address..."
+              placeholder="Add token address..."
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value)}
               className="flex-1 h-12 text-p2 border-2 border-primary/20 focus:border-primary"
             />
             <Button 
               size="lg"
-              className="bg-gradient-primary hover:shadow-glow animate-pulse-glow px-8 h-12 text-p2 font-semibold min-w-[200px]"
+              className="bg-gradient-primary hover:shadow-glow px-8 h-12 text-p2 font-semibold min-w-[120px]"
             >
-              Run a Free Scan
+              SEARCH
             </Button>
           </div>
           
-          <p className="text-p3 text-muted-foreground mb-12">
-            No wallet connect needed • Results in under 30 seconds
-          </p>
+          
+          <div className="absolute bottom-8 right-8">
+            <a href="#" className="text-p3 text-muted-foreground hover:text-primary transition-smooth flex items-center gap-2">
+              Sample of how to make a scan
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </a>
+          </div>
           
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
