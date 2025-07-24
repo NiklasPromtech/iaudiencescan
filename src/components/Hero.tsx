@@ -8,7 +8,7 @@ const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero Background Pattern */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute top-0 right-0 w-96 h-96 bg-contain bg-no-repeat opacity-10"
         style={{ backgroundImage: `url(/lovable-uploads/bad95cd7-504e-4986-ad82-cdd251337e3b.png)` }}
       />
       
