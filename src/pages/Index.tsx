@@ -1,13 +1,32 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import Features from "@/components/Features";
+import HowItWorks from "@/components/HowItWorks";
+import FAQ from "@/components/FAQ";
+import CTA from "@/components/CTA";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <>
+      {/* SEO Meta Tags */}
+      <title>AudienceScan - Web3 Audience Analysis Tool</title>
+      <meta name="description" content="Turn blockchain data into marketing signal. Free audience analysis for Web3 projects. Analyze token holders, find community overlaps, and get actionable insights." />
+      <meta name="keywords" content="Web3 marketing, blockchain analytics, token analysis, audience insights, crypto marketing, DeFi marketing" />
+      <meta property="og:title" content="AudienceScan - Web3 Audience Analysis Tool" />
+      <meta property="og:description" content="Turn blockchain data into marketing signal. Free audience analysis for Web3 projects." />
+      <meta property="og:type" content="website" />
+      
+      <div className="min-h-screen bg-background">
+        <Header />
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <FAQ />
+        <CTA />
+        <Footer />
       </div>
-    </div>
+    </>
   );
 };
 
