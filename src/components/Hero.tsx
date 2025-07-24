@@ -8,8 +8,11 @@ const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero Background Pattern */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-        style={{ backgroundImage: `url(/lovable-uploads/bad95cd7-504e-4986-ad82-cdd251337e3b.png)` }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+        style={{ 
+          backgroundImage: `url(/lovable-uploads/bad95cd7-504e-4986-ad82-cdd251337e3b.png)`,
+          backgroundSize: '70%'
+        }}
       />
       
       {/* Backdrop Texture */}
@@ -18,10 +21,6 @@ const Hero = () => {
         style={{ backgroundImage: `url(${backdropTexture})` }}
       />
             
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full animate-float blur-sm" />
-      <div className="absolute bottom-40 right-32 w-24 h-24 bg-primary-glow/20 rounded-full animate-float blur-sm" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 right-20 w-16 h-16 bg-accent/30 rounded-full animate-float blur-sm" style={{ animationDelay: '2s' }} />
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
