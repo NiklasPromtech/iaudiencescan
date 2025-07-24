@@ -24,17 +24,17 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+          <h1 className="text-h1 font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
             Turn any token into a data-backed crypto audience
           </h1>
           
-          <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
+          <p className="text-p1 text-muted-foreground mb-6 max-w-3xl mx-auto">
             Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
           </p>
           
           
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
             <div className="text-center">
               <div className="text-h2 font-bold text-primary mb-2">847K+</div>
               <div className="text-p3 text-muted-foreground">Wallets Analyzed</div>
