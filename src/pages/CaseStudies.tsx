@@ -61,7 +61,7 @@ const CaseStudies = () => {
           <div className="grid gap-8 md:gap-12">
             {caseStudies.map((study, index) => (
               <Card key={index} className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
-                <div className="grid md:grid-cols-2 gap-8 items-start">
+                <div className="space-y-8">
                   <div>
                     <h2 className="text-h3 font-bold mb-4 text-foreground">
                       {study.title}
@@ -111,7 +111,7 @@ const CaseStudies = () => {
                         <img 
                           src={study.screenshot} 
                           alt="Campaign Screenshot"
-                          className="w-full h-auto object-contain max-h-80"
+                          className="w-full h-auto object-contain"
                         />
                       </div>
                       <p className="text-p3 mt-3 text-muted-foreground font-medium">Campaign Performance Data</p>
