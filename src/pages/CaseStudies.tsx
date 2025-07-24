@@ -2,6 +2,9 @@ import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import dv360Logo from "@/assets/dv360-logo.png";
+import telegramLogo from "@/assets/telegram-logo.png";
+import xLogo from "@/assets/x-logo.png";
 
 const CaseStudies = () => {
   const caseStudies = [
@@ -15,7 +18,9 @@ const CaseStudies = () => {
         metric: "CPA"
       },
       improvement: "84% lower CPA using AudienceScan",
-      screenshot: "/lovable-uploads/f613b86d-553e-46a0-8589-8a06a49093c0.png"
+      screenshot: "/lovable-uploads/f613b86d-553e-46a0-8589-8a06a49093c0.png",
+      logo: dv360Logo,
+      platform: "DV360"
     },
     {
       title: "Telegram Campaign – Token-Based Channel Targeting", 
@@ -27,7 +32,9 @@ const CaseStudies = () => {
         metric: "CPA"
       },
       improvement: "66% more cost-efficient using AudienceScan",
-      screenshot: "/lovable-uploads/ada45400-38d0-4a2f-866f-2f252b37200b.png"
+      screenshot: "/lovable-uploads/ada45400-38d0-4a2f-866f-2f252b37200b.png",
+      logo: telegramLogo,
+      platform: "Telegram"
     },
     {
       title: "X Campaign – BSC Token Targeting for Lead Gen",
@@ -39,7 +46,9 @@ const CaseStudies = () => {
         metric: "Cost per Subscription"
       },
       improvement: "3× more conversions at 60% lower cost",
-      screenshot: "/lovable-uploads/42492af3-11d2-4f8a-9447-3cd163ffa1c2.png"
+      screenshot: "/lovable-uploads/42492af3-11d2-4f8a-9447-3cd163ffa1c2.png",
+      logo: xLogo,
+      platform: "X (Twitter)"
     }
   ];
 
@@ -61,11 +70,19 @@ const CaseStudies = () => {
           <div className="grid gap-8 md:gap-12">
             {caseStudies.map((study, index) => (
               <Card key={index} className="p-8 bg-card/50 backdrop-blur-sm border-border/50">
-                <div className="space-y-8">
-                  <div>
-                    <h2 className="text-h3 font-bold mb-4 text-foreground">
-                      {study.title}
-                    </h2>
+                <div className="grid lg:grid-cols-3 gap-8">
+                  {/* Left Section - Content */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center gap-4 mb-6">
+                      <img 
+                        src={study.logo} 
+                        alt={`${study.platform} logo`}
+                        className="w-12 h-12 object-contain"
+                      />
+                      <h2 className="text-h3 font-bold text-foreground">
+                        {study.title}
+                      </h2>
+                    </div>
                     
                     <div className="mb-6">
                       <h3 className="text-p2 font-semibold mb-2 text-foreground">Summary:</h3>
@@ -79,7 +96,7 @@ const CaseStudies = () => {
                       </p>
                     </div>
 
-                    <div className="mb-6">
+                    <div>
                       <h3 className="text-p2 font-semibold mb-4 text-foreground">Results:</h3>
                       <div className="space-y-2 text-p2">
                         {study.results.metric && (
@@ -96,26 +113,31 @@ const CaseStudies = () => {
                         )}
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg border border-primary/20">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                      <span className="text-p2 font-semibold text-primary">
-                        {study.improvement}
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="bg-card/30 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
-                    <div className="text-center">
-                      <div className="overflow-hidden rounded-lg border border-border/50 bg-background/50">
-                        <img 
-                          src={study.screenshot} 
-                          alt="Campaign Screenshot"
-                          className="w-full h-auto object-contain"
-                        />
-                      </div>
-                      <p className="text-p3 mt-3 text-muted-foreground font-medium">Campaign Performance Data</p>
+                  {/* Right Section - Large Purple Result Box */}
+                  <div className="lg:col-span-1 flex flex-col justify-center">
+                    <div className="bg-gradient-to-br from-primary to-primary/80 p-8 rounded-2xl text-center text-white shadow-lg">
+                      <Check className="w-8 h-8 mx-auto mb-4 opacity-90" />
+                      <h3 className="text-h4 font-bold mb-3">Key Result</h3>
+                      <p className="text-lg font-semibold leading-relaxed">
+                        {study.improvement}
+                      </p>
                     </div>
+                  </div>
+                </div>
+
+                {/* Bottom Section - Screenshot */}
+                <div className="mt-8 bg-card/30 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
+                  <div className="text-center">
+                    <div className="overflow-hidden rounded-lg border border-border/50 bg-background/50">
+                      <img 
+                        src={study.screenshot} 
+                        alt="Campaign Screenshot"
+                        className="w-full h-auto object-contain"
+                      />
+                    </div>
+                    <p className="text-p3 mt-3 text-muted-foreground font-medium">Campaign Performance Data</p>
                   </div>
                 </div>
               </Card>
