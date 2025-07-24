@@ -25,9 +25,11 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center">
-          <Button className="bg-primary text-white hover:bg-primary/90 transition-smooth text-p2 font-medium">
-            Generate Audience
-          </Button>
+          <img 
+            src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
+            alt="Generate Audience" 
+            className="h-12 cursor-pointer hover:opacity-90 transition-opacity"
+          />
         </div>
       </div>
     </header>

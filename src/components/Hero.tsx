@@ -5,17 +5,17 @@ import backdropTexture from "@/assets/backdrop-texture.jpg";
 const Hero = () => {
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-subtle overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Hero Background Pattern */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(/lovable-uploads/bad95cd7-504e-4986-ad82-cdd251337e3b.png)` }}
+      />
+      
       {/* Backdrop Texture */}
       <div 
         className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${backdropTexture})` }}
-      />
-      
-      {/* Hero Background Image */}
-      <div 
-        className="absolute inset-0 opacity-5 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroImage})` }}
       />
       
       {/* Floating Elements */}
@@ -32,16 +32,6 @@ const Hero = () => {
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
             Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
           </p>
-          
-          {/* CTA Button */}
-          <div className="flex justify-center mb-8">
-            <Button 
-              size="lg"
-              className="bg-primary text-white hover:bg-primary/90 px-12 h-14 text-p1 font-semibold"
-            >
-              Generate Audience
-            </Button>
-          </div>
           
           
           {/* Stats */}
