@@ -6,24 +6,23 @@ const Header = () => {
     <header className="w-full border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <img 
-            src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png" 
-            alt="AudienceScan" 
-            className="h-6"
-          />
+          <Link to="/">
+            <img 
+              src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png" 
+              alt="AudienceScan" 
+              className="h-6 hover:opacity-80 transition-opacity cursor-pointer"
+            />
+          </Link>
         </div>
         
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+          <a href="/#features" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Platform
           </a>
-          <a href="#partnerships" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+          <a href="/#partnerships" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Partnerships
           </a>
-          <Link to="/pricing" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            Pricing
-          </Link>
-          <a href="#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+          <a href="/#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             FAQ
           </a>
         </nav>
@@ -31,6 +30,9 @@ const Header = () => {
         <div className="flex items-center gap-6">
           <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Case Studies
+          </Link>
+          <Link to="/pricing" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+            Pricing
           </Link>
           <a 
             href="https://app.audiencescan.io" 
