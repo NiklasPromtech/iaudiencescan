@@ -24,9 +24,11 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            Turn any token into a data-backed crypto audience
-          </h1>
+          <div className="border border-border rounded-lg p-6 mb-6 bg-background/50 backdrop-blur-sm">
+            <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              Turn any token into a data-backed crypto audience
+            </h1>
+          </div>
           
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
             Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
