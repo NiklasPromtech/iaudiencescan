@@ -76,7 +76,7 @@ const Pricing = () => {
             {plans.map((plan, index) => (
               <Card 
                 key={index} 
-                className={`relative border-2 transition-all duration-300 hover:shadow-xl ${
+                className={`relative border-2 transition-all duration-300 hover:shadow-xl h-full flex flex-col ${
                   plan.popular 
                     ? 'border-primary bg-primary/5 scale-105' 
                     : plan.name === "Enterprise"
@@ -117,8 +117,8 @@ const Pricing = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4 flex flex-col h-full">
-                  <div className="space-y-3">
+                <CardContent className="flex flex-col flex-1">
+                  <div className="space-y-3 flex-1">
                     {plan.features.map((feature, featureIndex) => (
                       <div key={featureIndex} className="flex items-start gap-3">
                         <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
@@ -133,7 +133,7 @@ const Pricing = () => {
                     ))}
                   </div>
 
-                  <div className="pt-6 mt-auto">
+                  <div className="pt-6">
                     <a 
                       href="https://app.audiencescan.io/signUp"
                       target="_blank"
