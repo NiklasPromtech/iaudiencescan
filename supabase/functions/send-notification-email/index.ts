@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "Notifications <onboarding@resend.dev>",
-      to: ["your-email@example.com"], // Replace with your email
+      to: ["niklas@audiencescan.io"],
       subject: `New ${type === 'email' ? 'Email' : 'Telegram'} Submission`,
       html: `
         <h2>New Lead Submission</h2>
