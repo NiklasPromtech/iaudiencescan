@@ -41,21 +41,6 @@ const CTA = () => {
             </Button>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg"
-              className="px-8 h-12 text-p2 font-semibold bg-white text-primary hover:bg-white/90"
-            >
-              Run Token Scan Now
-            </Button>
-            <Button 
-              size="lg"
-              className="px-8 h-12 text-p2 font-semibold bg-white text-primary hover:bg-white/90"
-            >
-              View Sample Report
-            </Button>
-          </div>
-          
           <p className="text-p3 text-primary-foreground/60 mt-8">
             No spam, ever. Unsubscribe with one click.
           </p>
