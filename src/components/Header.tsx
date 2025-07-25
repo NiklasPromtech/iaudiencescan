@@ -29,11 +29,17 @@ const Header = () => {
           <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Case Studies
           </Link>
-          <img 
-            src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
-            alt="Generate Audience" 
-            className="w-[228px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
-          />
+          <a 
+            href="https://app.audiencescan.io" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <img 
+              src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
+              alt="Generate Audience" 
+              className="w-[180px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
+            />
+          </a>
         </div>
       </div>
     </header>
