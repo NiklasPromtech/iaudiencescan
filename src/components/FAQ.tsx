@@ -1,15 +1,14 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Coins, Triangle, Hexagon, Mountain, Ghost, Zap, Database } from "lucide-react";
 
 const FAQ = () => {
   const supportedChains = [
-    { name: 'Ethereum', icon: Coins, id: '1' },
-    { name: 'Polygon', icon: Triangle, id: '137' },
-    { name: 'BNB Smart Chain (BSC)', icon: Hexagon, id: '56' },
-    { name: 'Avalanche C-Chain', icon: Mountain, id: '43114' },
-    { name: 'Fantom', icon: Ghost, id: '250' },
-    { name: 'Arbitrum', icon: Zap, id: '42161' },
-    { name: 'Base', icon: Database, id: '8453' }
+    { name: 'Ethereum', icon: '/lovable-uploads/bd550364-de3d-40a7-8b96-a1b03f324520.png', id: '1' },
+    { name: 'Polygon', icon: '/lovable-uploads/6ec4e23f-c59e-4106-b9f9-395586a7c47d.png', id: '137' },
+    { name: 'BNB Smart Chain (BSC)', icon: '/lovable-uploads/4afdeabf-1539-422b-9189-10277e1ad902.png', id: '56' },
+    { name: 'Avalanche C-Chain', icon: '/lovable-uploads/e261f7ad-1d1a-46de-90d6-0df473c9e0a1.png', id: '43114' },
+    { name: 'Fantom', icon: '/lovable-uploads/4772c2e1-0d72-46ab-b794-e4caae22b177.png', id: '250' },
+    { name: 'Arbitrum', icon: '/lovable-uploads/c7efd782-8b9e-4e4c-95eb-d9f7a0241e46.png', id: '42161' },
+    { name: 'Base', icon: '/lovable-uploads/915f1590-0372-4e21-bdbd-d0c98b338f6f.png', id: '8453' }
   ];
 
   const faqs = [
@@ -33,8 +32,12 @@ const FAQ = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {supportedChains.map((chain, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <chain.icon className="w-4 h-4 text-primary" />
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500/80 to-primary/60 rounded-lg flex items-center justify-center p-1.5">
+                  <img 
+                    src={chain.icon} 
+                    alt={`${chain.name} logo`}
+                    className="w-full h-full object-contain filter brightness-100"
+                  />
                 </div>
                 <div>
                   <span className="font-medium text-foreground">{chain.name}</span>
