@@ -20,6 +20,9 @@ const Header = () => {
           <a href="#partnerships" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Partnerships
           </a>
+          <Link to="/pricing" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+            Pricing
+          </Link>
           <a href="#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             FAQ
           </a>

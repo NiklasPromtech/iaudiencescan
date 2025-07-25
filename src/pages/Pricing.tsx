@@ -1,0 +1,163 @@
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check } from "lucide-react";
+
+const Pricing = () => {
+  const plans = [
+    {
+      name: "Free",
+      description: "Our most basic option",
+      price: "Free",
+      yearlyPrice: null,
+      monthlyNote: null,
+      features: [
+        "1 scan",
+        "Preview data only"
+      ],
+      buttonText: "Get Started",
+      buttonVariant: "outline" as const,
+      popular: false
+    },
+    {
+      name: "Pro",
+      description: "500+ marketers use this daily",
+      price: "$1,099",
+      yearlyPrice: "$1,099",
+      monthlyNote: "$199 when you pay monthly",
+      features: [
+        "5 scans / month",
+        "Full data",
+        "Additional filter:",
+        "- Transaction count"
+      ],
+      buttonText: "Choose Pro",
+      buttonVariant: "default" as const,
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      description: "Ad agencies love this for targeting",
+      price: "$9,999",
+      yearlyPrice: "$9,999",
+      monthlyNote: "$999 when you pay monthly",
+      features: [
+        "50 scans / month",
+        "Everything from Pro",
+        "API",
+        "White-labeled",
+        "Premium support",
+        "Additional filter:",
+        "- Transaction volume"
+      ],
+      buttonText: "Choose Enterprise",
+      buttonVariant: "default" as const,
+      popular: false
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h1 className="text-h1 font-bold mb-6">
+              Start generating audiences
+            </h1>
+            <p className="text-p1 text-muted-foreground max-w-3xl mx-auto">
+              Choose a plan to unlock the power of <span className="font-semibold">AudienceScan</span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plans.map((plan, index) => (
+              <Card 
+                key={index} 
+                className={`relative border-2 transition-all duration-300 hover:shadow-xl ${
+                  plan.popular 
+                    ? 'border-primary bg-primary/5 scale-105' 
+                    : plan.name === "Enterprise"
+                    ? 'border-foreground bg-foreground text-background'
+                    : 'border-border hover:border-primary/30'
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-full">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className={`text-h3 font-bold ${plan.name === "Enterprise" ? 'text-background' : ''}`}>
+                    {plan.name}
+                  </CardTitle>
+                  <p className={`text-p2 ${plan.name === "Enterprise" ? 'text-background/70' : 'text-muted-foreground'} mt-2`}>
+                    {plan.description}
+                  </p>
+                  
+                  <div className="mt-6">
+                    <div className={`text-h2 font-bold ${plan.name === "Enterprise" ? 'text-background' : ''}`}>
+                      {plan.price}
+                      {plan.yearlyPrice && (
+                        <span className={`text-p2 font-normal ${plan.name === "Enterprise" ? 'text-background/70' : 'text-muted-foreground'}`}>
+                          {" "}/per year
+                        </span>
+                      )}
+                    </div>
+                    {plan.monthlyNote && (
+                      <p className={`text-p3 ${plan.name === "Enterprise" ? 'text-background/60' : 'text-muted-foreground'} mt-1`}>
+                        {plan.monthlyNote}
+                      </p>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-start gap-3">
+                        <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+                          plan.name === "Enterprise" ? 'text-background' : 'text-primary'
+                        }`} />
+                        <span className={`text-p2 ${
+                          plan.name === "Enterprise" ? 'text-background/90' : 'text-foreground'
+                        }`}>
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-6">
+                    <Button 
+                      variant={plan.name === "Enterprise" ? "secondary" : plan.buttonVariant}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {plan.buttonText}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-16">
+            <p className="text-p2 text-muted-foreground">
+              Need a custom solution? <a href="mailto:support@audiencescan.io" className="text-primary hover:underline">Contact us</a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Pricing;
