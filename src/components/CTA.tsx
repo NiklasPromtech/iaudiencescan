@@ -40,6 +40,11 @@ const CTA = () => {
           .insert({ email: inputValue });
         
         if (error) throw error;
+        
+        // Send notification email
+        await supabase.functions.invoke('send-notification-email', {
+          body: { type: 'email', value: inputValue, timestamp: new Date().toISOString() }
+        });
       } else {
         // Store in telegram submissions table  
         const { error } = await supabase
@@ -47,6 +52,11 @@ const CTA = () => {
           .insert({ telegram_handle: inputValue });
         
         if (error) throw error;
+        
+        // Send notification email
+        await supabase.functions.invoke('send-notification-email', {
+          body: { type: 'telegram', value: inputValue, timestamp: new Date().toISOString() }
+        });
       }
       
       toast.success("Success! We'll contact you soon with your free analysis.");
