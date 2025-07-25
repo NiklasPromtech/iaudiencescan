@@ -24,7 +24,7 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <div className="border-4 border-border rounded-lg p-6 mb-6 bg-background/50 backdrop-blur-sm">
+          <div className="border-4 border-primary rounded-lg p-6 mb-6 bg-background/50 backdrop-blur-sm">
             <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
               Turn any token into a data-backed crypto audience
             </h1>
