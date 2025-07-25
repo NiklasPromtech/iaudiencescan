@@ -2,13 +2,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const FAQ = () => {
   const supportedChains = [
-    { name: 'Ethereum', icon: '/lovable-uploads/bd550364-de3d-40a7-8b96-a1b03f324520.png', id: '1' },
-    { name: 'Polygon', icon: '/lovable-uploads/6ec4e23f-c59e-4106-b9f9-395586a7c47d.png', id: '137' },
-    { name: 'BNB Smart Chain (BSC)', icon: '/lovable-uploads/4afdeabf-1539-422b-9189-10277e1ad902.png', id: '56' },
-    { name: 'Avalanche C-Chain', icon: '/lovable-uploads/e261f7ad-1d1a-46de-90d6-0df473c9e0a1.png', id: '43114' },
-    { name: 'Fantom', icon: '/lovable-uploads/4772c2e1-0d72-46ab-b794-e4caae22b177.png', id: '250' },
-    { name: 'Arbitrum', icon: '/lovable-uploads/c7efd782-8b9e-4e4c-95eb-d9f7a0241e46.png', id: '42161' },
-    { name: 'Base', icon: '/lovable-uploads/915f1590-0372-4e21-bdbd-d0c98b338f6f.png', id: '8453' }
+    { name: 'Ethereum', icon: '/lovable-uploads/bd550364-de3d-40a7-8b96-a1b03f324520.png' }, // Diamond-like icon with two horizontal lines
+    { name: 'Polygon', icon: '/lovable-uploads/6ec4e23f-c59e-4106-b9f9-395586a7c47d.png' }, // Interlocking hexagon icon
+    { name: 'BNB Smart Chain (BSC)', icon: '/lovable-uploads/4afdeabf-1539-422b-9189-10277e1ad902.png' }, // Cube-like icon with interconnected lines
+    { name: 'Avalanche C-Chain', icon: '/lovable-uploads/e261f7ad-1d1a-46de-90d6-0df473c9e0a1.png' }, // Icon with two triangles inside a circle
+    { name: 'Fantom', icon: '/lovable-uploads/4772c2e1-0d72-46ab-b794-e4caae22b177.png' }, // Icon with a horizontal line cutting through a circle
+    { name: 'Arbitrum', icon: '/lovable-uploads/c7efd782-8b9e-4e4c-95eb-d9f7a0241e46.png' }, // Hexagonal icon with internal lines
+    { name: 'Base', icon: '/lovable-uploads/915f1590-0372-4e21-bdbd-d0c98b338f6f.png' } // Hexagonal icon with internal lines
   ];
 
   const faqs = [
@@ -41,7 +41,6 @@ const FAQ = () => {
                 </div>
                 <div>
                   <span className="font-medium text-foreground">{chain.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2">ID: {chain.id}</span>
                 </div>
               </div>
             ))}
