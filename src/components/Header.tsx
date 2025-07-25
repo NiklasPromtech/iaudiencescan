@@ -15,25 +15,25 @@ const Header = () => {
         
         <nav className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            Features
+            Platform
           </a>
-          <a href="#how-it-works" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            How it works
+          <a href="#partnerships" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+            Partnerships
           </a>
-          <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            Case Studies
-          </Link>
           <a href="#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             FAQ
           </a>
         </nav>
 
-        <div className="flex items-center">
-            <img 
-              src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
-              alt="Generate Audience" 
-              className="w-[228px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
-            />
+        <div className="flex items-center gap-6">
+          <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+            Case Studies
+          </Link>
+          <img 
+            src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
+            alt="Generate Audience" 
+            className="w-[228px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
+          />
         </div>
       </div>
     </header>
