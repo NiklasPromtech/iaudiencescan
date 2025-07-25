@@ -16,7 +16,7 @@ const FAQ = () => {
     },
     {
       question: "What chains are supported?",
-      answer: "Base, Ethereum, Arbitrum, and Solana with more chains coming soon. We're continuously expanding our multi-chain support."
+      answer: "Ethereum, Polygon, BNB Smart Chain (BSC), Avalanche C-Chain, Fantom, Arbitrum, and Base with more chains being added regularly."
     },
     {
       question: "How accurate is the social media data?",
