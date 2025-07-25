@@ -62,13 +62,13 @@ const Partnerships = () => {
                 Why Partnership Data Matters
               </h3>
               <p className="text-p1 text-muted-foreground leading-relaxed mb-6">
-                When you know that 40% of your token holders also hold another project's token, 
+                When you know that xx% of your token holders also hold another project's token, 
                 that's not just data - that's your next marketing partnership. Use these insights 
                 to craft outreach messages that highlight genuine community overlap.
               </p>
               <div className="bg-primary/10 rounded-lg p-6">
                 <p className="text-p2 text-foreground font-medium italic">
-                  "Hey [Project], our scan shows 2,847 wallets hold both our tokens. 
+                  "Hey [Project], our scan shows 20% wallets hold both our tokens. 
                   Want to explore a cross-promotion that targets this shared audience?"
                 </p>
               </div>
