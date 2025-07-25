@@ -117,7 +117,7 @@ const Pricing = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 flex flex-col h-full">
                   <div className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <div key={featureIndex} className="flex items-start gap-3">
@@ -133,14 +133,21 @@ const Pricing = () => {
                     ))}
                   </div>
 
-                  <div className="pt-6">
-                    <Button 
-                      variant={plan.name === "Enterprise" ? "secondary" : plan.buttonVariant}
-                      className="w-full"
-                      size="lg"
+                  <div className="pt-6 mt-auto">
+                    <a 
+                      href="https://app.audiencescan.io/signUp"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
                     >
-                      {plan.buttonText}
-                    </Button>
+                      <Button 
+                        variant={plan.name === "Enterprise" ? "secondary" : plan.buttonVariant}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {plan.buttonText}
+                      </Button>
+                    </a>
                   </div>
                 </CardContent>
               </Card>
