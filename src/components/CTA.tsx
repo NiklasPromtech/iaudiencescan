@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CTA = () => {
   const [email, setEmail] = useState("");
@@ -29,12 +30,29 @@ const CTA = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const inputValue = email.trim();
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputValue);
+      
+      if (isEmail) {
+        // Store in email submissions table
+        const { error } = await supabase
+          .from('email_submissions')
+          .insert({ email: inputValue });
+        
+        if (error) throw error;
+      } else {
+        // Store in telegram submissions table  
+        const { error } = await supabase
+          .from('telegram_submissions')
+          .insert({ telegram_handle: inputValue });
+        
+        if (error) throw error;
+      }
       
       toast.success("Success! We'll contact you soon with your free analysis.");
       setEmail("");
     } catch (error) {
+      console.error('Submission error:', error);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
