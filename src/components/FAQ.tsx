@@ -22,7 +22,7 @@ const FAQ = () => {
     },
     {
       question: "How much does it cost?",
-      answer: "Free for the first 100 scans. After that, pricing tiers will apply based on usage volume and advanced features. We'll announce pricing details soon."
+      answer: "Starting from $199 / month for 5 scans, you will be able to get a weekly update of how your community is changing and new opportunities. We offer a customer advisory discount for selected users, so reach out to see if you are a good fit to help us grow AudienceScan."
     },
     {
       question: "What chains are supported?",
