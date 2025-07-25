@@ -1,9 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const CTA = () => {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const telegramRegex = /^@[\w]+$/;
+    return emailRegex.test(email) || telegramRegex.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      toast.error("Please enter your email or Telegram handle");
+      return;
+    }
+
+    if (!validateEmail(email.trim())) {
+      toast.error("Please enter a valid email or Telegram handle (e.g., @username)");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success("Success! We'll contact you soon with your free analysis.");
+      setEmail("");
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="py-24 bg-gradient-primary relative overflow-hidden">
@@ -26,20 +62,24 @@ const CTA = () => {
           </p>
           
           {/* Main CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 max-w-2xl mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 max-w-2xl mx-auto">
             <Input
+              type="text"
               placeholder="Enter your email or Telegram handle..."
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 h-12 text-p2 bg-primary-foreground/90 border-0 text-foreground placeholder:text-muted-foreground"
+              disabled={isLoading}
             />
             <Button 
+              type="submit"
               size="lg"
-              className="px-8 h-12 text-p2 font-semibold min-w-[200px] bg-white text-primary hover:bg-white/90"
+              disabled={isLoading}
+              className="px-8 h-12 text-p2 font-semibold min-w-[200px] bg-white text-primary hover:bg-white/90 disabled:opacity-50"
             >
-              Get Free Analysis
+              {isLoading ? "Processing..." : "Get Free Analysis"}
             </Button>
-          </div>
+          </form>
           
           <p className="text-p3 text-primary-foreground/60 mt-8">
             No spam, ever. Unsubscribe with one click.
