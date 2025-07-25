@@ -1,6 +1,17 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Coins, Triangle, Hexagon, Mountain, Ghost, Zap, Database } from "lucide-react";
 
 const FAQ = () => {
+  const supportedChains = [
+    { name: 'Ethereum', icon: Coins, id: '1' },
+    { name: 'Polygon', icon: Triangle, id: '137' },
+    { name: 'BNB Smart Chain (BSC)', icon: Hexagon, id: '56' },
+    { name: 'Avalanche C-Chain', icon: Mountain, id: '43114' },
+    { name: 'Fantom', icon: Ghost, id: '250' },
+    { name: 'Arbitrum', icon: Zap, id: '42161' },
+    { name: 'Base', icon: Database, id: '8453' }
+  ];
+
   const faqs = [
     {
       question: "What does the scan include?",
@@ -16,7 +27,25 @@ const FAQ = () => {
     },
     {
       question: "What chains are supported?",
-      answer: "Ethereum, Polygon, BNB Smart Chain (BSC), Avalanche C-Chain, Fantom, Arbitrum, and Base with more chains being added regularly."
+      answer: (
+        <div className="space-y-4">
+          <p className="text-p2 text-muted-foreground">We support the following blockchain networks:</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {supportedChains.map((chain, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <chain.icon className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">{chain.name}</span>
+                  <span className="text-xs text-muted-foreground ml-2">ID: {chain.id}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-p3 text-muted-foreground">More chains being added regularly based on community demand.</p>
+        </div>
+      )
     },
     {
       question: "How accurate is the social media data?",
@@ -52,7 +81,7 @@ const FAQ = () => {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-p2 text-muted-foreground leading-relaxed pt-2">
-                  {faq.answer}
+                  {typeof faq.answer === 'string' ? faq.answer : faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
