@@ -50,10 +50,6 @@ const FAQ = () => {
       )
     },
     {
-      question: "How accurate is the social media data?",
-      answer: "Our AI models analyze on-chain patterns and cross-reference with public social graphs to provide highly accurate community overlap insights with 85%+ confidence scores."
-    },
-    {
       question: "Can I export the data?",
       answer: "Yes! Export audience segments in CSV format for use in Google Ads, Drippi.ai, or any other marketing tool. Premium users get additional export formats."
     }
