@@ -45,7 +45,7 @@ const FAQ = () => {
               </div>
             ))}
           </div>
-          <p className="text-p3 text-muted-foreground">More chains being added regularly based on community demand.</p>
+          <p className="text-p3 text-muted-foreground">More chains being added regularly based on community demand. If you chain isn't here, do please reach out support@audiencescan.io</p>
         </div>
       )
     },
