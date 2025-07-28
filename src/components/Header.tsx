@@ -39,11 +39,9 @@ const Header = () => {
             target="_blank" 
             rel="nofollow noopener noreferrer"
           >
-            <img 
-              src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
-              alt="Generate Audience" 
-              className="w-[180px] h-auto cursor-pointer hover:opacity-90 transition-opacity"
-            />
+            <Button className="bg-primary text-white hover:bg-primary/90">
+              Go to app ▶
+            </Button>
           </a>
         </div>
       </div>
