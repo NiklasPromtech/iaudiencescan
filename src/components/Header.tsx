@@ -39,7 +39,7 @@ const Header = () => {
             target="_blank" 
             rel="nofollow noopener noreferrer"
           >
-            <Button className="bg-primary text-white hover:bg-primary/90">
+            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[inset_0_-2px_8px_rgba(255,255,255,0.3)]">
               Launch app
             </Button>
           </a>
