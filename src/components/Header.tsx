@@ -40,7 +40,7 @@ const Header = () => {
             rel="nofollow noopener noreferrer"
           >
             <Button className="bg-primary text-white hover:bg-primary/90">
-              Go to app ▶
+              Launch app
             </Button>
           </a>
         </div>
