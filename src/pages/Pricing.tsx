@@ -54,7 +54,6 @@ const Pricing = () => {
         "50 scans / month",
         "Everything from Pro",
         "API",
-        "White-labeled",
         "Premium support",
         "Additional filter\n- Transaction volume"
       ],
