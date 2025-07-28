@@ -44,12 +44,12 @@ const Pricing = () => {
     {
       name: "Enterprise",
       description: "Ad agencies love this for targeting",
-      price: "$3,999",
-      originalPrice: "$9,999",
-      yearlyPrice: "$3,999",
-      originalYearlyPrice: "$9,999",
-      monthlyNote: "$399 when you pay monthly",
-      originalMonthlyNote: "$999 when you pay monthly",
+      price: "$9,999",
+      originalPrice: "$24,999",
+      yearlyPrice: "$9,999",
+      originalYearlyPrice: "$13,999",
+      monthlyNote: "$999 when you pay monthly",
+      originalMonthlyNote: "$2,499 when you pay monthly",
       features: [
         "50 scans / month",
         "Everything from Pro",
