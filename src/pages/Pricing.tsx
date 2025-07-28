@@ -26,10 +26,10 @@ const Pricing = () => {
     {
       name: "Pro",
       description: "500+ marketers use this daily",
-      price: "$799",
-      originalPrice: "$1,999",
-      yearlyPrice: "$799",
-      originalYearlyPrice: "$1,999",
+      price: "$199",
+      originalPrice: "$599",
+      yearlyPrice: "$1,999",
+      originalYearlyPrice: "$4,999",
       monthlyNote: "$79 when you pay monthly",
       originalMonthlyNote: "$199 when you pay monthly",
       features: [
@@ -44,12 +44,12 @@ const Pricing = () => {
     {
       name: "Enterprise",
       description: "Ad agencies love this for targeting",
-      price: "$3,999",
-      originalPrice: "$9,999",
-      yearlyPrice: "$3,999",
-      originalYearlyPrice: "$9,999",
+      price: "$999",
+      originalPrice: "$2,499",
+      yearlyPrice: "$9,999",
+      originalYearlyPrice: "$24,999",
       monthlyNote: "$399 when you pay monthly",
-      originalMonthlyNote: "$2,499 when you pay monthly",
+      originalMonthlyNote: "$999 when you pay monthly",
       features: [
         "50 scans / month",
         "Everything from Pro",
