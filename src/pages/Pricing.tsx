@@ -47,7 +47,7 @@ const Pricing = () => {
         "API",
         "White-labeled",
         "Premium support",
-        "Additional filter:\n- Transaction volume"
+        "Additional filter\n- Transaction volume"
       ],
       buttonText: "Choose Enterprise",
       buttonVariant: "default" as const,
