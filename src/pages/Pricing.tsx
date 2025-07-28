@@ -49,7 +49,7 @@ const Pricing = () => {
       yearlyPrice: "$3,999",
       originalYearlyPrice: "$9,999",
       monthlyNote: "$399 when you pay monthly",
-      originalMonthlyNote: "$999 when you pay monthly",
+      originalMonthlyNote: "$2,499 when you pay monthly",
       features: [
         "50 scans / month",
         "Everything from Pro",
