@@ -10,11 +10,8 @@ const Pricing = () => {
       name: "Free",
       description: "Our most basic option",
       price: "Free",
-      originalPrice: null,
       yearlyPrice: null,
-      originalYearlyPrice: null,
       monthlyNote: null,
-      originalMonthlyNote: null,
       features: [
         "1 scan",
         "Preview data only"
@@ -26,12 +23,9 @@ const Pricing = () => {
     {
       name: "Pro",
       description: "500+ marketers use this daily",
-      price: "$199",
-      originalPrice: "$499",
+      price: "$1,999",
       yearlyPrice: "$1,999",
-      originalYearlyPrice: "$4,999",
       monthlyNote: "$199 when you pay monthly",
-      originalMonthlyNote: "$499 when you pay monthly",
       features: [
         "5 scans / month",
         "Full data",
@@ -44,12 +38,9 @@ const Pricing = () => {
     {
       name: "Enterprise",
       description: "Ad agencies love this for targeting",
-      price: "$999",
-      originalPrice: "$2,499",
+      price: "$9,999",
       yearlyPrice: "$9,999",
-      originalYearlyPrice: "$24,999",
       monthlyNote: "$999 when you pay monthly",
-      originalMonthlyNote: "$2,499 when you pay monthly",
       features: [
         "50 scans / month",
         "Everything from Pro",
@@ -70,14 +61,6 @@ const Pricing = () => {
       
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
-          {/* Promotional Banner */}
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-12 max-w-4xl mx-auto text-center">
-            <h2 className="text-h3 font-bold text-primary mb-2">Limited Time: 60% Off All Plans!</h2>
-            <p className="text-p2 text-muted-foreground">
-              Early bird pricing available until we reach our first 100 users. Lock in these rates forever.
-            </p>
-          </div>
-
           <div className="text-center mb-16">
             <h1 className="text-h1 font-bold mb-6">
               Start generating audiences
@@ -116,11 +99,6 @@ const Pricing = () => {
                   </p>
                   
                   <div className="mt-6">
-                    {plan.originalPrice && (
-                      <div className={`text-p2 line-through ${plan.name === "Enterprise" ? 'text-background/50' : 'text-muted-foreground'} mb-1`}>
-                        {plan.originalPrice}/per year
-                      </div>
-                    )}
                     <div className={`text-h2 font-bold ${plan.name === "Enterprise" ? 'text-background' : ''}`}>
                       {plan.price}
                       {plan.yearlyPrice && (
@@ -130,16 +108,9 @@ const Pricing = () => {
                       )}
                     </div>
                     {plan.monthlyNote && (
-                      <div>
-                        {plan.originalMonthlyNote && (
-                          <p className={`text-p3 line-through ${plan.name === "Enterprise" ? 'text-background/40' : 'text-muted-foreground/60'}`}>
-                            {plan.originalMonthlyNote}
-                          </p>
-                        )}
-                        <p className={`text-p3 ${plan.name === "Enterprise" ? 'text-background/60' : 'text-muted-foreground'} mt-1`}>
-                          {plan.monthlyNote}
-                        </p>
-                      </div>
+                      <p className={`text-p3 ${plan.name === "Enterprise" ? 'text-background/60' : 'text-muted-foreground'} mt-1`}>
+                        {plan.monthlyNote}
+                      </p>
                     )}
                   </div>
                 </CardHeader>
