@@ -23,8 +23,8 @@ const Pricing = () => {
     {
       name: "Pro",
       description: "500+ marketers use this daily",
-      price: "$1,099",
-      yearlyPrice: "$1,099",
+      price: "$1,999",
+      yearlyPrice: "$1,999",
       monthlyNote: "$199 when you pay monthly",
       features: [
         "5 scans / month",
