@@ -29,8 +29,7 @@ const Pricing = () => {
       features: [
         "5 scans / month",
         "Full data",
-        "Additional filter:",
-        "- Transaction count"
+        "Additional filter\n- Transaction count"
       ],
       buttonText: "Choose Pro",
       buttonVariant: "default" as const,
@@ -48,8 +47,7 @@ const Pricing = () => {
         "API",
         "White-labeled",
         "Premium support",
-        "Additional filter:",
-        "- Transaction volume"
+        "Additional filter:\n- Transaction volume"
       ],
       buttonText: "Choose Enterprise",
       buttonVariant: "default" as const,
