@@ -37,7 +37,7 @@ const Header = () => {
           <a 
             href="https://app.audiencescan.io" 
             target="_blank" 
-            rel="noopener noreferrer"
+            rel="nofollow noopener noreferrer"
           >
             <img 
               src="/lovable-uploads/277d9169-9274-487d-a725-e00ee2e8164e.png" 
