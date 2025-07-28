@@ -122,7 +122,7 @@ const Pricing = () => {
                         <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
                           plan.name === "Enterprise" ? 'text-background' : 'text-primary'
                         }`} />
-                        <span className={`text-p2 ${
+                        <span className={`text-p2 whitespace-pre-wrap ${
                           plan.name === "Enterprise" ? 'text-background/90' : 'text-foreground'
                         }`}>
                           {feature}
