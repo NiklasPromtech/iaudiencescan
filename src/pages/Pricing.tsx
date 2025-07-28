@@ -164,7 +164,7 @@ const Pricing = () => {
                     <a 
                       href="https://app.audiencescan.io/signUp"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="block"
                     >
                       <Button 
