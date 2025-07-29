@@ -220,8 +220,10 @@ const BlogPostAddressableAudiences = () => {
                 <p className="text-lg text-muted-foreground mb-6">
                   Stop guessing where your audience is. Start reaching them where they actually are.
                 </p>
-                <Button size="lg" className="text-lg px-8">
-                  Try AudienceScan Now
+                <Button size="lg" className="text-lg px-8" asChild>
+                  <a href="https://app.audiencescan.io/signup" target="_blank" rel="noopener noreferrer noindex">
+                    Try AudienceScan Now
+                  </a>
                 </Button>
               </div>
             </div>
