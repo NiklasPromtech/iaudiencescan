@@ -16,6 +16,15 @@ const Blog = () => {
       date: "Jan 29, 2025",
       readTime: "8 min read",
       category: "Founder's Letter",
+      featured: false,
+    },
+    {
+      id: 2,
+      title: "AudienceScan Video Tutorials",
+      excerpt: "Master AudienceScan and learn how to create high-performing ad campaigns across all major platforms. Includes step-by-step tutorials for Twitter, DV360, Reddit, and Telegram advertising.",
+      date: "Jan 29, 2025",
+      readTime: "12 min read",
+      category: "Tutorials",
       featured: true,
       content: `Hi, I'm Niklas, the founder of AudienceScan.
 
@@ -121,7 +130,7 @@ Have an amazing day,
 Founder and builder of AudienceScan`
     },
     {
-      id: 2,
+      id: 3,
       title: "The Ultimate Guide to Wallet-Based Marketing",
       excerpt: "Discover how wallet data can revolutionize your marketing campaigns and increase conversion rates by 300%.",
       date: "Dec 10, 2024",
@@ -129,7 +138,7 @@ Founder and builder of AudienceScan`
       category: "Guide"
     },
     {
-      id: 3,
+      id: 4,
       title: "Case Study: How Protocol X Increased User Acquisition by 400%",
       excerpt: "Deep dive into how a major DeFi protocol used audience segmentation to dramatically improve their marketing ROI.",
       date: "Dec 5, 2024",
@@ -137,7 +146,7 @@ Founder and builder of AudienceScan`
       category: "Case Study"
     },
     {
-      id: 4,
+      id: 5,
       title: "Understanding On-Chain Behavior Patterns",
       excerpt: "A technical guide to interpreting wallet transaction data and what it reveals about user intent and preferences.",
       date: "Nov 28, 2024",
@@ -145,7 +154,7 @@ Founder and builder of AudienceScan`
       category: "Technical"
     },
     {
-      id: 5,
+      id: 6,
       title: "Privacy-First Audience Building in Web3",
       excerpt: "How to build effective marketing audiences while respecting user privacy and following best practices.",
       date: "Nov 20, 2024",
@@ -153,7 +162,7 @@ Founder and builder of AudienceScan`
       category: "Privacy"
     },
     {
-      id: 6,
+      id: 7,
       title: "Integrating AudienceScan with Your Marketing Stack",
       excerpt: "Step-by-step guide to connecting AudienceScan with Google Ads, Mailchimp, and other popular marketing tools.",
       date: "Nov 15, 2024",
@@ -162,7 +171,7 @@ Founder and builder of AudienceScan`
     }
   ];
 
-  const categories = ["All", "Founder's Letter", "Strategy", "Guide", "Case Study", "Technical", "Privacy", "Integration"];
+  const categories = ["All", "Tutorials", "Founder's Letter", "Strategy", "Guide", "Case Study", "Technical", "Privacy", "Integration"];
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,7 +228,7 @@ Founder and builder of AudienceScan`
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => navigate('/blog/personal-letter')}
+                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/personal-letter')}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
