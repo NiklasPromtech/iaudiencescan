@@ -86,11 +86,12 @@ const BlogPostTutorials = () => {
               <CardContent>
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://player.vimeo.com/video/${tutorial.videoId}?h=0&badge=0&autopause=0&player_id=0&app_id=58479`}
+                    src={`https://player.vimeo.com/video/${tutorial.videoId.split('/')[0]}?h=${tutorial.videoId.split('/')[1]}&badge=0&autopause=0&player_id=0&app_id=58479`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
                     title={tutorial.title}
                     className="rounded-lg"
                   />
