@@ -124,6 +124,13 @@ export default {
 					},
 					'50%': {
 						boxShadow: '0 0 40px hsl(var(--primary) / 0.6)'
+				},
+				'reverse-spin': {
+					from: {
+						transform: 'rotate(360deg)'
+					},
+					to: {
+						transform: 'rotate(0deg)'
 					}
 				}
 			},
@@ -131,7 +138,8 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
-				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'reverse-spin': 'reverse-spin 1s linear infinite'
 			}
 		}
 	},
