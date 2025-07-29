@@ -219,7 +219,7 @@ Founder and builder of AudienceScan`
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => navigate(`/blog/${post.id}`)}
+                      onClick={() => navigate('/personal-letter')}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
