@@ -169,15 +169,6 @@ Founder and builder of AudienceScan`
                 {blogPost.readTime}
               </div>
             </div>
-            
-            {/* Featured Image */}
-            <div className="w-full max-w-3xl mx-auto mb-8">
-              <img 
-                src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
-                alt="Network cluster map visualization showing connected user groups"
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
           </div>
         </div>
       </section>

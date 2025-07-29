@@ -226,8 +226,12 @@ Founder and builder of AudienceScan`
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto">
-                  {/* Placeholder for featured image */}
+                <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto flex items-center justify-center p-4">
+                  <img 
+                    src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
+                    alt="Network cluster map visualization"
+                    className="w-full h-full object-contain rounded-lg"
+                  />
                 </div>
               </div>
             </Card>
