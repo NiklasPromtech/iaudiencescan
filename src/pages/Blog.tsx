@@ -255,8 +255,14 @@ Founder and builder of AudienceScan`
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : `/blog/${post.id}`)}
               >
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg">
-                  {/* Placeholder for blog image */}
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden">
+                  {post.id === 1 && (
+                    <img 
+                      src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
+                      alt="Network chart showing audience data connections"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
