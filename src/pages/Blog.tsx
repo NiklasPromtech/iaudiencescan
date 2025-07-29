@@ -29,10 +29,19 @@ const Blog = () => {
       readTime: "12 min read",
       category: "Tutorials",
       featured: true,
+    },
+    {
+      id: 3,
+      title: "Turning Blockchain Data Into Addressable Audiences with AudienceScan",
+      excerpt: "Running ads for crypto projects has always felt like throwing darts in a blackout. AudienceScan changes this by flipping the targeting process on its head, turning blockchain data into truly addressable audiences.",
+      date: "Jan 28, 2025",
+      readTime: "7 min read",
+      category: "Strategy",
+      featured: false,
     }
   ];
 
-  const categories = ["All", "Tutorials", "Founder's Letter"];
+  const categories = ["All", "Tutorials", "Founder's Letter", "Strategy"];
 
   const filteredPosts = selectedCategory === "All" 
     ? blogPosts 
@@ -143,17 +152,26 @@ const Blog = () => {
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : `/blog/${post.id}`)}
               >
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
-                  {post.id === 1 && (
-                    <div>
-                      <img 
-                        src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
-                        alt="Network chart showing audience data connections"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  )}
-                </div>
+                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
+                   {post.id === 1 && (
+                     <div>
+                       <img 
+                         src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
+                         alt="Network chart showing audience data connections"
+                         className="w-full h-full object-contain"
+                       />
+                     </div>
+                   )}
+                   {post.id === 3 && (
+                     <div>
+                       <img 
+                         src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
+                         alt="Blockchain data visualization showing addressable audiences"
+                         className="w-full h-full object-contain"
+                       />
+                     </div>
+                   )}
+                 </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="outline" className="text-xs">{post.category}</Badge>
