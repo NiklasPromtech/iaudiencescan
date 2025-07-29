@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,6 +10,7 @@ import platformIcons from "@/assets/platform-icons-circles.jpg";
 
 const Blog = () => {
   const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const blogPosts = [
     {
       id: 1,
@@ -174,6 +176,10 @@ Founder and builder of AudienceScan`
 
   const categories = ["All", "Tutorials", "Founder's Letter", "Strategy", "Guide", "Case Study", "Technical", "Privacy", "Integration"];
 
+  const filteredPosts = selectedCategory === "All" 
+    ? blogPosts 
+    : blogPosts.filter(post => post.category === selectedCategory);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -198,9 +204,10 @@ Founder and builder of AudienceScan`
             {categories.map((category) => (
               <Button
                 key={category}
-                variant={category === "All" ? "default" : "outline"}
+                variant={category === selectedCategory ? "default" : "outline"}
                 size="sm"
-                className="rounded-full"
+                className="rounded-full hover:text-foreground"
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </Button>
@@ -208,7 +215,7 @@ Founder and builder of AudienceScan`
           </div>
 
           {/* Featured Post */}
-          {blogPosts.filter(post => post.featured).map((post) => (
+          {filteredPosts.filter(post => post.featured).map((post) => (
             <Card key={post.id} className="mb-12 overflow-hidden">
               <div className="grid md:grid-cols-2 gap-0">
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-8 flex items-center">
@@ -272,7 +279,7 @@ Founder and builder of AudienceScan`
 
           {/* Blog Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogPosts.filter(post => !post.featured).map((post) => (
+            {filteredPosts.filter(post => !post.featured).map((post) => (
               <Card 
                 key={post.id} 
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
