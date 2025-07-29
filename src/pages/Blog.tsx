@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import platformIcons from "@/assets/platform-icons-circles.jpg";
 
 const Blog = () => {
   const navigate = useNavigate();
@@ -228,7 +229,7 @@ Founder and builder of AudienceScan`
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/personal-letter')}
+                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/founders-letter')}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -237,9 +238,9 @@ Founder and builder of AudienceScan`
                 </div>
                 <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto flex items-center justify-center p-4">
                   <img 
-                    src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
-                    alt="Network cluster map visualization"
-                    className="w-full h-full object-contain rounded-lg"
+                    src={platformIcons} 
+                    alt="Platform advertising icons hovering in circles"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
               </div>

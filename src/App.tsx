@@ -9,6 +9,7 @@ import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogPostTutorials from "./pages/BlogPostTutorials";
+import BlogPostFoundersLetter from "./pages/BlogPostFoundersLetter";
 import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/personal-letter" element={<BlogPost />} />
           <Route path="/blog/tutorials" element={<BlogPostTutorials />} />
+          <Route path="/blog/founders-letter" element={<BlogPostFoundersLetter />} />
           <Route path="/proposed-features" element={<ProposedFeatures />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
