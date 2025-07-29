@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Blog = () => {
+  const navigate = useNavigate();
   const blogPosts = [
     {
       id: 1,
@@ -215,7 +217,10 @@ Founder and builder of AudienceScan`
                       </div>
                       <Badge variant="outline">{post.category}</Badge>
                     </div>
-                    <Button className="group">
+                    <Button 
+                      className="group"
+                      onClick={() => navigate(`/blog/${post.id}`)}
+                    >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -231,7 +236,11 @@ Founder and builder of AudienceScan`
           {/* Blog Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogPosts.filter(post => !post.featured).map((post) => (
-              <Card key={post.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <Card 
+                key={post.id} 
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                onClick={() => navigate(`/blog/${post.id}`)}
+              >
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg">
                   {/* Placeholder for blog image */}
                 </div>
