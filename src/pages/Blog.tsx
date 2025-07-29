@@ -239,7 +239,7 @@ Founder and builder of AudienceScan`
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-64 md:h-auto flex items-center justify-center p-8">
                   <div className="flex items-center gap-8">
                     {/* X/Twitter Icon */}
-                    <div className="w-24 h-24 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div>
                       <img 
                         src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
                         alt="X/Twitter platform icon"
@@ -248,7 +248,7 @@ Founder and builder of AudienceScan`
                     </div>
                     
                     {/* Play Button */}
-                    <div className="w-28 h-28 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div>
                       <img 
                         src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
                         alt="Video play button"
@@ -257,7 +257,7 @@ Founder and builder of AudienceScan`
                     </div>
                     
                     {/* Telegram Icon */}
-                    <div className="w-24 h-24 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div>
                       <img 
                         src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
                         alt="Telegram platform icon"
@@ -280,7 +280,7 @@ Founder and builder of AudienceScan`
               >
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
                   {post.id === 1 && (
-                    <div className="w-full h-full bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <div>
                       <img 
                         src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
                         alt="Network chart showing audience data connections"
