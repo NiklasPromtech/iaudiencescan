@@ -237,31 +237,31 @@ Founder and builder of AudienceScan`
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-64 md:h-auto flex items-center justify-center p-8">
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-8">
                     {/* X/Twitter Icon */}
-                    <div className="w-16 h-16 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div className="w-24 h-24 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
                       <img 
                         src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
                         alt="X/Twitter platform icon"
-                        className="w-10 h-10"
+                        className="w-16 h-16"
                       />
                     </div>
                     
                     {/* Play Button */}
-                    <div className="w-20 h-20 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div className="w-28 h-28 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
                       <img 
                         src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
                         alt="Video play button"
-                        className="w-12 h-12"
+                        className="w-18 h-18"
                       />
                     </div>
                     
                     {/* Telegram Icon */}
-                    <div className="w-16 h-16 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                    <div className="w-24 h-24 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
                       <img 
                         src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
                         alt="Telegram platform icon"
-                        className="w-10 h-10"
+                        className="w-16 h-16"
                       />
                     </div>
                   </div>
@@ -278,13 +278,15 @@ Founder and builder of AudienceScan`
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : `/blog/${post.id}`)}
               >
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
                   {post.id === 1 && (
-                    <img 
-                      src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
-                      alt="Network chart showing audience data connections"
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                      <img 
+                        src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
+                        alt="Network chart showing audience data connections"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   )}
                 </div>
                 <CardHeader>
