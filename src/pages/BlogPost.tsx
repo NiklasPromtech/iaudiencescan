@@ -389,15 +389,15 @@ Founder and builder of AudienceScan`
                       <div className="text-sm text-muted-foreground">Years using rough version</div>
                     </CardContent>
                   </Card>
-                  <Card className="text-center border-secondary/20">
+                  <Card className="text-center border-primary/20">
                     <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-secondary mb-1">50%+</div>
+                      <div className="text-2xl font-bold text-primary mb-1">50%+</div>
                       <div className="text-sm text-muted-foreground">Consistent cost reduction</div>
                     </CardContent>
                   </Card>
-                  <Card className="text-center border-accent/20">
+                  <Card className="text-center border-primary/20">
                     <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-accent mb-1">3</div>
+                      <div className="text-2xl font-bold text-primary mb-1">3</div>
                       <div className="text-sm text-muted-foreground">Platforms (X, Telegram, DV360)</div>
                     </CardContent>
                   </Card>
