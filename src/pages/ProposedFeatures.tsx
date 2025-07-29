@@ -42,7 +42,7 @@ const ProposedFeatures = () => {
     {
       title: "Clean Marketing Tokens",
       icon: RefreshCw,
-      description: "Cleaning out marketing tokens from the analysis (e.g token that contain a webpage link or \"claim now\" type text. But making it 1000% more enjoyable",
+      description: "Cleaning out marketing tokens from the analysis (e.g token that contain a webpage link or \"claim now\" type text.",
       status: "in-progress"
     }
   ];
