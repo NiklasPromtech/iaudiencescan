@@ -237,7 +237,7 @@ Founder and builder of AudienceScan`
                   </div>
                 </div>
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-64 md:h-auto flex items-center justify-center p-8">
-                  <div className="flex items-center gap-8">
+                  <div>
                     {/* X/Twitter Icon */}
                     <div>
                       <img 
