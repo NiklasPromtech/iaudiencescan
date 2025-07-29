@@ -159,7 +159,7 @@ Founder and builder of AudienceScan`
             <h1 className="text-h1 font-bold text-foreground mb-6">
               {blogPost.title}
             </h1>
-            <div className="flex items-center justify-center gap-4 text-muted-foreground">
+            <div className="flex items-center justify-center gap-4 text-muted-foreground mb-8">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 {blogPost.date}
@@ -168,6 +168,15 @@ Founder and builder of AudienceScan`
                 <Clock className="w-4 h-4" />
                 {blogPost.readTime}
               </div>
+            </div>
+            
+            {/* Featured Image */}
+            <div className="w-full max-w-3xl mx-auto mb-8">
+              <img 
+                src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
+                alt="Network cluster map visualization showing connected user groups"
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
             </div>
           </div>
         </div>
@@ -264,6 +273,27 @@ Founder and builder of AudienceScan`
                     <CardContent className="pt-0">
                       <p className="text-sm text-muted-foreground">
                         Then, we'd map how those secondary handles interacted with each other, building network cluster maps.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Network Cluster Map Visualization */}
+                <div className="mt-6">
+                  <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+                    <CardHeader>
+                      <CardTitle className="text-center text-lg text-primary">Network Cluster Map Example</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="text-center mb-4">
+                        <img 
+                          src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
+                          alt="Network cluster map showing interconnected user groups and communities"
+                          className="w-full max-w-2xl mx-auto h-auto rounded-lg shadow-md border border-border"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground text-center italic">
+                        This is exactly what those network cluster maps looked like - showing how different user groups connected and interacted with each other.
                       </p>
                     </CardContent>
                   </Card>
