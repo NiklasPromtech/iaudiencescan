@@ -236,12 +236,32 @@ Founder and builder of AudienceScan`
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto flex items-center justify-center p-4">
-                  <img 
-                    src={platformIcons} 
-                    alt="Platform advertising icons hovering in circles"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto flex items-center justify-center p-8 relative overflow-hidden">
+                  <div className="relative z-10 grid grid-cols-2 gap-8 items-center">
+                    <div className="space-y-6">
+                      <img 
+                        src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
+                        alt="X/Twitter platform icon"
+                        className="w-16 h-16 hover-scale animate-fade-in"
+                        style={{ animationDelay: '0.2s' }}
+                      />
+                      <img 
+                        src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
+                        alt="Telegram platform icon"
+                        className="w-16 h-16 hover-scale animate-fade-in ml-8"
+                        style={{ animationDelay: '0.4s' }}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <img 
+                        src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
+                        alt="Video play button"
+                        className="w-20 h-20 hover-scale animate-scale-in pulse"
+                        style={{ animationDelay: '0.6s' }}
+                      />
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
                 </div>
               </div>
             </Card>
