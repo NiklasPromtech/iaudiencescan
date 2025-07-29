@@ -1,4 +1,6 @@
-import { Twitter, Github, MessageCircle } from "lucide-react";
+import { Linkedin } from "lucide-react";
+import xLogo from "@/assets/x-logo.png";
+import telegramLogo from "@/assets/telegram-logo.png";
 
 const Footer = () => {
   return (
@@ -48,22 +50,28 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">Connect</h3>
             <div className="flex gap-4">
               <a 
-                href="#" 
+                href="https://www.linkedin.com/company/audiencescanio/" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-muted hover:bg-primary rounded-lg flex items-center justify-center transition-smooth group"
               >
-                <Twitter className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
+                <Linkedin className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
               </a>
               <a 
-                href="#" 
+                href="https://t.me/audienceScan" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-muted hover:bg-primary rounded-lg flex items-center justify-center transition-smooth group"
               >
-                <MessageCircle className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
+                <img src={telegramLogo} alt="Telegram" className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
               <a 
-                href="#" 
+                href="https://x.com/AudienceScanIO" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-muted hover:bg-primary rounded-lg flex items-center justify-center transition-smooth group"
               >
-                <Github className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
+                <img src={xLogo} alt="X" className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
             </div>
             
