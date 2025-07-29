@@ -175,7 +175,7 @@ Founder and builder of AudienceScan`
               <img 
                 src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
                 alt="Network cluster map visualization showing connected user groups"
-                className="w-full h-auto rounded-lg shadow-lg"
+                className="w-full h-auto rounded-lg"
               />
             </div>
           </div>
@@ -289,7 +289,7 @@ Founder and builder of AudienceScan`
                         <img 
                           src="/lovable-uploads/f261ca92-566d-4793-a438-cd95998dab53.png" 
                           alt="Network cluster map showing interconnected user groups and communities"
-                          className="w-full max-w-2xl mx-auto h-auto rounded-lg shadow-md border border-border"
+                          className="w-full max-w-2xl mx-auto h-auto rounded-lg"
                         />
                       </div>
                       <p className="text-sm text-muted-foreground text-center italic">
