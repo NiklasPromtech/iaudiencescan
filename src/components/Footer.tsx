@@ -75,11 +75,14 @@ const Footer = () => {
             </div>
             
             <div className="mt-6">
-              <h4 className="font-semibold text-foreground mb-2 text-sm">Integrates with</h4>
+              <h4 className="font-semibold text-foreground mb-2 text-sm">Useable for</h4>
               <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-muted rounded text-xs text-muted-foreground">Google Ads</span>
-                <span className="px-2 py-1 bg-muted rounded text-xs text-muted-foreground">Drippi.ai</span>
-                <span className="px-2 py-1 bg-muted rounded text-xs text-muted-foreground">Mailchimp</span>
+                <a href="https://ads.google.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">Google Ads</a>
+                <a href="https://marketingplatform.google.com/about/display-video-360/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">DV360</a>
+                <a href="https://ads.x.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">X ads</a>
+                <a href="https://ads.telegram.org/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">Telegram ads</a>
+                <a href="https://ads.reddit.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">Reddit Ads</a>
+                <a href="https://www.drippiai.link/onboarding?&inviterUid=rhsjratWHLVB6BYKS4qx8j6HO662&inviterName=AudienceScan" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-muted hover:bg-muted-foreground/20 rounded text-xs text-muted-foreground hover:text-foreground transition-smooth">Drippi</a>
               </div>
             </div>
           </div>
