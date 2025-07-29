@@ -236,62 +236,35 @@ Founder and builder of AudienceScan`
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-primary/20 to-primary/10 h-64 md:h-auto flex items-center justify-center p-8 relative overflow-hidden">
-                  {/* Animated background particles */}
-                  <div className="absolute inset-0">
-                    <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/30 rounded-full animate-ping" style={{ animationDelay: '0s', animationDuration: '3s' }}></div>
-                    <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-primary/40 rounded-full animate-ping" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
-                    <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-primary/25 rounded-full animate-ping" style={{ animationDelay: '2s', animationDuration: '5s' }}></div>
-                  </div>
-                  
-                  {/* Central play button with orbiting platform icons */}
-                  <div className="relative flex items-center justify-center w-full h-full">
-                    {/* Central Play Button */}
-                    <div className="relative z-20 group cursor-pointer">
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse"></div>
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-64 md:h-auto flex items-center justify-center p-8">
+                  <div className="flex items-center gap-6">
+                    {/* X/Twitter Icon */}
+                    <div className="w-16 h-16 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
                       <img 
-                        src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
-                        alt="Video play button"
-                        className="relative w-24 h-24 group-hover:scale-110 transition-all duration-300 filter drop-shadow-2xl"
+                        src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
+                        alt="X/Twitter platform icon"
+                        className="w-10 h-10"
                       />
                     </div>
                     
-                    {/* Orbiting X/Twitter Icon */}
-                    <div className="absolute animate-spin" style={{ animationDuration: '20s' }}>
-                      <div className="relative">
-                        <div className="w-32 h-32 relative">
-                          <img 
-                            src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
-                            alt="X/Twitter platform icon"
-                            className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-12 h-12 hover:scale-125 transition-all duration-300 filter drop-shadow-lg"
-                            style={{ animation: 'reverse-spin 20s linear infinite' }}
-                          />
-                        </div>
-                      </div>
+                    {/* Play Button */}
+                    <div className="w-20 h-20 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                      <img 
+                        src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
+                        alt="Video play button"
+                        className="w-12 h-12"
+                      />
                     </div>
                     
-                    {/* Orbiting Telegram Icon */}
-                    <div className="absolute animate-spin" style={{ animationDuration: '25s', animationDirection: 'reverse' }}>
-                      <div className="relative">
-                        <div className="w-40 h-40 relative">
-                          <img 
-                            src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
-                            alt="Telegram platform icon"
-                            className="absolute top-1/2 -right-4 transform -translate-y-1/2 w-14 h-14 hover:scale-125 transition-all duration-300 filter drop-shadow-lg"
-                            style={{ animation: 'reverse-spin 25s linear infinite reverse' }}
-                          />
-                        </div>
-                      </div>
+                    {/* Telegram Icon */}
+                    <div className="w-16 h-16 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center shadow-md">
+                      <img 
+                        src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
+                        alt="Telegram platform icon"
+                        className="w-10 h-10"
+                      />
                     </div>
-                    
-                    {/* Additional floating icons for more epic feel */}
-                    <div className="absolute top-8 left-8 w-8 h-8 bg-primary/20 rounded-full animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3s' }}></div>
-                    <div className="absolute bottom-8 right-8 w-6 h-6 bg-primary/30 rounded-full animate-bounce" style={{ animationDelay: '1.5s', animationDuration: '4s' }}></div>
-                    <div className="absolute top-1/2 left-4 w-4 h-4 bg-primary/25 rounded-full animate-bounce" style={{ animationDelay: '2.5s', animationDuration: '3.5s' }}></div>
                   </div>
-                  
-                  {/* Epic gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-primary/5 pointer-events-none"></div>
                 </div>
               </div>
             </Card>

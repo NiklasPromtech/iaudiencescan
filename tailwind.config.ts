@@ -124,6 +124,7 @@ export default {
 					},
 					'50%': {
 						boxShadow: '0 0 40px hsl(var(--primary) / 0.6)'
+					}
 				},
 				'reverse-spin': {
 					from: {
