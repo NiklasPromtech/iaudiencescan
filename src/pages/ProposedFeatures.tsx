@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone } from "lucide-react";
+import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone, ShieldCheck } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -34,6 +34,12 @@ const ProposedFeatures = () => {
       title: "Add Wallets Manually",
       icon: Plus,
       description: "Simply make it possible to add a list of wallets manually (comma separated or something like that)",
+      status: "proposed"
+    },
+    {
+      title: "Pre-approval of Invalid Tokens",
+      icon: ShieldCheck,
+      description: "Add pre-approval of tokens that we know won't work (e.g addresses, or tokens that don't have enough transactions)",
       status: "proposed"
     }
   ];
