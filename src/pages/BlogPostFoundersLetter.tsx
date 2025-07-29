@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import networkChart from "@/assets/network-chart.jpg";
+import networkChart from "/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png";
 
 const BlogPostFoundersLetter = () => {
   return (

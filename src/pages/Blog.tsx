@@ -229,7 +229,7 @@ Founder and builder of AudienceScan`
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/founders-letter')}
+                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/personal-letter')}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -253,7 +253,7 @@ Founder and builder of AudienceScan`
               <Card 
                 key={post.id} 
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(`/blog/${post.id}`)}
+                onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : `/blog/${post.id}`)}
               >
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg">
                   {/* Placeholder for blog image */}
