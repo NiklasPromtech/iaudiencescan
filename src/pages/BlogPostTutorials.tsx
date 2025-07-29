@@ -110,13 +110,14 @@ const BlogPostTutorials = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://audiencescan.io"
+                href="https://app.audiencescan.io/signup"
                 className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                rel="noindex"
               >
                 Start Your Scan
               </a>
               <a
-                href="https://t.me/audiencescan"
+                href="https://t.me/audienceScan"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
               >
                 Get Support
