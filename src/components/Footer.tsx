@@ -1,4 +1,3 @@
-import { Linkedin } from "lucide-react";
 import xLogo from "@/assets/x-logo.png";
 import telegramLogo from "@/assets/telegram-logo.png";
 
@@ -55,7 +54,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-muted hover:bg-primary rounded-lg flex items-center justify-center transition-smooth group"
               >
-                <Linkedin className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
+                <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
               <a 
                 href="https://t.me/audienceScan" 
