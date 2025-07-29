@@ -150,7 +150,7 @@ const Blog = () => {
               <Card 
                 key={post.id} 
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : `/blog/${post.id}`)}
+                onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : post.id === 3 ? '/blog/addressable-audiences' : `/blog/${post.id}`)}
               >
                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
                    {post.id === 1 && (
