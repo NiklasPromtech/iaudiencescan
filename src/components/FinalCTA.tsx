@@ -16,7 +16,7 @@ const FinalCTA = () => {
               </div>
               
               <h2 className="text-h2 font-bold mb-6 flex items-center justify-center gap-3">
-                <span>📊</span> Turn blockchain data into your unfair advantage.
+Turn blockchain data into your unfair advantage.
               </h2>
               
               <p className="text-p1 text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
