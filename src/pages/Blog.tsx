@@ -38,10 +38,19 @@ const Blog = () => {
       readTime: "7 min read",
       category: "Strategy",
       featured: false,
+    },
+    {
+      id: 4,
+      title: "Guaranteed Results: We Put Our Money Where Our Mouth Is",
+      excerpt: "50%+ cost reduction guaranteed or your money back. We're so confident in our results, we offer a full money-back guarantee for Pro subscribers.",
+      date: "December 20, 2024",
+      readTime: "5 min read",
+      category: "Guarantee",
+      featured: true,
     }
   ];
 
-  const categories = ["All", "Tutorials", "Founder's Letter", "Strategy"];
+  const categories = ["All", "Tutorials", "Founder's Letter", "Strategy", "Guarantee"];
 
   const filteredPosts = selectedCategory === "All" 
     ? blogPosts 
@@ -103,7 +112,15 @@ const Blog = () => {
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => navigate(post.id === 2 ? '/blog/tutorials' : '/blog/personal-letter')}
+                      onClick={() => {
+                        if (post.id === 2) {
+                          navigate('/blog/tutorials');
+                        } else if (post.id === 4) {
+                          navigate('/blog/guaranteed-results');
+                        } else {
+                          navigate('/blog/personal-letter');
+                        }
+                      }}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -150,7 +167,15 @@ const Blog = () => {
               <Card 
                 key={post.id} 
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(post.id === 1 ? '/blog/personal-letter' : post.id === 3 ? '/blog/addressable-audiences' : `/blog/${post.id}`)}
+                onClick={() => {
+                  if (post.id === 1) {
+                    navigate('/blog/personal-letter');
+                  } else if (post.id === 3) {
+                    navigate('/blog/addressable-audiences');
+                  } else {
+                    navigate(`/blog/${post.id}`);
+                  }
+                }}
               >
                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
                    {post.id === 1 && (
