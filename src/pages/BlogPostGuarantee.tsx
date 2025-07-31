@@ -55,21 +55,21 @@ const BlogPostGuarantee = () => {
                 <p className="text-sm text-muted-foreground">If we don't deliver 50%+ cost reduction</p>
               </Card>
               
-              <Card className="p-6 border-accent/20 bg-gradient-to-br from-accent/5 to-transparent">
+              <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                 <div className="flex items-center gap-3 mb-2">
-                  <DollarSign className="h-6 w-6 text-accent" />
+                  <DollarSign className="h-6 w-6 text-primary" />
                   <span className="font-semibold">Max Refund</span>
                 </div>
-                <p className="text-2xl font-bold text-accent">$199</p>
+                <p className="text-2xl font-bold text-primary">$199</p>
                 <p className="text-sm text-muted-foreground">One month of Pro subscription</p>
               </Card>
               
-              <Card className="p-6 border-muted/20 bg-gradient-to-br from-muted/5 to-transparent">
+              <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                 <div className="flex items-center gap-3 mb-2">
-                  <Clock className="h-6 w-6 text-foreground" />
+                  <Clock className="h-6 w-6 text-primary" />
                   <span className="font-semibold">Test Period</span>
                 </div>
-                <p className="text-2xl font-bold">3 Weeks</p>
+                <p className="text-2xl font-bold text-primary">3 Weeks</p>
                 <p className="text-sm text-muted-foreground">Minimum $1,000 spend per campaign</p>
               </Card>
             </div>

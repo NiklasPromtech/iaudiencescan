@@ -46,7 +46,7 @@ const Blog = () => {
       date: "December 20, 2024",
       readTime: "5 min read",
       category: "Guarantee",
-      featured: true,
+      featured: false,
     }
   ];
 
@@ -129,30 +129,12 @@ const Blog = () => {
                 </div>
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-64 md:h-auto flex items-center justify-center p-8">
                   <div className="flex items-center gap-8">
-                    {/* X/Twitter Icon */}
-                    <div className="w-24 h-24 rounded-full flex items-center justify-center">
+                    {/* Money Back Guarantee Badge */}
+                    <div className="w-32 h-32 rounded-full flex items-center justify-center">
                       <img 
-                        src="/lovable-uploads/03b5d5a7-4a63-4682-bc47-fc87dfa9ed89.png"
-                        alt="X/Twitter platform icon"
-                        className="w-16 h-16"
-                      />
-                    </div>
-                    
-                    {/* Play Button */}
-                    <div className="w-28 h-28 rounded-full flex items-center justify-center">
-                      <img 
-                        src="/lovable-uploads/39f0b36e-f0ea-425c-9f73-b75e874f0f67.png"
-                        alt="Video play button"
-                        className="w-18 h-18"
-                      />
-                    </div>
-                    
-                    {/* Telegram Icon */}
-                    <div className="w-24 h-24 rounded-full flex items-center justify-center">
-                      <img 
-                        src="/lovable-uploads/1de3c902-4d9e-43de-92bd-56b825590bd8.png"
-                        alt="Telegram platform icon"
-                        className="w-16 h-16"
+                        src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png"
+                        alt="Money Back 100% Guarantee badge"
+                        className="w-28 h-28"
                       />
                     </div>
                   </div>
