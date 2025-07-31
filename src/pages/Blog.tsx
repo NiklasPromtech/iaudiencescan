@@ -154,6 +154,8 @@ const Blog = () => {
                     navigate('/blog/personal-letter');
                   } else if (post.id === 3) {
                     navigate('/blog/addressable-audiences');
+                  } else if (post.id === 4) {
+                    navigate('/blog/guaranteed-results');
                   } else {
                     navigate(`/blog/${post.id}`);
                   }
@@ -174,6 +176,15 @@ const Blog = () => {
                        <img 
                          src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
                          alt="Blockchain data visualization showing addressable audiences"
+                         className="w-full h-full object-contain"
+                       />
+                     </div>
+                   )}
+                   {post.id === 4 && (
+                     <div>
+                       <img 
+                         src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 
+                         alt="Money Back 100% Guarantee badge"
                          className="w-full h-full object-contain"
                        />
                      </div>
