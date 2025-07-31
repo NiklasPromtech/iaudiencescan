@@ -13,6 +13,7 @@ import BlogPostAddressableAudiences from "./pages/BlogPostAddressableAudiences";
 import BlogPostGuarantee from "./pages/BlogPostGuarantee";
 import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
+import Sitemap from "./pages/Sitemap";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/blog/addressable-audiences" element={<BlogPostAddressableAudiences />} />
           <Route path="/blog/guaranteed-results" element={<BlogPostGuarantee />} />
           <Route path="/proposed-features" element={<ProposedFeatures />} />
+          <Route path="/sitemap.xml" element={<Sitemap />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
