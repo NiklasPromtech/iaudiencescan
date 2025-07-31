@@ -9,46 +9,46 @@ const ProposedFeatures = () => {
     {
       title: "Auto Refresh",
       icon: RefreshCw,
-      description: "Tool aimed at token owners, where a users select a token \"As their own\" and then we will re-run the scan on a weekly or bi-weekly basis and send them and update on how things have changed since they last checked",
+      description: "A tool designed for token owners to “claim” their token within AudienceScan. Once set, we’ll automatically re-run the scan weekly or bi-weekly and deliver an updated report highlighting key changes and new insights since the last analysis.",
       status: "proposed"
     },
     {
-      title: "DM Direct TG Users from the Platform", 
+      title: "Direct Messaging (Telegram)", 
       icon: MessageCircle,
-      description: "Some simple script that lets you select e.g a Telegram handle, you write in your number, we ask you for the verification code and then we send a DM to all the users, over a period of time (To avoid getting you banned) we would recommend something like 20 messages a day just to you don't get overwhelmed",
+      description: "A feature that enables direct outreach to Telegram users from within the platform. You’ll input your phone number, verify your account, and AudienceScan will handle sending messages gradually (e.g., ~20 per day) to avoid spam flags and keep outreach manageable.",
       status: "proposed"
     },
     {
-      title: "DM X through Drippi.ai",
+      title: "Direct Messaging (X via Drippi.ai)",
       icon: Users,
-      description: "Simple tutorial of how you setup a Drippi campaign based on the data in the report",
+      description: "SA guided workflow showing how to launch a Drippi campaign using AudienceScan data. This tutorial-based feature helps you reach relevant X (Twitter) users efficiently, turning audience insights into real conversations.",
       status: "proposed"
     },
     {
-      title: "Copy to Clipboard for AI Question",
+      title: "AI-Friendly Copy to Clipboard",
       icon: Copy,
-      description: "Basically a button that copies data from the study to the clipboard. With the most valuable information. With a box where you add in \"Your question\" [Maybe we even have some templated questions that you can copy directly or that it works similar to the Invite box. Where you get a window that opens up, and you then press copy to clipboard, and then (One of those, but for scans)]",
+      description: "A one-click button to extract the most valuable data from a study into your clipboard. You can then paste this into AI tools to generate insights or next steps. We’re considering adding ready-made prompt templates for quick use.",
       status: "proposed"
     },
     {
-      title: "Add Wallets Manually",
+      title: "Manual Wallet Upload",
       icon: Plus,
-      description: "Simply make it possible to add a list of wallets manually (comma separated or something like that)",
+      description: "An option to import wallets manually (comma-separated list or file upload) for analysis. This makes it easy to combine your own data with AudienceScan results.",
       status: "proposed"
     },
     {
-      title: "Pre-approval of Invalid Tokens",
+      title: "Invalid Token Pre-Approval",
       icon: ShieldCheck,
-      description: "Add pre-approval of tokens that we know won't work (e.g addresses, or tokens that don't have enough transactions)",
+      description: "An automated filter that flags or blocks addresses and tokens known to have too few transactions or be incompatible with AudienceScan before a scan is run.",
       status: "proposed"
     }
   ];
 
   const inProgress = [
     {
-      title: "Clean Marketing Tokens",
+      title: "Marketing Token Cleanup",
       icon: RefreshCw,
-      description: "Cleaning out marketing tokens from the analysis (e.g token that contain a webpage link or \"claim now\" type text.",
+      description: "We’re actively improving how AudienceScan filters out irrelevant tokens (such as those with spammy names like “claim now” or containing URLs), ensuring cleaner and more accurate datasets in every scan.",
       status: "in-progress"
     }
   ];
