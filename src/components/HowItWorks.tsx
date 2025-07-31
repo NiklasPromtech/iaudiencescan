@@ -7,11 +7,8 @@ const HowItWorks = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-h2 font-bold mb-6">
-            What Is AudienceScan?
+            How It Works (3 Steps)
           </h2>
-          <p className="text-p1 text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-            AudienceScan helps Web3 teams understand and activate their holders. We analyze on-chain wallet data to uncover where your community overlaps, what tokens they hold, and how to use those insights in your go-to-market.
-          </p>
         </div>
         
         <div className="max-w-5xl mx-auto">
@@ -23,8 +20,8 @@ const HowItWorks = () => {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold">1</span>
                   </div>
-                  <h3 className="text-tag font-semibold mb-2">Enter Token Address</h3>
-                  <p className="text-p3 text-muted-foreground">Paste any contract address</p>
+                  <h3 className="text-tag font-semibold mb-2">Scan Any Token</h3>
+                  <p className="text-p3 text-muted-foreground">Analyze real wallet transactions, not interests or keywords</p>
                 </CardContent>
               </Card>
             </div>
@@ -36,8 +33,8 @@ const HowItWorks = () => {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold">2</span>
                   </div>
-                  <h3 className="text-tag font-semibold mb-2">AI Analysis</h3>
-                  <p className="text-p3 text-muted-foreground">We scan wallet behaviors</p>
+                  <h3 className="text-tag font-semibold mb-2">Find Audience Overlap</h3>
+                  <p className="text-p3 text-muted-foreground">Discover communities that actually buy and trade similar tokens</p>
                 </CardContent>
               </Card>
             </div>
@@ -49,27 +46,13 @@ const HowItWorks = () => {
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold">3</span>
                   </div>
-                  <h3 className="text-tag font-semibold mb-2">Get Insights</h3>
-                  <p className="text-p3 text-muted-foreground">Actionable marketing data</p>
+                  <h3 className="text-tag font-semibold mb-2">Target With Precision</h3>
+                  <p className="text-p3 text-muted-foreground">Use ready-made audiences to run high-performance ad campaigns</p>
                 </CardContent>
               </Card>
             </div>
           </div>
           
-          <div className="text-center mt-16">
-            <div className="bg-accent/50 backdrop-blur-sm rounded-2xl p-8 max-w-3xl mx-auto">
-              <h3 className="text-h3 font-semibold mb-4 text-accent-foreground">
-                Why It Matters
-              </h3>
-              <p className="text-p1 text-accent-foreground/80 leading-relaxed">
-                In Web2, you buy lookalike audiences. In Web3, your wallet data <em>is</em> the audience. 
-                AudienceScan helps token teams go from blockchain noise to actionable signal.
-              </p>
-              <p className="text-p3 text-accent-foreground/60 mt-4">
-                We've helped projects on Base, Arbitrum, and Solana understand their true user base.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

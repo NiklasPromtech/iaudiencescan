@@ -25,12 +25,18 @@ const Hero = () => {
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-6">
-            Turn any token into a data-backed crypto audience
+            Data-Backed Crypto Audiences. Guaranteed Results.
           </h1>
           
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Create and target the perfect Web3 audience for Twitter, Telegram, and Google Ads — with precision
+            AudienceScan turns any token into a targetable audience for X, Telegram, Google, and Reddit ads – cutting costs by 50% or more. If it doesn't, you get your money back.
           </p>
+          
+          <div className="mb-12">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
+              Start Your Guaranteed Test
+            </Button>
+          </div>
           
           
           {/* Stats */}
@@ -41,15 +47,15 @@ const Hero = () => {
             </div>
             <div className="text-center">
               <div className="text-h2 font-bold text-primary mb-2">2.1M+</div>
-              <div className="text-p3 text-muted-foreground">Transactions</div>
+              <div className="text-p3 text-muted-foreground">Transactions Processed</div>
             </div>
             <div className="text-center">
               <div className="text-h2 font-bold text-primary mb-2">125K+</div>
-              <div className="text-p3 text-muted-foreground">Tokens Found</div>
+              <div className="text-p3 text-muted-foreground">Tokens Indexed</div>
             </div>
             <div className="text-center">
               <div className="text-h2 font-bold text-primary mb-2">$4.2B+</div>
-              <div className="text-p3 text-muted-foreground">Transaction Value</div>
+              <div className="text-p3 text-muted-foreground">in On-Chain Activity</div>
             </div>
           </div>
         </div>

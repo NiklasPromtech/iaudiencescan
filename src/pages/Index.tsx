@@ -1,9 +1,10 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import Partnerships from "@/components/Partnerships";
-import FAQ from "@/components/FAQ";
-import CTA from "@/components/CTA";
+import HowItWorks from "@/components/HowItWorks";
+import ProvenResults from "@/components/ProvenResults";
+import MoneyBackGuarantee from "@/components/MoneyBackGuarantee";
+import Resources from "@/components/Resources";
+import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -11,10 +12,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <Features />
-      <Partnerships />
-      <FAQ />
-      <CTA />
+      <HowItWorks />
+      <ProvenResults />
+      <MoneyBackGuarantee />
+      <Resources />
+      <FinalCTA />
       <Footer />
     </div>
   );
