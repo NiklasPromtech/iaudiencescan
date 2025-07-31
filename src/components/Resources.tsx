@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { BookOpen, Play, Settings } from "lucide-react";
 
 const Resources = () => {
@@ -52,8 +53,8 @@ const Resources = () => {
           </div>
           
           <div className="text-center">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4">
-              View Tutorials
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4">
+              <Link to="/blog/tutorials">View Tutorials</Link>
             </Button>
           </div>
         </div>

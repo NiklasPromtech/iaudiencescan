@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { BarChart3, Target } from "lucide-react";
 
 const FinalCTA = () => {
@@ -23,8 +24,8 @@ Turn blockchain data into your unfair advantage.
                 Stop wasting budget on broad "crypto enthusiast" targeting. Reach real wallets, with guaranteed results or your money back.
               </p>
               
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
-                Start Your Guaranteed Test
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
+                <Link to="/blog/guaranteed-results">Start Your Guaranteed Test</Link>
               </Button>
             </CardContent>
           </Card>

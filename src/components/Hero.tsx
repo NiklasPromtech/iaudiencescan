@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 import backdropTexture from "@/assets/backdrop-texture.jpg";
 
@@ -33,8 +34,8 @@ const Hero = () => {
           </p>
           
           <div className="mb-12">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
-              Start Your Guaranteed Test
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
+              <Link to="/blog/guaranteed-results">Start Your Guaranteed Test</Link>
             </Button>
           </div>
           

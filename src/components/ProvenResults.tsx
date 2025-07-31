@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { Quote, Lightbulb } from "lucide-react";
 
 const ProvenResults = () => {
@@ -33,8 +34,8 @@ const ProvenResults = () => {
               <p className="text-p1 text-foreground mb-6">
                 If you spend $400/month or more on ads, AudienceScan pays for itself in saved costs.
               </p>
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                See Case Studies
+              <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Link to="/case-studies">See Case Studies</Link>
               </Button>
             </CardContent>
           </Card>

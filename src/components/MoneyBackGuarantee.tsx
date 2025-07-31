@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { Shield, CheckCircle } from "lucide-react";
 
 const MoneyBackGuarantee = () => {
@@ -32,8 +33,8 @@ const MoneyBackGuarantee = () => {
                 </div>
               </div>
               
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 py-4">
-                Learn About the Guarantee
+              <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 py-4">
+                <Link to="/blog/guaranteed-results">Learn About the Guarantee</Link>
               </Button>
             </CardContent>
           </Card>
