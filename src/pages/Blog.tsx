@@ -214,20 +214,20 @@ const Blog = () => {
                      </div>
                    )}
                    {post.id === 4 && (
-                     <div>
+                     <div className="flex items-center justify-center h-full">
                        <img 
                          src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
                          alt="Blockchain data visualization showing addressable audiences"
-                         className="w-full h-full object-contain"
+                         className="w-full h-auto object-cover rounded"
                        />
                      </div>
                    )}
                    {post.id === 5 && (
-                     <div>
+                     <div className="flex items-center justify-center h-full">
                        <img 
                          src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 
                          alt="Money Back 100% Guarantee badge"
-                         className="w-full h-full object-contain"
+                         className="w-full h-auto object-cover rounded"
                        />
                      </div>
                    )}
