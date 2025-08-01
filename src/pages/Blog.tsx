@@ -14,6 +14,15 @@ const Blog = () => {
   const blogPosts = [
     {
       id: 1,
+      title: "The AudienceScan ROI: Why 50%+ Cost Reduction is Standard",
+      excerpt: "Discover the numbers behind AudienceScan's consistent performance and calculate your potential savings with our interactive ROI calculator.",
+      date: "Jan 30, 2025",
+      readTime: "5 min read",
+      category: "ROI Analysis",
+      featured: true,
+    },
+    {
+      id: 2,
       title: "A Personal Letter to New Users of AudienceScan",
       excerpt: "Hi, I'm Niklas, the founder of AudienceScan. I want to share how and why we ended up launching AudienceScan, from my early digital marketing days to building a tool that consistently delivers 50%+ cost reductions.",
       date: "Jan 29, 2025",
@@ -22,16 +31,16 @@ const Blog = () => {
       featured: false,
     },
     {
-      id: 2,
+      id: 3,
       title: "AudienceScan Video Tutorials",
       excerpt: "Master AudienceScan and learn how to create high-performing ad campaigns across all major platforms. Includes step-by-step tutorials for Twitter, DV360, Reddit, and Telegram advertising.",
       date: "Jan 29, 2025",
       readTime: "12 min read",
       category: "Tutorials",
-      featured: true,
+      featured: false,
     },
     {
-      id: 3,
+      id: 4,
       title: "Turning Blockchain Data Into Addressable Audiences with AudienceScan",
       excerpt: "Running ads for crypto projects has always felt like throwing darts in a blackout. AudienceScan changes this by flipping the targeting process on its head, turning blockchain data into truly addressable audiences.",
       date: "Jan 28, 2025",
@@ -40,7 +49,7 @@ const Blog = () => {
       featured: false,
     },
     {
-      id: 4,
+      id: 5,
       title: "Guaranteed Results: We Put Our Money Where Our Mouth Is",
       excerpt: "50%+ cost reduction guaranteed or your money back. We're so confident in our results, we offer a full money-back guarantee for Pro subscribers.",
       date: "December 20, 2024",
@@ -50,7 +59,7 @@ const Blog = () => {
     }
   ];
 
-  const categories = ["All", "Tutorials", "Founder's Letter", "Strategy", "Guarantee"];
+  const categories = ["All", "ROI Analysis", "Tutorials", "Founder's Letter", "Strategy", "Guarantee"];
 
   const filteredPosts = selectedCategory === "All" 
     ? blogPosts 
@@ -113,9 +122,11 @@ const Blog = () => {
                     <Button 
                       className="group"
                       onClick={() => {
-                        if (post.id === 2) {
+                        if (post.id === 1) {
+                          navigate('/blog/roi');
+                        } else if (post.id === 3) {
                           navigate('/blog/tutorials');
-                        } else if (post.id === 4) {
+                        } else if (post.id === 5) {
                           navigate('/blog/guaranteed-results');
                         } else {
                           navigate('/blog/personal-letter');
@@ -169,10 +180,14 @@ const Blog = () => {
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => {
                   if (post.id === 1) {
+                    navigate('/blog/roi');
+                  } else if (post.id === 2) {
                     navigate('/blog/personal-letter');
                   } else if (post.id === 3) {
-                    navigate('/blog/addressable-audiences');
+                    navigate('/blog/tutorials');
                   } else if (post.id === 4) {
+                    navigate('/blog/addressable-audiences');
+                  } else if (post.id === 5) {
                     navigate('/blog/guaranteed-results');
                   } else {
                     navigate(`/blog/${post.id}`);
@@ -180,7 +195,7 @@ const Blog = () => {
                 }}
               >
                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
-                   {post.id === 1 && (
+                   {post.id === 2 && (
                      <div>
                        <img 
                          src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
@@ -189,7 +204,7 @@ const Blog = () => {
                        />
                      </div>
                    )}
-                   {post.id === 3 && (
+                   {post.id === 4 && (
                      <div>
                        <img 
                          src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
@@ -198,7 +213,7 @@ const Blog = () => {
                        />
                      </div>
                    )}
-                   {post.id === 4 && (
+                   {post.id === 5 && (
                      <div>
                        <img 
                          src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 

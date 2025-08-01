@@ -11,6 +11,7 @@ import BlogPost from "./pages/BlogPost";
 import BlogPostTutorials from "./pages/BlogPostTutorials";
 import BlogPostAddressableAudiences from "./pages/BlogPostAddressableAudiences";
 import BlogPostGuarantee from "./pages/BlogPostGuarantee";
+import BlogPostROI from "./pages/BlogPostROI";
 import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/blog/tutorials" element={<BlogPostTutorials />} />
           <Route path="/blog/addressable-audiences" element={<BlogPostAddressableAudiences />} />
           <Route path="/blog/guaranteed-results" element={<BlogPostGuarantee />} />
+          <Route path="/blog/roi" element={<BlogPostROI />} />
           <Route path="/proposed-features" element={<ProposedFeatures />} />
           <Route path="/sitemap.xml" element={<Sitemap />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
