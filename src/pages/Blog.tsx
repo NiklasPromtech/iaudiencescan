@@ -19,7 +19,7 @@ const Blog = () => {
       date: "Jan 30, 2025",
       readTime: "5 min read",
       category: "ROI Analysis",
-      featured: true,
+      featured: false,
     },
     {
       id: 2,
@@ -37,7 +37,7 @@ const Blog = () => {
       date: "Jan 29, 2025",
       readTime: "12 min read",
       category: "Tutorials",
-      featured: false,
+      featured: true,
     },
     {
       id: 4,
@@ -195,6 +195,15 @@ const Blog = () => {
                 }}
               >
                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
+                   {post.id === 1 && (
+                     <div>
+                       <img 
+                         src="/lovable-uploads/c9468e33-7558-4144-8a93-2f37dafeeecc.png" 
+                         alt="ROI text in purple gradient"
+                         className="w-full h-full object-contain"
+                       />
+                     </div>
+                   )}
                    {post.id === 2 && (
                      <div>
                        <img 
