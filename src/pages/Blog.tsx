@@ -196,11 +196,11 @@ const Blog = () => {
               >
                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
                    {post.id === 1 && (
-                     <div>
+                     <div className="flex items-center justify-center h-full">
                        <img 
                          src="/lovable-uploads/c9468e33-7558-4144-8a93-2f37dafeeecc.png" 
                          alt="ROI text in purple gradient"
-                         className="w-full h-full object-contain"
+                         className="w-full h-auto object-cover rounded"
                        />
                      </div>
                    )}
