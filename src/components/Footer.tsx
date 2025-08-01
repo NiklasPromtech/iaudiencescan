@@ -27,9 +27,8 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">Product</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/proposed-features" className="text-muted-foreground hover:text-primary transition-smooth">Proposed Features</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Pricing</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">API</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Integrations</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">API docs (Coming soon)</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Integrations (Coming soon)</a></li>
             </ul>
           </div>
           
@@ -37,10 +36,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">About</a></li>
               <li><a href="/blog" className="text-muted-foreground hover:text-primary transition-smooth">Blog</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Careers</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Contact</a></li>
             </ul>
           </div>
           
