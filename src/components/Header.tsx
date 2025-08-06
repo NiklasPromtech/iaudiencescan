@@ -17,13 +17,13 @@ const Header = () => {
         
         <nav className="hidden md:flex items-center gap-8">
           <a href="/#features" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            Platform
+            How It Works
           </a>
           <a href="/#partnerships" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            Partnerships
+            Web3 Partnerships
           </a>
           <a href="/#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
-            FAQ
+            Support
           </a>
         </nav>
 
