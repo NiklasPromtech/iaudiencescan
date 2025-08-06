@@ -233,15 +233,24 @@ const Blog = () => {
                        />
                      </div>
                    )}
-                   {post.id === 5 && (
-                     <div className="flex items-center justify-center h-full">
-                       <img 
-                         src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 
-                         alt="Money Back 100% Guarantee badge"
-                         className="w-full h-auto object-cover rounded"
-                       />
-                     </div>
-                   )}
+                    {post.id === 5 && (
+                      <div className="flex items-center justify-center h-full">
+                        <img 
+                          src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 
+                          alt="Money Back 100% Guarantee badge"
+                          className="w-full h-auto object-cover rounded"
+                        />
+                      </div>
+                    )}
+                    {post.id === 6 && (
+                      <div className="flex items-center justify-center h-full">
+                        <img 
+                          src="/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png" 
+                          alt="AudienceScan Analytics Icon"
+                          className="w-24 h-24 object-contain"
+                        />
+                      </div>
+                    )}
                  </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
