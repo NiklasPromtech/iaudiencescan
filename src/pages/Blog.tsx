@@ -56,6 +56,15 @@ const Blog = () => {
       readTime: "5 min read",
       category: "Guarantee",
       featured: false,
+    },
+    {
+      id: 6,
+      title: "AudienceScan Ads",
+      excerpt: "Over the years, AudienceScan has grown out of real hands-on work in the Web3 space. We offer comprehensive paid marketing services across all major platforms.",
+      date: "Aug 6, 2025",
+      readTime: "6 min read",
+      category: "Services",
+      featured: false,
     }
   ];
 
@@ -189,6 +198,8 @@ const Blog = () => {
                     navigate('/blog/addressable-audiences');
                   } else if (post.id === 5) {
                     navigate('/blog/guaranteed-results');
+                  } else if (post.id === 6) {
+                    navigate('/blog/audiencescan-ads');
                   } else {
                     navigate(`/blog/${post.id}`);
                   }
