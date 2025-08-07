@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone, ShieldCheck } from "lucide-react";
+import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone, ShieldCheck, Rocket } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -40,6 +40,12 @@ const ProposedFeatures = () => {
       title: "Invalid Token Pre-Approval",
       icon: ShieldCheck,
       description: "An automated filter that flags or blocks addresses and tokens known to have too few transactions or be incompatible with AudienceScan before a scan is run.",
+      status: "proposed"
+    },
+    {
+      title: "Launchpads",
+      icon: Rocket,
+      description: "A module that surfaces which launchpads tokens (e.g., PinkSale, DAO Maker, etc.) the scan returns. Useful for spotting patterns in go-to-market strategies, cross-token overlaps, and community behavior tied to early-stage offerings.",
       status: "proposed"
     }
   ];
