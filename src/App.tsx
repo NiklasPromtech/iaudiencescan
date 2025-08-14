@@ -16,6 +16,7 @@ import BlogPostAudienceScanAds from "./pages/BlogPostAudienceScanAds";
 import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
+import DMAssistant from "./pages/DMAssistant";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/blog/audiencescan-ads" element={<BlogPostAudienceScanAds />} />
           <Route path="/proposed-features" element={<ProposedFeatures />} />
           <Route path="/sitemap.xml" element={<Sitemap />} />
+          <Route path="/dm-assistant" element={<DMAssistant />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
