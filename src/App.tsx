@@ -17,6 +17,7 @@ import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
 import DMAssistant from "./pages/DMAssistant";
+import ManagedService from "./pages/ManagedService";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/proposed-features" element={<ProposedFeatures />} />
           <Route path="/sitemap.xml" element={<Sitemap />} />
           <Route path="/dm-assistant" element={<DMAssistant />} />
+          <Route path="/managed-service" element={<ManagedService />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
