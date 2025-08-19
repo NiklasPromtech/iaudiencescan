@@ -107,6 +107,10 @@ const BlogPostAudienceScanAds = () => {
                     <div className="w-2 h-2 bg-secondary rounded-full"></div>
                     <span className="text-foreground font-medium">Tracking setup (Google Tag Manager)</span>
                   </div>
+                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-xl">
+                    <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                    <span className="text-foreground font-medium">Telegram bots</span>
+                  </div>
                 </div>
               </div>
             </div>
