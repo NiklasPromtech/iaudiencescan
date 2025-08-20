@@ -65,10 +65,19 @@ const Blog = () => {
       readTime: "6 min read",
       category: "Services",
       featured: false,
+    },
+    {
+      id: 7,
+      title: "Tracking, Tracking, Tracking",
+      excerpt: "A short 'How To' guide for setting up tracking in Google Analytics (GA4). Learn how to set key events, create them if they don't exist, and use them in your reports.",
+      date: "Aug 20, 2025",
+      readTime: "6 min read",
+      category: "Tutorials",
+      featured: false,
     }
   ];
 
-  const categories = ["All", "ROI Analysis", "Tutorials", "Founder's Letter", "Strategy", "Guarantee"];
+  const categories = ["All", "ROI Analysis", "Tutorials", "Founder's Letter", "Strategy", "Guarantee", "Services"];
 
   const filteredPosts = selectedCategory === "All" 
     ? blogPosts 
@@ -200,6 +209,8 @@ const Blog = () => {
                     navigate('/blog/guaranteed-results');
                   } else if (post.id === 6) {
                     navigate('/blog/audiencescan-ads');
+                  } else if (post.id === 7) {
+                    navigate('/blog/tracking');
                   } else {
                     navigate(`/blog/${post.id}`);
                   }
@@ -242,15 +253,24 @@ const Blog = () => {
                         />
                       </div>
                     )}
-                    {post.id === 6 && (
-                      <div className="flex items-center justify-center h-full">
-                        <img 
-                          src="/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png" 
-                          alt="AudienceScan Analytics Icon"
-                          className="w-24 h-24 object-contain"
-                        />
-                      </div>
-                    )}
+                     {post.id === 6 && (
+                       <div className="flex items-center justify-center h-full">
+                         <img 
+                           src="/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png" 
+                           alt="AudienceScan Analytics Icon"
+                           className="w-24 h-24 object-contain"
+                         />
+                       </div>
+                     )}
+                     {post.id === 7 && (
+                       <div className="flex items-center justify-center h-full">
+                         <img 
+                           src="/lovable-uploads/b45bfeb9-7ddd-4bac-a5c0-dc4cb34d6335.png" 
+                           alt="Google Analytics tracking dashboard"
+                           className="w-full h-auto object-cover rounded"
+                         />
+                       </div>
+                     )}
                  </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
