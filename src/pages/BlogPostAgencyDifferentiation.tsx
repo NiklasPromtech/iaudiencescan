@@ -62,13 +62,20 @@ const BlogPostAgencyDifferentiation = () => {
             Use AudienceScan to export overlap data for any token community.
           </p>
 
-          
-
-          <p className="mb-8">
-            <a href="https://vimeo.com/1111983156?share=copy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-              Video link: https://vimeo.com/1111983156?share=copy
-            </a>
-          </p>
+          <div className="bg-muted/30 rounded-lg p-6 mb-8">
+            <div className="aspect-video w-full">
+              <iframe
+                src="https://player.vimeo.com/video/1111983156?badge=0&autopause=0&player_id=0&app_id=58479"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="Export AudienceScan Data Tutorial"
+                className="rounded-lg"
+              />
+            </div>
+          </div>
 
           <div className="border-t border-muted my-12"></div>
 
