@@ -74,6 +74,15 @@ const Blog = () => {
       readTime: "6 min read",
       category: "Tutorials",
       featured: false,
+    },
+    {
+      id: 8,
+      title: "Differentiate Your Agency From the Sea of Sameness",
+      excerpt: "Most agencies walk into pitches with the same tired decks. Learn how to use AudienceScan data in Looker Studio to create unique, data-backed presentations that win clients.",
+      date: "Aug 21, 2025",
+      readTime: "8 min read",
+      category: "Strategy",
+      featured: false,
     }
   ];
 
@@ -211,6 +220,8 @@ const Blog = () => {
                     navigate('/blog/audiencescan-ads');
                   } else if (post.id === 7) {
                     navigate('/blog/tracking');
+                  } else if (post.id === 8) {
+                    navigate('/blog/agency-differentiation');
                   } else {
                     navigate(`/blog/${post.id}`);
                   }
@@ -262,15 +273,24 @@ const Blog = () => {
                          />
                        </div>
                      )}
-                     {post.id === 7 && (
-                       <div className="flex items-center justify-center h-full">
-                         <img 
-                           src="/lovable-uploads/b45bfeb9-7ddd-4bac-a5c0-dc4cb34d6335.png" 
-                           alt="Google Analytics tracking dashboard"
-                           className="w-full h-auto object-cover rounded"
-                         />
-                       </div>
-                     )}
+                      {post.id === 7 && (
+                        <div className="flex items-center justify-center h-full">
+                          <img 
+                            src="/lovable-uploads/b45bfeb9-7ddd-4bac-a5c0-dc4cb34d6335.png" 
+                            alt="Google Analytics tracking dashboard"
+                            className="w-full h-auto object-cover rounded"
+                          />
+                        </div>
+                      )}
+                      {post.id === 8 && (
+                        <div className="flex items-center justify-center h-full">
+                          <img 
+                            src="/lovable-uploads/f0cabb29-b0ec-45c9-ac40-e40566a59905.png" 
+                            alt="Looker Studio dashboard showing agency data analysis"
+                            className="w-full h-auto object-cover rounded"
+                          />
+                        </div>
+                      )}
                  </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">

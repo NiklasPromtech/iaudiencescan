@@ -14,6 +14,7 @@ import BlogPostGuarantee from "./pages/BlogPostGuarantee";
 import BlogPostROI from "./pages/BlogPostROI";
 import BlogPostAudienceScanAds from "./pages/BlogPostAudienceScanAds";
 import BlogPostTracking from "./pages/BlogPostTracking";
+import BlogPostAgencyDifferentiation from "./pages/BlogPostAgencyDifferentiation";
 import ProposedFeatures from "./pages/ProposedFeatures";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/blog/roi" element={<BlogPostROI />} />
           <Route path="/blog/audiencescan-ads" element={<BlogPostAudienceScanAds />} />
           <Route path="/blog/tracking" element={<BlogPostTracking />} />
+          <Route path="/blog/agency-differentiation" element={<BlogPostAgencyDifferentiation />} />
           <Route path="/proposed-features" element={<ProposedFeatures />} />
           <Route path="/sitemap.xml" element={<Sitemap />} />
           <Route path="/dm-assistant" element={<DMAssistant />} />
