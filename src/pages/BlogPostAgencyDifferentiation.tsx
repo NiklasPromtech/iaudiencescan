@@ -3,20 +3,13 @@ import Footer from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
 const BlogPostAgencyDifferentiation = () => {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Header />
       
       <article className="container mx-auto px-4 py-16 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/blog')}
-          className="mb-8 text-muted-foreground hover:text-foreground"
-        >
+        <Button variant="ghost" onClick={() => navigate('/blog')} className="mb-8 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Blog
         </Button>
@@ -69,9 +62,7 @@ const BlogPostAgencyDifferentiation = () => {
             Use AudienceScan to export overlap data for any token community.
           </p>
 
-          <p className="mb-6 text-primary font-medium">
-            👉 [Insert short video / gif of export flow]
-          </p>
+          
 
           <p className="mb-8">
             <a href="https://vimeo.com/1111983156?share=copy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
@@ -88,11 +79,7 @@ const BlogPostAgencyDifferentiation = () => {
           </p>
 
           <div className="bg-muted/30 rounded-lg p-6 mb-8">
-            <img 
-              src="/lovable-uploads/18968c8d-6657-40ad-a4d1-c288ee9e62fb.png"
-              alt="Google Sheets with Mog Coin sample data showing token analysis"
-              className="w-full rounded-lg border"
-            />
+            <img src="/lovable-uploads/18968c8d-6657-40ad-a4d1-c288ee9e62fb.png" alt="Google Sheets with Mog Coin sample data showing token analysis" className="w-full rounded-lg border" />
             <p className="text-sm text-muted-foreground mt-2 text-center">
               Screenshot of example sheet with token data
             </p>
@@ -112,11 +99,7 @@ const BlogPostAgencyDifferentiation = () => {
           </p>
 
           <div className="bg-muted/30 rounded-lg p-6 mb-8">
-            <img 
-              src="/lovable-uploads/918ec6c4-ae11-43ae-888c-9696b8a9e24e.png"
-              alt="Looker Studio connection interface showing Google Connectors"
-              className="w-full rounded-lg border"
-            />
+            <img src="/lovable-uploads/918ec6c4-ae11-43ae-888c-9696b8a9e24e.png" alt="Looker Studio connection interface showing Google Connectors" className="w-full rounded-lg border" />
             <p className="text-sm text-muted-foreground mt-2 text-center">
               Screenshot of the connection window
             </p>
@@ -135,11 +118,7 @@ const BlogPostAgencyDifferentiation = () => {
           </p>
 
           <div className="bg-muted/30 rounded-lg p-6 mb-8">
-            <img 
-              src="/lovable-uploads/1d77ddce-2134-4432-b593-4f2bde1fd074.png"
-              alt="Field configuration in Looker Studio showing dimensions and data types"
-              className="w-full rounded-lg border"
-            />
+            <img src="/lovable-uploads/1d77ddce-2134-4432-b593-4f2bde1fd074.png" alt="Field configuration in Looker Studio showing dimensions and data types" className="w-full rounded-lg border" />
             <p className="text-sm text-muted-foreground mt-2 text-center">
               Screenshot of field configuration with logo mapping
             </p>
@@ -154,11 +133,7 @@ const BlogPostAgencyDifferentiation = () => {
           </p>
 
           <div className="bg-muted/30 rounded-lg p-6 mb-8">
-            <img 
-              src="/lovable-uploads/cd60bbbb-54eb-49ab-a295-92ab3486fa08.png"
-              alt="Create Filter dialog in Looker Studio for excluding null logos"
-              className="w-full rounded-lg border"
-            />
+            <img src="/lovable-uploads/cd60bbbb-54eb-49ab-a295-92ab3486fa08.png" alt="Create Filter dialog in Looker Studio for excluding null logos" className="w-full rounded-lg border" />
             <p className="text-sm text-muted-foreground mt-2 text-center">
               Filter setup to exclude tokens without logos
             </p>
@@ -173,11 +148,7 @@ const BlogPostAgencyDifferentiation = () => {
           </p>
 
           <div className="bg-muted/30 rounded-lg p-6 mb-8">
-            <img 
-              src="/lovable-uploads/f0cabb29-b0ec-45c9-ac40-e40566a59905.png"
-              alt="Finished Looker Studio dashboard showing Your agency with token logos and community data"
-              className="w-full rounded-lg border"
-            />
+            <img src="/lovable-uploads/f0cabb29-b0ec-45c9-ac40-e40566a59905.png" alt="Finished Looker Studio dashboard showing Your agency with token logos and community data" className="w-full rounded-lg border" />
             <p className="text-sm text-muted-foreground mt-2 text-center">
               Screenshot of the finished Looker dashboard
             </p>
@@ -245,8 +216,6 @@ const BlogPostAgencyDifferentiation = () => {
       </article>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default BlogPostAgencyDifferentiation;
