@@ -25,21 +25,29 @@ const Header = () => {
           <a href="/#faq" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Support
           </a>
-        </nav>
-
-        <div className="flex items-center gap-6">
           <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Case Studies
           </Link>
           <Link to="/pricing" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
             Pricing
           </Link>
+        </nav>
+
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className="hidden md:flex items-center gap-6">
+            <Link to="/case-studies" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+              Case Studies
+            </Link>
+            <Link to="/pricing" className="text-p2 text-muted-foreground hover:text-foreground transition-smooth">
+              Pricing
+            </Link>
+          </div>
           <a 
             href="https://app.audiencescan.io" 
             target="_blank" 
             rel="nofollow noopener noreferrer"
           >
-            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 md:px-6">
               Launch app
             </Button>
           </a>
