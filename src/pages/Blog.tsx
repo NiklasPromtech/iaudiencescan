@@ -242,8 +242,8 @@ const Blog = () => {
                    {post.id === 1 && (
                      <div className="flex items-center justify-center h-full">
                        <img 
-                         src="/lovable-uploads/c9468e33-7558-4144-8a93-2f37dafeeecc.png" 
-                         alt="ROI text in purple gradient"
+                         src="/lovable-uploads/d4bad08d-c4de-4c77-ae9a-bd51c641d14b.png" 
+                         alt="What am I looking at guide image"
                          className="w-full h-auto object-cover rounded"
                        />
                      </div>
@@ -251,9 +251,18 @@ const Blog = () => {
                    {post.id === 2 && (
                      <div>
                        <img 
-                         src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
-                         alt="Network chart showing audience data connections"
+                         src="/lovable-uploads/c9468e33-7558-4144-8a93-2f37dafeeecc.png" 
+                         alt="ROI text in purple gradient"
                          className="w-full h-full object-contain"
+                       />
+                     </div>
+                   )}
+                   {post.id === 3 && (
+                     <div className="flex items-center justify-center h-full">
+                       <img 
+                         src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
+                         alt="A personal letter from founder"
+                         className="w-full h-auto object-cover rounded"
                        />
                      </div>
                    )}
