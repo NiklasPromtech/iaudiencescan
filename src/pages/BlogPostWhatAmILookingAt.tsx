@@ -12,13 +12,13 @@ const BlogPostWhatAmILookingAt = () => {
       
       <main className="pt-24">
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <section className="py-16 bg-gradient-to-br from-primary/5 via-background to-slate-50 dark:to-slate-900">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <Badge variant="secondary" className="mb-4">
                 Guide
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-slate-600 dark:to-slate-300 bg-clip-text text-transparent">
                 What is it I am looking at?
               </h1>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
@@ -48,7 +48,7 @@ const BlogPostWhatAmILookingAt = () => {
                       className="rounded-lg shadow-lg w-full max-w-lg mx-auto"
                     />
                   </div>
-                  <blockquote className="text-lg italic text-muted-foreground border-l-4 border-l-accent pl-6 mb-6">
+                  <blockquote className="text-lg italic text-muted-foreground border-l-4 border-l-slate-300 dark:border-l-slate-600 pl-6 mb-6">
                     "Right so, I've searched for a token I've been involved with in the past, what exactly am I looking at here?"
                   </blockquote>
                   <p className="text-lg leading-relaxed">
@@ -59,8 +59,8 @@ const BlogPostWhatAmILookingAt = () => {
                       <div className="text-2xl font-bold text-primary mb-2">1</div>
                       <p className="font-semibold">What is the meaning of the numbers</p>
                     </div>
-                    <div className="text-center p-4 bg-accent/5 rounded-lg">
-                      <div className="text-2xl font-bold text-accent mb-2">2</div>
+                    <div className="text-center p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                      <div className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2">2</div>
                       <p className="font-semibold">Why they are relevant</p>
                     </div>
                     <div className="text-center p-4 bg-secondary/5 rounded-lg">
@@ -89,22 +89,22 @@ const BlogPostWhatAmILookingAt = () => {
                 
                 <Card className="mb-8">
                   <CardContent className="p-8">
-                    <h3 className="text-xl font-semibold mb-4 text-accent">a) Main Categories</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">a) Main Categories</h3>
                     <p className="mb-4">
                       When you look at a preview of a scan or in the scan view, you will see 4 main categories:
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <div className="font-bold text-blue-700 dark:text-blue-300">Twitter</div>
+                        <div className="font-bold text-blue-800 dark:text-blue-200">Twitter</div>
                       </div>
                       <div className="text-center p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
-                        <div className="font-bold text-cyan-700 dark:text-cyan-300">Telegram</div>
+                        <div className="font-bold text-cyan-800 dark:text-cyan-200">Telegram</div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                        <div className="font-bold text-orange-700 dark:text-orange-300">Reddit</div>
+                        <div className="font-bold text-orange-800 dark:text-orange-200">Reddit</div>
                       </div>
                       <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                        <div className="font-bold text-purple-700 dark:text-purple-300">Tags</div>
+                        <div className="font-bold text-purple-800 dark:text-purple-200">Tags</div>
                       </div>
                     </div>
                     <p className="mt-4">
@@ -127,15 +127,15 @@ const BlogPostWhatAmILookingAt = () => {
                         <h5 className="font-semibold mb-3">Simple Examples:</h5>
                         <div className="space-y-3">
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">100%</Badge>
+                            <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700">100%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>all 10</strong> also transacted USDT</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">30%</Badge>
+                            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700">30%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>3</strong> also transacted PANCAKE</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">10%</Badge>
+                            <Badge variant="outline" className="bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-200 border-red-300 dark:border-red-700">10%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>1</strong> also transacted DOGE</span>
                           </div>
                         </div>
@@ -174,7 +174,7 @@ const BlogPostWhatAmILookingAt = () => {
                       Over the years in this space, we have tried 100's of different ways to use on-chain/analytics data/keywords/audience data for our clients. The one way we found that generated the best results was discovered through extensive testing.
                     </p>
 
-                    <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6 rounded-lg mb-6">
+                    <div className="bg-gradient-to-r from-primary/5 to-slate-100 dark:to-slate-800 p-6 rounded-lg mb-6">
                       <div className="text-center">
                         <div className="text-4xl font-bold text-primary mb-2">50%</div>
                         <p className="text-lg font-semibold">Below previous best results</p>
@@ -212,7 +212,7 @@ const BlogPostWhatAmILookingAt = () => {
                         <h4 className="font-semibold mb-2">Paid Ad Campaigns</h4>
                         <p className="text-sm text-muted-foreground">Target these audiences in your advertising campaigns</p>
                       </div>
-                      <div className="text-center p-6 bg-accent/5 rounded-lg">
+                      <div className="text-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
                         <div className="text-3xl mb-4">💬</div>
                         <h4 className="font-semibold mb-2">DM Campaigns</h4>
                         <p className="text-sm text-muted-foreground">Direct outreach on X or Telegram</p>
@@ -224,7 +224,7 @@ const BlogPostWhatAmILookingAt = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg">
+                    <div className="bg-gradient-to-r from-primary/10 to-slate-100 dark:to-slate-800 p-6 rounded-lg">
                       <h4 className="font-semibold mb-3">Your Messaging Advantage:</h4>
                       <blockquote className="text-lg italic">
                         "We know (for a fact) that people who own tokens in this community are also buying our token. Here is why [explanation]"
@@ -250,7 +250,7 @@ const BlogPostWhatAmILookingAt = () => {
 
               {/* CTA Section */}
               <section className="text-center">
-                <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+                <Card className="bg-gradient-to-r from-primary/5 to-slate-100 dark:to-slate-800 border-primary/20">
                   <CardContent className="p-12">
                     <h3 className="text-2xl font-bold mb-4">Ready to see what your token's audience looks like?</h3>
                     <p className="text-lg text-muted-foreground mb-8">
