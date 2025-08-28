@@ -14,6 +14,15 @@ const Blog = () => {
   const blogPosts = [
     {
       id: 1,
+      title: "What is it I am looking at?",
+      excerpt: "A complete breakdown of your AudienceScan results and how to interpret the data that drives 50%+ cost reductions.",
+      date: "Aug 28, 2025",
+      readTime: "8 min read",
+      category: "Guide",
+      featured: false,
+    },
+    {
+      id: 2,
       title: "The AudienceScan ROI: Why 50%+ Cost Reduction is Standard",
       excerpt: "Discover the numbers behind AudienceScan's consistent performance and calculate your potential savings with our interactive ROI calculator.",
       date: "Jul 30, 2025",
@@ -22,7 +31,7 @@ const Blog = () => {
       featured: false,
     },
     {
-      id: 2,
+      id: 3,
       title: "A Personal Letter to New Users of AudienceScan",
       excerpt: "Hi, I'm Niklas, the founder of AudienceScan. I want to share how and why we ended up launching AudienceScan, from my early digital marketing days to building a tool that consistently delivers 50%+ cost reductions.",
       date: "Jan 29, 2025",
@@ -31,7 +40,7 @@ const Blog = () => {
       featured: false,
     },
     {
-      id: 3,
+      id: 4,
       title: "AudienceScan Video Tutorials",
       excerpt: "Master AudienceScan and learn how to create high-performing ad campaigns across all major platforms. Includes step-by-step tutorials for Twitter, DV360, Reddit, and Telegram advertising.",
       date: "Mar 29, 2025",
@@ -40,7 +49,7 @@ const Blog = () => {
       featured: true,
     },
     {
-      id: 4,
+      id: 5,
       title: "Turning Blockchain Data Into Addressable Audiences with AudienceScan",
       excerpt: "Running ads for crypto projects has always felt like throwing darts in a blackout. AudienceScan changes this by flipping the targeting process on its head, turning blockchain data into truly addressable audiences.",
       date: "Jun 28, 2025",
@@ -207,20 +216,22 @@ const Blog = () => {
                 className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => {
                   if (post.id === 1) {
-                    navigate('/blog/roi');
+                    navigate('/blog/what-am-i-looking-at');
                   } else if (post.id === 2) {
-                    navigate('/blog/personal-letter');
+                    navigate('/blog/roi');
                   } else if (post.id === 3) {
-                    navigate('/blog/tutorials');
+                    navigate('/blog/personal-letter');
                   } else if (post.id === 4) {
-                    navigate('/blog/addressable-audiences');
+                    navigate('/blog/tutorials');
                   } else if (post.id === 5) {
-                    navigate('/blog/guaranteed-results');
+                    navigate('/blog/addressable-audiences');
                   } else if (post.id === 6) {
-                    navigate('/blog/audiencescan-ads');
+                    navigate('/blog/guaranteed-results');
                   } else if (post.id === 7) {
-                    navigate('/blog/tracking');
+                    navigate('/blog/audiencescan-ads');
                   } else if (post.id === 8) {
+                    navigate('/blog/tracking');
+                  } else if (post.id === 9) {
                     navigate('/blog/agency-differentiation');
                   } else {
                     navigate(`/blog/${post.id}`);
