@@ -94,17 +94,17 @@ const BlogPostWhatAmILookingAt = () => {
                       When you look at a preview of a scan or in the scan view, you will see 4 main categories:
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-blue-500/10 rounded-lg">
-                        <div className="font-bold text-blue-500">Twitter</div>
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <div className="font-bold text-blue-700 dark:text-blue-300">Twitter</div>
                       </div>
-                      <div className="text-center p-4 bg-sky-500/10 rounded-lg">
-                        <div className="font-bold text-sky-500">Telegram</div>
+                      <div className="text-center p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
+                        <div className="font-bold text-cyan-700 dark:text-cyan-300">Telegram</div>
                       </div>
-                      <div className="text-center p-4 bg-orange-500/10 rounded-lg">
-                        <div className="font-bold text-orange-500">Reddit</div>
+                      <div className="text-center p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                        <div className="font-bold text-orange-700 dark:text-orange-300">Reddit</div>
                       </div>
-                      <div className="text-center p-4 bg-purple-500/10 rounded-lg">
-                        <div className="font-bold text-purple-500">Tags</div>
+                      <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                        <div className="font-bold text-purple-700 dark:text-purple-300">Tags</div>
                       </div>
                     </div>
                     <p className="mt-4">
@@ -115,10 +115,10 @@ const BlogPostWhatAmILookingAt = () => {
 
                 <Card>
                   <CardContent className="p-8">
-                    <h3 className="text-xl font-semibold mb-4 text-accent">b) Understanding the Data</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-foreground">b) Understanding the Data</h3>
                     
                     <div className="mb-8">
-                      <h4 className="text-lg font-semibold mb-4 text-primary">The % Value</h4>
+                      <h4 className="text-lg font-semibold mb-4 text-foreground">The % Value</h4>
                       <p className="mb-4">
                         This is the % <strong>OVERLAP</strong> between tokens that were transacted by traders of the source token (in this case Holoclear). 
                       </p>
@@ -127,15 +127,15 @@ const BlogPostWhatAmILookingAt = () => {
                         <h5 className="font-semibold mb-3">Simple Examples:</h5>
                         <div className="space-y-3">
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">100%</Badge>
+                            <Badge variant="outline" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">100%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>all 10</strong> also transacted USDT</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">30%</Badge>
+                            <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">30%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>3</strong> also transacted PANCAKE</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">10%</Badge>
+                            <Badge variant="outline" className="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">10%</Badge>
                             <span>If we found 10 wallets that transacted Holoclear and <strong>1</strong> also transacted DOGE</span>
                           </div>
                         </div>
@@ -143,11 +143,11 @@ const BlogPostWhatAmILookingAt = () => {
                     </div>
 
                     <div>
-                      <h4 className="text-lg font-semibold mb-4 text-primary">Tokens and Communities</h4>
+                      <h4 className="text-lg font-semibold mb-4 text-foreground">Tokens and Communities</h4>
                       <p className="mb-4">
                         The tokens we see in this list are simply the communities we were able to match with the tokens that have an overlap.
                       </p>
-                      <div className="bg-blue-500/5 border border-blue-500/20 p-6 rounded-lg">
+                      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-6 rounded-lg">
                         <p className="mb-2">
                           <strong>Example:</strong> You might see DOGE under Reddit but NOT under Telegram.
                         </p>
@@ -186,8 +186,8 @@ const BlogPostWhatAmILookingAt = () => {
                       We had a full-time staff (for a while) that only worked on finding communities based on interest/category/"common sense". But when we tested this specific approach, we consistently got cost per actions that were 50% below what our best guesses ever had gotten us.
                     </p>
 
-                    <div className="bg-accent/5 border border-accent/20 p-6 rounded-lg">
-                      <h4 className="font-semibold mb-3 text-accent">Our Best Theory:</h4>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 p-6 rounded-lg">
+                      <h4 className="font-semibold mb-3 text-foreground">Our Best Theory:</h4>
                       <p>
                         The communities we find using on-chain data represent <strong>actionable behavior patterns</strong> rather than "tire kickers" we found targeting people with the same interests. What people <strong>do</strong> on the chain means more than what they are interested in.
                       </p>
