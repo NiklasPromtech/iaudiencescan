@@ -207,46 +207,42 @@ const Blog = () => {
             </Card>
           ))}
 
-          {/* Blog Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Blog List */}
+          <div className="space-y-6">
             {filteredPosts.filter(post => !post.featured).map((post) => (
               <Card 
                 key={post.id} 
-                className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-primary/20 hover:border-l-primary overflow-hidden"
+                className="group hover:shadow-md transition-all duration-300 cursor-pointer border-l-4 border-l-transparent hover:border-l-primary"
                 onClick={() => navigate(post.link)}
               >
-                <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 h-32 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent"></div>
-                  <div className="relative z-10 text-center px-4">
-                    <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-primary/20 flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-primary/40"></div>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Badge variant="outline" className="text-xs">{post.category}</Badge>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {post.date}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {post.readTime}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <CardTitle className="text-xl mb-3 group-hover:text-primary transition-colors">
+                        {post.title}
+                      </CardTitle>
+                      
+                      <p className="text-muted-foreground leading-relaxed">
+                        {post.excerpt}
+                      </p>
                     </div>
-                    <Badge variant="outline" className="text-xs font-medium">{post.category}</Badge>
-                  </div>
-                  <div className="absolute top-2 right-2 opacity-20">
-                    <ArrowRight className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="text-xs">{post.category}</Badge>
-                  </div>
-                  <CardTitle className="group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {post.date}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {post.readTime}
+                    
+                    <div className="ml-6 flex items-center justify-center">
+                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
                     </div>
                   </div>
                 </CardContent>
