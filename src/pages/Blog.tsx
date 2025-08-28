@@ -20,6 +20,7 @@ const Blog = () => {
       readTime: "8 min read",
       category: "Guide",
       featured: false,
+      link: "/blog/what-am-i-looking-at",
     },
     {
       id: 2,
@@ -29,6 +30,7 @@ const Blog = () => {
       readTime: "5 min read",
       category: "ROI Analysis",
       featured: false,
+      link: "/blog/roi",
     },
     {
       id: 3,
@@ -38,6 +40,7 @@ const Blog = () => {
       readTime: "8 min read",
       category: "Founder's Letter",
       featured: false,
+      link: "/blog/personal-letter",
     },
     {
       id: 4,
@@ -47,6 +50,7 @@ const Blog = () => {
       readTime: "12 min read",
       category: "Tutorials",
       featured: true,
+      link: "/blog/tutorials",
     },
     {
       id: 5,
@@ -56,42 +60,47 @@ const Blog = () => {
       readTime: "7 min read",
       category: "Strategy",
       featured: false,
+      link: "/blog/addressable-audiences",
     },
     {
-      id: 5,
+      id: 6,
       title: "Guaranteed Results: We Put Our Money Where Our Mouth Is",
       excerpt: "50%+ cost reduction guaranteed or your money back. We're so confident in our results, we offer a full money-back guarantee for Pro subscribers.",
       date: "Jul 20, 2025",
       readTime: "5 min read",
       category: "Guarantee",
       featured: false,
+      link: "/blog/guaranteed-results",
     },
     {
-      id: 6,
+      id: 7,
       title: "AudienceScan Ads",
       excerpt: "Over the years, AudienceScan has grown out of real hands-on work in the Web3 space. We offer comprehensive paid marketing services across all major platforms.",
       date: "Aug 6, 2025",
       readTime: "6 min read",
       category: "Services",
       featured: false,
+      link: "/blog/audiencescan-ads",
     },
     {
-      id: 7,
+      id: 8,
       title: "Tracking, Tracking, Tracking",
       excerpt: "A short 'How To' guide for setting up tracking in Google Analytics (GA4). Learn how to set key events, create them if they don't exist, and use them in your reports.",
       date: "Aug 20, 2025",
       readTime: "6 min read",
       category: "Tutorials",
       featured: false,
+      link: "/blog/tracking",
     },
     {
-      id: 8,
+      id: 9,
       title: "Differentiate Your Agency From the Sea of Sameness",
       excerpt: "Most agencies walk into pitches with the same tired decks. Learn how to use AudienceScan data in Looker Studio to create unique, data-backed presentations that win clients.",
       date: "Aug 21, 2025",
       readTime: "8 min read",
       category: "Strategy",
       featured: false,
+      link: "/blog/agency-differentiation",
     }
   ];
 
@@ -157,17 +166,7 @@ const Blog = () => {
                     </div>
                     <Button 
                       className="group"
-                      onClick={() => {
-                        if (post.id === 1) {
-                          navigate('/blog/roi');
-                        } else if (post.id === 3) {
-                          navigate('/blog/tutorials');
-                        } else if (post.id === 5) {
-                          navigate('/blog/guaranteed-results');
-                        } else {
-                          navigate('/blog/personal-letter');
-                        }
-                      }}
+                      onClick={() => navigate(post.link)}
                     >
                       Read More
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -213,105 +212,21 @@ const Blog = () => {
             {filteredPosts.filter(post => !post.featured).map((post) => (
               <Card 
                 key={post.id} 
-                className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => {
-                  if (post.id === 1) {
-                    navigate('/blog/what-am-i-looking-at');
-                  } else if (post.id === 2) {
-                    navigate('/blog/roi');
-                  } else if (post.id === 3) {
-                    navigate('/blog/personal-letter');
-                  } else if (post.id === 4) {
-                    navigate('/blog/tutorials');
-                  } else if (post.id === 5) {
-                    navigate('/blog/addressable-audiences');
-                  } else if (post.id === 6) {
-                    navigate('/blog/guaranteed-results');
-                  } else if (post.id === 7) {
-                    navigate('/blog/audiencescan-ads');
-                  } else if (post.id === 8) {
-                    navigate('/blog/tracking');
-                  } else if (post.id === 9) {
-                    navigate('/blog/agency-differentiation');
-                  } else {
-                    navigate(`/blog/${post.id}`);
-                  }
-                }}
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-primary/20 hover:border-l-primary overflow-hidden"
+                onClick={() => navigate(post.link)}
               >
-                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 h-48 rounded-t-lg overflow-hidden p-4">
-                   {post.id === 1 && (
-                     <div className="flex items-center justify-center h-full">
-                       <img 
-                         src="/lovable-uploads/d4bad08d-c4de-4c77-ae9a-bd51c641d14b.png" 
-                         alt="What am I looking at guide image"
-                         className="w-full h-auto object-cover rounded"
-                       />
-                     </div>
-                   )}
-                   {post.id === 2 && (
-                     <div>
-                       <img 
-                         src="/lovable-uploads/c9468e33-7558-4144-8a93-2f37dafeeecc.png" 
-                         alt="ROI text in purple gradient"
-                         className="w-full h-full object-contain"
-                       />
-                     </div>
-                   )}
-                   {post.id === 3 && (
-                     <div className="flex items-center justify-center h-full">
-                       <img 
-                         src="/lovable-uploads/163f606c-595d-49e0-8e7a-7276e10450ab.png" 
-                         alt="A personal letter from founder"
-                         className="w-full h-auto object-cover rounded"
-                       />
-                     </div>
-                   )}
-                   {post.id === 4 && (
-                     <div className="flex items-center justify-center h-full">
-                       <img 
-                         src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
-                         alt="Blockchain data visualization showing addressable audiences"
-                         className="w-full h-auto object-cover rounded"
-                       />
-                     </div>
-                   )}
-                    {post.id === 5 && (
-                      <div className="flex items-center justify-center h-full">
-                        <img 
-                          src="/lovable-uploads/6fc508c7-ce47-40eb-847c-8511097c3ede.png" 
-                          alt="Money Back 100% Guarantee badge"
-                          className="w-full h-auto object-cover rounded"
-                        />
-                      </div>
-                    )}
-                     {post.id === 6 && (
-                       <div className="flex items-center justify-center h-full">
-                         <img 
-                           src="/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png" 
-                           alt="AudienceScan Analytics Icon"
-                           className="w-24 h-24 object-contain"
-                         />
-                       </div>
-                     )}
-                      {post.id === 7 && (
-                        <div className="flex items-center justify-center h-full">
-                          <img 
-                            src="/lovable-uploads/b45bfeb9-7ddd-4bac-a5c0-dc4cb34d6335.png" 
-                            alt="Google Analytics tracking dashboard"
-                            className="w-full h-auto object-cover rounded"
-                          />
-                        </div>
-                      )}
-                      {post.id === 8 && (
-                        <div className="flex items-center justify-center h-full">
-                          <img 
-                            src="/lovable-uploads/f0cabb29-b0ec-45c9-ac40-e40566a59905.png" 
-                            alt="Looker Studio dashboard showing agency data analysis"
-                            className="w-full h-auto object-cover rounded"
-                          />
-                        </div>
-                      )}
-                 </div>
+                <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 h-32 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent"></div>
+                  <div className="relative z-10 text-center px-4">
+                    <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-primary/20 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-primary/40"></div>
+                    </div>
+                    <Badge variant="outline" className="text-xs font-medium">{post.category}</Badge>
+                  </div>
+                  <div className="absolute top-2 right-2 opacity-20">
+                    <ArrowRight className="w-6 h-6 text-primary" />
+                  </div>
+                </div>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="outline" className="text-xs">{post.category}</Badge>
