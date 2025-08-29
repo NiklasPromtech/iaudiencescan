@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone, ShieldCheck, Rocket } from "lucide-react";
+import { RefreshCw, MessageCircle, Users, Copy, Plus, Phone, ShieldCheck, Rocket, CheckCircle, Edit3 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -59,6 +59,21 @@ const ProposedFeatures = () => {
     }
   ];
 
+  const completed = [
+    {
+      title: "Editable Study Names",
+      icon: Edit3,
+      description: "You can now rename any AudienceScan study after it's been created. This makes it easier to keep your workspace organized — for example, you can update generic study names into something more descriptive like 'ETH whales – July Campaign' or 'Polygon DeFi segment' without having to re-run a scan.",
+      status: "completed"
+    },
+    {
+      title: "Holder-Based Analysis",
+      icon: Users,
+      description: "AudienceScan now supports analyzing wallets that hold a token in addition to those that transact with it. This unlocks a deeper layer of audience insights by capturing long-term investors, not just active traders. You can compare behaviors between holders and transactors, spot overlaps, and identify communities that are loyal vs. those that are speculative.",
+      status: "completed"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -83,6 +98,33 @@ const ProposedFeatures = () => {
                       <feature.icon className="h-6 w-6 text-primary" />
                       {feature.title}
                       <Badge variant="secondary" className="ml-auto">Proposed</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Completed Features */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold text-foreground mb-6">Completed</h2>
+            <p className="text-muted-foreground mb-6">Features and improvements already live in AudienceScan</p>
+            <div className="grid gap-6">
+              {completed.map((feature, index) => (
+                <Card key={index} className="border-green-500/20 bg-green-50/50 dark:bg-green-950/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      <feature.icon className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      {feature.title}
+                      <Badge variant="outline" className="ml-auto border-green-500/50 text-green-700 dark:text-green-300">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Completed
+                      </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
