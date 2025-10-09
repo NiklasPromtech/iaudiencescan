@@ -58,23 +58,22 @@ const CreateScan = () => {
                 onClick={() => setSelectedOption(option.id)}
               >
                 <CardHeader>
-                  <div className="flex items-start gap-4">
+                  <div className="flex flex-col items-center text-center gap-4">
                     <RadioGroupItem
                       value={option.id}
                       id={option.id}
-                      className="mt-1"
                     />
-                    <div className="flex-1">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <option.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
                       <Label
                         htmlFor={option.id}
-                        className="flex items-center gap-3 cursor-pointer"
+                        className="cursor-pointer"
                       >
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <option.icon className="h-6 w-6 text-primary" />
-                        </div>
-                        <CardTitle className="text-xl">{option.title}</CardTitle>
+                        <CardTitle className="text-xl mb-2">{option.title}</CardTitle>
                       </Label>
-                      <CardDescription className="mt-2 ml-14">
+                      <CardDescription className="mt-2">
                         {option.description}
                       </CardDescription>
                     </div>
