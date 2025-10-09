@@ -46,7 +46,7 @@ const CreateScan = () => {
         </div>
 
         <RadioGroup value={selectedOption} onValueChange={setSelectedOption}>
-          <div className="grid gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {scanOptions.map((option) => (
               <Card
                 key={option.id}
