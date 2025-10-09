@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingUp, Wallet, FileText } from "lucide-react";
 import Header from "@/components/Header";
@@ -45,54 +43,40 @@ const CreateScan = () => {
           </p>
         </div>
 
-        <RadioGroup value={selectedOption} onValueChange={setSelectedOption}>
-          <div className="grid md:grid-cols-3 gap-6">
-            {scanOptions.map((option) => (
-              <Card
-                key={option.id}
-                className={`cursor-pointer transition-all hover:border-primary/50 ${
-                  selectedOption === option.id
-                    ? "border-primary ring-2 ring-primary/20"
-                    : ""
-                }`}
-                onClick={() => setSelectedOption(option.id)}
-              >
-                <CardHeader>
-                  <div className="flex flex-col items-center text-center gap-4">
-                    <RadioGroupItem
-                      value={option.id}
-                      id={option.id}
-                    />
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <option.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor={option.id}
-                        className="cursor-pointer"
-                      >
-                        <CardTitle className="text-xl mb-2">{option.title}</CardTitle>
-                      </Label>
-                      <CardDescription className="mt-2">
-                        {option.description}
-                      </CardDescription>
-                    </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {scanOptions.map((option) => (
+            <Card
+              key={option.id}
+              className={`transition-all hover:border-primary/50 ${
+                selectedOption === option.id
+                  ? "border-primary ring-2 ring-primary/20"
+                  : ""
+              }`}
+            >
+              <CardHeader>
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="p-3 rounded-lg bg-primary/10">
+                    <option.icon className="h-8 w-8 text-primary" />
                   </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </RadioGroup>
-
-        <div className="mt-12 flex justify-center">
-          <Button
-            size="lg"
-            disabled={!selectedOption}
-            className="min-w-[200px]"
-          >
-            Continue
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+                  <div>
+                    <CardTitle className="text-xl mb-2">{option.title}</CardTitle>
+                    <CardDescription className="mt-2">
+                      {option.description}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  className="w-full"
+                  onClick={() => setSelectedOption(option.id)}
+                >
+                  Select
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </main>
 
