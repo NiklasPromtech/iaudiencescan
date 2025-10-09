@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
 import DMAssistant from "./pages/DMAssistant";
 import ManagedService from "./pages/ManagedService";
+import CreateScan from "./pages/CreateScan";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/sitemap.xml" element={<Sitemap />} />
           <Route path="/dm-assistant" element={<DMAssistant />} />
           <Route path="/managed-service" element={<ManagedService />} />
+          <Route path="/create-scan" element={<CreateScan />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
