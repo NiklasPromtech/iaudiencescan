@@ -58,7 +58,7 @@ const SalesPitch = () => {
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
-                <span>Target <strong>real wallets</strong> with verified on-chain behavior</span>
+                <span>Reach <strong>relevant users</strong> based on verified on-chain behavior</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
