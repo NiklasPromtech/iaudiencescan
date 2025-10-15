@@ -1,8 +1,6 @@
 import { Shield, Target, Zap, BarChart3, CheckCircle, TrendingUp } from "lucide-react";
-
 const SalesPitch = () => {
-  return (
-    <div className="min-h-screen bg-white print:bg-white">
+  return <div className="min-h-screen bg-white print:bg-white">
       {/* Print-friendly single page sales pitch */}
       <div className="max-w-[8.5in] mx-auto p-12 print:p-8">
         
@@ -232,15 +230,11 @@ const SalesPitch = () => {
             <p className="text-sm text-gray-600 mb-4">
               Stop wasting budget on broad targeting. Reach real wallets, guaranteed results or your money back.
             </p>
-            <div className="text-purple-600 font-bold text-lg">
-              Start Your Guaranteed Test Today
-            </div>
+            
           </div>
         </div>
 
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SalesPitch;
