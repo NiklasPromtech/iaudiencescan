@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus } from "lucide-react";
+import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Header from "@/components/Header";
@@ -18,10 +18,16 @@ const CreateScan = () => {
 
   const scanOptions = [
     {
-      id: "transact",
-      title: "Wallets that transact a token",
-      description: "Analyze wallets based on their transaction activity with a specific token. Perfect for identifying active traders and understanding market dynamics.",
-      icon: TrendingUp,
+      id: "transact-count",
+      title: "Transaction count",
+      description: "Analyze wallets based on how many times they've transacted with a specific token. Perfect for finding wallets that have transacted 2-4 times, for example.",
+      icon: Hash,
+    },
+    {
+      id: "transact-volume",
+      title: "Transaction volume",
+      description: "Analyze wallets based on the total value of their transactions with a specific token. Ideal for targeting wallets that transacted between $1,000-$5,000 USDC, for example.",
+      icon: DollarSign,
     },
     {
       id: "hold",
@@ -32,7 +38,7 @@ const CreateScan = () => {
     {
       id: "custom",
       title: "A list of wallets you provide",
-      description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities, airdrop recipients, or any curated audience. Available for Solana chain.",
+      description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities, airdrop recipients, or any curated audience.",
       icon: FileText,
       badge: "Solana compatible",
     },
@@ -65,7 +71,7 @@ const CreateScan = () => {
               <CardDescription>Choose how you want to identify your target audience</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {scanOptions.map((option) => (
                   <Card
                     key={option.id}
