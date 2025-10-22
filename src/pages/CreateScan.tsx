@@ -36,7 +36,7 @@ const CreateScan = () => {
       title: "A list of wallets you provide",
       description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities, airdrop recipients, or any curated audience. Available for Solana chain.",
       icon: FileText,
-      badge: "Solana Ready",
+      badge: "Solana compatible",
     },
   ];
 
