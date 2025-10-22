@@ -22,14 +22,12 @@ const CreateScan = () => {
       title: "Wallets that transact a token",
       description: "Analyze wallets based on their transaction activity with a specific token. Perfect for identifying active traders and understanding market dynamics.",
       icon: TrendingUp,
-      comingSoon: true,
     },
     {
       id: "hold",
       title: "Wallets that hold a token",
       description: "Study wallets that currently hold a token, regardless of transaction activity. Ideal for finding long-term investors and loyal community members.",
       icon: Wallet,
-      comingSoon: true,
     },
     {
       id: "custom",
@@ -75,7 +73,7 @@ const CreateScan = () => {
                       selectedOption === option.id
                         ? "border-primary ring-2 ring-primary/20"
                         : ""
-                    } ${option.comingSoon ? "opacity-60" : ""}`}
+                    }`}
                   >
                     <CardHeader>
                       <div className="flex flex-col items-center text-center gap-4">
@@ -88,9 +86,6 @@ const CreateScan = () => {
                             {option.badge && (
                               <Badge variant="default" className="text-xs">{option.badge}</Badge>
                             )}
-                            {option.comingSoon && (
-                              <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
-                            )}
                           </div>
                           <CardDescription className="mt-2">
                             {option.description}
@@ -102,7 +97,6 @@ const CreateScan = () => {
                       <Button 
                         className="w-full"
                         onClick={() => setSelectedOption(option.id)}
-                        disabled={option.comingSoon}
                       >
                         Select
                         <ArrowRight className="ml-2 h-4 w-4" />
