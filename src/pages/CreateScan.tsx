@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash } from "lucide-react";
+import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash, Search, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Header from "@/components/Header";
@@ -15,6 +15,20 @@ const CreateScan = () => {
   const [transactionValueMax, setTransactionValueMax] = useState(0);
   const [transactionCountMin, setTransactionCountMin] = useState(2);
   const [transactionCountMax, setTransactionCountMax] = useState(3);
+  const [tokenSearch, setTokenSearch] = useState("");
+  const [showTokenResults, setShowTokenResults] = useState(false);
+
+  // Mock token search results
+  const mockTokenResults = tokenSearch ? {
+    name: "USD Coin",
+    symbol: "USDC",
+    addresses: [
+      { chain: "Ethereum", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+      { chain: "Solana", address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" },
+      { chain: "Polygon", address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174" },
+      { chain: "Arbitrum", address: "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8" },
+    ]
+  } : null;
 
   const scanOptions = [
     {
@@ -64,7 +78,68 @@ const CreateScan = () => {
         </div>
 
         <div className="space-y-8">
-          {/* Widget 1: Create New Scan */}
+          {/* Widget 1: Token Search */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Search Token</CardTitle>
+              <CardDescription>Search for a token by name or symbol to analyze</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Enter token name or symbol (e.g., USDC, Ethereum)"
+                  className="pl-10"
+                  value={tokenSearch}
+                  onChange={(e) => {
+                    setTokenSearch(e.target.value);
+                    setShowTokenResults(e.target.value.length > 0);
+                  }}
+                />
+              </div>
+
+              {showTokenResults && mockTokenResults && (
+                <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">{mockTokenResults.name}</h3>
+                      <Badge variant="secondary" className="mt-1">{mockTokenResults.symbol}</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-muted-foreground">Contract Addresses</h4>
+                    {mockTokenResults.addresses.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-background rounded-md border">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline">{item.chain}</Badge>
+                          </div>
+                          <code className="text-xs text-muted-foreground break-all">{item.address}</code>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="ml-2 shrink-0"
+                          onClick={() => navigator.clipboard.writeText(item.address)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button className="w-full">
+                    Continue with this token
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Widget 2: Create New Scan */}
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">Create New Scan</CardTitle>
@@ -114,7 +189,7 @@ const CreateScan = () => {
             </CardContent>
           </Card>
 
-          {/* Widget 2: Advanced Filter */}
+          {/* Widget 3: Advanced Filter */}
           <Card>
             <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
               <CardHeader>
