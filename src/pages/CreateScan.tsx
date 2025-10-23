@@ -17,6 +17,7 @@ const CreateScan = () => {
   const [transactionCountMax, setTransactionCountMax] = useState(3);
   const [tokenSearch, setTokenSearch] = useState("");
   const [showTokenResults, setShowTokenResults] = useState(false);
+  const [inputMode, setInputMode] = useState<"search" | "manual">("search");
 
   // Mock token search results
   const mockTokenResults = tokenSearch ? {
@@ -85,57 +86,102 @@ const CreateScan = () => {
               <CardDescription>Search for a token by name or symbol to analyze</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Enter token name or symbol (e.g., USDC, Ethereum)"
-                  className="pl-10"
-                  value={tokenSearch}
-                  onChange={(e) => {
-                    setTokenSearch(e.target.value);
-                    setShowTokenResults(e.target.value.length > 0);
-                  }}
-                />
+              <div className="flex gap-2">
+                <Button
+                  variant={inputMode === "search" ? "default" : "outline"}
+                  onClick={() => setInputMode("search")}
+                  className="flex-1"
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Search token
+                </Button>
+                <Button
+                  variant={inputMode === "manual" ? "default" : "outline"}
+                  onClick={() => setInputMode("manual")}
+                  className="flex-1"
+                >
+                  Paste contract manually
+                </Button>
               </div>
 
-              {showTokenResults && mockTokenResults && (
-                <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">{mockTokenResults.name}</h3>
-                      <Badge variant="secondary" className="mt-1">{mockTokenResults.symbol}</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-muted-foreground">Contract Addresses</h4>
-                    {mockTokenResults.addresses.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-background rounded-md border">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline">{item.chain}</Badge>
-                          </div>
-                          <code className="text-xs text-muted-foreground break-all">{item.address}</code>
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="ml-2 shrink-0"
-                          onClick={() => navigator.clipboard.writeText(item.address)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+              {inputMode === "search" ? (
+                <>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Enter token name or symbol (e.g., USDC, Ethereum)"
+                      className="pl-10"
+                      value={tokenSearch}
+                      onChange={(e) => {
+                        setTokenSearch(e.target.value);
+                        setShowTokenResults(e.target.value.length > 0);
+                      }}
+                    />
                   </div>
 
+                  {showTokenResults && mockTokenResults && (
+                    <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold">{mockTokenResults.name}</h3>
+                          <Badge variant="secondary" className="mt-1">{mockTokenResults.symbol}</Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-muted-foreground">Contract Addresses</h4>
+                        {mockTokenResults.addresses.map((item, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-background rounded-md border">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline">{item.chain}</Badge>
+                              </div>
+                              <code className="text-xs text-muted-foreground break-all">{item.address}</code>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="ml-2 shrink-0"
+                              onClick={() => navigator.clipboard.writeText(item.address)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button className="w-full">
+                        Continue with this token
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Contract Address</label>
+                    <Input
+                      type="text"
+                      placeholder="Paste contract address here"
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Chain</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g., Ethereum, Solana, Polygon"
+                    />
+                  </div>
                   <Button className="w-full">
-                    Continue with this token
+                    Continue with this contract
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               )}
+
             </CardContent>
           </Card>
 
