@@ -140,9 +140,14 @@ const CreateScan = () => {
                           href={mockTokenResults.cmcLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline"
+                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          View on CMC →
+                          <span>check on</span>
+                          <img 
+                            src="https://s2.coinmarketcap.com/static/cloud/img/coinmarketcap_1.svg"
+                            alt="CoinMarketCap"
+                            className="h-4"
+                          />
                         </a>
                       </div>
                       
