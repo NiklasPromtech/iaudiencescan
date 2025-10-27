@@ -23,6 +23,8 @@ const CreateScan = () => {
   const mockTokenResults = tokenSearch ? {
     name: "USD Coin",
     symbol: "USDC",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png",
+    cmcLink: "https://coinmarketcap.com/currencies/usd-coin/",
     addresses: [
       { chain: "Ethereum", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
       { chain: "Solana", address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" },
@@ -123,10 +125,25 @@ const CreateScan = () => {
                   {showTokenResults && mockTokenResults && (
                     <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold">{mockTokenResults.name}</h3>
-                          <Badge variant="secondary" className="mt-1">{mockTokenResults.symbol}</Badge>
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={mockTokenResults.logo} 
+                            alt={`${mockTokenResults.name} logo`}
+                            className="w-12 h-12 rounded-full"
+                          />
+                          <div>
+                            <h3 className="text-lg font-semibold">{mockTokenResults.name}</h3>
+                            <Badge variant="secondary" className="mt-1">{mockTokenResults.symbol}</Badge>
+                          </div>
                         </div>
+                        <a 
+                          href={mockTokenResults.cmcLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          View on CMC →
+                        </a>
                       </div>
                       
                       <div className="space-y-3">
