@@ -8,9 +8,9 @@ const BlogPostTutorials = () => {
   const tutorials = [
     {
       title: "How to Create a Scan",
-      description: "Learn how to create an AudienceScan using a meme coin on Base as an example. Make sure that the token (and not a Contract or Address/Wallet) has transactions on the blockchain first.",
-      videoId: "1097756598/3c1ae299fc",
-      note: "Check the top right corner before the 0x... to ensure you're scanning a token with blockchain transactions"
+      description: "A short video showing how to create a scan of wallets that transacts a token.",
+      videoId: "1132464448",
+      note: "This is a good approach if you're looking at a token that offers a staking contract or liquidity pools that might reduce the number of holders of the token."
     },
     {
       title: "How to Setup X/Twitter Ads Campaign",
@@ -86,7 +86,7 @@ const BlogPostTutorials = () => {
               <CardContent>
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://player.vimeo.com/video/${tutorial.videoId.split('/')[0]}?h=${tutorial.videoId.split('/')[1]}&badge=0&autopause=0&player_id=0&app_id=58479`}
+                    src={`https://player.vimeo.com/video/${tutorial.videoId.includes('/') ? tutorial.videoId.split('/')[0] : tutorial.videoId}${tutorial.videoId.includes('/') ? `?h=${tutorial.videoId.split('/')[1]}` : ''}&badge=0&autopause=0&player_id=0&app_id=58479`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
