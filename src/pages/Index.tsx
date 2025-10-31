@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign } from "lucide-react";
+import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign, Coins, Users, List } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import overlapResults from "@/assets/overlap-results.png";
@@ -26,6 +26,24 @@ const Index = () => {
     { value: wallets.toLocaleString(), label: "Wallets analysed" },
     { value: transactions.toLocaleString(), label: "Transactions analysed" },
     { value: tokens.toLocaleString(), label: "Tokens found" }
+  ];
+
+  const scanTypes = [
+    { 
+      icon: Coins, 
+      title: "Token Transactors", 
+      description: "Select a token and scan wallets that actively transfer it" 
+    },
+    { 
+      icon: Wallet, 
+      title: "Token Holders", 
+      description: "Select a token and scan wallets that currently hold it" 
+    },
+    { 
+      icon: List, 
+      title: "List of Wallets", 
+      description: "Upload your own wallet list and we'll scan those specific wallets" 
+    }
   ];
 
   const benefits = [
@@ -129,6 +147,39 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Scan Types */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto space-y-12">
+            <div className="text-center space-y-4">
+              <Badge variant="default" className="px-4 py-2">
+                3 Types of Scans
+              </Badge>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                Choose how you want to <span className="text-primary">analyze your audience</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Whether you're analyzing token activity, holders, or custom wallet lists, we've got you covered.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {scanTypes.map((type, idx) => (
+                <Card key={idx} className="text-center">
+                  <CardHeader>
+                    <div className="mx-auto p-4 rounded-lg bg-primary/10 w-fit mb-4">
+                      <type.icon className="h-10 w-10 text-primary" />
+                    </div>
+                    <CardTitle className="text-2xl mb-3">{type.title}</CardTitle>
+                    <CardDescription className="text-base">{type.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
