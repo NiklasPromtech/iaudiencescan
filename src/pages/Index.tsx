@@ -1,34 +1,331 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign } from "lucide-react";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import HowItWorks from "@/components/HowItWorks";
-import Partnerships from "@/components/Partnerships";
-import ProvenResults from "@/components/ProvenResults";
-import MoneyBackGuarantee from "@/components/MoneyBackGuarantee";
-import FAQ from "@/components/FAQ";
-import Resources from "@/components/Resources";
-import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
 const Index = () => {
+  const overlapData = [
+    { platform: "Twitter", items: [
+      { name: "@circle", logo: "💵", score: "100%" },
+      { name: "@Tether_to", logo: "💎", score: "69%" },
+      { name: "@zkmlsystems", logo: "⚡", score: "49%" }
+    ]},
+    { platform: "Telegram", items: [
+      { name: "t/OfficialTether", logo: "💎", score: "69%" },
+      { name: "t/zkmlsystems", logo: "⚡", score: "49%" },
+      { name: "t/reploy.ai", logo: "🟢", score: "41%" }
+    ]},
+    { platform: "Web3", items: [
+      { name: "USD Coin", logo: "💵", score: "100%" },
+      { name: "Wrapped Ether", logo: "🔷", score: "81%" },
+      { name: "Dai Stablecoin", logo: "🟡", score: "33%" }
+    ]}
+  ];
+
+  const stats = [
+    { value: "145", label: "Wallets analysed" },
+    { value: "944", label: "Transactions analysed" },
+    { value: "211", label: "Tokens found" },
+    { value: "97.9", label: "Avg affinity score", suffix: "%" }
+  ];
+
+  const benefits = [
+    { icon: Target, title: "Stop Guessing", description: "Target wallets that actually transact with tokens like yours" },
+    { icon: TrendingUp, title: "Proven Communities", description: "Find overlap between your holders and other successful projects" },
+    { icon: Zap, title: "2-3 Minutes", description: "Get actionable audience data faster than testing a single ad" },
+    { icon: DollarSign, title: "Avoid Waste", description: "$199 vs $5,000+ in wasted ad spend on bad audiences" }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Hero />
-      <section id="features">
-        <Features />
+      
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge variant="secondary" className="px-4 py-2 text-sm">
+              Stop wasting ad spend on generic audiences
+            </Badge>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+              Instead of guessing,<br />
+              <span className="text-primary">target proven communities</span><br />
+              your holders already engage with
+            </h1>
+            
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              $199 is less than testing 2 bad X Ads audiences. This tool pays for itself the first time you avoid wasted ad spend.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className="text-lg px-8 py-6">
+                Start Your Scan Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                See Live Demo
+              </Button>
+            </div>
+
+            <div className="pt-4 text-sm text-muted-foreground">
+              ✓ 2-3 minute scans &nbsp;•&nbsp; ✓ Fresh data exports &nbsp;•&nbsp; ✓ No complex setup
+            </div>
+          </div>
+        </div>
       </section>
-      <HowItWorks />
-      <section id="partnerships">
-        <Partnerships />
+
+      {/* Stats Section */}
+      <section className="py-12 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-primary">
+                  {stat.value}{stat.suffix || ''}
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
-      <ProvenResults />
-      <MoneyBackGuarantee />
-      <section id="faq">
-        <FAQ />
+
+      {/* The Aha Moment - Live Overlap Data */}
+      <section className="py-20 lg:py-32">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto space-y-12">
+            <div className="text-center space-y-4">
+              <Badge variant="default" className="px-4 py-2">
+                The "Aha" Moment
+              </Badge>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                See who your holders <span className="text-primary">actually follow</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Highlight surprising tokens and communities your holders engage with. Compare overlap vs generic targeting.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {overlapData.map((platform, idx) => (
+                <Card key={idx} className="border-2 hover:border-primary/50 transition-all">
+                  <CardHeader>
+                    <CardTitle className="text-primary text-lg">{platform.platform}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {platform.items.map((item, itemIdx) => (
+                      <div key={itemIdx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">{item.logo}</div>
+                          <div className="text-sm font-medium truncate">{item.name}</div>
+                        </div>
+                        <Badge variant="secondary" className="font-bold">{item.score}</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="text-center pt-8">
+              <p className="text-lg text-muted-foreground mb-6">
+                <span className="font-semibold text-foreground">Frame it simply:</span> Instead of guessing, you can go straight to proven communities the wallets are engaged with
+              </p>
+              <Button size="lg" className="text-lg px-8">
+                Run Your First Scan
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
       </section>
-      <Resources />
-      <FinalCTA />
+
+      {/* Benefits Grid */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {benefits.map((benefit, idx) => (
+                <Card key={idx} className="text-center">
+                  <CardHeader>
+                    <div className="mx-auto p-3 rounded-lg bg-primary/10 w-fit mb-4">
+                      <benefit.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                    <CardDescription className="text-base">{benefit.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing - Good/Better/Best */}
+      <section className="py-20 lg:py-32">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto space-y-12">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold">
+                Choose what works for you
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Start with a proof of concept, scale to fresh audiences, or let us handle everything
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Good */}
+              <Card>
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit mb-2">Good</Badge>
+                  <CardTitle className="text-2xl">One-Time Scan</CardTitle>
+                  <CardDescription>Proof of concept</CardDescription>
+                  <div className="pt-4">
+                    <div className="text-3xl font-bold">$49</div>
+                    <div className="text-sm text-muted-foreground">one time</div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Single token scan</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Overlap analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Basic export</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Get Started
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Better */}
+              <Card className="border-2 border-primary relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <Badge className="px-4 py-1">Most Popular</Badge>
+                </div>
+                <CardHeader>
+                  <Badge variant="default" className="w-fit mb-2">Better</Badge>
+                  <CardTitle className="text-2xl">Subscription</CardTitle>
+                  <CardDescription>Fresh audiences & exports</CardDescription>
+                  <div className="pt-4">
+                    <div className="text-4xl font-bold text-primary">$199</div>
+                    <div className="text-sm text-muted-foreground">per month</div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Unlimited scans</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Fresh data exports</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Advanced filters</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Priority support</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full">
+                    Start Subscription
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Best */}
+              <Card>
+                <CardHeader>
+                  <Badge variant="outline" className="w-fit mb-2">Best</Badge>
+                  <CardTitle className="text-2xl">Done-For-You</CardTitle>
+                  <CardDescription>Full campaign management</CardDescription>
+                  <div className="pt-4">
+                    <div className="text-3xl font-bold">$2k-5k</div>
+                    <div className="text-sm text-muted-foreground">per month</div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Custom targeting strategy</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Campaign setup & management</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Monthly reporting</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+                      <span className="text-sm">Dedicated account manager</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Contact Sales
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="text-center pt-8">
+              <p className="text-lg font-semibold text-foreground mb-2">
+                This tool pays for itself the first time you avoid wasted ad spend
+              </p>
+              <p className="text-muted-foreground">
+                $199 is less than the cost of testing 2 bad X Ads audiences
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Do you want to keep guessing or start targeting proven communities?
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Get your first scan in 2-3 minutes. See your wallet overlap data. Make $199 feel like a rounding error.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-8 py-6">
+                Start Your Free Scan
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                Talk to Sales
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Free trial • No credit card required • 2-minute setup
+            </p>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
