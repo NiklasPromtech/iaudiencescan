@@ -86,7 +86,7 @@ const BlogPostTutorials = () => {
               <CardContent>
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://player.vimeo.com/video/${tutorial.videoId.includes('/') ? tutorial.videoId.split('/')[0] : tutorial.videoId}${tutorial.videoId.includes('/') ? `?h=${tutorial.videoId.split('/')[1]}` : ''}&badge=0&autopause=0&player_id=0&app_id=58479`}
+                    src={`https://player.vimeo.com/video/${tutorial.videoId.includes('/') ? tutorial.videoId.split('/')[0] : tutorial.videoId}?${tutorial.videoId.includes('/') ? `h=${tutorial.videoId.split('/')[1]}&` : ''}badge=0&autopause=0&player_id=0&app_id=58479`}
                     width="100%"
                     height="100%"
                     frameBorder="0"
