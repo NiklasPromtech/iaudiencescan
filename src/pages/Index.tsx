@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import overlapResults from "@/assets/overlap-results.png";
 
 const Index = () => {
   const overlapData = [
@@ -110,25 +111,12 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {overlapData.map((platform, idx) => (
-                <Card key={idx} className="border-2 hover:border-primary/50 transition-all">
-                  <CardHeader>
-                    <CardTitle className="text-primary text-lg">{platform.platform}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {platform.items.map((item, itemIdx) => (
-                      <div key={itemIdx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl">{item.logo}</div>
-                          <div className="text-sm font-medium truncate">{item.name}</div>
-                        </div>
-                        <Badge variant="secondary" className="font-bold">{item.score}</Badge>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="rounded-xl overflow-hidden border-2 border-border shadow-2xl">
+              <img 
+                src={overlapResults} 
+                alt="AudienceScan overlap results showing Twitter, Telegram, Reddit and Tags data with affinity scores"
+                className="w-full h-auto"
+              />
             </div>
 
             <div className="text-center pt-8">
