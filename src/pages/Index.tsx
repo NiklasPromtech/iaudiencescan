@@ -63,12 +63,16 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="text-lg px-8 py-6">
-                Start Your Scan Now
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="text-lg px-8 py-6" asChild>
+                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                  Start Your Scan Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                See Live Demo
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
+                <a href="https://calendly.com/niklas-audiencescan/audiencescan-intro" target="_blank" rel="noopener noreferrer">
+                  See Live Demo
+                </a>
               </Button>
             </div>
 
@@ -123,9 +127,11 @@ const Index = () => {
               <p className="text-lg text-muted-foreground mb-6">
                 <span className="font-semibold text-foreground">Frame it simply:</span> Instead of guessing, you can go straight to proven communities the wallets are engaged with
               </p>
-              <Button size="lg" className="text-lg px-8">
-                Run Your First Scan
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="text-lg px-8" asChild>
+                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                  Run Your First Scan
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
@@ -153,74 +159,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Simple $199 Value Prop */}
-      <section className="py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="text-center space-y-6">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                Fresh audiences & exports for as little as <span className="text-primary">$199/month</span>
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                This tool pays for itself the first time you avoid wasted ad spend. $199 is less than the cost of testing 2 bad X Ads audiences.
-              </p>
-            </div>
-
-            <Card className="border-2 border-primary max-w-xl mx-auto">
-              <CardHeader className="text-center pb-8">
-                <div className="space-y-2">
-                  <div className="text-5xl font-bold text-primary">$199</div>
-                  <div className="text-muted-foreground">per month</div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
-                    <span className="text-base">Unlimited token scans</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
-                    <span className="text-base">Fresh audience data exports</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
-                    <span className="text-base">Advanced transaction filters</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
-                    <span className="text-base">Twitter, Telegram, Reddit & Web3 overlap</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
-                    <span className="text-base">Priority support</span>
-                  </li>
-                </ul>
-                
-                <div className="pt-4">
-                  <Button size="lg" className="w-full text-lg py-6">
-                    Start Your Subscription
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-
-                <p className="text-center text-sm text-muted-foreground pt-2">
-                  Free trial available • Cancel anytime
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="text-center pt-4">
-              <p className="text-muted-foreground mb-4">
-                Need custom targeting or full campaign management?
-              </p>
-              <Button variant="outline" size="lg">
-                Talk to Sales About Agency Services
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-br from-primary/10 via-background to-primary/5">
@@ -233,12 +171,16 @@ const Index = () => {
               Get your first scan in 2-3 minutes. See your wallet overlap data. Make $199 feel like a rounding error.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8 py-6">
-                Start Your Free Scan
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="text-lg px-8 py-6" asChild>
+                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                  Start Your Free Scan
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                Talk to Sales
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
+                <a href="https://calendly.com/niklas-audiencescan/audiencescan-intro" target="_blank" rel="noopener noreferrer">
+                  Talk to Sales
+                </a>
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
