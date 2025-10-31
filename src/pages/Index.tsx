@@ -32,17 +32,20 @@ const Index = () => {
     { 
       icon: Coins, 
       title: "Token Transactors", 
-      description: "Select a token and scan wallets that actively transfer it" 
+      description: "Select a token and scan wallets that actively transfer it",
+      image: "/lovable-uploads/token-transactors.png"
     },
     { 
       icon: Wallet, 
       title: "Token Holders", 
-      description: "Select a token and scan wallets that currently hold it" 
+      description: "Select a token and scan wallets that currently hold it",
+      image: "/lovable-uploads/token-holders.png"
     },
     { 
       icon: List, 
       title: "List of Wallets", 
-      description: "Upload your own wallet list and we'll scan those specific wallets" 
+      description: "Upload your own wallet list and we'll scan those specific wallets",
+      image: "/lovable-uploads/list-of-wallets.png"
     }
   ];
 
@@ -170,7 +173,14 @@ const Index = () => {
 
             <div className="grid md:grid-cols-3 gap-8">
               {scanTypes.map((type, idx) => (
-                <Card key={idx} className="text-center">
+                <Card key={idx} className="text-center overflow-hidden">
+                  <div className="aspect-video w-full overflow-hidden bg-muted">
+                    <img 
+                      src={type.image} 
+                      alt={`${type.title} interface screenshot`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <CardHeader>
                     <div className="mx-auto p-4 rounded-lg bg-primary/10 w-fit mb-4">
                       <type.icon className="h-10 w-10 text-primary" />
