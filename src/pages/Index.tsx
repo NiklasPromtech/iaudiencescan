@@ -165,136 +165,70 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Pricing - Good/Better/Best */}
+      {/* Simple $199 Value Prop */}
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto space-y-12">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold">
-                Choose what works for you
+          <div className="max-w-4xl mx-auto space-y-12">
+            <div className="text-center space-y-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                Fresh audiences & exports for as little as <span className="text-primary">$199/month</span>
               </h2>
-              <p className="text-xl text-muted-foreground">
-                Start with a proof of concept, scale to fresh audiences, or let us handle everything
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                This tool pays for itself the first time you avoid wasted ad spend. $199 is less than the cost of testing 2 bad X Ads audiences.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Good */}
-              <Card>
-                <CardHeader>
-                  <Badge variant="outline" className="w-fit mb-2">Good</Badge>
-                  <CardTitle className="text-2xl">One-Time Scan</CardTitle>
-                  <CardDescription>Proof of concept</CardDescription>
-                  <div className="pt-4">
-                    <div className="text-3xl font-bold">$49</div>
-                    <div className="text-sm text-muted-foreground">one time</div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Single token scan</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Overlap analysis</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Basic export</span>
-                    </li>
-                  </ul>
-                  <Button variant="outline" className="w-full">
-                    Get Started
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Better */}
-              <Card className="border-2 border-primary relative">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="px-4 py-1">Most Popular</Badge>
+            <Card className="border-2 border-primary max-w-xl mx-auto">
+              <CardHeader className="text-center pb-8">
+                <div className="space-y-2">
+                  <div className="text-5xl font-bold text-primary">$199</div>
+                  <div className="text-muted-foreground">per month</div>
                 </div>
-                <CardHeader>
-                  <Badge variant="default" className="w-fit mb-2">Better</Badge>
-                  <CardTitle className="text-2xl">Subscription</CardTitle>
-                  <CardDescription>Fresh audiences & exports</CardDescription>
-                  <div className="pt-4">
-                    <div className="text-4xl font-bold text-primary">$199</div>
-                    <div className="text-sm text-muted-foreground">per month</div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Unlimited scans</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Fresh data exports</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Advanced filters</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Priority support</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full">
-                    Start Subscription
-                    <ArrowRight className="ml-2 h-4 w-4" />
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
+                    <span className="text-base">Unlimited token scans</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
+                    <span className="text-base">Fresh audience data exports</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
+                    <span className="text-base">Advanced transaction filters</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
+                    <span className="text-base">Twitter, Telegram, Reddit & Web3 overlap</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-primary mt-0.5 shrink-0" />
+                    <span className="text-base">Priority support</span>
+                  </li>
+                </ul>
+                
+                <div className="pt-4">
+                  <Button size="lg" className="w-full text-lg py-6">
+                    Start Your Subscription
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Best */}
-              <Card>
-                <CardHeader>
-                  <Badge variant="outline" className="w-fit mb-2">Best</Badge>
-                  <CardTitle className="text-2xl">Done-For-You</CardTitle>
-                  <CardDescription>Full campaign management</CardDescription>
-                  <div className="pt-4">
-                    <div className="text-3xl font-bold">$2k-5k</div>
-                    <div className="text-sm text-muted-foreground">per month</div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Custom targeting strategy</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Campaign setup & management</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Monthly reporting</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
-                      <span className="text-sm">Dedicated account manager</span>
-                    </li>
-                  </ul>
-                  <Button variant="outline" className="w-full">
-                    Contact Sales
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+                <p className="text-center text-sm text-muted-foreground pt-2">
+                  Free trial available • Cancel anytime
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="text-center pt-8">
-              <p className="text-lg font-semibold text-foreground mb-2">
-                This tool pays for itself the first time you avoid wasted ad spend
+            <div className="text-center pt-4">
+              <p className="text-muted-foreground mb-4">
+                Need custom targeting or full campaign management?
               </p>
-              <p className="text-muted-foreground">
-                $199 is less than the cost of testing 2 bad X Ads audiences
-              </p>
+              <Button variant="outline" size="lg">
+                Talk to Sales About Agency Services
+              </Button>
             </div>
           </div>
         </div>
