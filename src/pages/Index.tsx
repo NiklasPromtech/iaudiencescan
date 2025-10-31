@@ -5,31 +5,27 @@ import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign }
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import overlapResults from "@/assets/overlap-results.png";
+import { useEffect, useState } from "react";
 
 const Index = () => {
-  const overlapData = [
-    { platform: "Twitter", items: [
-      { name: "@circle", logo: "💵", score: "100%" },
-      { name: "@Tether_to", logo: "💎", score: "69%" },
-      { name: "@zkmlsystems", logo: "⚡", score: "49%" }
-    ]},
-    { platform: "Telegram", items: [
-      { name: "t/OfficialTether", logo: "💎", score: "69%" },
-      { name: "t/zkmlsystems", logo: "⚡", score: "49%" },
-      { name: "t/reploy.ai", logo: "🟢", score: "41%" }
-    ]},
-    { platform: "Web3", items: [
-      { name: "USD Coin", logo: "💵", score: "100%" },
-      { name: "Wrapped Ether", logo: "🔷", score: "81%" },
-      { name: "Dai Stablecoin", logo: "🟡", score: "33%" }
-    ]}
-  ];
+  const [wallets, setWallets] = useState(36250);
+  const [transactions, setTransactions] = useState(236000);
+  const [tokens, setTokens] = useState(52750);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWallets(prev => prev + Math.floor(Math.random() * 3) + 1);
+      setTransactions(prev => prev + Math.floor(Math.random() * 8) + 1);
+      setTokens(prev => prev + Math.floor(Math.random() * 2) + 1);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const stats = [
-    { value: "145", label: "Wallets analysed" },
-    { value: "944", label: "Transactions analysed" },
-    { value: "211", label: "Tokens found" },
-    { value: "97.9", label: "Avg affinity score", suffix: "%" }
+    { value: wallets.toLocaleString(), label: "Wallets analysed" },
+    { value: transactions.toLocaleString(), label: "Transactions analysed" },
+    { value: tokens.toLocaleString(), label: "Tokens found" }
   ];
 
   const benefits = [
@@ -86,11 +82,11 @@ const Index = () => {
       {/* Stats Section */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-primary">
-                  {stat.value}{stat.suffix || ''}
+                  {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
