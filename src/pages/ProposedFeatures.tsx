@@ -9,13 +9,13 @@ const ProposedFeatures = () => {
     {
       title: "Auto Refresh",
       icon: RefreshCw,
-      description: "A tool designed for token owners to “claim” their token within AudienceScan. Once set, we’ll automatically re-run the scan weekly or bi-weekly and deliver an updated report highlighting key changes and new insights since the last analysis.",
+      description: "A tool designed for token owners to \"claim\" their token within AudienceScan. Once set, we'll automatically re-run the scan weekly or bi-weekly and deliver an updated report highlighting key changes and new insights since the last analysis.",
       status: "proposed"
     },
     {
       title: "Direct Messaging (Telegram)", 
       icon: MessageCircle,
-      description: "A feature that enables direct outreach to Telegram users from within the platform. You’ll input your phone number, verify your account, and AudienceScan will handle sending messages gradually (e.g., ~20 per day) to avoid spam flags and keep outreach manageable.",
+      description: "A feature that enables direct outreach to Telegram users from within the platform. You'll input your phone number, verify your account, and AudienceScan will handle sending messages gradually (e.g., ~20 per day) to avoid spam flags and keep outreach manageable.",
       status: "proposed"
     },
     {
@@ -27,25 +27,7 @@ const ProposedFeatures = () => {
     {
       title: "AI-Friendly Copy to Clipboard",
       icon: Copy,
-      description: "A one-click button to extract the most valuable data from a study into your clipboard. You can then paste this into AI tools to generate insights or next steps. We’re considering adding ready-made prompt templates for quick use.",
-      status: "proposed"
-    },
-    {
-      title: "Manual Wallet Upload",
-      icon: Plus,
-      description: "An option to import wallets manually (comma-separated list or file upload) for analysis. This makes it easy to combine your own data with AudienceScan results.",
-      status: "proposed"
-    },
-    {
-      title: "Invalid Token Pre-Approval",
-      icon: ShieldCheck,
-      description: "An automated filter that flags or blocks addresses and tokens known to have too few transactions or be incompatible with AudienceScan before a scan is run.",
-      status: "proposed"
-    },
-    {
-      title: "Launchpads",
-      icon: Rocket,
-      description: "A module that surfaces which launchpads tokens (e.g., PinkSale, DAO Maker, etc.) the scan returns. Useful for spotting patterns in go-to-market strategies, cross-token overlaps, and community behavior tied to early-stage offerings.",
+      description: "A one-click button to extract the most valuable data from a study into your clipboard. You can then paste this into AI tools to generate insights or next steps. We're considering adding ready-made prompt templates for quick use.",
       status: "proposed"
     }
   ];
@@ -54,7 +36,7 @@ const ProposedFeatures = () => {
     {
       title: "Marketing Token Cleanup",
       icon: RefreshCw,
-      description: "We’re actively improving how AudienceScan filters out irrelevant tokens (such as those with spammy names like “claim now” or containing URLs), ensuring cleaner and more accurate datasets in every scan.",
+      description: "We're actively improving how AudienceScan filters out irrelevant tokens (such as those with spammy names like \"claim now\" or containing URLs), ensuring cleaner and more accurate datasets in every scan.",
       status: "in-progress"
     }
   ];
@@ -70,6 +52,24 @@ const ProposedFeatures = () => {
       title: "Holder-Based Analysis",
       icon: Users,
       description: "AudienceScan now supports analyzing wallets that hold a token in addition to those that transact with it. This unlocks a deeper layer of audience insights by capturing long-term investors, not just active traders. You can compare behaviors between holders and transactors, spot overlaps, and identify communities that are loyal vs. those that are speculative.",
+      status: "completed"
+    },
+    {
+      title: "Manual Wallet Upload",
+      icon: Plus,
+      description: "An option to import wallets manually (comma-separated list or file upload) for analysis. This makes it easy to combine your own data with AudienceScan results.",
+      status: "completed"
+    },
+    {
+      title: "Invalid Token Pre-Approval",
+      icon: ShieldCheck,
+      description: "An automated filter that flags or blocks addresses and tokens known to have too few transactions or be incompatible with AudienceScan before a scan is run.",
+      status: "completed"
+    },
+    {
+      title: "Launchpads",
+      icon: Rocket,
+      description: "A module that surfaces which launchpads tokens (e.g., PinkSale, DAO Maker, etc.) the scan returns. Useful for spotting patterns in go-to-market strategies, cross-token overlaps, and community behavior tied to early-stage offerings.",
       status: "completed"
     }
   ];
