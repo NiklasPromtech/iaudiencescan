@@ -7,13 +7,7 @@ import Footer from "@/components/Footer";
 const ProposedFeatures = () => {
   const features = [
     {
-      title: "Auto Refresh",
-      icon: RefreshCw,
-      description: "A tool designed for token owners to \"claim\" their token within AudienceScan. Once set, we'll automatically re-run the scan weekly or bi-weekly and deliver an updated report highlighting key changes and new insights since the last analysis.",
-      status: "proposed"
-    },
-    {
-      title: "Direct Messaging (Telegram)", 
+      title: "Direct Messaging (Telegram)",
       icon: MessageCircle,
       description: "A feature that enables direct outreach to Telegram users from within the platform. You'll input your phone number, verify your account, and AudienceScan will handle sending messages gradually (e.g., ~20 per day) to avoid spam flags and keep outreach manageable.",
       status: "proposed"
@@ -34,9 +28,9 @@ const ProposedFeatures = () => {
 
   const inProgress = [
     {
-      title: "Marketing Token Cleanup",
+      title: "Auto Refresh",
       icon: RefreshCw,
-      description: "We're actively improving how AudienceScan filters out irrelevant tokens (such as those with spammy names like \"claim now\" or containing URLs), ensuring cleaner and more accurate datasets in every scan.",
+      description: "A tool designed for token owners to \"claim\" their token within AudienceScan. Once set, we'll automatically re-run the scan weekly or bi-weekly and deliver an updated report highlighting key changes and new insights since the last analysis.",
       status: "in-progress"
     }
   ];
@@ -70,6 +64,12 @@ const ProposedFeatures = () => {
       title: "Launchpads",
       icon: Rocket,
       description: "A module that surfaces which launchpads tokens (e.g., PinkSale, DAO Maker, etc.) the scan returns. Useful for spotting patterns in go-to-market strategies, cross-token overlaps, and community behavior tied to early-stage offerings.",
+      status: "completed"
+    },
+    {
+      title: "Marketing Token Cleanup",
+      icon: RefreshCw,
+      description: "We're actively improving how AudienceScan filters out irrelevant tokens (such as those with spammy names like \"claim now\" or containing URLs), ensuring cleaner and more accurate datasets in every scan.",
       status: "completed"
     }
   ];
