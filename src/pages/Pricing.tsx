@@ -2,19 +2,19 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Check } from "lucide-react";
+import { useState } from "react";
 
 const Pricing = () => {
+  const [isYearly, setIsYearly] = useState(false);
+
   const plans = [
     {
       name: "Free",
       description: "Our most basic option",
-      price: "Free",
-      originalPrice: null,
-      yearlyPrice: null,
-      originalYearlyPrice: null,
-      monthlyNote: null,
-      originalMonthlyNote: null,
+      monthlyPrice: "Free",
+      yearlyPrice: "Free",
       features: [
         "1 scan",
         "Preview data only"
@@ -26,12 +26,8 @@ const Pricing = () => {
     {
       name: "Pro",
       description: "500+ marketers use this daily",
-      price: "$999",
-      originalPrice: "$2,499",
+      monthlyPrice: "$199",
       yearlyPrice: "$999",
-      originalYearlyPrice: "$2,499",
-      monthlyNote: "$199 when you pay monthly",
-      originalMonthlyNote: "$499 when you pay monthly",
       features: [
         "5 scans / month",
         "Full data",
@@ -44,12 +40,8 @@ const Pricing = () => {
     {
       name: "Enterprise",
       description: "Ad agencies love this for targeting",
-      price: "$9,999",
-      originalPrice: "$24,999",
+      monthlyPrice: "$999",
       yearlyPrice: "$9,999",
-      originalYearlyPrice: "$13,999",
-      monthlyNote: "$999 when you pay monthly",
-      originalMonthlyNote: "$2,499 when you pay monthly",
       features: [
         "50 scans / month",
         "Everything from Pro",
@@ -69,21 +61,30 @@ const Pricing = () => {
       
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
-          {/* Promotional Banner */}
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 mb-12 max-w-4xl mx-auto text-center">
-            <h2 className="text-h3 font-bold text-primary mb-2">Limited Time: 60% Off All Plans!</h2>
-            <p className="text-p2 text-muted-foreground">
-              Early bird pricing available until we reach our first 100 users. Lock in these rates forever.
+          <div className="text-center mb-12">
+            <h1 className="text-h1 font-bold mb-4">
+              Start generating audiences
+            </h1>
+            <p className="text-p1 text-muted-foreground mb-2">
+              Start from as little as $199 / month
+            </p>
+            <p className="text-p2 text-muted-foreground max-w-3xl mx-auto">
+              Choose a plan to unlock the power of <span className="font-semibold">AudienceScan</span>
             </p>
           </div>
 
-          <div className="text-center mb-16">
-            <h1 className="text-h1 font-bold mb-6">
-              Start generating audiences
-            </h1>
-            <p className="text-p1 text-muted-foreground max-w-3xl mx-auto">
-              Choose a plan to unlock the power of <span className="font-semibold">AudienceScan</span>
-            </p>
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-12">
+            <span className={`text-p1 font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+            />
+            <span className={`text-p1 font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Yearly
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -115,31 +116,14 @@ const Pricing = () => {
                   </p>
                   
                   <div className="mt-6">
-                    {plan.originalPrice && (
-                      <div className={`text-p2 line-through ${plan.name === "Enterprise" ? 'text-background/50' : 'text-muted-foreground'} mb-1`}>
-                        {plan.originalPrice}/per year
-                      </div>
-                    )}
                     <div className={`text-h2 font-bold ${plan.name === "Enterprise" ? 'text-background' : ''}`}>
-                      {plan.price}
-                      {plan.yearlyPrice && (
+                      {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                      {plan.monthlyPrice !== "Free" && (
                         <span className={`text-p2 font-normal ${plan.name === "Enterprise" ? 'text-background/70' : 'text-muted-foreground'}`}>
-                          {" "}/per year
+                          {isYearly ? "/per year" : "/per month"}
                         </span>
                       )}
                     </div>
-                    {plan.monthlyNote && (
-                      <div>
-                        {plan.originalMonthlyNote && (
-                          <p className={`text-p3 line-through ${plan.name === "Enterprise" ? 'text-background/40' : 'text-muted-foreground/60'}`}>
-                            {plan.originalMonthlyNote}
-                          </p>
-                        )}
-                        <p className={`text-p3 ${plan.name === "Enterprise" ? 'text-background/60' : 'text-muted-foreground'} mt-1`}>
-                          {plan.monthlyNote}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </CardHeader>
 
