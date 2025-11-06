@@ -15,6 +15,7 @@ const Pricing = () => {
       description: "Our most basic option",
       monthlyPrice: "Free",
       yearlyPrice: "Free",
+      trialNote: "7-day trial",
       features: [
         "1 scan",
         "Preview data only"
@@ -124,6 +125,11 @@ const Pricing = () => {
                         </span>
                       )}
                     </div>
+                    {'trialNote' in plan && (
+                      <p className="text-p3 text-muted-foreground mt-2">
+                        {plan.trialNote}
+                      </p>
+                    )}
                   </div>
                 </CardHeader>
 
