@@ -20,7 +20,15 @@ const Header = () => {
               Pricing
             </Link>
           </div>
-          <a href="https://app.audiencescan.io" target="_blank" rel="nofollow noopener noreferrer">
+          <a 
+            href="https://app.audiencescan.io" 
+            target="_blank" 
+            rel="nofollow noopener noreferrer"
+            onClick={(e) => {
+              e.preventDefault();
+              (window as any).gtag_report_conversion('https://app.audiencescan.io');
+            }}
+          >
             <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 md:px-6">
               Launch app
             </Button>

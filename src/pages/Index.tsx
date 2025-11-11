@@ -81,7 +81,15 @@ const Index = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button size="lg" className="text-lg px-8 py-6" asChild>
-                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://app.audiencescan.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  }}
+                >
                   Start Your Scan Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
@@ -145,7 +153,15 @@ const Index = () => {
                 <span className="font-semibold text-foreground">Frame it simply:</span> Instead of guessing, you can go straight to proven communities the wallets are engaged with
               </p>
               <Button size="lg" className="text-lg px-8" asChild>
-                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://app.audiencescan.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  }}
+                >
                   Run Your First Scan
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
@@ -229,7 +245,15 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8 py-6" asChild>
-                <a href="https://app.audiencescan.io/" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://app.audiencescan.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  }}
+                >
                   Start Your Free Scan
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>

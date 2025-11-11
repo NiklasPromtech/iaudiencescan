@@ -28,6 +28,22 @@
       gtag('config', 'G-RB92X75K5Y');
     </script>
     
+    <!-- Google Ads Conversion Tracking -->
+    <script>
+      function gtag_report_conversion(url) {
+        var callback = function () {
+          if (typeof(url) != 'undefined') {
+            window.location = url;
+          }
+        };
+        gtag('event', 'conversion', {
+            'send_to': 'AW-443807859/bTp5CKieq74bEPPwz9MB',
+            'event_callback': callback
+        });
+        return false;
+      }
+    </script>
+    
     <title>AudienceScan - Web3 Audience Analysis Tool</title>
     <meta name="description" content="Turn blockchain data into marketing signal. Free audience analysis for Web3 projects. Analyze token holders, find community overlaps, and get actionable insights." />
     <meta name="keywords" content="Web3 marketing, blockchain analytics, token analysis, audience insights, crypto marketing, DeFi marketing, wallet analysis" />
