@@ -23,6 +23,7 @@ import DMAssistant from "./pages/DMAssistant";
 import ManagedService from "./pages/ManagedService";
 import CreateScan from "./pages/CreateScan";
 import SalesPitch from "./pages/SalesPitch";
+import SDTerms from "./pages/SDTerms";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/managed-service" element={<ManagedService />} />
           <Route path="/create-scan" element={<CreateScan />} />
           <Route path="/sales-pitch" element={<SalesPitch />} />
+          <Route path="/sdterms" element={<SDTerms />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
