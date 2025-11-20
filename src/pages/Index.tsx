@@ -11,6 +11,16 @@ const Index = () => {
   const [wallets, setWallets] = useState(36250);
   const [transactions, setTransactions] = useState(236000);
   const [tokens, setTokens] = useState(52750);
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  
+  const rotatingPhrases = [
+    "to find the most relevant communities for your outreach",
+    "to find the most relevant communities for your KOL research",
+    "to find the most relevant launchpads",
+    "to enrich your token research",
+    "to research tokens to add to your exchange"
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,6 +30,19 @@ const Index = () => {
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const phraseInterval = setInterval(() => {
+      setIsVisible(false);
+      
+      setTimeout(() => {
+        setCurrentPhraseIndex((prev) => (prev + 1) % rotatingPhrases.length);
+        setIsVisible(true);
+      }, 300);
+    }, 3000);
+
+    return () => clearInterval(phraseInterval);
   }, []);
 
   const stats = [
@@ -69,14 +92,19 @@ const Index = () => {
               Stop wasting ad spend on generic audiences
             </Badge>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Instead of guessing,<br />
-              <span className="text-primary">target proven communities</span><br />
-              your holders already engage with
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              <span className="text-foreground">Use on-chain data </span>
+              <span 
+                className={`text-primary transition-opacity duration-300 ${
+                  isVisible ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {rotatingPhrases[currentPhraseIndex]}
+              </span>
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              $199 is less than testing 2 bad X Ads audiences. This tool pays for itself the first time you avoid wasted ad spend.
+              Analyze any token to discover the communities that actually transact with it. Target your outreach with precision—backed by real wallet behavior, not guesswork.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
