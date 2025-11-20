@@ -92,7 +92,7 @@ const Index = () => {
               Stop wasting ad spend on generic audiences
             </Badge>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[12rem] md:min-h-[15rem] lg:min-h-[18rem] flex flex-col justify-start">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[10rem] md:min-h-[12rem] lg:min-h-[14rem] flex flex-col justify-start">
               <span className="text-foreground">Use on-chain data </span>
               <span 
                 className={`text-primary transition-opacity duration-300 ${
