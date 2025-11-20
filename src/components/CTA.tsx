@@ -9,8 +9,13 @@ const CTA = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email: string) => {
+    // Check length limit
+    if (email.length > 255) {
+      return false;
+    }
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const telegramRegex = /^@[\w]+$/;
+    const telegramRegex = /^@[a-zA-Z0-9_]{5,32}$/; // Telegram username length limit
     return emailRegex.test(email) || telegramRegex.test(email);
   };
 
@@ -61,9 +66,16 @@ const CTA = () => {
       
       toast.success("Success! We'll contact you soon with your free analysis.");
       setEmail("");
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error("Something went wrong. Please try again.");
+    } catch (error: any) {
+      // Log error without exposing user data
+      console.error('Form submission failed:', error?.message || 'Unknown error');
+      
+      // User-friendly error messages
+      if (error?.message?.includes('rate limit') || error?.status === 429) {
+        toast.error("Too many submissions. Please try again later.");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
