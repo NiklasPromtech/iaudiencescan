@@ -7,27 +7,38 @@ import backdropTexture from "@/assets/backdrop-texture.jpg";
 const Hero = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [hasFinished, setHasFinished] = useState(false);
   
   const rotatingPhrases = [
     "to find the most relevant communities for your outreach",
     "to find the most relevant communities for your KOL research",
     "to find the most relevant launchpads",
     "to enrich your token research",
-    "to research tokens to add to your exchange"
+    "to research tokens to add to your exchange",
+    "to create your web3 marketing strategy"
   ];
 
   useEffect(() => {
+    if (hasFinished) return;
+
     const interval = setInterval(() => {
       setIsVisible(false);
       
       setTimeout(() => {
-        setCurrentPhraseIndex((prev) => (prev + 1) % rotatingPhrases.length);
+        setCurrentPhraseIndex((prev) => {
+          const nextIndex = prev + 1;
+          if (nextIndex >= rotatingPhrases.length - 1) {
+            setHasFinished(true);
+            return rotatingPhrases.length - 1;
+          }
+          return nextIndex;
+        });
         setIsVisible(true);
       }, 300);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [hasFinished]);
 
   return <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero Background Pattern */}
