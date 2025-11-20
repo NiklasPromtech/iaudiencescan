@@ -1,8 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import heroImage from "@/assets/hero-image.jpg";
 import backdropTexture from "@/assets/backdrop-texture.jpg";
+
 const Hero = () => {
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  
+  const rotatingPhrases = [
+    "to find the most relevant communities for your outreach",
+    "to find the most relevant communities for your KOL research",
+    "to find the most relevant launchpads",
+    "to enrich your token research",
+    "to research tokens to add to your exchange"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible(false);
+      
+      setTimeout(() => {
+        setCurrentPhraseIndex((prev) => (prev + 1) % rotatingPhrases.length);
+        setIsVisible(true);
+      }, 300);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero Background Pattern */}
       <div className="absolute inset-0 bg-cover bg-right bg-no-repeat opacity-30" style={{
@@ -18,10 +44,21 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-6">Find the Most Relevant Communities for Your Token</h1>
+          <h1 className="text-h1 font-bold mb-6">
+            <span className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              Use on-chain data{" "}
+            </span>
+            <span 
+              className={`bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent transition-opacity duration-300 ${
+                isVisible ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {rotatingPhrases[currentPhraseIndex]}
+            </span>
+          </h1>
           
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Use on-chain data to discover which communities actually transact with tokens like yours. Target your outreach with precision—backed by real wallet behavior, not guesswork.
+            Analyze any token to discover the communities that actually transact with it. Target your outreach with precision—backed by real wallet behavior, not guesswork.
           </p>
           
           <div className="mb-12">
