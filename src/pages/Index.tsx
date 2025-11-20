@@ -15,11 +15,11 @@ const Index = () => {
   const [isVisible, setIsVisible] = useState(true);
   
   const rotatingPhrases = [
-    "to find the most relevant communities for your outreach",
-    "to find the most relevant communities for your KOL research",
-    "to find the most relevant launchpads",
-    "to enrich your token research",
-    "to research tokens to add to your exchange"
+    "to target the right communities",
+    "for KOL research and discovery",
+    "to find aligned launchpads",
+    "to research tokens in-depth",
+    "to evaluate tokens for listing"
   ];
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const Index = () => {
               Stop wasting ad spend on generic audiences
             </Badge>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[8rem] md:min-h-[10rem] lg:min-h-[12rem] flex flex-col justify-center">
               <span className="text-foreground">Use on-chain data </span>
               <span 
                 className={`text-primary transition-opacity duration-300 ${
