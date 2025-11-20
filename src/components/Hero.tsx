@@ -18,10 +18,10 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-6">Data-Backed Crypto Audiences. Guaranteed Results</h1>
+          <h1 className="text-h1 font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-6">Find the Most Relevant Communities for Your Token</h1>
           
           <p className="text-p1 text-muted-foreground mb-8 max-w-3xl mx-auto">
-            AudienceScan turns any token into a targetable audience for X, Telegram, Google, and Reddit ads – cutting costs by 50% or more. If it doesn't, you get your money back.
+            Use on-chain data to discover which communities actually transact with tokens like yours. Target your outreach with precision—backed by real wallet behavior, not guesswork.
           </p>
           
           <div className="mb-12">

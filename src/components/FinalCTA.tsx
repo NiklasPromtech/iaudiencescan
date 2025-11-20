@@ -17,11 +17,11 @@ const FinalCTA = () => {
               </div>
               
               <h2 className="text-h2 font-bold mb-6 flex items-center justify-center gap-3">
-Turn blockchain data into your unfair advantage.
+Discover the communities that matter most.
               </h2>
               
               <p className="text-p1 text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
-                Stop wasting budget on broad "crypto enthusiast" targeting. Reach real wallets, with guaranteed results or your money back.
+                Stop guessing which communities to target. Use real on-chain behavior to find where your next users are—and reach them with precision.
               </p>
               
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 text-lg">
