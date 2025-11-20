@@ -103,7 +103,7 @@ const Index = () => {
               </span>
             </h1>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto -mt-4">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto -mt-12">
               Analyze any token to discover the communities that actually transact with it. Target your outreach with precision—backed by real wallet behavior, not guesswork.
             </p>
             
