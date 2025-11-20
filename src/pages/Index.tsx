@@ -89,7 +89,7 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <Badge variant="secondary" className="px-4 py-2 text-sm">
-              Stop wasting ad spend on generic audiences
+              Create your perfect GTM strategy
             </Badge>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[10rem] md:min-h-[12rem] lg:min-h-[14rem] flex flex-col justify-start">
