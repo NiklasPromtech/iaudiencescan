@@ -26,11 +26,18 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setWallets(prev => prev + Math.floor(Math.random() * 3) + 1);
-      setTransactions(prev => prev + Math.floor(Math.random() * 30) + 15);
       setTokens(prev => prev + Math.floor(Math.random() * 2) + 1);
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const transactionInterval = setInterval(() => {
+      setTransactions(prev => prev + 1);
+    }, 100);
+
+    return () => clearInterval(transactionInterval);
   }, []);
 
   useEffect(() => {
