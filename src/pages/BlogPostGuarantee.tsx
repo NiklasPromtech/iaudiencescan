@@ -32,7 +32,7 @@ const BlogPostGuarantee = () => {
               Guarantee
             </Badge>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-[2]">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent pb-2">
               Guaranteed Results
             </h1>
             

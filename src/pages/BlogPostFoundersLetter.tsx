@@ -15,7 +15,7 @@ const BlogPostFoundersLetter = () => {
           <Badge variant="secondary" className="mb-4">
             Founder's Letter
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent leading-[2]">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent pb-2">
             A Personal Letter to New Users of AudienceScan
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">

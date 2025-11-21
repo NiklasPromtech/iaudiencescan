@@ -18,7 +18,7 @@ const BlogPostWhatAmILookingAt = () => {
               <Badge variant="secondary" className="mb-4">
                 Guide
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-slate-600 dark:to-slate-300 bg-clip-text text-transparent leading-[2]">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-slate-600 dark:to-slate-300 bg-clip-text text-transparent pb-2">
                 What is it I am looking at?
               </h1>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
