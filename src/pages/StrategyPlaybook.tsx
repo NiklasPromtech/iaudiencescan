@@ -141,7 +141,7 @@ const StrategyPlaybook = () => {
       description: "Tap into Google's advertising ecosystem with token-specific keywords.",
       note: "Token-tag keywords outperform Google's flagship 'Intent targeting' 9/10 times.",
       subtasks: [
-        { id: "5-1", text: "If you don't have a DV360 seat, reach out to support for approval" },
+        { id: "5-1", text: "If you don't have a DV360 seat, reach out to AudienceScan support - we can potentially help run DV360 for you because we have a seat" },
         { id: "5-2", text: "Go to ads.google.com or displayvideo.google.com" },
         { id: "5-3", text: "Copy the tags from the scan" },
         { id: "5-4", text: "Create a new campaign" },
@@ -164,7 +164,7 @@ const StrategyPlaybook = () => {
         { id: "6-5", text: "Select 'account source'" },
         { id: "6-6", text: "Paste one X account from the scan (repeat for ~5 most relevant communities)" },
         { id: "6-7", text: "Use an account OTHER than your main project account",
-          details: "For messaging, simply nudge the user in the right direction. Ask questions (like the Telegram bot idea). The goal is to show that you're someone researching new projects, you've been looking over their project, and you're exploring more opportunities." }
+          details: "For messaging, simply nudge the user in the right direction. Ask questions (like the Telegram bot idea). The goal is to show that you're someone researching opportunities in their space and exploring what's interesting in the market." }
       ]
     },
     {
@@ -213,12 +213,12 @@ const StrategyPlaybook = () => {
       description: "Create an ecosystem article and saturate small, targeted communities.",
       note: "This advanced strategy embeds your brand in the memory of ideal micro-communities.",
       subtasks: [
-        { id: "10-1", text: "Create an article about your project and other players in the space" },
+        { id: "10-1", text: "Create an article about your project and other players in the space on a news site you can run ads from - we can provide one if needed" },
         { id: "10-2", text: "Filter communities you want to target on X" },
         { id: "10-3", text: "Pick around 5 geos (geographical locations)" },
-        { id: "10-4", text: "Look for communities around 10,000 members",
+        { id: "10-4", text: "Play around with the communities and geo targeting until you get a reach of the campaign to be around 10,000",
           details: "This size is ideal — big enough to matter, small enough to saturate." },
-        { id: "10-5", text: "Run ads targeting these communities with message: 'Read our latest article about [topic]'" },
+        { id: "10-5", text: "Run ads targeting these communities with message: 'Read our latest article about [topic]' - the article ads will go out from the news page's X account" },
         { id: "10-6", text: "Add a simple CPA (e.g., 'check out the page to whitelist')",
           details: "The goal is to embed your brand in the memory of these users. When they read the article later, they're already primed to feel more familiar with your project." }
       ]
@@ -362,6 +362,9 @@ const StrategyPlaybook = () => {
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4 font-medium">
               It's classic sales: <span className="text-primary">warm up the lead first.</span>
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-4 text-sm">
+              If you have any questions, you can reach us at <a href="mailto:support@audiencescan.io" className="text-primary hover:underline">support@audiencescan.io</a>
             </p>
           </Card>
         </div>
