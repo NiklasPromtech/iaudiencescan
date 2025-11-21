@@ -26,7 +26,7 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setWallets(prev => prev + Math.floor(Math.random() * 3) + 1);
-      setTransactions(prev => prev + Math.floor(Math.random() * 8) + 1);
+      setTransactions(prev => prev + Math.floor(Math.random() * 30) + 15);
       setTokens(prev => prev + Math.floor(Math.random() * 2) + 1);
     }, 2000);
 
