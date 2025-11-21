@@ -232,7 +232,7 @@ const Index = () => {
 
             <div className="grid md:grid-cols-3 gap-8">
               {scanTypes.map((type, idx) => (
-                <Card key={idx} className="text-center overflow-hidden">
+                <Card key={idx} className="text-center overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105 cursor-pointer">
                   <div className="w-full overflow-hidden bg-muted" style={{ aspectRatio: '658/1024' }}>
                     <img 
                       src={type.image} 
