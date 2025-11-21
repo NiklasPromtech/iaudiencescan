@@ -215,9 +215,9 @@ const Index = () => {
       </section>
 
       {/* Scan Types */}
-      <section className="py-20">
+      <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto space-y-12">
+          <div className="max-w-6xl mx-auto space-y-16">
             <div className="text-center space-y-4">
               <Badge variant="default" className="px-4 py-2">
                 3 Types of Scans
@@ -230,22 +230,22 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-12">
               {scanTypes.map((type, idx) => (
                 <Card key={idx} className="text-center overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105 cursor-pointer">
-                  <div className="w-full overflow-hidden bg-muted" style={{ aspectRatio: '658/1024' }}>
+                  <div className="w-full overflow-hidden bg-background flex items-center justify-center p-6">
                     <img 
                       src={type.image} 
                       alt={`${type.title} interface screenshot`}
-                      className="w-full h-full object-contain"
+                      className="w-full max-w-[280px] h-auto object-contain"
                     />
                   </div>
-                  <CardHeader>
-                    <div className="mx-auto p-4 rounded-lg bg-primary/10 w-fit mb-4">
-                      <type.icon className="h-10 w-10 text-primary" />
+                  <CardHeader className="pt-6">
+                    <div className="mx-auto p-3 rounded-lg bg-primary/10 w-fit mb-4">
+                      <type.icon className="h-8 w-8 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl mb-3">{type.title}</CardTitle>
-                    <CardDescription className="text-base">{type.description}</CardDescription>
+                    <CardTitle className="text-xl mb-3">{type.title}</CardTitle>
+                    <CardDescription className="text-sm">{type.description}</CardDescription>
                   </CardHeader>
                 </Card>
               ))}
