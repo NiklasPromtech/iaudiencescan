@@ -183,7 +183,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="rounded-xl overflow-hidden border-2 border-border shadow-2xl">
+            <div className="rounded-xl overflow-hidden border border-border">
               <img 
                 src={overlapResults} 
                 alt="AudienceScan overlap results showing Twitter, Telegram, Reddit and Tags data with affinity scores"
