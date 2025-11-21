@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle2, TrendingUp, Wallet, Target, Zap, DollarSign, Coins, Users, List } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PlaybookFloatingCTA from "@/components/PlaybookFloatingCTA";
 import overlapResults from "@/assets/overlap-results.png";
 import { useEffect, useState } from "react";
 
@@ -300,6 +301,9 @@ const Index = () => {
       </section>
 
       <Footer />
+      
+      {/* Floating Playbook CTA */}
+      <PlaybookFloatingCTA />
     </div>
   );
 };
