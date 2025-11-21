@@ -59,6 +59,24 @@ const StrategyPlaybook = () => {
     });
   };
 
+  const toggleAllTaskSubtasks = (task: Task) => {
+    const allSubtasksCompleted = task.subtasks.every(st => completedTasks.has(st.id));
+    
+    setCompletedTasks(prev => {
+      const newSet = new Set(prev);
+      
+      if (allSubtasksCompleted) {
+        // Uncheck all subtasks
+        task.subtasks.forEach(st => newSet.delete(st.id));
+      } else {
+        // Check all subtasks
+        task.subtasks.forEach(st => newSet.add(st.id));
+      }
+      
+      return newSet;
+    });
+  };
+
   const tasks: Task[] = [
     {
       id: "task-1",
@@ -129,7 +147,7 @@ const StrategyPlaybook = () => {
         { id: "5-4", text: "Create a new campaign" },
         { id: "5-5", text: "Paste the tags in as keywords" },
         { id: "5-6", text: "Add wallet detection JavaScript to your site",
-          details: "Since CPMs are much lower here, track conversions for users with a wallet extension installed. Add this JavaScript snippet to your site:\n\n<script type=\"text/javascript\">\n  (function() {\n      if (typeof window.ethereum !== 'undefined') {\n            [Add your conversion tracker here]\n      }\n  })();\n</script>" },
+          details: "Since CPMs are much lower here, track conversions for users with a wallet extension installed. Add this JavaScript snippet to your site:" },
         { id: "5-7", text: "Set the campaign to desktop only",
           details: "We're optimizing for users who are already in Web3 and ready to take action." }
       ]
@@ -234,7 +252,9 @@ const StrategyPlaybook = () => {
                   {completedSubtasks} of {totalSubtasks} tasks completed
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
+              <div className="bg-white border border-gray-200 rounded-full p-1">
+                <Progress value={progressPercentage} className="h-2" />
+              </div>
             </Card>
           </div>
 
@@ -253,14 +273,12 @@ const StrategyPlaybook = () => {
                 >
                   <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-accent/50 transition-colors">
                     <div className="flex items-start gap-4 flex-1 text-left">
-                      <div className="flex-shrink-0">
-                        {isTaskComplete ? (
-                          <CheckCircle2 className="h-6 w-6 text-primary" />
-                        ) : (
-                          <div className="h-6 w-6 rounded-full border-2 border-muted-foreground flex items-center justify-center text-xs font-medium text-muted-foreground">
-                            {index + 1}
-                          </div>
-                        )}
+                      <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={isTaskComplete}
+                          onCheckedChange={() => toggleAllTaskSubtasks(task)}
+                          className="h-6 w-6"
+                        />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg mb-1">{task.title}</h3>
@@ -268,7 +286,9 @@ const StrategyPlaybook = () => {
                           <p className="text-sm text-muted-foreground">{task.description}</p>
                         )}
                         <div className="mt-2">
-                          <Progress value={taskProgress} className="h-1" />
+                          <div className="bg-white border border-gray-200 rounded-full p-0.5">
+                            <Progress value={taskProgress} className="h-1" />
+                          </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             {taskSubtasksCompleted}/{task.subtasks.length} steps
                           </p>
@@ -309,6 +329,20 @@ const StrategyPlaybook = () => {
                               <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
                                 {subtask.details}
                               </p>
+                            </div>
+                          )}
+                          {/* Special code block for wallet detection */}
+                          {subtask.id === "5-6" && (
+                            <div className="ml-8 mt-2">
+                              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-xs font-mono border border-gray-700">
+                                <code>{`<script type="text/javascript">
+  (function() {
+    if (typeof window.ethereum !== 'undefined') {
+      [Add your conversion tracker here]
+    }
+  })();
+</script>`}</code>
+                              </pre>
                             </div>
                           )}
                         </div>
