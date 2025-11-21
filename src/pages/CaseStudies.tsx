@@ -59,7 +59,7 @@ const CaseStudies = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+            <h1 className="text-h1 font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-[2]">
               Case Studies
             </h1>
             <p className="text-p1 text-muted-foreground max-w-3xl mx-auto">

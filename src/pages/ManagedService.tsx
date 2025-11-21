@@ -33,7 +33,7 @@ const ManagedService = () => {
               </div>
             </div>
             
-            <h1 className="text-h1 font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-h1 font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-[2]">
               AudienceScan Managed Crypto Ad Service
             </h1>
             
