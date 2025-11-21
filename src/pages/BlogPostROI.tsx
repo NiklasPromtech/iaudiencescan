@@ -22,7 +22,7 @@ const BlogPostROI = () => {
           <Badge variant="secondary" className="mb-4">
             ROI Analysis
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent leading-[2]">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent pb-2">
             The AudienceScan ROI: Why 50%+ Cost Reduction is Standard
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
