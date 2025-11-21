@@ -363,9 +363,6 @@ const StrategyPlaybook = () => {
             <p className="text-muted-foreground leading-relaxed mt-4 font-medium">
               It's classic sales: <span className="text-primary">warm up the lead first.</span>
             </p>
-            <p className="text-muted-foreground leading-relaxed mt-4">
-              Visitors should be able to mark tasks as done, and your progress is automatically saved as you work through the playbook.
-            </p>
           </Card>
         </div>
       </main>
