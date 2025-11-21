@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 const Header = () => {
-  return <header className="w-full bg-background/80 backdrop-blur-md sticky top-0 z-50 mx-4 mt-4 rounded-lg">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+  return <header className="w-full bg-background/80 backdrop-blur-md sticky top-0 z-50 mx-2 sm:mx-4 mt-4 rounded-lg">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/">
             <img src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png" alt="AudienceScan" className="h-6 hover:opacity-80 transition-opacity cursor-pointer" />
@@ -29,7 +29,7 @@ const Header = () => {
               (window as any).gtag_report_conversion('https://app.audiencescan.io');
             }}
           >
-            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 md:px-6">
+            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 sm:px-4 md:px-6">
               Launch app
             </Button>
           </a>
