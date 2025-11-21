@@ -253,7 +253,7 @@ const StrategyPlaybook = () => {
                 </span>
               </div>
               <div className="bg-white border border-gray-200 rounded-full p-1">
-                <Progress value={progressPercentage} className="h-2" />
+                <Progress value={progressPercentage} className="h-2 bg-gray-100" />
               </div>
             </Card>
           </div>
@@ -287,7 +287,7 @@ const StrategyPlaybook = () => {
                         )}
                         <div className="mt-2">
                           <div className="bg-white border border-gray-200 rounded-full p-0.5">
-                            <Progress value={taskProgress} className="h-1" />
+                            <Progress value={taskProgress} className="h-1 bg-gray-100" />
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             {taskSubtasksCompleted}/{task.subtasks.length} steps
