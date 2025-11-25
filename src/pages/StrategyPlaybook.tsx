@@ -157,7 +157,7 @@ const StrategyPlaybook = () => {
       title: "6. X DM campaign",
       description: "Direct outreach to relevant X users with personalized messaging.",
       subtasks: [
-        { id: "6-1", text: "Go to Drippy.ai" },
+        { id: "6-1", text: "Go to Drippi.ai" },
         { id: "6-2", text: "Start your free trial (if you don't have an account)" },
         { id: "6-3", text: "Create a new lead source" },
         { id: "6-4", text: "Select 'Scraper'" },
@@ -321,7 +321,13 @@ const StrategyPlaybook = () => {
                               <span className="font-medium">
                                 {String.fromCharCode(97 + subIndex)})
                               </span>{" "}
-                              {subtask.text}
+                              {subtask.id === "6-1" ? (
+                                <>
+                                  Go to <a href="https://www.drippiai.link/onboarding?&inviterUid=rhsjratWHLVB6BYKS4qx8j6HO662&inviterName=AudienceScan" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Drippi.ai</a>
+                                </>
+                              ) : (
+                                subtask.text
+                              )}
                             </label>
                           </div>
                           {subtask.details && (
