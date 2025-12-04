@@ -24,9 +24,12 @@ const Header = () => {
             href="https://app.audiencescan.io" 
             target="_blank" 
             rel="nofollow noopener noreferrer"
-            onClick={(e) => {
-              e.preventDefault();
-              (window as any).gtag_report_conversion('https://app.audiencescan.io');
+            onClick={() => {
+              try {
+                (window as any).gtag_report_conversion?.('https://app.audiencescan.io');
+              } catch (e) {
+                // Conversion tracking failed, link will still work
+              }
             }}
           >
             <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 sm:px-4 md:px-6">

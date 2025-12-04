@@ -128,9 +128,12 @@ const Index = () => {
                   href="https://app.audiencescan.io/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  onClick={() => {
+                    try {
+                      (window as any).gtag_report_conversion?.('https://app.audiencescan.io/');
+                    } catch (e) {
+                      // Conversion tracking failed, link will still work
+                    }
                   }}
                 >
                   Start Your Scan Now
@@ -200,9 +203,12 @@ const Index = () => {
                   href="https://app.audiencescan.io/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  onClick={() => {
+                    try {
+                      (window as any).gtag_report_conversion?.('https://app.audiencescan.io/');
+                    } catch (e) {
+                      // Conversion tracking failed, link will still work
+                    }
                   }}
                 >
                   Run Your First Scan
@@ -292,9 +298,12 @@ const Index = () => {
                   href="https://app.audiencescan.io/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    (window as any).gtag_report_conversion('https://app.audiencescan.io/');
+                  onClick={() => {
+                    try {
+                      (window as any).gtag_report_conversion?.('https://app.audiencescan.io/');
+                    } catch (e) {
+                      // Conversion tracking failed, link will still work
+                    }
                   }}
                 >
                   Start Your Free Scan
