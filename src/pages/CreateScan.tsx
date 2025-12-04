@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash, Search, Copy } from "lucide-react";
+import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash, Search, Copy, Building2, Tags } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Header from "@/components/Header";
@@ -18,6 +18,7 @@ const CreateScan = () => {
   const [tokenSearch, setTokenSearch] = useState("");
   const [showTokenResults, setShowTokenResults] = useState(false);
   const [inputMode, setInputMode] = useState<"search" | "manual">("search");
+  const [showMoreScanTypes, setShowMoreScanTypes] = useState(false);
 
   // Mock token search results
   const mockTokenResults = tokenSearch ? {
@@ -33,29 +34,38 @@ const CreateScan = () => {
     ]
   } : null;
 
-  const scanOptions = [
+  const primaryScanOptions = [
     {
-      id: "transact-count",
-      title: "Transaction count",
-      description: "Analyze wallets based on how many times they've transacted with a specific token. Perfect for finding wallets that have transacted 2-4 times, for example.",
-      icon: Hash,
+      id: "transactors",
+      title: "Token Transactors",
+      description: "Analyze wallets based on their transaction activity with a specific token. Filter by transaction count or volume.",
+      icon: TrendingUp,
     },
     {
-      id: "transact-volume",
-      title: "Transaction volume",
-      description: "Analyze wallets based on the total value of their transactions with a specific token. Ideal for targeting wallets that transacted between $1,000-$5,000 USDC, for example.",
-      icon: DollarSign,
-    },
-    {
-      id: "hold",
-      title: "Wallets that hold a token",
-      description: "Study wallets that currently hold a token, regardless of transaction activity. Ideal for finding long-term investors and loyal community members.",
+      id: "holders",
+      title: "Token Holders",
+      description: "Study wallets that currently hold a token. Ideal for finding long-term investors and loyal community members.",
       icon: Wallet,
+    },
+  ];
+
+  const secondaryScanOptions = [
+    {
+      id: "exchange",
+      title: "Exchange Targeting",
+      description: "Target wallets that interact with specific exchanges. Great for finding active traders.",
+      icon: Building2,
+    },
+    {
+      id: "category",
+      title: "Category",
+      description: "Target wallets based on token categories like DeFi, NFTs, Gaming, and more.",
+      icon: Tags,
     },
     {
       id: "custom",
-      title: "A list of wallets you provide",
-      description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities, airdrop recipients, or any curated audience.",
+      title: "Custom List",
+      description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities or airdrop recipients.",
       icon: FileText,
       badge: "Solana compatible",
     },
@@ -213,9 +223,10 @@ const CreateScan = () => {
               <CardTitle className="text-2xl">Create New Scan</CardTitle>
               <CardDescription>Choose how you want to identify your target audience</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {scanOptions.map((option) => (
+            <CardContent className="space-y-6">
+              {/* Primary scan options - shown prominently */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {primaryScanOptions.map((option) => (
                   <Card
                     key={option.id}
                     className={`transition-all hover:border-primary/50 ${
@@ -226,16 +237,11 @@ const CreateScan = () => {
                   >
                     <CardHeader>
                       <div className="flex flex-col items-center text-center gap-4">
-                        <div className="p-3 rounded-lg bg-primary/10">
-                          <option.icon className="h-8 w-8 text-primary" />
+                        <div className="p-4 rounded-lg bg-primary/10">
+                          <option.icon className="h-10 w-10 text-primary" />
                         </div>
                         <div>
-                          <div className="flex items-center justify-center gap-2 mb-2">
-                            <CardTitle className="text-xl">{option.title}</CardTitle>
-                            {option.badge && (
-                              <Badge variant="default" className="text-xs">{option.badge}</Badge>
-                            )}
-                          </div>
+                          <CardTitle className="text-xl">{option.title}</CardTitle>
                           <CardDescription className="mt-2">
                             {option.description}
                           </CardDescription>
@@ -254,6 +260,58 @@ const CreateScan = () => {
                   </Card>
                 ))}
               </div>
+
+              {/* Secondary scan options - collapsible */}
+              <Collapsible open={showMoreScanTypes} onOpenChange={setShowMoreScanTypes}>
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-2">
+                  <span>{showMoreScanTypes ? "Hide" : "More scan types"}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showMoreScanTypes ? 'rotate-180' : ''}`} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {secondaryScanOptions.map((option) => (
+                      <Card
+                        key={option.id}
+                        className={`transition-all hover:border-primary/50 ${
+                          selectedOption === option.id
+                            ? "border-primary ring-2 ring-primary/20"
+                            : ""
+                        }`}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <option.icon className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <CardTitle className="text-base">{option.title}</CardTitle>
+                                {option.badge && (
+                                  <Badge variant="secondary" className="text-xs">{option.badge}</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <CardDescription className="text-xs mb-3">
+                            {option.description}
+                          </CardDescription>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setSelectedOption(option.id)}
+                          >
+                            Select
+                            <ArrowRight className="ml-2 h-3 w-3" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </CardContent>
           </Card>
 
