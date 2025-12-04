@@ -68,7 +68,7 @@ const CreateScan = () => {
       title: "Custom List",
       description: "Upload your own wallet list for analysis.",
       icon: FileText,
-      group: "source",
+      group: "custom",
       badge: "Solana compatible",
     },
   ];
@@ -255,8 +255,34 @@ const CreateScan = () => {
               {/* By Source Section */}
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">By Source</h3>
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   {allScanOptions.filter(o => o.group === "source").map((option) => (
+                    <Card
+                      key={option.id}
+                      className={`transition-all hover:border-primary/50 cursor-pointer ${
+                        selectedOption === option.id ? "border-primary ring-2 ring-primary/20" : ""
+                      }`}
+                      onClick={() => setSelectedOption(option.id)}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                          <option.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm">{option.title}</h4>
+                          <p className="text-xs text-muted-foreground">{option.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Section */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Custom</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {allScanOptions.filter(o => o.group === "custom").map((option) => (
                     <Card
                       key={option.id}
                       className={`transition-all hover:border-primary/50 cursor-pointer ${
