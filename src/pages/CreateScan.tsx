@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, TrendingUp, Wallet, FileText, ChevronDown, Plus, Minus, DollarSign, Hash, Search, Copy, Building2, Tags } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -18,7 +19,6 @@ const CreateScan = () => {
   const [tokenSearch, setTokenSearch] = useState("");
   const [showTokenResults, setShowTokenResults] = useState(false);
   const [inputMode, setInputMode] = useState<"search" | "manual">("search");
-  const [showMoreScanTypes, setShowMoreScanTypes] = useState(false);
 
   // Mock token search results
   const mockTokenResults = tokenSearch ? {
@@ -34,39 +34,41 @@ const CreateScan = () => {
     ]
   } : null;
 
-  const primaryScanOptions = [
+  const allScanOptions = [
     {
       id: "transactors",
       title: "Token Transactors",
-      description: "Analyze wallets based on their transaction activity with a specific token. Filter by transaction count or volume.",
+      description: "Analyze wallets based on transaction activity with a specific token.",
       icon: TrendingUp,
+      group: "token",
     },
     {
       id: "holders",
       title: "Token Holders",
-      description: "Study wallets that currently hold a token. Ideal for finding long-term investors and loyal community members.",
+      description: "Study wallets that currently hold a token.",
       icon: Wallet,
+      group: "token",
     },
-  ];
-
-  const secondaryScanOptions = [
     {
       id: "exchange",
       title: "Exchange Targeting",
-      description: "Target wallets that interact with specific exchanges. Great for finding active traders.",
+      description: "Target wallets that interact with specific exchanges.",
       icon: Building2,
+      group: "source",
     },
     {
       id: "category",
       title: "Category",
-      description: "Target wallets based on token categories like DeFi, NFTs, Gaming, and more.",
+      description: "Target wallets based on token categories.",
       icon: Tags,
+      group: "source",
     },
     {
       id: "custom",
       title: "Custom List",
-      description: "Upload your own custom wallet list for analysis. Great for analyzing specific communities or airdrop recipients.",
+      description: "Upload your own wallet list for analysis.",
       icon: FileText,
+      group: "source",
       badge: "Solana compatible",
     },
   ];
@@ -217,101 +219,180 @@ const CreateScan = () => {
             </CardContent>
           </Card>
 
-          {/* Widget 2: Create New Scan */}
+          {/* OPTION B: Visual Grouping with Headers */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Create New Scan</CardTitle>
-              <CardDescription>Choose how you want to identify your target audience</CardDescription>
+              <CardTitle className="text-2xl">Option B: Visual Grouping</CardTitle>
+              <CardDescription>Organized by category with section headers</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Primary scan options - shown prominently */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {primaryScanOptions.map((option) => (
-                  <Card
-                    key={option.id}
-                    className={`transition-all hover:border-primary/50 ${
-                      selectedOption === option.id
-                        ? "border-primary ring-2 ring-primary/20"
-                        : ""
-                    }`}
-                  >
-                    <CardHeader>
-                      <div className="flex flex-col items-center text-center gap-4">
-                        <div className="p-4 rounded-lg bg-primary/10">
-                          <option.icon className="h-10 w-10 text-primary" />
+              {/* By Token Section */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">By Token</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {allScanOptions.filter(o => o.group === "token").map((option) => (
+                    <Card
+                      key={option.id}
+                      className={`transition-all hover:border-primary/50 cursor-pointer ${
+                        selectedOption === option.id ? "border-primary ring-2 ring-primary/20" : ""
+                      }`}
+                      onClick={() => setSelectedOption(option.id)}
+                    >
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                          <option.icon className="h-6 w-6 text-primary" />
                         </div>
-                        <div>
-                          <CardTitle className="text-xl">{option.title}</CardTitle>
-                          <CardDescription className="mt-2">
-                            {option.description}
-                          </CardDescription>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium">{option.title}</h4>
+                          <p className="text-sm text-muted-foreground">{option.description}</p>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <Button 
-                        className="w-full"
-                        onClick={() => setSelectedOption(option.id)}
-                      >
-                        Select
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
 
-              {/* Secondary scan options - collapsible */}
-              <Collapsible open={showMoreScanTypes} onOpenChange={setShowMoreScanTypes}>
-                <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full justify-center py-2">
-                  <span>{showMoreScanTypes ? "Hide" : "More scan types"}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showMoreScanTypes ? 'rotate-180' : ''}`} />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-4">
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {secondaryScanOptions.map((option) => (
+              {/* By Source Section */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">By Source</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {allScanOptions.filter(o => o.group === "source").map((option) => (
+                    <Card
+                      key={option.id}
+                      className={`transition-all hover:border-primary/50 cursor-pointer ${
+                        selectedOption === option.id ? "border-primary ring-2 ring-primary/20" : ""
+                      }`}
+                      onClick={() => setSelectedOption(option.id)}
+                    >
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                          <option.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-sm">{option.title}</h4>
+                            {option.badge && <Badge variant="secondary" className="text-xs">{option.badge}</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{option.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* OPTION C: Tabs */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Option C: Tabs</CardTitle>
+              <CardDescription>Navigate between scan types using tabs</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="token" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 mb-6">
+                  <TabsTrigger value="token">Token</TabsTrigger>
+                  <TabsTrigger value="exchange">Exchange</TabsTrigger>
+                  <TabsTrigger value="category">Category</TabsTrigger>
+                  <TabsTrigger value="custom">Custom List</TabsTrigger>
+                </TabsList>
+                <TabsContent value="token" className="space-y-4">
+                  <p className="text-sm text-muted-foreground mb-4">Choose how to analyze token-related wallets:</p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {allScanOptions.filter(o => o.group === "token").map((option) => (
                       <Card
                         key={option.id}
-                        className={`transition-all hover:border-primary/50 ${
-                          selectedOption === option.id
-                            ? "border-primary ring-2 ring-primary/20"
-                            : ""
+                        className={`transition-all hover:border-primary/50 cursor-pointer ${
+                          selectedOption === option.id ? "border-primary ring-2 ring-primary/20" : ""
                         }`}
+                        onClick={() => setSelectedOption(option.id)}
                       >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                              <option.icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <CardTitle className="text-base">{option.title}</CardTitle>
-                                {option.badge && (
-                                  <Badge variant="secondary" className="text-xs">{option.badge}</Badge>
-                                )}
-                              </div>
-                            </div>
+                        <CardContent className="p-6 text-center">
+                          <div className="p-3 rounded-lg bg-primary/10 inline-block mb-3">
+                            <option.icon className="h-8 w-8 text-primary" />
                           </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <CardDescription className="text-xs mb-3">
-                            {option.description}
-                          </CardDescription>
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => setSelectedOption(option.id)}
-                          >
-                            Select
-                            <ArrowRight className="ml-2 h-3 w-3" />
-                          </Button>
+                          <h4 className="font-semibold mb-1">{option.title}</h4>
+                          <p className="text-sm text-muted-foreground">{option.description}</p>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
+                </TabsContent>
+                <TabsContent value="exchange">
+                  <div className="text-center py-8">
+                    <div className="p-4 rounded-lg bg-primary/10 inline-block mb-4">
+                      <Building2 className="h-12 w-12 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Exchange Targeting</h3>
+                    <p className="text-muted-foreground mb-4">Target wallets that interact with specific exchanges.</p>
+                    <Button onClick={() => setSelectedOption("exchange")}>
+                      Select Exchange Targeting
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="category">
+                  <div className="text-center py-8">
+                    <div className="p-4 rounded-lg bg-primary/10 inline-block mb-4">
+                      <Tags className="h-12 w-12 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Category</h3>
+                    <p className="text-muted-foreground mb-4">Target wallets based on token categories.</p>
+                    <Button onClick={() => setSelectedOption("category")}>
+                      Select Category
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="custom">
+                  <div className="text-center py-8">
+                    <div className="p-4 rounded-lg bg-primary/10 inline-block mb-4">
+                      <FileText className="h-12 w-12 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Custom List</h3>
+                    <p className="text-muted-foreground mb-4">Upload your own wallet list for analysis.</p>
+                    <Badge variant="secondary" className="mb-4">Solana compatible</Badge>
+                    <div>
+                      <Button onClick={() => setSelectedOption("custom")}>
+                        Select Custom List
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          {/* OPTION D: Compact Cards */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Option D: Compact Cards</CardTitle>
+              <CardDescription>All options visible in a single row</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {allScanOptions.map((option) => (
+                  <Card
+                    key={option.id}
+                    className={`transition-all hover:border-primary/50 cursor-pointer ${
+                      selectedOption === option.id ? "border-primary ring-2 ring-primary/20" : ""
+                    }`}
+                    onClick={() => setSelectedOption(option.id)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <div className="p-2 rounded-lg bg-primary/10 inline-block mb-2">
+                        <option.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <h4 className="font-medium text-sm leading-tight">{option.title}</h4>
+                      {option.badge && (
+                        <Badge variant="secondary" className="text-[10px] mt-1">{option.badge}</Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
