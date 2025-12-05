@@ -26,6 +26,7 @@ import SalesPitch from "./pages/SalesPitch";
 import SDTerms from "./pages/SDTerms";
 import Sample1 from "./pages/Sample1";
 import StrategyPlaybook from "./pages/StrategyPlaybook";
+import Video from "./pages/Video";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/sdterms" element={<SDTerms />} />
           <Route path="/sample1" element={<Sample1 />} />
           <Route path="/strategy-playbook" element={<StrategyPlaybook />} />
+          <Route path="/video" element={<Video />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
