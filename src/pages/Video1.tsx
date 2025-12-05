@@ -28,6 +28,8 @@ const Video1 = () => {
     { type: "platforms", duration: 4000 },
     { type: "useCases", duration: 4000 },
     { type: "testimonial", duration: 4000 },
+    { type: "socialProofStats", duration: 4000 },
+    { type: "clientLogos", duration: 5000 },
     { type: "pricing", duration: 4000 },
     { type: "cta", duration: 6000 },
   ];
@@ -83,6 +85,8 @@ const Video1 = () => {
       case "platforms": return <PlatformsScene {...sceneProps} />;
       case "useCases": return <UseCasesScene {...sceneProps} />;
       case "testimonial": return <TestimonialScene {...sceneProps} />;
+      case "socialProofStats": return <SocialProofStatsScene {...sceneProps} />;
+      case "clientLogos": return <ClientLogosScene {...sceneProps} />;
       case "pricing": return <PricingScene {...sceneProps} />;
       case "cta": return <CTAScene {...sceneProps} />;
       default: return null;
@@ -611,10 +615,10 @@ const Result3Scene = () => (
   <Scene className="bg-gradient-to-br from-green-50 to-emerald-50">
     <div className="text-center max-w-3xl">
       <div className="text-9xl md:text-[12rem] font-bold text-green-600 mb-4 animate-scale-in">
-        250+
+        314
       </div>
       <h3 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in-up delay-300">
-        Successful Campaigns
+        Campaigns Activated
       </h3>
       <p className="text-xl text-slate-600 animate-fade-in-up delay-500">
         Launched using AudienceScan data
@@ -707,7 +711,111 @@ const TestimonialScene = () => (
   </Scene>
 );
 
-// Scene 21: Pricing
+// Scene 21: Social Proof Stats
+const SocialProofStatsScene = () => (
+  <Scene className="bg-gradient-to-br from-violet-50 to-purple-50">
+    <div className="max-w-5xl">
+      <div className="text-center mb-16">
+        <div className="text-violet-600 text-sm font-bold uppercase tracking-widest mb-6 animate-fade-in">
+          Proven At Scale
+        </div>
+        <h2 className="text-4xl md:text-6xl font-bold animate-fade-in-up delay-200">
+          Trusted by <span className="gradient-text">industry leaders</span>
+        </h2>
+      </div>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="text-center p-10 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up delay-300">
+          <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">$8M+</div>
+          <h3 className="text-2xl font-bold mb-2">Ad Budget Powered</h3>
+          <p className="text-slate-600">In marketing spend managed using AudienceScan data</p>
+        </div>
+        <div className="text-center p-10 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up delay-500">
+          <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">314</div>
+          <h3 className="text-2xl font-bold mb-2">Campaigns Activated</h3>
+          <p className="text-slate-600">Successful campaigns launched with our targeting data</p>
+        </div>
+      </div>
+    </div>
+  </Scene>
+);
+
+// Scene 22: Client Logos
+const ClientLogosScene = () => {
+  const tier1 = ["BitMEX", "OKX", "PrimeXBT", "FXTM", "Alpari", "CoinChange", "Syscoin", "Flare Network"];
+  const tier2 = ["Mantra DAO", "MintLayer", "Semetrix", "TronPad", "Vabble", "Vent Finance", "Realms of Ethernity", "Synesis One", "Moonstake", "NFTrade", "Guild of Guardians", "Hume"];
+  const tier3 = ["Axion", "WAM", "Luxy", "SharkRace", "Soma"];
+  
+  return (
+    <Scene>
+      <div className="max-w-6xl">
+        <div className="text-center mb-12">
+          <div className="text-violet-600 text-sm font-bold uppercase tracking-widest mb-4 animate-fade-in">
+            Our Clients
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold animate-fade-in-up delay-100">
+            Powering <span className="gradient-text">Web3's best</span>
+          </h2>
+        </div>
+        
+        {/* Tier 1 - Exchanges & Major Platforms */}
+        <div className="mb-8 animate-fade-in-up delay-200">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-yellow-500 text-xl">🥇</span>
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Exchanges & Major Platforms</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {tier1.map((client, i) => (
+              <div 
+                key={i}
+                className="px-5 py-2.5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border border-yellow-200 font-semibold text-slate-800"
+              >
+                {client}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Tier 2 - Established Web3 Projects */}
+        <div className="mb-8 animate-fade-in-up delay-400">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-slate-400 text-xl">🥈</span>
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Established Web3 Projects</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {tier2.map((client, i) => (
+              <div 
+                key={i}
+                className="px-4 py-2 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-700 text-sm"
+              >
+                {client}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Tier 3 - Additional Projects */}
+        <div className="animate-fade-in-up delay-600">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-amber-600 text-xl">🔥</span>
+            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider">And Many More</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {tier3.map((client, i) => (
+              <div 
+                key={i}
+                className="px-4 py-2 bg-slate-50/50 rounded-lg border border-slate-100 font-medium text-slate-500 text-sm"
+              >
+                {client}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Scene>
+  );
+};
+
+// Scene 23: Pricing
 const PricingScene = () => (
   <Scene>
     <div className="max-w-3xl text-center">
@@ -735,7 +843,7 @@ const CTAScene = () => (
         perfect audience?
       </h2>
       <p className="text-xl text-white/80 mb-12 animate-fade-in-up delay-200">
-        Join 250+ Web3 teams using on-chain intelligence
+        Join 300+ Web3 teams powering $8M+ in ad spend
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-400">
         <a
