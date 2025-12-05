@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logoWhite from "@/assets/audiencescan-logo-white.png";
 
 const Video = () => {
   const [currentScene, setCurrentScene] = useState(0);
@@ -172,7 +173,7 @@ const IntroScene = () => (
     <div className="text-center">
       <div className="mb-8 animate-fade-in-up">
         <img 
-          src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png" 
+          src={logoWhite} 
           alt="AudienceScan" 
           className="h-12 mx-auto"
         />
@@ -384,7 +385,7 @@ const CTAScene = () => (
     <div className="max-w-4xl mx-auto text-center">
       <div className="mb-8 animate-fade-in-up">
         <img 
-          src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png" 
+          src={logoWhite} 
           alt="AudienceScan" 
           className="h-10 mx-auto"
         />
