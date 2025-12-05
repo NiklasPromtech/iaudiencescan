@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 const Video = () => {
   const [currentScene, setCurrentScene] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(true);
 
   const scenes = [
     { type: "intro" },
@@ -15,6 +16,8 @@ const Video = () => {
   ];
 
   useEffect(() => {
+    if (!autoPlay) return;
+    
     // Auto-advance scenes
     const sceneTimer = setInterval(() => {
       setCurrentScene((prev) => {
@@ -24,9 +27,10 @@ const Video = () => {
     }, 6000);
 
     return () => clearInterval(sceneTimer);
-  }, []);
+  }, [autoPlay]);
 
-  const goToScene = (index: number) => {
+  const goToScene = (index: number, pauseAutoPlay = false) => {
+    if (pauseAutoPlay) setAutoPlay(false);
     if (index === currentScene) return;
     setIsTransitioning(true);
     setTimeout(() => {
@@ -42,7 +46,7 @@ const Video = () => {
         {scenes.map((_, index) => (
           <button
             key={index}
-            onClick={() => goToScene(index)}
+            onClick={() => goToScene(index, true)}
             className="flex-1 h-1 rounded-full overflow-hidden bg-white/20 cursor-pointer"
           >
             <div
@@ -58,7 +62,7 @@ const Video = () => {
 
       {/* Navigation Arrows */}
       <button
-        onClick={() => goToScene(Math.max(0, currentScene - 1))}
+        onClick={() => goToScene(Math.max(0, currentScene - 1), true)}
         className="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-30"
         disabled={currentScene === 0}
       >
@@ -67,7 +71,7 @@ const Video = () => {
         </svg>
       </button>
       <button
-        onClick={() => goToScene(Math.min(scenes.length - 1, currentScene + 1))}
+        onClick={() => goToScene(Math.min(scenes.length - 1, currentScene + 1), true)}
         className="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-30"
         disabled={currentScene === scenes.length - 1}
       >
@@ -108,7 +112,7 @@ const Video = () => {
         {scenes.map((_, index) => (
           <button
             key={index}
-            onClick={() => goToScene(index)}
+            onClick={() => goToScene(index, true)}
             className={`h-2 rounded-full transition-all duration-300 ${
               currentScene === index ? "bg-primary w-8" : "bg-white/30 hover:bg-white/50 w-2"
             }`}
