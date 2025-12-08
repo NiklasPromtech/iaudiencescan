@@ -28,6 +28,7 @@ import Sample1 from "./pages/Sample1";
 import StrategyPlaybook from "./pages/StrategyPlaybook";
 import Video from "./pages/Video";
 import Video1 from "./pages/Video1";
+import VideoWhite from "./pages/VideoWhite";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/strategy-playbook" element={<StrategyPlaybook />} />
           <Route path="/video" element={<Video />} />
           <Route path="/video1" element={<Video1 />} />
+          <Route path="/video/white" element={<VideoWhite />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
