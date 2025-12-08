@@ -141,16 +141,13 @@ const VideoWhite = () => {
         .animate-scroll-hint {
           animation: scroll-hint 1.5s ease-in-out infinite;
         }
-        .animate-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-fade-in-scale { animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .delay-100 { animation-delay: 0.1s; opacity: 0; }
-        .delay-200 { animation-delay: 0.2s; opacity: 0; }
-        .delay-300 { animation-delay: 0.3s; opacity: 0; }
-        .delay-400 { animation-delay: 0.4s; opacity: 0; }
-        .delay-500 { animation-delay: 0.5s; opacity: 0; }
-        .delay-600 { animation-delay: 0.6s; opacity: 0; }
+        /* Base state - always invisible until animation runs */
+        .anim-base { opacity: 0; }
+        /* Active animations */
+        .anim-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-fade-in-scale { animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .material-icons-outlined {
           font-family: 'Material Icons Outlined';
           font-weight: normal;
@@ -213,20 +210,26 @@ interface SceneProps {
 
 const IntroScene = ({ isActive }: SceneProps) => (
   <div className="text-center max-w-4xl mx-auto px-6">
-    <div className={`mb-8 ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <div className={`mb-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100 mb-8">
         <span className="material-icons-outlined text-violet-600" style={{ fontSize: '18px' }}>auto_awesome</span>
         <span className="text-violet-700 font-medium text-sm">On-Chain Intelligence Platform</span>
       </div>
     </div>
-    <h1 className={`text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight leading-[0.95] ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h1 
+      className={`text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight leading-[0.95] anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       <span className="bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 bg-clip-text text-transparent">
         Find Your Perfect
       </span>
       <br />
       <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">Web3 Audience</span>
     </h1>
-    <p className={`text-xl md:text-2xl text-slate-500 font-light max-w-2xl mx-auto leading-relaxed ${isActive ? 'animate-fade-in-up delay-400' : 'opacity-0'}`}>
+    <p 
+      className={`text-xl md:text-2xl text-slate-500 font-light max-w-2xl mx-auto leading-relaxed anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.3s' : '0s' }}
+    >
       Use on-chain data to reach users through community targeting
     </p>
   </div>
@@ -234,10 +237,13 @@ const IntroScene = ({ isActive }: SceneProps) => (
 
 const ProblemScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto text-center px-6">
-    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       The Problem
     </p>
-    <h2 className={`text-4xl md:text-6xl font-bold mb-16 leading-tight ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h2 
+      className={`text-4xl md:text-6xl font-bold mb-16 leading-tight anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       90% of Web3 marketing<br />
       <span className="text-slate-300">misses its target audience</span>
     </h2>
@@ -248,7 +254,8 @@ const ProblemScene = ({ isActive }: SceneProps) => (
       ].map((item, i) => (
         <div
           key={i}
-          className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl p-8 ${isActive ? (i === 0 ? 'animate-slide-in-left delay-400' : 'animate-slide-in-right delay-500') : 'opacity-0'}`}
+          className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl p-8 anim-base ${isActive ? (i === 0 ? 'anim-slide-in-left' : 'anim-slide-in-right') : ''}`}
+          style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
         >
           <div className="flex items-start gap-4">
             <div className={`w-12 h-12 rounded-xl bg-white/80 border ${item.border} flex items-center justify-center shrink-0`}>
@@ -264,16 +271,25 @@ const ProblemScene = ({ isActive }: SceneProps) => (
 
 const SolutionScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto text-center px-6">
-    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       The Solution
     </p>
-    <h2 className={`text-4xl md:text-6xl font-bold mb-6 leading-tight ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h2 
+      className={`text-4xl md:text-6xl font-bold mb-6 leading-tight anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       Community targeting powered<br />by on-chain data
     </h2>
-    <p className={`text-lg text-slate-500 mb-14 max-w-2xl mx-auto ${isActive ? 'animate-fade-in-up delay-300' : 'opacity-0'}`}>
+    <p 
+      className={`text-lg text-slate-500 mb-14 max-w-2xl mx-auto anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.25s' : '0s' }}
+    >
       AudienceScan analyzes on-chain behavior to help you reach users through community targeting
     </p>
-    <div className={`relative ${isActive ? 'animate-fade-in-scale delay-500' : 'opacity-0'}`}>
+    <div 
+      className={`relative anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+      style={{ animationDelay: isActive ? '0.4s' : '0s' }}
+    >
       <div className="bg-white border border-slate-200 rounded-2xl p-10 shadow-xl shadow-slate-200/40">
         <div className="flex items-center justify-center gap-4 md:gap-10 flex-wrap md:flex-nowrap">
           <div className="text-center group">
@@ -308,10 +324,13 @@ const SolutionScene = ({ isActive }: SceneProps) => (
 
 const HowItWorksScene = ({ isActive }: SceneProps) => (
   <div className="max-w-6xl mx-auto px-6">
-    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       How It Works
     </p>
-    <h2 className={`text-4xl md:text-5xl font-bold mb-14 text-center ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h2 
+      className={`text-4xl md:text-5xl font-bold mb-14 text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       Three simple steps
     </h2>
     <div className="grid md:grid-cols-3 gap-5">
@@ -346,8 +365,8 @@ const HowItWorksScene = ({ isActive }: SceneProps) => (
       ].map((item, i) => (
         <div
           key={i}
-          className={`relative bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl p-7 overflow-hidden ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}
-          style={{ animationDelay: `${0.3 + i * 0.1}s` }}
+          className={`relative bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl p-7 overflow-hidden anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+          style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
         >
           <div className="relative z-10">
             <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${item.accent} mb-5`}>
@@ -364,10 +383,13 @@ const HowItWorksScene = ({ isActive }: SceneProps) => (
 
 const ResultsScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto text-center px-6">
-    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       Real Results
     </p>
-    <h2 className={`text-4xl md:text-6xl font-bold mb-14 ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h2 
+      className={`text-4xl md:text-6xl font-bold mb-14 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       Proven performance
     </h2>
     <div className="grid md:grid-cols-3 gap-6">
@@ -378,8 +400,8 @@ const ResultsScene = ({ isActive }: SceneProps) => (
       ].map((stat, i) => (
         <div
           key={i}
-          className={`bg-white border border-slate-200 rounded-2xl p-8 shadow-lg shadow-slate-100/80 ${isActive ? 'animate-fade-in-scale' : 'opacity-0'}`}
-          style={{ animationDelay: `${0.3 + i * 0.1}s` }}
+          className={`bg-white border border-slate-200 rounded-2xl p-8 shadow-lg shadow-slate-100/80 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+          style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
         >
           <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
             {stat.value}
@@ -394,10 +416,13 @@ const ResultsScene = ({ isActive }: SceneProps) => (
 
 const UseCasesScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto px-6">
-    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       Use Cases
     </p>
-    <h2 className={`text-4xl md:text-5xl font-bold mb-12 text-center ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <h2 
+      className={`text-4xl md:text-5xl font-bold mb-12 text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       Who uses AudienceScan?
     </h2>
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -410,8 +435,8 @@ const UseCasesScene = ({ isActive }: SceneProps) => (
       ].map((item, i) => (
         <div
           key={i}
-          className={`bg-white border border-slate-200 rounded-xl p-5 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/50 transition-all duration-300 ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}
-          style={{ animationDelay: `${0.3 + i * 0.08}s` }}
+          className={`bg-white border border-slate-200 rounded-xl p-5 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100/50 transition-all duration-300 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+          style={{ animationDelay: isActive ? `${0.3 + i * 0.08}s` : '0s' }}
         >
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-50 to-purple-100 border border-violet-100 flex items-center justify-center shrink-0">
@@ -430,14 +455,20 @@ const UseCasesScene = ({ isActive }: SceneProps) => (
 
 const CTAScene = ({ isActive }: SceneProps) => (
   <div className="text-center max-w-3xl mx-auto px-6">
-    <h2 className={`text-4xl md:text-6xl font-bold mb-6 ${isActive ? 'animate-fade-in-up' : 'opacity-0'}`}>
+    <h2 className={`text-4xl md:text-6xl font-bold mb-6 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
       Ready to find your<br />
       <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">perfect audience?</span>
     </h2>
-    <p className={`text-lg text-slate-500 mb-10 ${isActive ? 'animate-fade-in-up delay-200' : 'opacity-0'}`}>
+    <p 
+      className={`text-lg text-slate-500 mb-10 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
       Join leading Web3 teams using on-chain intelligence
     </p>
-    <div className={`flex flex-col sm:flex-row gap-4 justify-center ${isActive ? 'animate-fade-in-up delay-400' : 'opacity-0'}`}>
+    <div 
+      className={`flex flex-col sm:flex-row gap-4 justify-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.3s' : '0s' }}
+    >
       <a
         href="https://app.audiencescan.xyz"
         target="_blank"
