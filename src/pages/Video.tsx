@@ -42,6 +42,9 @@ const Video = () => {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
+      {/* Google Material Icons */}
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+      
       {/* Progress Bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex gap-1 p-4">
         {scenes.map((_, index) => (
@@ -157,6 +160,22 @@ const Video = () => {
         .delay-800 { animation-delay: 0.8s; opacity: 0; }
         .delay-900 { animation-delay: 0.9s; opacity: 0; }
         .delay-1000 { animation-delay: 1s; opacity: 0; }
+        .material-icons-outlined {
+          font-family: 'Material Icons Outlined';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          word-wrap: normal;
+          direction: ltr;
+          -webkit-font-feature-settings: 'liga';
+          font-feature-settings: 'liga';
+          -webkit-font-smoothing: antialiased;
+        }
       `}</style>
     </div>
   );
@@ -200,17 +219,18 @@ const ProblemScene = () => (
         90% of Web3 marketing<br />
         <span className="text-white/40">misses its target audience</span>
       </h2>
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
         {[
-          { icon: "🎯", text: "Targeting based on demographics, not behavior" },
-          { icon: "💸", text: "Wasted ad spend on unqualified audiences" },
-          { icon: "📉", text: "Low conversion rates from cold outreach" },
+          { icon: "person_off", text: "Targeting based on demographics, not behavior" },
+          { icon: "money_off", text: "Wasted ad spend on unqualified audiences" },
         ].map((item, i) => (
           <div
             key={i}
             className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 animate-fade-in-up delay-${400 + i * 200}`}
           >
-            <div className="text-4xl mb-4">{item.icon}</div>
+            <div className="w-16 h-16 rounded-2xl bg-red-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+              <span className="material-icons-outlined text-red-400" style={{ fontSize: '32px' }}>{item.icon}</span>
+            </div>
             <p className="text-white/70">{item.text}</p>
           </div>
         ))}
@@ -226,10 +246,10 @@ const SolutionScene = () => (
         The Solution
       </p>
       <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight animate-fade-in-up delay-200">
-        Target wallets, not demographics
+        Community targeting powered<br />by on-chain data
       </h2>
       <p className="text-xl md:text-2xl text-white/60 mb-16 max-w-3xl mx-auto animate-fade-in-up delay-400">
-        AudienceScan analyzes on-chain behavior to find users who already interact with similar tokens and projects
+        AudienceScan analyzes on-chain behavior to help you reach users through community targeting
       </p>
       <div className="relative animate-fade-in-scale delay-600">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 blur-3xl" />
@@ -237,21 +257,25 @@ const SolutionScene = () => (
           <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap md:flex-nowrap">
             <div className="text-center">
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center mb-4 mx-auto">
-                <span className="text-2xl md:text-3xl">🔗</span>
+                <span className="material-icons-outlined text-primary" style={{ fontSize: '40px' }}>token</span>
               </div>
               <p className="text-white/60 text-sm md:text-base">Your Token</p>
             </div>
-            <div className="text-3xl md:text-4xl text-primary animate-bounce-x">→</div>
+            <div className="text-3xl md:text-4xl text-primary animate-bounce-x">
+              <span className="material-icons-outlined" style={{ fontSize: '40px' }}>arrow_forward</span>
+            </div>
             <div className="text-center">
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 border border-white/30 flex items-center justify-center mb-4 mx-auto">
-                <span className="text-2xl md:text-3xl">🔍</span>
+                <span className="material-icons-outlined text-white/80" style={{ fontSize: '40px' }}>search</span>
               </div>
               <p className="text-white/60 text-sm md:text-base">Scan Holders</p>
             </div>
-            <div className="text-3xl md:text-4xl text-primary animate-bounce-x" style={{ animationDelay: "0.2s" }}>→</div>
+            <div className="text-3xl md:text-4xl text-primary animate-bounce-x" style={{ animationDelay: "0.2s" }}>
+              <span className="material-icons-outlined" style={{ fontSize: '40px' }}>arrow_forward</span>
+            </div>
             <div className="text-center">
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center mb-4 mx-auto">
-                <span className="text-2xl md:text-3xl">🎯</span>
+                <span className="material-icons-outlined text-green-400" style={{ fontSize: '40px' }}>groups</span>
               </div>
               <p className="text-white/60 text-sm md:text-base">Perfect Audience</p>
             </div>
@@ -275,33 +299,41 @@ const HowItWorksScene = () => (
         {[
           {
             step: "01",
-            title: "Scan Any Token",
-            desc: "Enter any token contract address. We analyze all holders and their transaction history.",
+            title: "Scan Wallets",
+            desc: "Find wallets using a ticker, browse by token category, or upload a list of wallets you already have.",
             color: "from-blue-500/20 to-blue-600/10",
+            borderColor: "border-blue-500/30",
+            numColor: "text-blue-400",
           },
           {
             step: "02",
             title: "Find Overlaps",
             desc: "Discover which other tokens, communities, and platforms your target audience engages with.",
             color: "from-purple-500/20 to-purple-600/10",
+            borderColor: "border-purple-500/30",
+            numColor: "text-purple-400",
           },
           {
             step: "03",
             title: "Target Precisely",
             desc: "Export audiences to DV360, X Ads, Telegram, or use for direct outreach campaigns.",
             color: "from-green-500/20 to-green-600/10",
+            borderColor: "border-green-500/30",
+            numColor: "text-green-400",
           },
         ].map((item, i) => (
           <div
             key={i}
-            className={`relative bg-gradient-to-br ${item.color} border border-white/10 rounded-3xl p-8 overflow-hidden animate-fade-in-up`}
+            className={`relative bg-gradient-to-br ${item.color} border ${item.borderColor} rounded-3xl p-8 overflow-hidden animate-fade-in-up`}
             style={{ animationDelay: `${0.4 + i * 0.2}s`, opacity: 0 }}
           >
-            <div className="absolute top-4 right-4 text-6xl font-bold text-white/5">
+            <div className={`absolute top-4 right-4 text-7xl font-black ${item.numColor} opacity-40`}>
               {item.step}
             </div>
             <div className="relative z-10">
-              <div className="text-primary text-sm font-semibold mb-4">STEP {item.step}</div>
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 ${item.borderColor} border mb-4`}>
+                <span className={`text-2xl font-bold ${item.numColor}`}>{item.step}</span>
+              </div>
               <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
               <p className="text-white/60">{item.desc}</p>
             </div>
@@ -358,19 +390,20 @@ const UseCasesScene = () => (
       </h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { icon: "🚀", title: "Token Projects", desc: "Target communities of similar successful tokens" },
-          { icon: "🎤", title: "KOL Researchers", desc: "Discover influential wallet networks" },
-          { icon: "🏗️", title: "Launchpads", desc: "Find aligned holder communities" },
-          { icon: "🔬", title: "Token Researchers", desc: "Deep dive into token holder behavior" },
-          { icon: "🏦", title: "Exchanges", desc: "Evaluate tokens for listing decisions" },
-          { icon: "📢", title: "Marketing Agencies", desc: "Deliver better results for clients" },
+          { icon: "rocket_launch", title: "Token Projects", desc: "Using on-chain data to assist their GTM strategy and outreach", color: "text-orange-400", bg: "bg-orange-500/20", border: "border-orange-500/30" },
+          { icon: "record_voice_over", title: "KOL Researchers", desc: "Discover which communities to look for relevant KOLs", color: "text-pink-400", bg: "bg-pink-500/20", border: "border-pink-500/30" },
+          { icon: "construction", title: "Launchpads", desc: "Figure out which launchpads your or your competitors' holders engage with", color: "text-yellow-400", bg: "bg-yellow-500/20", border: "border-yellow-500/30" },
+          { icon: "account_balance", title: "Exchanges", desc: "Evaluate tokens for listing based on what gets deposited into large CEXs", color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/30" },
+          { icon: "campaign", title: "Marketing Agencies", desc: "Stand out from competition and enhance your pitch with on-chain insights", color: "text-green-400", bg: "bg-green-500/20", border: "border-green-500/30" },
         ].map((item, i) => (
           <div
             key={i}
-            className={`bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors ${i % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
+            className={`${item.bg} border ${item.border} rounded-2xl p-6 hover:bg-white/10 transition-colors ${i % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
             style={{ animationDelay: `${0.3 + i * 0.1}s`, opacity: 0 }}
           >
-            <div className="text-3xl mb-3">{item.icon}</div>
+            <div className={`w-12 h-12 rounded-xl ${item.bg} border ${item.border} flex items-center justify-center mb-3`}>
+              <span className={`material-icons-outlined ${item.color}`} style={{ fontSize: '24px' }}>{item.icon}</span>
+            </div>
             <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
             <p className="text-white/50 text-sm">{item.desc}</p>
           </div>
