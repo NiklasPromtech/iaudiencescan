@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import logoBlack from "@/assets/audiencescan-logo-white.png"; // We'll need a dark logo
 
 const VideoWhite = () => {
   const [currentScene, setCurrentScene] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isScrolling = useRef(false);
+  const isTransitioning = useRef(false);
+  const accumulatedDelta = useRef(0);
+  const lastScrollTime = useRef(0);
 
   const scenes = [
     { type: "intro" },
@@ -16,23 +18,52 @@ const VideoWhite = () => {
     { type: "cta" },
   ];
 
+  const SCROLL_THRESHOLD = 50;
+  const TRANSITION_DURATION = 600;
+  const SCROLL_COOLDOWN = 100;
+
+  const changeScene = useCallback((direction: 'next' | 'prev') => {
+    if (isTransitioning.current) return;
+    
+    setCurrentScene(prev => {
+      const newScene = direction === 'next' 
+        ? Math.min(prev + 1, scenes.length - 1)
+        : Math.max(prev - 1, 0);
+      
+      if (newScene !== prev) {
+        isTransitioning.current = true;
+        setTimeout(() => {
+          isTransitioning.current = false;
+        }, TRANSITION_DURATION);
+      }
+      
+      return newScene;
+    });
+    
+    accumulatedDelta.current = 0;
+  }, [scenes.length]);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
-      if (isScrolling.current) return;
+      if (isTransitioning.current) return;
       
-      isScrolling.current = true;
-      
-      if (e.deltaY > 0 && currentScene < scenes.length - 1) {
-        setCurrentScene(prev => prev + 1);
-      } else if (e.deltaY < 0 && currentScene > 0) {
-        setCurrentScene(prev => prev - 1);
+      const now = Date.now();
+      if (now - lastScrollTime.current < SCROLL_COOLDOWN) {
+        accumulatedDelta.current += e.deltaY;
+      } else {
+        accumulatedDelta.current = e.deltaY;
       }
+      lastScrollTime.current = now;
       
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 800);
+      if (Math.abs(accumulatedDelta.current) >= SCROLL_THRESHOLD) {
+        if (accumulatedDelta.current > 0) {
+          changeScene('next');
+        } else {
+          changeScene('prev');
+        }
+      }
     };
 
     const container = containerRef.current;
@@ -45,7 +76,7 @@ const VideoWhite = () => {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [currentScene, scenes.length]);
+  }, [changeScene]);
 
   // Touch support for mobile
   const touchStart = useRef(0);
@@ -55,44 +86,48 @@ const VideoWhite = () => {
       touchStart.current = e.touches[0].clientY;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
     const handleTouchEnd = (e: TouchEvent) => {
-      if (isScrolling.current) return;
+      if (isTransitioning.current) return;
       
       const touchEnd = e.changedTouches[0].clientY;
       const diff = touchStart.current - touchEnd;
       
       if (Math.abs(diff) > 50) {
-        isScrolling.current = true;
-        
-        if (diff > 0 && currentScene < scenes.length - 1) {
-          setCurrentScene(prev => prev + 1);
-        } else if (diff < 0 && currentScene > 0) {
-          setCurrentScene(prev => prev - 1);
+        if (diff > 0) {
+          changeScene('next');
+        } else {
+          changeScene('prev');
         }
-        
-        setTimeout(() => {
-          isScrolling.current = false;
-        }, 800);
       }
     };
 
     const container = containerRef.current;
     if (container) {
       container.addEventListener('touchstart', handleTouchStart, { passive: true });
+      container.addEventListener('touchmove', handleTouchMove, { passive: false });
       container.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
 
     return () => {
       if (container) {
         container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
         container.removeEventListener('touchend', handleTouchEnd);
       }
     };
-  }, [currentScene, scenes.length]);
+  }, [changeScene]);
 
   const goToScene = (index: number) => {
-    if (index === currentScene) return;
+    if (index === currentScene || isTransitioning.current) return;
+    isTransitioning.current = true;
     setCurrentScene(index);
+    setTimeout(() => {
+      isTransitioning.current = false;
+    }, TRANSITION_DURATION);
   };
 
   return (
@@ -167,17 +202,20 @@ const VideoWhite = () => {
       </div>
 
       {/* Scenes Container */}
-      <div className="relative">
+      <div className="relative h-screen">
         {scenes.map((scene, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-all duration-700 ease-out ${
+            className={`absolute inset-0 will-change-transform ${
               currentScene === index 
-                ? 'opacity-100 translate-y-0' 
+                ? 'opacity-100 translate-y-0 pointer-events-auto' 
                 : currentScene > index 
-                  ? 'opacity-0 -translate-y-full' 
-                  : 'opacity-0 translate-y-full'
+                  ? 'opacity-0 -translate-y-[30%] pointer-events-none' 
+                  : 'opacity-0 translate-y-[30%] pointer-events-none'
             }`}
+            style={{
+              transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease-out',
+            }}
           >
             {scene.type === "intro" && <IntroScene isActive={currentScene === index} />}
             {scene.type === "problem" && <ProblemScene isActive={currentScene === index} />}
