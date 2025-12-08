@@ -3,6 +3,7 @@ import overlapResults from "@/assets/overlap-results.png";
 
 const VideoWhite = () => {
   const [currentScene, setCurrentScene] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
   
@@ -32,6 +33,22 @@ const VideoWhite = () => {
     return () => clearInterval(transactionInterval);
   }, []);
 
+  // Track scroll progress for parallax
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight - container.clientHeight;
+      const progress = scrollTop / scrollHeight;
+      setScrollProgress(progress);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const scenes = [
     { type: "intro" },
     { type: "liveStats" },
@@ -40,6 +57,7 @@ const VideoWhite = () => {
     { type: "ahaOverlap" },
     { type: "scanTypes" },
     { type: "howItWorks" },
+    { type: "benefits" },
     { type: "results" },
     { type: "socialProof" },
     { type: "useCases" },
@@ -114,12 +132,56 @@ const VideoWhite = () => {
         </div>
       </div>
 
-      {/* Subtle Background */}
+      {/* Parallax Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Base gradient */}
         <div 
           className="absolute inset-0"
           style={{
             background: "radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.03) 0%, transparent 50%)",
+          }}
+        />
+        
+        {/* Floating shapes with parallax */}
+        <div 
+          className="absolute w-96 h-96 rounded-full bg-gradient-to-br from-violet-200/20 to-purple-300/10 blur-3xl"
+          style={{
+            top: `${10 - scrollProgress * 30}%`,
+            right: `${-10 + scrollProgress * 20}%`,
+            transform: `translateY(${scrollProgress * -100}px) scale(${1 + scrollProgress * 0.3})`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        />
+        <div 
+          className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-blue-200/15 to-cyan-200/10 blur-3xl"
+          style={{
+            bottom: `${20 - scrollProgress * 40}%`,
+            left: `${-5 + scrollProgress * 15}%`,
+            transform: `translateY(${scrollProgress * 150}px) scale(${1 + scrollProgress * 0.2})`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        />
+        <div 
+          className="absolute w-64 h-64 rounded-full bg-gradient-to-bl from-emerald-200/10 to-teal-200/10 blur-3xl"
+          style={{
+            top: `${50 + scrollProgress * 20}%`,
+            right: `${20 - scrollProgress * 10}%`,
+            transform: `translateY(${scrollProgress * -80}px)`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        />
+        
+        {/* Grid pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(139, 92, 246, 1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(139, 92, 246, 1) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+            transform: `translateY(${scrollProgress * -50}px)`,
+            transition: 'transform 0.1s ease-out',
           }}
         />
       </div>
@@ -239,6 +301,8 @@ const SceneContent = ({ type, isActive, wallets, transactions, tokens }: SceneCo
       return <ScanTypesScene isActive={isActive} />;
     case "howItWorks":
       return <HowItWorksScene isActive={isActive} />;
+    case "benefits":
+      return <BenefitsScene isActive={isActive} />;
     case "results":
       return <ResultsScene isActive={isActive} />;
     case "socialProof":
@@ -566,6 +630,72 @@ const HowItWorksScene = ({ isActive }: SceneProps) => (
     </div>
   </div>
 );
+
+const BenefitsScene = ({ isActive }: SceneProps) => {
+  const benefits = [
+    { 
+      icon: "gps_fixed", 
+      title: "Stop Guessing", 
+      desc: "Target wallets that actually transact with tokens like yours",
+      color: "text-blue-600",
+      bg: "from-blue-50 to-sky-50",
+      border: "border-blue-100"
+    },
+    { 
+      icon: "verified", 
+      title: "Proven Communities", 
+      desc: "Find overlap between your holders and other successful projects",
+      color: "text-emerald-600",
+      bg: "from-emerald-50 to-green-50",
+      border: "border-emerald-100"
+    },
+    { 
+      icon: "bolt", 
+      title: "2-3 Minutes", 
+      desc: "Get actionable audience data faster than testing a single ad",
+      color: "text-amber-600",
+      bg: "from-amber-50 to-orange-50",
+      border: "border-amber-100"
+    },
+    { 
+      icon: "savings", 
+      title: "Avoid Waste", 
+      desc: "$199 vs $5,000+ in wasted ad spend on bad audiences",
+      color: "text-violet-600",
+      bg: "from-violet-50 to-purple-50",
+      border: "border-violet-100"
+    },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto px-6">
+      <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+        Why AudienceScan
+      </p>
+      <h2 
+        className={`text-4xl md:text-5xl font-bold mb-14 text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+      >
+        Benefits that matter
+      </h2>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {benefits.map((benefit, i) => (
+          <div
+            key={i}
+            className={`bg-gradient-to-br ${benefit.bg} border ${benefit.border} rounded-2xl p-6 text-center anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+            style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
+          >
+            <div className={`w-14 h-14 rounded-xl bg-white/80 border ${benefit.border} flex items-center justify-center mb-4 mx-auto`}>
+              <span className={`material-icons-outlined ${benefit.color}`} style={{ fontSize: '28px' }}>{benefit.icon}</span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">{benefit.title}</h3>
+            <p className="text-slate-600 text-sm leading-relaxed">{benefit.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ResultsScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto text-center px-6">
