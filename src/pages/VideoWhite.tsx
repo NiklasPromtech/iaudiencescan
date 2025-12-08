@@ -100,8 +100,39 @@ const VideoWhite = () => {
       {/* Google Material Icons */}
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
       
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+              <span className="material-icons-outlined text-white" style={{ fontSize: '18px' }}>radar</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent group-hover:from-violet-600 group-hover:to-purple-600 transition-all duration-300">
+              AudienceScan
+            </span>
+          </a>
+          
+          {/* CTA Button */}
+          <a
+            href="https://app.audiencescan.io/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 transition-all duration-300"
+            onClick={() => {
+              try {
+                (window as any).gtag_report_conversion?.('https://app.audiencescan.io/');
+              } catch (e) {}
+            }}
+          >
+            <span>Launch App</span>
+            <span className="material-icons-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
+          </a>
+        </div>
+      </header>
+      
       {/* Scene Counter - Fixed */}
-      <div className="fixed top-6 right-6 z-50 text-sm font-medium text-slate-400 tabular-nums">
+      <div className="fixed top-6 right-24 z-40 text-sm font-medium text-slate-400 tabular-nums">
         {String(currentScene + 1).padStart(2, '0')} / {String(scenes.length).padStart(2, '0')}
       </div>
 
@@ -218,20 +249,29 @@ const VideoWhite = () => {
 
       <style>{`
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.96); }
+          from { opacity: 0; transform: scale(0.92); }
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes slideInLeft {
-          from { opacity: 0; transform: translateX(-30px); }
+          from { opacity: 0; transform: translateX(-40px); }
           to { opacity: 1; transform: translateX(0); }
         }
         @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(30px); }
+          from { opacity: 0; transform: translateX(40px); }
           to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeInBlur {
+          from { opacity: 0; filter: blur(10px); transform: translateY(20px); }
+          to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        @keyframes popIn {
+          0% { opacity: 0; transform: scale(0.8); }
+          70% { transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
         }
         @keyframes scroll-hint {
           0%, 100% { transform: translateY(0); opacity: 1; }
@@ -242,11 +282,13 @@ const VideoWhite = () => {
         }
         /* Base state - always invisible until animation runs */
         .anim-base { opacity: 0; }
-        /* Active animations */
-        .anim-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .anim-fade-in-scale { animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .anim-slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .anim-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        /* Active animations with improved timing */
+        .anim-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-fade-in-scale { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-in-left { animation: slideInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-slide-in-right { animation: slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-fade-in-blur { animation: fadeInBlur 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-pop-in { animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .material-icons-outlined {
           font-family: 'Material Icons Outlined';
           font-weight: normal;
@@ -322,28 +364,49 @@ interface SceneProps {
 
 const IntroScene = ({ isActive }: SceneProps) => (
   <div className="text-center max-w-4xl mx-auto px-6">
-    <div className={`mb-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
-      <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100 mb-8">
+    <div 
+      className={`mb-6 anim-base ${isActive ? 'anim-pop-in' : ''}`}
+      style={{ animationDelay: isActive ? '0s' : '0s' }}
+    >
+      <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100">
         <span className="material-icons-outlined text-violet-600" style={{ fontSize: '18px' }}>auto_awesome</span>
         <span className="text-violet-700 font-medium text-sm">On-Chain Intelligence Platform</span>
       </div>
     </div>
-    <h1 
-      className={`text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight leading-[0.95] anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
-      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
-    >
-      <span className="bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 bg-clip-text text-transparent">
+    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight leading-[0.95]">
+      <span 
+        className={`block bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 bg-clip-text text-transparent anim-base ${isActive ? 'anim-fade-in-blur' : ''}`}
+        style={{ animationDelay: isActive ? '0.1s' : '0s' }}
+      >
         Find Your Perfect
       </span>
-      <br />
-      <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">Web3 Audience</span>
+      <span 
+        className={`block bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent anim-base ${isActive ? 'anim-fade-in-blur' : ''}`}
+        style={{ animationDelay: isActive ? '0.25s' : '0s' }}
+      >
+        Web3 Audience
+      </span>
     </h1>
     <p 
       className={`text-xl md:text-2xl text-slate-500 font-light max-w-2xl mx-auto leading-relaxed anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
-      style={{ animationDelay: isActive ? '0.3s' : '0s' }}
+      style={{ animationDelay: isActive ? '0.4s' : '0s' }}
     >
       Use on-chain data to reach users through community targeting
     </p>
+    <div 
+      className={`mt-10 flex flex-col sm:flex-row gap-4 justify-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.55s' : '0s' }}
+    >
+      <a
+        href="https://app.audiencescan.io/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-violet-200 hover:-translate-y-0.5 transition-all duration-300"
+      >
+        <span>Start Your Scan</span>
+        <span className="material-icons-outlined" style={{ fontSize: '20px' }}>arrow_forward</span>
+      </a>
+    </div>
   </div>
 );
 
@@ -362,12 +425,15 @@ const LiveStatsScene = ({ isActive, wallets, transactions, tokens }: LiveStatsSc
 
   return (
     <div className="max-w-5xl mx-auto text-center px-6">
-      <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+      <p 
+        className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0s' : '0s' }}
+      >
         Live Platform Stats
       </p>
       <h2 
-        className={`text-4xl md:text-5xl font-bold mb-14 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
-        style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+        className={`text-4xl md:text-5xl font-bold mb-14 anim-base ${isActive ? 'anim-fade-in-blur' : ''}`}
+        style={{ animationDelay: isActive ? '0.1s' : '0s' }}
       >
         Powering Web3 intelligence
       </h2>
@@ -375,8 +441,8 @@ const LiveStatsScene = ({ isActive, wallets, transactions, tokens }: LiveStatsSc
         {stats.map((stat, i) => (
           <div
             key={i}
-            className={`bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-8 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
-            style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
+            className={`bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-8 anim-base ${isActive ? 'anim-pop-in' : ''}`}
+            style={{ animationDelay: isActive ? `${0.25 + i * 0.12}s` : '0s' }}
           >
             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 mx-auto">
               <span className="material-icons-outlined text-white" style={{ fontSize: '28px' }}>{stat.icon}</span>
