@@ -51,24 +51,6 @@ const VideoWhite = () => {
       {/* Google Material Icons */}
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
       
-      {/* Progress Bar - Fixed */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex gap-1 p-4 bg-white/90 backdrop-blur-md">
-        {scenes.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToScene(index)}
-            className="flex-1 h-1 rounded-full overflow-hidden bg-slate-200/80 cursor-pointer transition-all hover:bg-slate-300"
-          >
-            <div
-              className="h-full bg-gradient-to-r from-violet-600 to-purple-600 rounded-full transition-all duration-500 ease-out"
-              style={{
-                width: currentScene >= index ? "100%" : "0%",
-              }}
-            />
-          </button>
-        ))}
-      </div>
-
       {/* Scene Counter - Fixed */}
       <div className="fixed top-6 right-6 z-50 text-sm font-medium text-slate-400 tabular-nums">
         {String(currentScene + 1).padStart(2, '0')} / {String(scenes.length).padStart(2, '0')}
