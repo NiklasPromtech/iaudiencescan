@@ -1,16 +1,47 @@
 import { useState, useEffect, useRef } from "react";
+import overlapResults from "@/assets/overlap-results.png";
 
 const VideoWhite = () => {
   const [currentScene, setCurrentScene] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Live stats counters
+  const [wallets, setWallets] = useState(36250);
+  const [transactions, setTransactions] = useState(236000);
+  const [tokens, setTokens] = useState(52750);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWallets(prev => prev + Math.floor(Math.random() * 3) + 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const tokensInterval = setInterval(() => {
+      setTokens(prev => prev + Math.floor(Math.random() * 2) + 1);
+    }, 1000);
+    return () => clearInterval(tokensInterval);
+  }, []);
+
+  useEffect(() => {
+    const transactionInterval = setInterval(() => {
+      setTransactions(prev => prev + 1);
+    }, 100);
+    return () => clearInterval(transactionInterval);
+  }, []);
 
   const scenes = [
     { type: "intro" },
+    { type: "liveStats" },
     { type: "problem" },
     { type: "solution" },
+    { type: "ahaOverlap" },
+    { type: "scanTypes" },
     { type: "howItWorks" },
     { type: "results" },
+    { type: "socialProof" },
     { type: "useCases" },
     { type: "cta" },
   ];
@@ -112,7 +143,13 @@ const VideoWhite = () => {
               scrollSnapStop: "always",
             }}
           >
-            <SceneContent type={scene.type} isActive={currentScene === index} />
+            <SceneContent 
+              type={scene.type} 
+              isActive={currentScene === index} 
+              wallets={wallets}
+              transactions={transactions}
+              tokens={tokens}
+            />
           </div>
         ))}
       </div>
@@ -181,20 +218,31 @@ const VideoWhite = () => {
 interface SceneContentProps {
   type: string;
   isActive: boolean;
+  wallets?: number;
+  transactions?: number;
+  tokens?: number;
 }
 
-const SceneContent = ({ type, isActive }: SceneContentProps) => {
+const SceneContent = ({ type, isActive, wallets, transactions, tokens }: SceneContentProps) => {
   switch (type) {
     case "intro":
       return <IntroScene isActive={isActive} />;
+    case "liveStats":
+      return <LiveStatsScene isActive={isActive} wallets={wallets!} transactions={transactions!} tokens={tokens!} />;
     case "problem":
       return <ProblemScene isActive={isActive} />;
     case "solution":
       return <SolutionScene isActive={isActive} />;
+    case "ahaOverlap":
+      return <AhaOverlapScene isActive={isActive} />;
+    case "scanTypes":
+      return <ScanTypesScene isActive={isActive} />;
     case "howItWorks":
       return <HowItWorksScene isActive={isActive} />;
     case "results":
       return <ResultsScene isActive={isActive} />;
+    case "socialProof":
+      return <SocialProofScene isActive={isActive} />;
     case "useCases":
       return <UseCasesScene isActive={isActive} />;
     case "cta":
@@ -234,6 +282,51 @@ const IntroScene = ({ isActive }: SceneProps) => (
     </p>
   </div>
 );
+
+interface LiveStatsSceneProps extends SceneProps {
+  wallets: number;
+  transactions: number;
+  tokens: number;
+}
+
+const LiveStatsScene = ({ isActive, wallets, transactions, tokens }: LiveStatsSceneProps) => {
+  const stats = [
+    { value: wallets.toLocaleString(), label: "Wallets analysed", icon: "account_balance_wallet" },
+    { value: transactions.toLocaleString(), label: "Transactions analysed", icon: "receipt_long" },
+    { value: tokens.toLocaleString(), label: "Tokens found", icon: "token" },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto text-center px-6">
+      <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+        Live Platform Stats
+      </p>
+      <h2 
+        className={`text-4xl md:text-5xl font-bold mb-14 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+      >
+        Powering Web3 intelligence
+      </h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        {stats.map((stat, i) => (
+          <div
+            key={i}
+            className={`bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-8 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+            style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center mb-4 mx-auto">
+              <span className="material-icons-outlined text-white" style={{ fontSize: '28px' }}>{stat.icon}</span>
+            </div>
+            <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2 tabular-nums">
+              {stat.value}
+            </div>
+            <div className="text-slate-600 font-medium">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ProblemScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto text-center px-6">
@@ -321,6 +414,99 @@ const SolutionScene = ({ isActive }: SceneProps) => (
     </div>
   </div>
 );
+
+const AhaOverlapScene = ({ isActive }: SceneProps) => (
+  <div className="max-w-5xl mx-auto text-center px-6">
+    <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+      The "Aha" Moment
+    </p>
+    <h2 
+      className={`text-4xl md:text-5xl font-bold mb-6 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+    >
+      See who your holders <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">actually follow</span>
+    </h2>
+    <p 
+      className={`text-lg text-slate-500 mb-10 max-w-2xl mx-auto anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+      style={{ animationDelay: isActive ? '0.25s' : '0s' }}
+    >
+      Discover surprising tokens and communities your holders engage with. Compare overlap vs generic targeting.
+    </p>
+    <div 
+      className={`rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+      style={{ animationDelay: isActive ? '0.4s' : '0s' }}
+    >
+      <img 
+        src={overlapResults} 
+        alt="AudienceScan overlap results showing Twitter, Telegram, Reddit and Tags data with affinity scores"
+        className="w-full h-auto"
+      />
+    </div>
+  </div>
+);
+
+const ScanTypesScene = ({ isActive }: SceneProps) => {
+  const scanTypes = [
+    { 
+      icon: "currency_exchange", 
+      title: "Token Transactors", 
+      desc: "Select a token and scan wallets that actively transfer it",
+      image: "/lovable-uploads/token-transactors.png"
+    },
+    { 
+      icon: "account_balance_wallet", 
+      title: "Token Holders", 
+      desc: "Select a token and scan wallets that currently hold it",
+      image: "/lovable-uploads/token-holders.png"
+    },
+    { 
+      icon: "list_alt", 
+      title: "List of Wallets", 
+      desc: "Upload your own wallet list and we'll scan those specific wallets",
+      image: "/lovable-uploads/list-of-wallets.png"
+    },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto px-6">
+      <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+        3 Types of Scans
+      </p>
+      <h2 
+        className={`text-4xl md:text-5xl font-bold mb-12 text-center anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+      >
+        Choose how you want to <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">analyze</span>
+      </h2>
+      <div className="grid md:grid-cols-3 gap-6">
+        {scanTypes.map((type, i) => (
+          <div
+            key={i}
+            className={`bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-violet-200 transition-all duration-300 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+            style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
+          >
+            <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-center">
+              <img 
+                src={type.image} 
+                alt={`${type.title} interface screenshot`}
+                className="w-full max-w-[220px] h-auto object-contain"
+              />
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-100 border border-violet-100 flex items-center justify-center">
+                  <span className="material-icons-outlined text-violet-600" style={{ fontSize: '20px' }}>{type.icon}</span>
+                </div>
+                <h3 className="font-bold text-slate-900">{type.title}</h3>
+              </div>
+              <p className="text-slate-500 text-sm leading-relaxed">{type.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const HowItWorksScene = ({ isActive }: SceneProps) => (
   <div className="max-w-6xl mx-auto px-6">
@@ -413,6 +599,66 @@ const ResultsScene = ({ isActive }: SceneProps) => (
     </div>
   </div>
 );
+
+const SocialProofScene = ({ isActive }: SceneProps) => {
+  const clients = [
+    "BitMEX", "OKX", "PrimeXBT", "FXTM", "Alpari", "CoinChange", 
+    "Syscoin", "Flare Network", "Mantra DAO", "MintLayer", "Semetrix", 
+    "TronPad", "Vabble", "Vent Finance"
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto text-center px-6">
+      <p className={`text-violet-600 text-xs font-semibold mb-4 tracking-[0.2em] uppercase anim-base ${isActive ? 'anim-fade-in-up' : ''}`}>
+        Trusted By Leaders
+      </p>
+      <h2 
+        className={`text-4xl md:text-5xl font-bold mb-12 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0.15s' : '0s' }}
+      >
+        Powering top Web3 teams
+      </h2>
+      
+      {/* Key Metrics */}
+      <div className="grid md:grid-cols-2 gap-6 mb-14">
+        {[
+          { value: "$8M+", label: "Ad budget deployed", icon: "payments" },
+          { value: "314", label: "Campaigns activated", icon: "campaign" },
+        ].map((metric, i) => (
+          <div
+            key={i}
+            className={`bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl p-8 text-white anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+            style={{ animationDelay: isActive ? `${0.3 + i * 0.1}s` : '0s' }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center mb-4 mx-auto">
+              <span className="material-icons-outlined" style={{ fontSize: '28px' }}>{metric.icon}</span>
+            </div>
+            <div className="text-5xl md:text-6xl font-bold mb-2">{metric.value}</div>
+            <div className="text-violet-200 font-medium">{metric.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Client Logos */}
+      <div 
+        className={`anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        style={{ animationDelay: isActive ? '0.5s' : '0s' }}
+      >
+        <p className="text-slate-400 text-sm mb-6 uppercase tracking-wider">Trusted by</p>
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+          {clients.map((client, i) => (
+            <span 
+              key={i} 
+              className="text-slate-400 font-medium text-sm hover:text-slate-600 transition-colors"
+            >
+              {client}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const UseCasesScene = ({ isActive }: SceneProps) => (
   <div className="max-w-5xl mx-auto px-6">
