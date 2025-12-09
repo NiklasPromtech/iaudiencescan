@@ -471,9 +471,9 @@ const CategoryTokenSelectionStage = ({
           animationFillMode: 'forwards'
         }}
       >
-        {/* Gradient overlays for depth effect */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        {/* Subtle gradient overlays for depth effect - transparent not black */}
+        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
         
         {/* Selection highlight bar */}
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 z-5 rounded-lg" />
@@ -491,16 +491,17 @@ const CategoryTokenSelectionStage = ({
             {memeTokens.map((token, i) => {
               const ITEM_HEIGHT = 80;
               const itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-              const viewCenter = scrollOffset + 140; // 140 = half of 280px container
+              // viewCenter: the list position that's currently at the center of the view
+              // The view center (140px) corresponds to list position: 40 + scrollOffset
+              const viewCenter = 40 + scrollOffset;
               const distanceFromCenter = Math.abs(itemCenter - viewCenter);
               const isSelected = selectedToken?.symbol === token.symbol;
-              const isNearCenter = distanceFromCenter < ITEM_HEIGHT;
               
               // Calculate opacity and scale based on distance from center
               const maxDistance = ITEM_HEIGHT * 2;
               const normalizedDistance = Math.min(distanceFromCenter, maxDistance) / maxDistance;
-              const opacity = 1 - normalizedDistance * 0.7;
-              const scale = 1 - normalizedDistance * 0.15;
+              const opacity = 1 - normalizedDistance * 0.6;
+              const scale = 1 - normalizedDistance * 0.12;
               
               return (
                 <div
