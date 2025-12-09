@@ -870,41 +870,48 @@ const tokenLogos = [
   "https://s2.coinmarketcap.com/static/img/coins/128x128/35934.png",
 ];
 
-// Ring configuration with horizontal stretch: [startIndex, count, radiusX, radiusY, tokenSize, opacity]
-const rings = [
-  { start: 0, count: 8, radiusX: 28, radiusY: 18, size: 36, opacity: 1 },
-  { start: 8, count: 14, radiusX: 42, radiusY: 26, size: 30, opacity: 0.85 },
-  { start: 22, count: 20, radiusX: 56, radiusY: 34, size: 24, opacity: 0.7 },
-  { start: 42, count: 28, radiusX: 70, radiusY: 42, size: 20, opacity: 0.55 },
-  { start: 70, count: 30, radiusX: 84, radiusY: 48, size: 16, opacity: 0.4 },
-];
+// Reduced to 30 tokens for reliable performance - 3 rings
+const displayTokens = tokenLogos.slice(0, 30);
 
 // Stage 4: Token Compilation
 const TokenCompilationStage = () => {
-  // Calculate positions for each ring (elliptical - wider than tall)
-  const getTokenPositions = () => {
+  // Fixed container dimensions for consistent positioning
+  const containerWidth = 700;
+  const containerHeight = 350;
+  const centerX = containerWidth / 2;
+  const centerY = containerHeight / 2;
+  
+  // Ring configuration: [count, radiusX, radiusY, tokenSize, opacity]
+  const ringConfig = [
+    { count: 6, radiusX: 80, radiusY: 60, size: 40, opacity: 1 },
+    { count: 10, radiusX: 150, radiusY: 100, size: 32, opacity: 0.85 },
+    { count: 14, radiusX: 240, radiusY: 140, size: 26, opacity: 0.7 },
+  ];
+
+  // Calculate positions
+  const getPositions = () => {
     const positions: { x: number; y: number; size: number; opacity: number; logo: string; delay: number }[] = [];
+    let tokenIndex = 0;
     
-    rings.forEach((ring, ringIndex) => {
-      for (let i = 0; i < ring.count && ring.start + i < tokenLogos.length; i++) {
+    ringConfig.forEach((ring, ringIndex) => {
+      for (let i = 0; i < ring.count && tokenIndex < displayTokens.length; i++) {
         const angle = (i / ring.count) * Math.PI * 2 - Math.PI / 2;
-        const x = 50 + Math.cos(angle) * ring.radiusX;
-        const y = 50 + Math.sin(angle) * ring.radiusY;
         positions.push({
-          x,
-          y,
+          x: centerX + Math.cos(angle) * ring.radiusX,
+          y: centerY + Math.sin(angle) * ring.radiusY,
           size: ring.size,
           opacity: ring.opacity,
-          logo: tokenLogos[ring.start + i],
-          delay: 0.2 + ringIndex * 0.15 + i * 0.02,
+          logo: displayTokens[tokenIndex],
+          delay: 0.2 + ringIndex * 0.2 + i * 0.05,
         });
+        tokenIndex++;
       }
     });
     
     return positions;
   };
 
-  const tokenPositions = getTokenPositions();
+  const tokenPositions = getPositions();
 
   return (
     <div className="max-w-5xl mx-auto text-center">
@@ -918,20 +925,33 @@ const TokenCompilationStage = () => {
         Ranked by how many wallets also transact each token
       </p>
 
-      <div className="relative animate-fade-in-scale delay-300">
-        {/* Token Network Visualization */}
-        <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: "2 / 1" }}>
-          {/* Connection Lines (SVG) */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
+      <div className="relative animate-fade-in-scale delay-300 flex justify-center">
+        {/* Token Network Visualization - Fixed size container */}
+        <div 
+          className="relative"
+          style={{ 
+            width: containerWidth, 
+            height: containerHeight,
+            maxWidth: "100%",
+          }}
+        >
+          {/* Connection Lines (SVG) - using exact pixel positions */}
+          <svg 
+            className="absolute inset-0 pointer-events-none" 
+            width={containerWidth} 
+            height={containerHeight}
+            viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+            style={{ zIndex: 5 }}
+          >
             {tokenPositions.map((pos, i) => (
               <line
                 key={`line-${i}`}
-                x1="50%"
-                y1="50%"
-                x2={`${pos.x}%`}
-                y2={`${pos.y}%`}
-                stroke={`rgba(139, 92, 246, ${pos.opacity * 0.4})`}
-                strokeWidth={pos.size > 30 ? 2 : 1}
+                x1={centerX}
+                y1={centerY}
+                x2={pos.x}
+                y2={pos.y}
+                stroke={`rgba(139, 92, 246, ${pos.opacity * 0.5})`}
+                strokeWidth={pos.size > 35 ? 2 : 1}
                 strokeDasharray="4 4"
                 style={{
                   animation: `flowLine 0.8s ${pos.delay}s ease-out forwards`,
@@ -945,12 +965,13 @@ const TokenCompilationStage = () => {
           <div 
             className="absolute z-30 animate-node-appear"
             style={{
-              left: "50%",
-              top: "50%",
+              left: centerX,
+              top: centerY,
               transform: "translate(-50%, -50%)",
             }}
           >
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center shadow-lg"
+            <div 
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center"
               style={{ boxShadow: "0 0 30px 10px rgba(139, 92, 246, 0.4)" }}
             >
               <img 
@@ -961,14 +982,14 @@ const TokenCompilationStage = () => {
             </div>
           </div>
 
-          {/* Surrounding Tokens in rings */}
+          {/* Surrounding Tokens - using exact pixel positions */}
           {tokenPositions.map((pos, i) => (
             <div
               key={`token-${i}`}
               className="absolute animate-node-appear z-20"
               style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
+                left: pos.x,
+                top: pos.y,
                 transform: "translate(-50%, -50%)",
                 animationDelay: `${pos.delay}s`,
                 opacity: 0,
@@ -991,11 +1012,11 @@ const TokenCompilationStage = () => {
             </div>
           ))}
         </div>
-
-        <p className="text-white/40 animate-fade-in-up mt-4" style={{ animationDelay: "1.5s", opacity: 0 }}>
-          <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
-        </p>
       </div>
+
+      <p className="text-white/40 animate-fade-in-up mt-6" style={{ animationDelay: "1.5s", opacity: 0 }}>
+        <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
+      </p>
     </div>
   );
 };
