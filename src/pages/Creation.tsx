@@ -1193,26 +1193,6 @@ const ValuePropositionStage = ({ onReset }: { onReset: () => void }) => (
         Start Your First Scan
         <span className="material-icons-outlined">arrow_forward</span>
       </a>
-      <button
-        onClick={onReset}
-        className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-lg font-medium transition-colors"
-      >
-        Watch Again
-      </button>
-    </div>
-
-    {/* Trust Indicators */}
-    <div className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in-up delay-600">
-      {[
-        { value: "$8M+", label: "Ad Budget Deployed" },
-        { value: "314", label: "Campaigns Activated" },
-        { value: "250+", label: "Scans Completed" },
-      ].map((stat, i) => (
-        <div key={i} className="text-center">
-          <p className="text-2xl md:text-3xl font-bold text-violet-400">{stat.value}</p>
-          <p className="text-sm text-white/50">{stat.label}</p>
-        </div>
-      ))}
     </div>
   </div>
 );
