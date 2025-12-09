@@ -470,11 +470,13 @@ const CategoryTokenSelectionStage = ({
           animationFillMode: 'forwards'
         }}
       >
-        {/* Selection highlight bar */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 rounded-lg" style={{ zIndex: 5 }} />
-        
         {/* Scroll wheel container */}
         <div className="h-[280px] overflow-hidden relative">
+          {/* Selection highlight bar - positioned inside scroll container */}
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 rounded-lg pointer-events-none" 
+            style={{ zIndex: 10 }} 
+          />
           <div 
             className="absolute w-full"
             style={{ 
