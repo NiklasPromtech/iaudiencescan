@@ -464,7 +464,7 @@ const CategoryTokenSelectionStage = ({
     ) : (
       // Token Selection - iOS-style vertical scroll picker wheel
       <div 
-        className="relative w-full max-w-md mx-auto animate-fade-in"
+        className="relative w-full max-w-md mx-auto animate-fade-in-up"
         style={{ 
           opacity: 0,
           animationDelay: '0.3s',
