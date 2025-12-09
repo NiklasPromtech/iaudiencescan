@@ -706,94 +706,239 @@ const TransactionAnalysisStage = () => (
   </div>
 );
 
+// All 100 token logos for the network visualization
+const tokenLogos = [
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2396.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7083.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3408.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/825.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5994.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/38828.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/32452.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/30171.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/8290.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3816.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/28412.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/24911.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/21416.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5692.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/36281.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/27772.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/4943.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7737.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7672.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/23246.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2348.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/34812.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/1455.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/36510.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/38371.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33038.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5864.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/4705.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/1975.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/1966.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3155.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/10821.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/24594.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/31632.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5617.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/28230.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/21846.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/21707.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/19269.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3029.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/26997.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/37456.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2539.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/18934.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/31185.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/32257.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/23711.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33981.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3717.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/21106.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/1727.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/24478.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/6210.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/21159.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/29471.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7278.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/31494.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/8425.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/9481.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/18679.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/9543.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/10804.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5338.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/1697.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33251.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2394.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/28081.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5176.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/10603.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/6958.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/29420.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/17799.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/9263.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7080.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7725.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/11865.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2341.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/6719.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/28695.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/35364.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/8071.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2092.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/13198.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/6950.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/2765.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3589.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/6747.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/7129.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/11821.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/25147.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/4195.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/5616.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33979.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/9194.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/30494.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33695.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/23494.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/33652.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/3783.png",
+  "https://s2.coinmarketcap.com/static/img/coins/128x128/35934.png",
+];
+
+// Ring configuration: [startIndex, count, radiusPercent, tokenSize, opacity]
+const rings = [
+  { start: 0, count: 8, radius: 22, size: 40, opacity: 1 },
+  { start: 8, count: 14, radius: 34, size: 32, opacity: 0.85 },
+  { start: 22, count: 20, radius: 44, size: 26, opacity: 0.7 },
+  { start: 42, count: 28, radius: 54, size: 22, opacity: 0.55 },
+  { start: 70, count: 30, radius: 64, size: 18, opacity: 0.4 },
+];
+
 // Stage 4: Token Compilation
-const TokenCompilationStage = () => (
-  <div className="max-w-5xl mx-auto text-center">
-    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 5
-    </p>
-    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Token Overlap Results
-    </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Ranked by how many wallets also transact each token
-    </p>
+const TokenCompilationStage = () => {
+  // Calculate positions for each ring
+  const getTokenPositions = () => {
+    const positions: { x: number; y: number; size: number; opacity: number; logo: string; delay: number }[] = [];
+    
+    rings.forEach((ring, ringIndex) => {
+      for (let i = 0; i < ring.count && ring.start + i < tokenLogos.length; i++) {
+        const angle = (i / ring.count) * Math.PI * 2 - Math.PI / 2;
+        const x = 50 + Math.cos(angle) * ring.radius;
+        const y = 50 + Math.sin(angle) * ring.radius;
+        positions.push({
+          x,
+          y,
+          size: ring.size,
+          opacity: ring.opacity,
+          logo: tokenLogos[ring.start + i],
+          delay: 0.2 + ringIndex * 0.15 + i * 0.02,
+        });
+      }
+    });
+    
+    return positions;
+  };
 
-    <div className="relative animate-fade-in-scale delay-300">
-      {/* Token Network Visualization */}
-      <div className="relative h-64 md:h-80 max-w-3xl mx-auto mb-8">
-        {/* Central Node */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center">
-            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png" alt="SHIB" className="w-10 h-10 md:w-12 md:h-12 rounded-full" />
-          </div>
-        </div>
+  const tokenPositions = getTokenPositions();
 
-        {/* Connection Lines (SVG) - Rendered first so they appear behind tokens */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-          {overlapResults.slice(0, 8).map((token, i) => {
-            const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-            const radius = 35;
-            const x = 50 + Math.cos(angle) * radius;
-            const y = 50 + Math.sin(angle) * radius;
-            
-            return (
+  return (
+    <div className="max-w-5xl mx-auto text-center">
+      <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+        Step 5
+      </p>
+      <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+        Token Overlap Results
+      </h2>
+      <p className="text-lg text-white/60 mb-8 animate-fade-in-up delay-200">
+        Ranked by how many wallets also transact each token
+      </p>
+
+      <div className="relative animate-fade-in-scale delay-300">
+        {/* Token Network Visualization */}
+        <div className="relative w-full aspect-square max-w-2xl mx-auto">
+          {/* Connection Lines (SVG) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
+            {tokenPositions.map((pos, i) => (
               <line
-                key={i}
+                key={`line-${i}`}
                 x1="50%"
                 y1="50%"
-                x2={`${x}%`}
-                y2={`${y}%`}
-                stroke={`rgba(139, 92, 246, ${token.score * 0.6})`}
-                strokeWidth={token.score > 0.5 ? 2 : 1}
+                x2={`${pos.x}%`}
+                y2={`${pos.y}%`}
+                stroke={`rgba(139, 92, 246, ${pos.opacity * 0.4})`}
+                strokeWidth={pos.size > 30 ? 2 : 1}
                 strokeDasharray="4 4"
                 style={{
-                  animation: `flowLine 1s ${0.3 + i * 0.1}s ease-out forwards`,
+                  animation: `flowLine 0.8s ${pos.delay}s ease-out forwards`,
                   strokeDashoffset: 100,
                 }}
               />
-            );
-          })}
-        </svg>
+            ))}
+          </svg>
 
-        {/* Surrounding Tokens - All same size for consistent line alignment */}
-        {overlapResults.slice(0, 8).map((token, i) => {
-          const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-          const radius = 35;
-          const x = 50 + Math.cos(angle) * radius;
-          const y = 50 + Math.sin(angle) * radius;
-          // Opacity based on score for visual hierarchy instead of size
-          const opacity = 0.6 + token.score * 0.4;
-          
-          return (
+          {/* Central SHIB Node */}
+          <div 
+            className="absolute z-30 animate-node-appear"
+            style={{
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center shadow-lg"
+              style={{ boxShadow: "0 0 30px 10px rgba(139, 92, 246, 0.4)" }}
+            >
+              <img 
+                src="https://s2.coinmarketcap.com/static/img/coins/128x128/5994.png" 
+                alt="SHIB" 
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full" 
+              />
+            </div>
+          </div>
+
+          {/* Surrounding Tokens in rings */}
+          {tokenPositions.map((pos, i) => (
             <div
-              key={i}
+              key={`token-${i}`}
               className="absolute animate-node-appear z-20"
               style={{
-                left: `${x}%`,
-                top: `${y}%`,
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
                 transform: "translate(-50%, -50%)",
-                animationDelay: `${0.3 + i * 0.1}s`,
+                animationDelay: `${pos.delay}s`,
                 opacity: 0,
               }}
             >
               <div 
-                className="w-12 h-12 rounded-full bg-white/10 border border-violet-500/50 flex items-center justify-center overflow-hidden"
-                style={{ opacity }}
+                className="rounded-full bg-white/10 border border-violet-500/40 flex items-center justify-center overflow-hidden"
+                style={{ 
+                  width: pos.size, 
+                  height: pos.size,
+                  opacity: pos.opacity,
+                }}
               >
-                <img src={token.logo} alt={token.symbol} className="w-full h-full object-cover" />
+                <img 
+                  src={pos.logo} 
+                  alt="" 
+                  className="w-full h-full object-cover" 
+                />
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
 
-      <p className="text-white/40 animate-fade-in-up delay-700">
-        <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
-      </p>
+        <p className="text-white/40 animate-fade-in-up mt-4" style={{ animationDelay: "1.5s", opacity: 0 }}>
+          <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Stage 5: Data Enrichment
 const DataEnrichmentStage = () => (
