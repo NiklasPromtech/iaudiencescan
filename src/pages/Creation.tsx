@@ -30,9 +30,17 @@ const categories = [
 
 const memeTokens: Token[] = [
   { name: "Dogecoin", symbol: "DOGE", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png" },
-  { name: "Shiba Inu", symbol: "SHIB", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png" },
   { name: "Pepe", symbol: "PEPE", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/24478.png" },
+  { name: "Bonk", symbol: "BONK", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/23095.png" },
+  { name: "Pudgy Penguins", symbol: "PENGU", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/34466.png" },
+  { name: "FLOKI", symbol: "FLOKI", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/10804.png" },
+  { name: "Fartcoin", symbol: "FARTCOIN", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/33597.png" },
+  { name: "Shiba Inu", symbol: "SHIB", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png" },
+  { name: "BUILDon", symbol: "B", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/36532.png" },
+  { name: "ApeCoin", symbol: "APE", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/18876.png" },
 ];
+
+const SHIB_INDEX = 6; // Index of Shiba Inu in the array
 
 const overlapResults: OverlapToken[] = [
   { score: 1.0, symbol: "WETH", name: "Wrapped Ether", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/2396.png" },
@@ -55,6 +63,8 @@ const Creation = () => {
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [autoSelectStep, setAutoSelectStep] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto-selection animation for category and token
@@ -72,15 +82,41 @@ const Creation = () => {
     // Move to token selection after 3.5s (give time for category selection animation)
     timers.push(setTimeout(() => {
       setAutoSelectStep(2);
+      // Start the scroll animation
+      setIsScrolling(true);
     }, 4000));
     
-    // Auto-select "Shiba Inu" after tokens are visible (2s after token UI appears)
+    // Animate the scroll wheel to land on Shiba Inu
     timers.push(setTimeout(() => {
-      setAutoSelectStep(3);
-      setSelectedToken(memeTokens[1]); // Shiba Inu
-    }, 6500));
+      const ITEM_HEIGHT = 80; // Height of each token row
+      const targetOffset = SHIB_INDEX * ITEM_HEIGHT;
+      const totalDuration = 2000; // 2 seconds total animation
+      const startTime = Date.now();
+      
+      const animateScroll = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / totalDuration, 1);
+        
+        // Easing function: starts fast, slows down at the end (easeOutCubic)
+        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+        
+        const currentOffset = easeOutCubic * targetOffset;
+        setScrollOffset(currentOffset);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        } else {
+          // Animation complete, select Shiba Inu
+          setAutoSelectStep(3);
+          setSelectedToken(memeTokens[SHIB_INDEX]);
+          setIsScrolling(false);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
+    }, 4500));
     
-    // Move to next stage after selection animation plays (2s after selection)
+    // Move to next stage after selection animation plays
     timers.push(setTimeout(() => {
       setIsAnimating(true);
       setTimeout(() => {
@@ -114,6 +150,8 @@ const Creation = () => {
       setSelectedCategory(null);
       setSelectedToken(null);
       setAutoSelectStep(0);
+      setScrollOffset(0);
+      setIsScrolling(false);
       setIsAnimating(false);
     }, 500);
   };
@@ -180,6 +218,8 @@ const Creation = () => {
             autoSelectStep={autoSelectStep}
             selectedCategory={selectedCategory}
             selectedToken={selectedToken}
+            scrollOffset={scrollOffset}
+            isScrolling={isScrolling}
           />
         )}
         {stage === 1 && selectedToken && <WalletDiscoveryStage token={selectedToken} />}
@@ -364,10 +404,14 @@ const CategoryTokenSelectionStage = ({
   autoSelectStep,
   selectedCategory,
   selectedToken,
+  scrollOffset,
+  isScrolling,
 }: {
   autoSelectStep: number;
   selectedCategory: string | null;
   selectedToken: Token | null;
+  scrollOffset: number;
+  isScrolling: boolean;
 }) => (
   <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
@@ -418,65 +462,98 @@ const CategoryTokenSelectionStage = ({
         })}
       </div>
     ) : (
-      // Token Selection - with fade-in animation starting from hidden
-      <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-        {memeTokens.map((token, i) => {
-          const isShiba = token.symbol === "SHIB";
-          
-          return (
-            <div
-              key={token.symbol}
-              className={`relative rounded-2xl p-6 text-center animate-fade-in-up ${
-                isShiba
-                  ? "bg-violet-600/20 border-2 border-violet-400"
-                  : "bg-white/5 border border-white/10"
-              }`}
-              style={{
-                opacity: 0,
-                animationDelay: `${0.3 + i * 0.1}s`,
-                animationFillMode: "forwards",
-                ...(isShiba ? {} : { opacity: 0.3 }),
-                transform: isShiba ? "scale(1.05)" : "scale(0.95)",
-                boxShadow: isShiba ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
-                transition: "transform 0.4s ease, box-shadow 0.4s ease",
-              }}
-            >
-              {/* Checkmark badge */}
-              {isShiba && (
-                <span className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <span className="material-icons-outlined text-violet-600 text-sm">check</span>
-                </span>
-              )}
+      // Token Selection - iOS-style vertical scroll picker wheel
+      <div 
+        className="relative w-full max-w-md mx-auto animate-fade-in"
+        style={{ 
+          opacity: 0,
+          animationDelay: '0.3s',
+          animationFillMode: 'forwards'
+        }}
+      >
+        {/* Gradient overlays for depth effect */}
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent z-10 pointer-events-none" />
+        
+        {/* Selection highlight bar */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 z-5 rounded-lg" />
+        
+        {/* Scroll wheel container */}
+        <div className="h-[280px] overflow-hidden relative">
+          <div 
+            className="absolute w-full transition-transform"
+            style={{ 
+              transform: `translateY(${100 - scrollOffset}px)`,
+              transitionDuration: isScrolling ? '0ms' : '300ms',
+              transitionTimingFunction: 'ease-out'
+            }}
+          >
+            {memeTokens.map((token, i) => {
+              const ITEM_HEIGHT = 80;
+              const itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+              const viewCenter = scrollOffset + 140; // 140 = half of 280px container
+              const distanceFromCenter = Math.abs(itemCenter - viewCenter);
+              const isSelected = selectedToken?.symbol === token.symbol;
+              const isNearCenter = distanceFromCenter < ITEM_HEIGHT;
               
-              <div className="relative z-10">
-                <div 
-                  className={`mx-auto mb-3 rounded-full overflow-hidden border-2 w-16 h-16 ${
-                    isShiba ? "border-violet-400" : "border-white/10"
-                  }`}
+              // Calculate opacity and scale based on distance from center
+              const maxDistance = ITEM_HEIGHT * 2;
+              const normalizedDistance = Math.min(distanceFromCenter, maxDistance) / maxDistance;
+              const opacity = 1 - normalizedDistance * 0.7;
+              const scale = 1 - normalizedDistance * 0.15;
+              
+              return (
+                <div
+                  key={token.symbol}
+                  className="flex items-center gap-4 px-6 py-4 transition-all duration-150"
+                  style={{
+                    height: `${ITEM_HEIGHT}px`,
+                    opacity: opacity,
+                    transform: `scale(${scale})`,
+                  }}
                 >
-                  <img
-                    src={token.logo}
-                    alt={token.name}
-                    className="w-full h-full rounded-full"
-                  />
-                </div>
-                <h3 className="font-bold mb-1 text-lg text-white">
-                  {token.name}
-                </h3>
-                <p className="text-white/50 text-sm">
-                  ${token.symbol}
-                </p>
-                
-                {/* Selected label */}
-                {isShiba && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-violet-500/20 border border-violet-400/30 rounded-full">
-                    <span className="text-xs text-violet-200 font-medium">Analyzing...</span>
+                  <div 
+                    className={`w-12 h-12 rounded-full overflow-hidden border-2 flex-shrink-0 transition-all duration-300 ${
+                      isSelected ? 'border-violet-400 shadow-lg shadow-violet-500/50' : 'border-white/20'
+                    }`}
+                  >
+                    <img
+                      src={token.logo}
+                      alt={token.name}
+                      className="w-full h-full"
+                    />
                   </div>
-                )}
-              </div>
+                  <div className="flex-1 text-left">
+                    <h3 className={`font-bold text-lg transition-colors duration-300 ${
+                      isSelected ? 'text-white' : 'text-white/80'
+                    }`}>
+                      {token.name}
+                    </h3>
+                    <p className="text-white/50 text-sm">
+                      ${token.symbol}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
+                        <span className="material-icons-outlined text-white text-sm">check</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Selected token info below wheel */}
+        {selectedToken && (
+          <div className="mt-6 text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
+              <span className="text-sm text-violet-200 font-medium">Analyzing {selectedToken.name}...</span>
             </div>
-          );
-        })}
+          </div>
+        )}
       </div>
     )}
   </div>
