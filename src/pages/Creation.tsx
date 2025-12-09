@@ -383,16 +383,16 @@ const CategoryTokenSelectionStage = ({
     </p>
 
     {autoSelectStep < 2 ? (
-      // Category Selection - simple grid layout
+      // Category Selection - simple grid layout, no animation delays
       <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-        {categories.map((category, i) => {
+        {categories.map((category) => {
           const isSelected = selectedCategory === category;
           const hasSelection = selectedCategory !== null;
           
           return (
             <div
               key={category}
-              className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap animate-fade-in-up relative ${
+              className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap relative ${
                 isSelected
                   ? "bg-violet-600 border-violet-400 text-white"
                   : "bg-white/5 border-white/10 text-white/70"
@@ -402,7 +402,6 @@ const CategoryTokenSelectionStage = ({
                 transform: isSelected ? "scale(1.1)" : hasSelection ? "scale(0.95)" : "scale(1)",
                 boxShadow: isSelected ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
                 transition: "all 0.4s ease",
-                animationDelay: `${0.2 + i * 0.05}s`,
               }}
             >
               {isSelected && (
@@ -644,66 +643,104 @@ const WalletFilteringStage = () => (
   </div>
 );
 
-// Stage 3: Transaction Analysis
-const TransactionAnalysisStage = () => (
-  <div className="max-w-5xl mx-auto text-center">
-    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 4
-    </p>
-    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Analyzing Wallet Activity
-    </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Examining token transactions and volume for each wallet
-    </p>
+// Easing count-up hook
+const useCountUp = (target: number, duration: number = 2500, delay: number = 500) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    const startTime = Date.now() + delay;
+    
+    const animate = () => {
+      const now = Date.now();
+      if (now < startTime) {
+        requestAnimationFrame(animate);
+        return;
+      }
+      
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease-out cubic: starts fast, slows down at the end
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      setCount(Math.floor(eased * target));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [target, duration, delay]);
+  
+  return count;
+};
 
-    <div className="relative animate-fade-in-scale delay-300">
-      {/* Wallet Analysis Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="relative bg-gradient-to-br from-violet-500/10 to-purple-600/10 border border-violet-500/30 rounded-xl p-4 animate-fade-in-up overflow-hidden"
-            style={{ animationDelay: `${0.3 + i * 0.1}s`, opacity: 0 }}
-          >
-            {/* Scanning Effect */}
+// Stage 3: Transaction Analysis
+const TransactionAnalysisStage = () => {
+  const transactionsCount = useCountUp(750, 2500, 800);
+  const tokensCount = useCountUp(130, 2500, 1000);
+  
+  return (
+    <div className="max-w-5xl mx-auto text-center">
+      <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+        Step 4
+      </p>
+      <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+        Analyzing Wallet Activity
+      </h2>
+      <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+        Examining token transactions and volume for each wallet
+      </p>
+
+      <div className="relative animate-fade-in-scale delay-300">
+        {/* Wallet Analysis Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {Array.from({ length: 8 }).map((_, i) => (
             <div
-              className="absolute inset-0 bg-gradient-to-b from-violet-500/20 via-transparent to-transparent"
-              style={{
-                animation: `scanLine 1.5s ${i * 0.2}s ease-in-out infinite`,
-              }}
-            />
-            
-            <div className="relative z-10">
-              <span className="material-icons-outlined text-white/60 text-2xl">account_balance_wallet</span>
-              <p className="text-xs text-white/40 font-mono mt-2">0x...{(1000 + i * 123).toString(16)}</p>
-              <div className="mt-3 space-y-1">
-                {[0, 1, 2].map((j) => (
-                  <div key={j} className="flex items-center gap-2 text-xs">
-                    <div className="w-4 h-4 rounded-full bg-violet-500/40" />
-                    <span className="text-white/50">${["UNI", "WETH", "USDC"][j]}</span>
-                  </div>
-                ))}
+              key={i}
+              className="relative bg-gradient-to-br from-violet-500/10 to-purple-600/10 border border-violet-500/30 rounded-xl p-4 animate-fade-in-up overflow-hidden"
+              style={{ animationDelay: `${0.3 + i * 0.1}s`, opacity: 0 }}
+            >
+              {/* Scanning Effect */}
+              <div
+                className="absolute inset-0 bg-gradient-to-b from-violet-500/20 via-transparent to-transparent"
+                style={{
+                  animation: `scanLine 1.5s ${i * 0.2}s ease-in-out infinite`,
+                }}
+              />
+              
+              <div className="relative z-10">
+                <span className="material-icons-outlined text-white/60 text-2xl">account_balance_wallet</span>
+                <p className="text-xs text-white/40 font-mono mt-2">0x...{(1000 + i * 123).toString(16)}</p>
+                <div className="mt-3 space-y-1">
+                  {[0, 1, 2].map((j) => (
+                    <div key={j} className="flex items-center gap-2 text-xs">
+                      <div className="w-4 h-4 rounded-full bg-violet-500/40" />
+                      <span className="text-white/50">${["UNI", "WETH", "USDC"][j]}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Results */}
-      <div className="grid grid-cols-2 gap-8 mt-12 max-w-lg mx-auto">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-700">
-          <p className="text-4xl font-bold text-violet-400 mb-2">750</p>
-          <p className="text-white/50 text-sm">Transactions Analyzed</p>
+          ))}
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-800">
-          <p className="text-4xl font-bold text-violet-400 mb-2">130</p>
-          <p className="text-white/50 text-sm">Tokens Found</p>
+
+        {/* Results */}
+        <div className="grid grid-cols-2 gap-8 mt-12 max-w-lg mx-auto">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-700">
+            <p className="text-4xl font-bold text-violet-400 mb-2">{transactionsCount}</p>
+            <p className="text-white/50 text-sm">Transactions Analyzed</p>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-800">
+            <p className="text-4xl font-bold text-violet-400 mb-2">{tokensCount}</p>
+            <p className="text-white/50 text-sm">Tokens Found</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // All 100 token logos for the network visualization
 const tokenLogos = [
@@ -933,58 +970,63 @@ const TokenCompilationStage = () => {
         </svg>
       </div>
 
-      <p className="relative z-10 text-white/40 animate-fade-in-up mt-6" style={{ animationDelay: "0.5s", opacity: 0 }}>
-        <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
-      </p>
     </div>
   );
 };
 
 // Stage 5: Data Enrichment
-const DataEnrichmentStage = () => (
-  <div className="max-w-5xl mx-auto text-center">
-    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 6
-    </p>
-    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Enriching with Social Data
-    </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Adding social handles and community tags
-    </p>
+const DataEnrichmentStage = () => {
+  const handlesCount = useCountUp(89, 2500, 600);
+  const channelsCount = useCountUp(67, 2500, 800);
+  const communitiesCount = useCountUp(43, 2500, 1000);
+  
+  const platforms = [
+    { icon: "tag", title: "X (Twitter)", count: handlesCount, desc: "Handles found" },
+    { icon: "send", title: "Telegram", count: channelsCount, desc: "Channels found" },
+    { icon: "forum", title: "Reddit", count: communitiesCount, desc: "Communities found" },
+  ];
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-      {[
-        { icon: "tag", title: "X (Twitter)", count: "89", desc: "Handles found" },
-        { icon: "send", title: "Telegram", count: "67", desc: "Channels found" },
-        { icon: "forum", title: "Reddit", count: "43", desc: "Communities found" },
-      ].map((platform, i) => (
-        <div
-          key={i}
-          className="relative bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-2xl p-6 animate-fade-in-up overflow-hidden"
-          style={{ animationDelay: `${0.3 + i * 0.15}s`, opacity: 0 }}
-        >
-          {/* Data Flow Animation */}
+  return (
+    <div className="max-w-5xl mx-auto text-center">
+      <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+        Step 6
+      </p>
+      <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+        Enriching with Social Data
+      </h2>
+      <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+        Adding social handles and community tags
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        {platforms.map((platform, i) => (
           <div
-            className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-purple-500/20 to-violet-500/10"
-            style={{
-              animation: `dataFlow 2s ${i * 0.3}s ease-in-out infinite`,
-            }}
-          />
-          
-          <div className="relative z-10">
-            <div className="w-14 h-14 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-4">
-              <span className="material-icons-outlined text-violet-400 text-2xl">{platform.icon}</span>
+            key={i}
+            className="relative bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-2xl p-6 animate-fade-in-up overflow-hidden"
+            style={{ animationDelay: `${0.3 + i * 0.15}s`, opacity: 0 }}
+          >
+            {/* Data Flow Animation */}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-purple-500/20 to-violet-500/10"
+              style={{
+                animation: `dataFlow 2s ${i * 0.3}s ease-in-out infinite`,
+              }}
+            />
+            
+            <div className="relative z-10">
+              <div className="w-14 h-14 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-4">
+                <span className="material-icons-outlined text-violet-400 text-2xl">{platform.icon}</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{platform.title}</h3>
+              <p className="text-3xl font-bold text-violet-400 mb-1">{platform.count}</p>
+              <p className="text-sm text-white/50">{platform.desc}</p>
             </div>
-            <h3 className="text-lg font-semibold mb-1">{platform.title}</h3>
-            <p className="text-3xl font-bold text-violet-400 mb-1">{platform.count}</p>
-            <p className="text-sm text-white/50">{platform.desc}</p>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Stage 6: Final Dataset
 const FinalDatasetStage = () => (
