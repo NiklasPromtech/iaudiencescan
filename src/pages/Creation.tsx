@@ -250,6 +250,26 @@ const Creation = () => {
           0% { transform: scale(1); opacity: 1; }
           100% { transform: scale(0.8); opacity: 0.3; }
         }
+        @keyframes bounceSelect {
+          0% { transform: scale(1); }
+          30% { transform: scale(1.08); }
+          50% { transform: scale(0.98); }
+          70% { transform: scale(1.03); }
+          100% { transform: scale(1); }
+        }
+        @keyframes pulseRing {
+          0% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.1); }
+        }
+        @keyframes popIn {
+          0% { transform: scale(0); opacity: 0; }
+          70% { transform: scale(1.2); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeSlideUp {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
         .animate-fade-in-scale { animation: fadeInScale 0.8s ease-out forwards; }
         .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
@@ -259,6 +279,7 @@ const Creation = () => {
         .animate-checkmark { animation: checkmarkPop 0.4s ease-out forwards; }
         .animate-ripple { animation: ripple 0.8s ease-out forwards; }
         .animate-shrink-out { animation: shrinkOut 0.4s ease-out forwards; }
+        .animate-bounce-select { animation: bounceSelect 0.5s ease-out forwards; }
         .delay-100 { animation-delay: 0.1s; opacity: 0; }
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
         .delay-300 { animation-delay: 0.3s; opacity: 0; }
@@ -406,10 +427,16 @@ const CategoryTokenSelectionStage = ({
           );
         })}
         <div
-          className={`px-6 py-3 rounded-full border border-white/10 bg-white/5 text-white/40 text-sm animate-fade-in-up transition-all duration-500 ${
-            selectedCategory ? "opacity-30 scale-90" : ""
-          }`}
-          style={{ animationDelay: "0.7s", opacity: 0 }}
+          className="px-6 py-3 rounded-full border text-sm animate-fade-in-up"
+          style={{ 
+            animationDelay: "0.7s", 
+            opacity: 0,
+            background: selectedCategory ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
+            borderColor: selectedCategory ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)",
+            color: selectedCategory ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.4)",
+            transform: selectedCategory ? "scale(0.9)" : "scale(1)",
+            transition: "all 0.5s ease-out",
+          }}
         >
           +392 more...
         </div>
@@ -425,54 +452,61 @@ const CategoryTokenSelectionStage = ({
           return (
             <div
               key={token.symbol}
-              className="relative rounded-2xl p-8 text-center"
+              className={`relative rounded-2xl p-8 text-center ${isSelected ? "animate-bounce-select" : ""}`}
               style={{ 
-                opacity: !shouldShow ? 0 : isSelected ? 1 : hasSelection ? 0.4 : 1,
+                opacity: !shouldShow ? 0 : hasSelection && !isSelected ? 0.3 : 1,
                 transform: !shouldShow 
                   ? "translateY(20px)" 
-                  : isSelected 
-                  ? "scale(1.02)" 
-                  : hasSelection 
-                  ? "scale(0.95)" 
+                  : hasSelection && !isSelected
+                  ? "scale(0.9)"
                   : "scale(1)",
-                filter: hasSelection && !isSelected ? "blur(1px)" : "none",
+                filter: hasSelection && !isSelected ? "blur(2px) grayscale(50%)" : "none",
                 background: isSelected 
-                  ? "rgba(139, 92, 246, 0.15)" 
+                  ? "rgba(139, 92, 246, 0.2)" 
                   : "rgba(255, 255, 255, 0.05)",
                 border: isSelected 
-                  ? "2px solid rgba(139, 92, 246, 0.6)" 
+                  ? "2px solid rgba(139, 92, 246, 0.8)" 
                   : "1px solid rgba(255, 255, 255, 0.1)",
                 boxShadow: isSelected 
-                  ? "0 0 40px 15px rgba(139, 92, 246, 0.25)" 
+                  ? "0 0 50px 20px rgba(139, 92, 246, 0.3)" 
                   : "none",
-                transition: "all 0.5s ease-out",
+                transition: hasSelection ? "opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease, background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease" : "opacity 0.5s ease, transform 0.5s ease",
                 transitionDelay: !shouldShow ? `${0.1 + i * 0.1}s` : "0s",
                 zIndex: isSelected ? 20 : 1,
               }}
             >
-              {/* Subtle glow on selection */}
-              {isSelected && (
-                <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-pulse-slow" />
-              )}
-              
-              {/* Large checkmark badge */}
+              {/* Highlight ring on selection */}
               {isSelected && (
                 <div 
-                  className="absolute -right-4 -top-4 w-12 h-12 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-2xl z-30"
-                  style={{ boxShadow: "0 0 30px 10px rgba(255, 255, 255, 0.3)" }}
+                  className="absolute inset-0 rounded-2xl border-2 border-violet-400"
+                  style={{
+                    animation: "pulseRing 1.5s ease-out infinite",
+                  }}
+                />
+              )}
+              
+              {/* Checkmark badge */}
+              {isSelected && (
+                <div 
+                  className="absolute -right-3 -top-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl z-30"
+                  style={{ 
+                    animation: "popIn 0.3s ease-out forwards",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.3)" 
+                  }}
                 >
-                  <span className="material-icons-outlined text-violet-600 text-2xl">check</span>
+                  <span className="material-icons-outlined text-violet-600 text-xl">check</span>
                 </div>
               )}
               
               <div className="relative z-10">
                 <div 
-                  className="mx-auto mb-4 rounded-full overflow-hidden"
+                  className="mx-auto mb-4 rounded-full overflow-hidden border-2"
                   style={{
-                    width: isSelected ? "6rem" : "4rem",
-                    height: isSelected ? "6rem" : "4rem",
-                    boxShadow: isSelected ? "0 0 20px 5px rgba(139, 92, 246, 0.5)" : "none",
-                    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    width: "5rem",
+                    height: "5rem",
+                    borderColor: isSelected ? "rgba(139, 92, 246, 0.8)" : "rgba(255,255,255,0.1)",
+                    boxShadow: isSelected ? "0 0 25px 8px rgba(139, 92, 246, 0.4)" : "none",
+                    transition: "all 0.4s ease",
                   }}
                 >
                   <img
@@ -482,20 +516,18 @@ const CategoryTokenSelectionStage = ({
                   />
                 </div>
                 <h3 
-                  className="font-bold mb-1"
+                  className="font-bold mb-1 text-xl"
                   style={{
-                    fontSize: isSelected ? "1.5rem" : "1.25rem",
                     color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
-                    transition: "all 0.5s ease",
+                    transition: "all 0.4s ease",
                   }}
                 >
                   {token.name}
                 </h3>
                 <p 
                   style={{
-                    fontSize: isSelected ? "1.125rem" : "1rem",
                     color: isSelected ? "rgb(196, 181, 253)" : "rgba(255,255,255,0.5)",
-                    transition: "all 0.5s ease",
+                    transition: "all 0.4s ease",
                   }}
                 >
                   ${token.symbol}
@@ -503,9 +535,12 @@ const CategoryTokenSelectionStage = ({
                 
                 {/* Selected label */}
                 {isSelected && (
-                  <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-violet-500/40 border border-violet-400/50 rounded-full animate-fade-in-up">
-                    <span className="material-icons-outlined text-violet-200 text-lg animate-pulse-slow">trending_up</span>
-                    <span className="text-base text-violet-100 font-semibold">Analyzing...</span>
+                  <div 
+                    className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/30 border border-violet-400/40 rounded-full"
+                    style={{ animation: "fadeSlideUp 0.4s 0.2s ease-out forwards", opacity: 0 }}
+                  >
+                    <span className="material-icons-outlined text-violet-200 text-base">trending_up</span>
+                    <span className="text-sm text-violet-100 font-medium">Analyzing...</span>
                   </div>
                 )}
               </div>
