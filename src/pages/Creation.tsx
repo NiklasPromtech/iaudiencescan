@@ -1011,6 +1011,20 @@ const TokenCompilationStage = () => {
 
       {/* Single large chart */}
       <div className="relative z-10 flex justify-center animate-fade-in-scale delay-300">
+        <style>{`
+          @keyframes dashFlow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -12; }
+          }
+          @keyframes tokenFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+          }
+          @keyframes centerPulse {
+            0%, 100% { transform: scale(1); filter: url(#glow); }
+            50% { transform: scale(1.05); }
+          }
+        `}</style>
         <svg 
           width={size} 
           height={size} 
@@ -1035,7 +1049,7 @@ const TokenCompilationStage = () => {
             </clipPath>
           </defs>
 
-          {/* Connection lines */}
+          {/* Connection lines with animated dash */}
           {tokens.map((token, i) => (
             <line
               key={`line-${i}`}
@@ -1043,15 +1057,25 @@ const TokenCompilationStage = () => {
               y1={center}
               x2={token.x}
               y2={token.y}
-              stroke={`rgba(139, 92, 246, ${token.opacity * 0.3})`}
+              stroke={`rgba(139, 92, 246, ${token.opacity * 0.4})`}
               strokeWidth="1"
-              strokeDasharray="3 3"
+              strokeDasharray="4 4"
+              style={{
+                animation: `dashFlow ${2 + (i % 3) * 0.5}s linear infinite`,
+              }}
             />
           ))}
 
-          {/* Token circles with images */}
+          {/* Token circles with images and subtle float */}
           {tokens.map((token, i) => (
-            <g key={`token-${i}`} style={{ opacity: token.opacity }}>
+            <g 
+              key={`token-${i}`} 
+              style={{ 
+                opacity: token.opacity,
+                animation: `tokenFloat ${3 + (i % 4) * 0.5}s ${(i * 0.1)}s ease-in-out infinite`,
+                transformOrigin: `${token.x}px ${token.y}px`,
+              }}
+            >
               <circle
                 cx={token.x}
                 cy={token.y}
@@ -1071,8 +1095,14 @@ const TokenCompilationStage = () => {
             </g>
           ))}
 
-          {/* Central SHIB node */}
-          <g filter="url(#glow)">
+          {/* Central SHIB node with pulse */}
+          <g 
+            filter="url(#glow)"
+            style={{
+              animation: 'centerPulse 2s ease-in-out infinite',
+              transformOrigin: `${center}px ${center}px`,
+            }}
+          >
             <circle cx={center} cy={center} r={32} fill="#7c3aed" stroke="white" strokeWidth="2" />
             <image
               href="https://s2.coinmarketcap.com/static/img/coins/128x128/5994.png"
