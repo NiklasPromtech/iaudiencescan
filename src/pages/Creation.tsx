@@ -229,14 +229,36 @@ const Creation = () => {
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes highlightPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-          50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
+          50% { box-shadow: 0 0 30px 15px rgba(139, 92, 246, 0.3); }
+        }
+        @keyframes selectGlow {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+          50% { transform: scale(1.15); box-shadow: 0 0 40px 20px rgba(139, 92, 246, 0.5); }
+          100% { transform: scale(1.1); box-shadow: 0 0 30px 10px rgba(139, 92, 246, 0.3); }
+        }
+        @keyframes checkmarkPop {
+          0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+          50% { transform: scale(1.3) rotate(0deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes ripple {
+          0% { transform: scale(0.8); opacity: 1; }
+          100% { transform: scale(2.5); opacity: 0; }
+        }
+        @keyframes shrinkOut {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(0.8); opacity: 0.3; }
         }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
         .animate-fade-in-scale { animation: fadeInScale 0.8s ease-out forwards; }
         .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
         .animate-node-appear { animation: nodeAppear 0.6s ease-out forwards; }
-        .animate-highlight { animation: highlightPulse 1s ease-in-out infinite; }
+        .animate-highlight { animation: highlightPulse 1.5s ease-in-out infinite; }
+        .animate-select-glow { animation: selectGlow 0.6s ease-out forwards; }
+        .animate-checkmark { animation: checkmarkPop 0.4s ease-out forwards; }
+        .animate-ripple { animation: ripple 0.8s ease-out forwards; }
+        .animate-shrink-out { animation: shrinkOut 0.4s ease-out forwards; }
         .delay-100 { animation-delay: 0.1s; opacity: 0; }
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
         .delay-300 { animation-delay: 0.3s; opacity: 0; }
@@ -341,22 +363,52 @@ const CategoryTokenSelectionStage = ({
 
     {autoSelectStep < 2 ? (
       // Category Selection
-      <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-        {categories.map((category, i) => (
-          <div
-            key={category}
-            className={`px-6 py-3 rounded-full border text-sm md:text-base transition-all duration-500 animate-fade-in-up ${
-              selectedCategory === category
-                ? "bg-violet-600 border-violet-500 text-white animate-highlight"
-                : "bg-white/5 border-white/10 text-white/70"
-            }`}
-            style={{ animationDelay: `${0.3 + i * 0.05}s`, opacity: 0 }}
-          >
-            {category}
-          </div>
-        ))}
+      <div className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto relative">
+        {categories.map((category, i) => {
+          const isSelected = selectedCategory === category;
+          const hasSelection = selectedCategory !== null;
+          
+          return (
+            <div
+              key={category}
+              className={`relative px-6 py-3 rounded-full border text-sm md:text-base transition-all duration-500 animate-fade-in-up ${
+                isSelected
+                  ? "bg-violet-600 border-violet-400 text-white scale-125 z-20 shadow-2xl animate-select-glow"
+                  : hasSelection
+                  ? "bg-white/5 border-white/5 text-white/30 scale-90 animate-shrink-out"
+                  : "bg-white/5 border-white/10 text-white/70"
+              }`}
+              style={{ 
+                animationDelay: isSelected ? "0s" : `${0.3 + i * 0.05}s`, 
+                opacity: isSelected ? 1 : 0,
+                boxShadow: isSelected ? "0 0 60px 20px rgba(139, 92, 246, 0.4)" : "none"
+              }}
+            >
+              {/* Ripple effect on selection */}
+              {isSelected && (
+                <>
+                  <div className="absolute inset-0 rounded-full bg-violet-500/30 animate-ripple" />
+                  <div className="absolute inset-0 rounded-full bg-violet-500/20 animate-ripple" style={{ animationDelay: "0.2s" }} />
+                </>
+              )}
+              
+              {/* Checkmark icon */}
+              {isSelected && (
+                <span 
+                  className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-lg"
+                >
+                  <span className="material-icons-outlined text-violet-600 text-sm">check</span>
+                </span>
+              )}
+              
+              <span className="relative z-10 font-medium">{category}</span>
+            </div>
+          );
+        })}
         <div
-          className="px-6 py-3 rounded-full border border-white/10 bg-white/5 text-white/40 text-sm animate-fade-in-up"
+          className={`px-6 py-3 rounded-full border border-white/10 bg-white/5 text-white/40 text-sm animate-fade-in-up transition-all duration-500 ${
+            selectedCategory ? "opacity-30 scale-90" : ""
+          }`}
           style={{ animationDelay: "0.7s", opacity: 0 }}
         >
           +392 more...
@@ -364,31 +416,73 @@ const CategoryTokenSelectionStage = ({
       </div>
     ) : (
       // Token Selection
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-        {memeTokens.map((token, i) => (
-          <div
-            key={token.symbol}
-            className={`relative bg-white/5 border rounded-2xl p-8 transition-all duration-500 animate-fade-in-up ${
-              selectedToken?.symbol === token.symbol
-                ? "border-violet-500 bg-violet-500/20 animate-highlight"
-                : "border-white/10"
-            }`}
-            style={{ animationDelay: `${0.1 + i * 0.1}s`, opacity: 0 }}
-          >
-            <img
-              src={token.logo}
-              alt={token.name}
-              className="w-16 h-16 mx-auto mb-4 rounded-full"
-            />
-            <h3 className="text-xl font-bold mb-1">{token.name}</h3>
-            <p className="text-white/50">${token.symbol}</p>
-            {selectedToken?.symbol === token.symbol && (
-              <div className="absolute top-4 right-4">
-                <span className="material-icons-outlined text-violet-400">check_circle</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        {memeTokens.map((token, i) => {
+          const isSelected = selectedToken?.symbol === token.symbol;
+          const hasSelection = selectedToken !== null;
+          
+          return (
+            <div
+              key={token.symbol}
+              className={`relative rounded-2xl p-8 transition-all duration-500 animate-fade-in-up ${
+                isSelected
+                  ? "bg-violet-600/30 border-2 border-violet-400 scale-110 z-20 animate-select-glow"
+                  : hasSelection
+                  ? "bg-white/5 border border-white/5 scale-90 opacity-40"
+                  : "bg-white/5 border border-white/10 hover:border-white/30"
+              }`}
+              style={{ 
+                animationDelay: `${0.1 + i * 0.1}s`, 
+                opacity: 0,
+                boxShadow: isSelected ? "0 0 80px 30px rgba(139, 92, 246, 0.4)" : "none"
+              }}
+            >
+              {/* Ripple effects on selection */}
+              {isSelected && (
+                <>
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 animate-ripple" />
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-ripple" style={{ animationDelay: "0.15s" }} />
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/5 animate-ripple" style={{ animationDelay: "0.3s" }} />
+                </>
+              )}
+              
+              {/* Large checkmark badge */}
+              {isSelected && (
+                <div 
+                  className="absolute -right-3 -top-3 w-10 h-10 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-xl z-30"
+                >
+                  <span className="material-icons-outlined text-violet-600 text-xl">check</span>
+                </div>
+              )}
+              
+              <div className="relative z-10">
+                <div className={`mx-auto mb-4 rounded-full transition-all duration-500 ${
+                  isSelected ? "w-20 h-20 ring-4 ring-violet-400 ring-offset-4 ring-offset-black" : "w-16 h-16"
+                }`}>
+                  <img
+                    src={token.logo}
+                    alt={token.name}
+                    className="w-full h-full rounded-full"
+                  />
+                </div>
+                <h3 className={`font-bold mb-1 transition-all duration-500 ${isSelected ? "text-2xl text-white" : "text-xl"}`}>
+                  {token.name}
+                </h3>
+                <p className={`transition-all duration-500 ${isSelected ? "text-violet-300" : "text-white/50"}`}>
+                  ${token.symbol}
+                </p>
+                
+                {/* Selected label */}
+                {isSelected && (
+                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/30 rounded-full animate-fade-in-up">
+                    <span className="material-icons-outlined text-violet-300 text-sm">trending_up</span>
+                    <span className="text-sm text-violet-200 font-medium">Analyzing...</span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     )}
   </div>
