@@ -427,35 +427,32 @@ const CategoryTokenSelectionStage = ({
               key={token.symbol}
               className="relative rounded-2xl p-8 text-center"
               style={{ 
-                opacity: !shouldShow ? 0 : 1,
+                opacity: !shouldShow ? 0 : isSelected ? 1 : hasSelection ? 0.4 : 1,
                 transform: !shouldShow 
-                  ? "scale(0.9) translateY(20px)" 
+                  ? "translateY(20px)" 
                   : isSelected 
-                  ? "scale(1.1)" 
+                  ? "scale(1.02)" 
                   : hasSelection 
-                  ? "scale(0.85)" 
+                  ? "scale(0.95)" 
                   : "scale(1)",
-                filter: hasSelection && !isSelected ? "blur(2px)" : "none",
+                filter: hasSelection && !isSelected ? "blur(1px)" : "none",
                 background: isSelected 
-                  ? "rgba(139, 92, 246, 0.2)" 
+                  ? "rgba(139, 92, 246, 0.15)" 
                   : "rgba(255, 255, 255, 0.05)",
                 border: isSelected 
-                  ? "2px solid rgba(139, 92, 246, 0.8)" 
+                  ? "2px solid rgba(139, 92, 246, 0.6)" 
                   : "1px solid rgba(255, 255, 255, 0.1)",
                 boxShadow: isSelected 
-                  ? "0 0 80px 30px rgba(139, 92, 246, 0.4), 0 0 150px 60px rgba(139, 92, 246, 0.2)" 
+                  ? "0 0 40px 15px rgba(139, 92, 246, 0.25)" 
                   : "none",
-                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transition: "all 0.5s ease-out",
                 transitionDelay: !shouldShow ? `${0.1 + i * 0.1}s` : "0s",
                 zIndex: isSelected ? 20 : 1,
               }}
             >
-              {/* Ripple effects on selection */}
+              {/* Subtle glow on selection */}
               {isSelected && (
-                <>
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/30 animate-ripple" />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 animate-ripple" style={{ animationDelay: "0.15s" }} />
-                </>
+                <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-pulse-slow" />
               )}
               
               {/* Large checkmark badge */}
@@ -592,53 +589,81 @@ const WalletFilteringStage = () => (
       Filtering for Relevance
     </h2>
     <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Focusing on normal wallet behavior (2-3 transactions)
+      Selecting wallets by transfer volume
     </p>
 
     <div className="relative animate-fade-in-scale delay-300">
-      {/* Filter Visualization */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
+      {/* Filter Selection */}
+      <div className="flex flex-col items-center gap-6 mb-12">
+        {/* Filter Type Selection */}
+        <div className="flex flex-wrap justify-center gap-3">
+          <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
+            Transaction Count
+          </div>
+          <div className="px-4 py-2 rounded-lg bg-violet-500/20 border-2 border-violet-500 text-violet-300 text-sm font-medium flex items-center gap-2">
+            <span className="material-icons-outlined text-base">attach_money</span>
+            Transfer Volume
+          </div>
+          <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
+            Token Age
+          </div>
+        </div>
+
+        {/* Volume Range Selection */}
+        <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-6 animate-fade-in-up delay-400">
+          <p className="text-white/60 text-sm mb-3">Selected range:</p>
+          <div className="flex items-center gap-4">
+            <div className="px-4 py-2 bg-violet-600/30 border border-violet-400 rounded-lg">
+              <span className="text-violet-200 font-mono font-bold">$100</span>
+            </div>
+            <span className="text-violet-400">to</span>
+            <div className="px-4 py-2 bg-violet-600/30 border border-violet-400 rounded-lg">
+              <span className="text-violet-200 font-mono font-bold">$500</span>
+            </div>
+            <span className="text-white/50 text-sm">USD</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Before/After Visualization */}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
         {/* Before */}
         <div className="text-center">
-          <div className="w-32 h-32 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-4">
-            <p className="text-3xl font-bold text-white/60">851</p>
+          <div className="w-28 h-28 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-3">
+            <p className="text-2xl font-bold text-white/60">851</p>
           </div>
           <p className="text-white/40 text-sm">All Wallets</p>
         </div>
 
-        {/* Arrow with filter */}
-        <div className="flex flex-col items-center gap-2 py-4 md:py-0">
-          <span className="material-icons-outlined text-violet-400 text-3xl md:rotate-0 rotate-90">arrow_forward</span>
-          <div className="bg-violet-500/20 border border-violet-500/50 rounded-lg px-4 py-2">
-            <p className="text-sm text-violet-300">2-3 txs filter</p>
-          </div>
+        {/* Arrow */}
+        <div className="flex items-center gap-2 py-4 md:py-0">
+          <span className="material-icons-outlined text-violet-400 text-2xl md:rotate-0 rotate-90">arrow_forward</span>
         </div>
 
         {/* After */}
         <div className="text-center">
-          <div className="w-32 h-32 rounded-full bg-violet-500/20 border-2 border-violet-500 flex items-center justify-center mb-4 animate-pulse-slow">
-            <p className="text-3xl font-bold text-violet-400">70</p>
+          <div className="w-28 h-28 rounded-full bg-violet-500/20 border-2 border-violet-500 flex items-center justify-center mb-3 animate-pulse-slow">
+            <p className="text-2xl font-bold text-violet-400">70</p>
           </div>
           <p className="text-white/60 text-sm">Filtered Wallets</p>
         </div>
       </div>
 
       {/* Explanation */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto animate-fade-in-up delay-500">
-        <div className="flex items-start gap-4">
-          <span className="material-icons-outlined text-violet-400 text-2xl">info</span>
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 max-w-xl mx-auto animate-fade-in-up delay-500">
+        <div className="flex items-start gap-3">
+          <span className="material-icons-outlined text-violet-400 text-xl">info</span>
           <div className="text-left">
-            <p className="text-white/80 mb-2">Why filter by transaction count?</p>
-            <p className="text-white/50 text-sm">
-              Wallets with 2-3 transactions represent typical user behavior. 
-              Wallets with 15+ transactions are often bots or traders, not your target audience.
+            <p className="text-white/80 text-sm mb-1">Why filter by transfer volume?</p>
+            <p className="text-white/50 text-xs">
+              Wallets transferring $100-$500 represent typical retail investors — your ideal target audience.
             </p>
           </div>
         </div>
       </div>
 
       {/* Sample size note */}
-      <p className="text-white/40 mt-8 animate-fade-in-up delay-600">
+      <p className="text-white/40 mt-6 animate-fade-in-up delay-600 text-sm">
         Scanning <span className="text-violet-400 font-semibold">100 wallets</span> as a representative sample
       </p>
     </div>
@@ -810,26 +835,26 @@ const tokenLogos = [
   "https://s2.coinmarketcap.com/static/img/coins/128x128/35934.png",
 ];
 
-// Ring configuration: [startIndex, count, radiusPercent, tokenSize, opacity]
+// Ring configuration with horizontal stretch: [startIndex, count, radiusX, radiusY, tokenSize, opacity]
 const rings = [
-  { start: 0, count: 8, radius: 22, size: 40, opacity: 1 },
-  { start: 8, count: 14, radius: 34, size: 32, opacity: 0.85 },
-  { start: 22, count: 20, radius: 44, size: 26, opacity: 0.7 },
-  { start: 42, count: 28, radius: 54, size: 22, opacity: 0.55 },
-  { start: 70, count: 30, radius: 64, size: 18, opacity: 0.4 },
+  { start: 0, count: 8, radiusX: 28, radiusY: 18, size: 36, opacity: 1 },
+  { start: 8, count: 14, radiusX: 42, radiusY: 26, size: 30, opacity: 0.85 },
+  { start: 22, count: 20, radiusX: 56, radiusY: 34, size: 24, opacity: 0.7 },
+  { start: 42, count: 28, radiusX: 70, radiusY: 42, size: 20, opacity: 0.55 },
+  { start: 70, count: 30, radiusX: 84, radiusY: 48, size: 16, opacity: 0.4 },
 ];
 
 // Stage 4: Token Compilation
 const TokenCompilationStage = () => {
-  // Calculate positions for each ring
+  // Calculate positions for each ring (elliptical - wider than tall)
   const getTokenPositions = () => {
     const positions: { x: number; y: number; size: number; opacity: number; logo: string; delay: number }[] = [];
     
     rings.forEach((ring, ringIndex) => {
       for (let i = 0; i < ring.count && ring.start + i < tokenLogos.length; i++) {
         const angle = (i / ring.count) * Math.PI * 2 - Math.PI / 2;
-        const x = 50 + Math.cos(angle) * ring.radius;
-        const y = 50 + Math.sin(angle) * ring.radius;
+        const x = 50 + Math.cos(angle) * ring.radiusX;
+        const y = 50 + Math.sin(angle) * ring.radiusY;
         positions.push({
           x,
           y,
@@ -860,7 +885,7 @@ const TokenCompilationStage = () => {
 
       <div className="relative animate-fade-in-scale delay-300">
         {/* Token Network Visualization */}
-        <div className="relative w-full aspect-square max-w-2xl mx-auto">
+        <div className="relative w-full max-w-4xl mx-auto" style={{ aspectRatio: "2 / 1" }}>
           {/* Connection Lines (SVG) */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
             {tokenPositions.map((pos, i) => (
