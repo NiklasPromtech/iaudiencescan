@@ -561,18 +561,36 @@ const WalletDiscoveryStage = ({ token }: { token: Token }) => (
         </div>
       </div>
 
-      {/* Wallet Grid Preview - random intervals */}
-      <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mt-8">
-        {Array.from({ length: 20 }).map((_, i) => {
-          // Random delay between 0.5s and 2.5s for gathering effect
-          const randomDelay = 0.5 + Math.random() * 2;
+      {/* Wallet Grid Preview - many wallets with random intervals and fading opacity */}
+      <div className="grid grid-cols-8 md:grid-cols-16 gap-1.5 mt-8 max-w-4xl mx-auto">
+        {Array.from({ length: 96 }).map((_, i) => {
+          // Random delay between 0.3s and 3s for gathering effect
+          const randomDelay = 0.3 + Math.random() * 2.7;
+          // Calculate row (0-5) and column position for opacity fading
+          const row = Math.floor(i / 16);
+          const col = i % 16;
+          // Fade based on distance from center-top
+          const centerCol = 7.5;
+          const colDist = Math.abs(col - centerCol) / 8;
+          const rowDist = row / 5;
+          const opacity = Math.max(0.15, 1 - (colDist * 0.6 + rowDist * 0.5));
+          
           return (
             <div
               key={i}
-              className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded-lg flex items-center justify-center animate-fade-in-up"
-              style={{ animationDelay: `${randomDelay}s`, opacity: 0 }}
+              className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded flex items-center justify-center animate-fade-in-up"
+              style={{ 
+                animationDelay: `${randomDelay}s`, 
+                opacity: 0,
+                '--final-opacity': opacity,
+              } as React.CSSProperties}
             >
-              <span className="material-icons-outlined text-violet-400/60 text-sm">account_balance_wallet</span>
+              <span 
+                className="material-icons-outlined text-violet-400 text-xs"
+                style={{ opacity }}
+              >
+                account_balance_wallet
+              </span>
             </div>
           );
         })}
@@ -825,27 +843,37 @@ const tokenLogos = [
   "https://s2.coinmarketcap.com/static/img/coins/128x128/35934.png",
 ];
 
-// Reduced to 30 tokens for reliable performance - 3 rings
-const displayTokens = tokenLogos.slice(0, 30);
-
-// Stage 4: Token Compilation - Pure SVG for perfect alignment
+// Stage 4: Token Compilation - Pure SVG with all 100 tokens in 6 concentric rings
 const TokenCompilationStage = () => {
-  const size = 400;
+  const size = 500;
   const center = size / 2;
   
-  // Simplified: 2 rings of tokens for cleaner look
-  const tokens = [
-    // Inner ring - 6 tokens at radius 80
-    ...displayTokens.slice(0, 6).map((logo, i) => {
-      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-      return { x: center + Math.cos(angle) * 80, y: center + Math.sin(angle) * 80, r: 22, logo, delay: 0.3 + i * 0.1 };
-    }),
-    // Outer ring - 12 tokens at radius 150
-    ...displayTokens.slice(6, 18).map((logo, i) => {
-      const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-      return { x: center + Math.cos(angle) * 150, y: center + Math.sin(angle) * 150, r: 18, logo, delay: 0.5 + i * 0.08 };
-    }),
+  // Ring configurations: [count, radius, tokenSize, opacity]
+  const rings: [number, number, number, number][] = [
+    [8, 65, 18, 1],      // Ring 1: 8 tokens
+    [12, 105, 16, 0.9],  // Ring 2: 12 tokens
+    [18, 145, 14, 0.75], // Ring 3: 18 tokens
+    [22, 185, 12, 0.6],  // Ring 4: 22 tokens
+    [28, 220, 10, 0.45], // Ring 5: 28 tokens
+    [12, 245, 8, 0.3],   // Ring 6: 12 tokens (fills to 100)
   ];
+  
+  let tokenIndex = 0;
+  const tokens: { x: number; y: number; r: number; logo: string; opacity: number }[] = [];
+  
+  rings.forEach(([count, radius, tokenSize, opacity]) => {
+    for (let i = 0; i < count && tokenIndex < tokenLogos.length; i++) {
+      const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+      tokens.push({
+        x: center + Math.cos(angle) * radius,
+        y: center + Math.sin(angle) * radius,
+        r: tokenSize,
+        logo: tokenLogos[tokenIndex],
+        opacity,
+      });
+      tokenIndex++;
+    }
+  });
 
   return (
     <div className="max-w-5xl mx-auto text-center">
@@ -866,7 +894,7 @@ const TokenCompilationStage = () => {
           viewBox={`0 0 ${size} ${size}`}
           className="max-w-full"
         >
-          {/* Defs for glow filter */}
+          {/* Defs for glow filter and clip paths */}
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
@@ -875,18 +903,17 @@ const TokenCompilationStage = () => {
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
-            {/* Clip paths for tokens */}
             {tokens.map((token, i) => (
               <clipPath key={`clip-${i}`} id={`token-clip-${i}`}>
-                <circle cx={token.x} cy={token.y} r={token.r - 2} />
+                <circle cx={token.x} cy={token.y} r={token.r - 1} />
               </clipPath>
             ))}
             <clipPath id="center-clip">
-              <circle cx={center} cy={center} r={30} />
+              <circle cx={center} cy={center} r={28} />
             </clipPath>
           </defs>
 
-          {/* Connection lines */}
+          {/* Connection lines - static, no animation */}
           {tokens.map((token, i) => (
             <line
               key={`line-${i}`}
@@ -894,60 +921,50 @@ const TokenCompilationStage = () => {
               y1={center}
               x2={token.x}
               y2={token.y}
-              stroke="rgba(139, 92, 246, 0.4)"
-              strokeWidth="1.5"
-              strokeDasharray="4 4"
-              style={{
-                animation: `flowLine 0.6s ${token.delay}s ease-out forwards`,
-                strokeDashoffset: 100,
-              }}
+              stroke={`rgba(139, 92, 246, ${token.opacity * 0.3})`}
+              strokeWidth="1"
+              strokeDasharray="3 3"
             />
           ))}
 
-          {/* Token circles with images */}
+          {/* Token circles with images - static, no animation */}
           {tokens.map((token, i) => (
-            <g 
-              key={`token-${i}`}
-              style={{
-                animation: `nodeAppear 0.5s ${token.delay}s ease-out forwards`,
-                opacity: 0,
-              }}
-            >
+            <g key={`token-${i}`} style={{ opacity: token.opacity }}>
               <circle
                 cx={token.x}
                 cy={token.y}
                 r={token.r}
                 fill="rgba(255, 255, 255, 0.1)"
-                stroke="rgba(139, 92, 246, 0.5)"
+                stroke={`rgba(139, 92, 246, ${token.opacity * 0.6})`}
                 strokeWidth="1"
               />
               <image
                 href={token.logo}
-                x={token.x - token.r + 2}
-                y={token.y - token.r + 2}
-                width={(token.r - 2) * 2}
-                height={(token.r - 2) * 2}
+                x={token.x - token.r + 1}
+                y={token.y - token.r + 1}
+                width={(token.r - 1) * 2}
+                height={(token.r - 1) * 2}
                 clipPath={`url(#token-clip-${i})`}
               />
             </g>
           ))}
 
           {/* Central SHIB node */}
-          <g filter="url(#glow)" className="animate-node-appear">
-            <circle cx={center} cy={center} r={36} fill="#7c3aed" stroke="white" strokeWidth="2" />
+          <g filter="url(#glow)">
+            <circle cx={center} cy={center} r={32} fill="#7c3aed" stroke="white" strokeWidth="2" />
             <image
               href="https://s2.coinmarketcap.com/static/img/coins/128x128/5994.png"
-              x={center - 26}
-              y={center - 26}
-              width="52"
-              height="52"
+              x={center - 24}
+              y={center - 24}
+              width="48"
+              height="48"
               clipPath="url(#center-clip)"
             />
           </g>
         </svg>
       </div>
 
-      <p className="text-white/40 animate-fade-in-up mt-6" style={{ animationDelay: "1.5s", opacity: 0 }}>
+      <p className="text-white/40 animate-fade-in-up mt-6" style={{ animationDelay: "0.5s", opacity: 0 }}>
         <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
       </p>
     </div>
