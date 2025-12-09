@@ -442,7 +442,7 @@ const CategoryTokenSelectionStage = ({
         </div>
       </div>
     ) : (
-      // Token Selection
+      // Token Selection - simplified for performance
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
         {memeTokens.map((token, i) => {
           const isSelected = selectedToken?.symbol === token.symbol;
@@ -452,49 +452,31 @@ const CategoryTokenSelectionStage = ({
           return (
             <div
               key={token.symbol}
-              className={`relative rounded-2xl p-8 text-center ${isSelected ? "animate-bounce-select" : ""}`}
+              className="relative rounded-2xl p-8 text-center"
               style={{ 
-                opacity: !shouldShow ? 0 : hasSelection && !isSelected ? 0.3 : 1,
+                opacity: !shouldShow ? 0 : hasSelection && !isSelected ? 0.25 : 1,
                 transform: !shouldShow 
                   ? "translateY(20px)" 
                   : hasSelection && !isSelected
-                  ? "scale(0.9)"
+                  ? "scale(0.92)"
                   : "scale(1)",
-                filter: hasSelection && !isSelected ? "blur(2px) grayscale(50%)" : "none",
                 background: isSelected 
-                  ? "rgba(139, 92, 246, 0.2)" 
+                  ? "rgba(139, 92, 246, 0.15)" 
                   : "rgba(255, 255, 255, 0.05)",
                 border: isSelected 
-                  ? "2px solid rgba(139, 92, 246, 0.8)" 
+                  ? "2px solid rgba(139, 92, 246, 0.7)" 
                   : "1px solid rgba(255, 255, 255, 0.1)",
-                boxShadow: isSelected 
-                  ? "0 0 50px 20px rgba(139, 92, 246, 0.3)" 
-                  : "none",
-                transition: hasSelection ? "opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease, background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease" : "opacity 0.5s ease, transform 0.5s ease",
+                transition: "all 0.4s ease",
                 transitionDelay: !shouldShow ? `${0.1 + i * 0.1}s` : "0s",
                 zIndex: isSelected ? 20 : 1,
               }}
             >
-              {/* Highlight ring on selection */}
-              {isSelected && (
-                <div 
-                  className="absolute inset-0 rounded-2xl border-2 border-violet-400"
-                  style={{
-                    animation: "pulseRing 1.5s ease-out infinite",
-                  }}
-                />
-              )}
-              
               {/* Checkmark badge */}
               {isSelected && (
                 <div 
-                  className="absolute -right-3 -top-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl z-30"
-                  style={{ 
-                    animation: "popIn 0.3s ease-out forwards",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.3)" 
-                  }}
+                  className="absolute -right-3 -top-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-30"
                 >
-                  <span className="material-icons-outlined text-violet-600 text-xl">check</span>
+                  <span className="material-icons-outlined text-violet-600 text-lg">check</span>
                 </div>
               )}
               
@@ -504,9 +486,8 @@ const CategoryTokenSelectionStage = ({
                   style={{
                     width: "5rem",
                     height: "5rem",
-                    borderColor: isSelected ? "rgba(139, 92, 246, 0.8)" : "rgba(255,255,255,0.1)",
-                    boxShadow: isSelected ? "0 0 25px 8px rgba(139, 92, 246, 0.4)" : "none",
-                    transition: "all 0.4s ease",
+                    borderColor: isSelected ? "rgba(139, 92, 246, 0.7)" : "rgba(255,255,255,0.1)",
+                    transition: "border-color 0.3s ease",
                   }}
                 >
                   <img
@@ -515,32 +496,17 @@ const CategoryTokenSelectionStage = ({
                     className="w-full h-full rounded-full"
                   />
                 </div>
-                <h3 
-                  className="font-bold mb-1 text-xl"
-                  style={{
-                    color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
-                    transition: "all 0.4s ease",
-                  }}
-                >
+                <h3 className="font-bold mb-1 text-xl text-white">
                   {token.name}
                 </h3>
-                <p 
-                  style={{
-                    color: isSelected ? "rgb(196, 181, 253)" : "rgba(255,255,255,0.5)",
-                    transition: "all 0.4s ease",
-                  }}
-                >
+                <p className="text-white/50">
                   ${token.symbol}
                 </p>
                 
                 {/* Selected label */}
                 {isSelected && (
-                  <div 
-                    className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/30 border border-violet-400/40 rounded-full"
-                    style={{ animation: "fadeSlideUp 0.4s 0.2s ease-out forwards", opacity: 0 }}
-                  >
-                    <span className="material-icons-outlined text-violet-200 text-base">trending_up</span>
-                    <span className="text-sm text-violet-100 font-medium">Analyzing...</span>
+                  <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
+                    <span className="text-sm text-violet-200 font-medium">Analyzing...</span>
                   </div>
                 )}
               </div>
@@ -684,18 +650,6 @@ const WalletFilteringStage = () => (
         </div>
       </div>
 
-      {/* Explanation */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-5 max-w-xl mx-auto animate-fade-in-up delay-500">
-        <div className="flex items-start gap-3">
-          <span className="material-icons-outlined text-violet-400 text-xl">info</span>
-          <div className="text-left">
-            <p className="text-white/80 text-sm mb-1">Why filter by transfer volume?</p>
-            <p className="text-white/50 text-xs">
-              Wallets transferring $100-$500 represent typical retail investors — your ideal target audience.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Sample size note */}
       <p className="text-white/40 mt-6 animate-fade-in-up delay-600 text-sm">
