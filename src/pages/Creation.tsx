@@ -463,54 +463,48 @@ const CategoryTokenSelectionStage = ({
       </div>
     ) : (
       // Token Selection - iOS-style vertical scroll picker wheel
-      <div 
-        className="relative w-full max-w-md mx-auto animate-fade-in-up"
+      <div className="relative w-full max-w-md mx-auto animate-fade-in-up"
         style={{ 
           opacity: 0,
           animationDelay: '0.3s',
           animationFillMode: 'forwards'
         }}
       >
-        {/* Subtle gradient overlays for depth effect - transparent not black */}
-        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
-        
         {/* Selection highlight bar */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 z-5 rounded-lg" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full max-w-sm h-20 bg-violet-600/20 border-y-2 border-violet-400/50 rounded-lg" style={{ zIndex: 5 }} />
         
         {/* Scroll wheel container */}
         <div className="h-[280px] overflow-hidden relative">
           <div 
-            className="absolute w-full transition-transform"
+            className="absolute w-full"
             style={{ 
               transform: `translateY(${100 - scrollOffset}px)`,
-              transitionDuration: isScrolling ? '0ms' : '300ms',
-              transitionTimingFunction: 'ease-out'
             }}
           >
             {memeTokens.map((token, i) => {
               const ITEM_HEIGHT = 80;
               const itemCenter = i * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-              // viewCenter: the list position that's currently at the center of the view
-              // The view center (140px) corresponds to list position: 40 + scrollOffset
-              const viewCenter = 40 + scrollOffset;
+              // When scrollOffset = i * 80, item i should be centered
+              // Center of view in list space = scrollOffset + 40
+              const viewCenter = scrollOffset + 40;
               const distanceFromCenter = Math.abs(itemCenter - viewCenter);
               const isSelected = selectedToken?.symbol === token.symbol;
               
               // Calculate opacity and scale based on distance from center
-              const maxDistance = ITEM_HEIGHT * 2;
+              const maxDistance = ITEM_HEIGHT * 2.5;
               const normalizedDistance = Math.min(distanceFromCenter, maxDistance) / maxDistance;
-              const opacity = 1 - normalizedDistance * 0.6;
-              const scale = 1 - normalizedDistance * 0.12;
+              const itemOpacity = 0.3 + (1 - normalizedDistance) * 0.7;
+              const scale = 0.85 + (1 - normalizedDistance) * 0.15;
               
               return (
                 <div
                   key={token.symbol}
-                  className="flex items-center gap-4 px-6 py-4 transition-all duration-150"
+                  className="flex items-center gap-4 px-6 py-4"
                   style={{
                     height: `${ITEM_HEIGHT}px`,
-                    opacity: opacity,
+                    opacity: itemOpacity,
                     transform: `scale(${scale})`,
+                    transition: 'opacity 0.1s, transform 0.1s',
                   }}
                 >
                   <div 
