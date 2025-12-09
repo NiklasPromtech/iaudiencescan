@@ -648,6 +648,39 @@ const WalletDiscoveryStage = ({ token }: { token: Token }) => (
   </div>
 );
 
+// Typewriter hook for number input effect
+const useTypewriter = (text: string, delay: number = 0, speed: number = 150) => {
+  const [displayed, setDisplayed] = useState("");
+  const [isDone, setIsDone] = useState(false);
+  
+  useEffect(() => {
+    const startTime = Date.now() + delay;
+    let charIndex = 0;
+    
+    const type = () => {
+      const now = Date.now();
+      if (now < startTime) {
+        requestAnimationFrame(type);
+        return;
+      }
+      
+      if (charIndex <= text.length) {
+        setDisplayed(text.slice(0, charIndex));
+        charIndex++;
+        if (charIndex <= text.length) {
+          setTimeout(type, speed);
+        } else {
+          setIsDone(true);
+        }
+      }
+    };
+    
+    requestAnimationFrame(type);
+  }, [text, delay, speed]);
+  
+  return { displayed, isDone };
+};
+
 // Count down hook for filtering animation
 const useCountDown = (start: number, end: number, duration: number = 1500, delay: number = 800) => {
   const [count, setCount] = useState(start);
@@ -683,7 +716,10 @@ const useCountDown = (start: number, end: number, duration: number = 1500, delay
 
 // Stage 2: Wallet Filtering
 const WalletFilteringStage = () => {
-  const filteredCount = useCountDown(851, 70, 1500, 800);
+  const firstValue = useTypewriter("100", 500, 120);
+  const secondValue = useTypewriter("500", 1200, 120);
+  // Start countdown after both values are typed (around 2000ms)
+  const filteredCount = useCountDown(851, 70, 1500, 2200);
   
   return (
     <div className="max-w-5xl mx-auto text-center">
@@ -718,12 +754,18 @@ const WalletFilteringStage = () => {
           <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl px-8 py-5 animate-fade-in-up delay-400">
             <p className="text-white/60 text-sm mb-3">Selected range:</p>
             <div className="flex items-center gap-4">
-              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg">
-                <span className="text-violet-200 font-mono font-bold">$100</span>
+              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg min-w-[80px]">
+                <span className="text-violet-200 font-mono font-bold">
+                  ${firstValue.displayed}
+                  {!firstValue.isDone && <span className="animate-pulse">|</span>}
+                </span>
               </div>
               <span className="text-violet-400">to</span>
-              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg">
-                <span className="text-violet-200 font-mono font-bold">$500</span>
+              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg min-w-[80px]">
+                <span className="text-violet-200 font-mono font-bold">
+                  ${secondValue.displayed}
+                  {firstValue.isDone && !secondValue.isDone && <span className="animate-pulse">|</span>}
+                </span>
               </div>
               <span className="text-white/50 text-sm">USD</span>
             </div>
