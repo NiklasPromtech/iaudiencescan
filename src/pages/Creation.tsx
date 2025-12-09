@@ -593,10 +593,10 @@ const WalletFilteringStage = () => (
           </div>
           <div className="px-4 py-2 rounded-lg bg-violet-500/20 border-2 border-violet-500 text-violet-300 text-sm font-medium flex items-center gap-2">
             <span className="material-icons-outlined text-base">attach_money</span>
-            Transfer Volume
+            Transaction Volume
           </div>
           <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
-            Token Age
+            Token Holdings
           </div>
         </div>
 
@@ -843,15 +843,27 @@ const TokenCompilationStage = () => {
 
   return (
     <div className="max-w-5xl mx-auto text-center relative">
-      {/* Chart positioned behind text with larger size */}
-      <div className="absolute inset-0 flex items-center justify-center -z-0 pointer-events-none" style={{ top: "-80px" }}>
+      {/* Text content on top */}
+      <div className="relative z-10">
+        <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+          Step 5
+        </p>
+        <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+          Token Overlap Results
+        </h2>
+        <p className="text-lg text-white/60 mb-8 animate-fade-in-up delay-200">
+          Ranked by how many wallets also transact each token
+        </p>
+      </div>
+
+      {/* Single large chart */}
+      <div className="relative z-10 flex justify-center animate-fade-in-scale delay-300">
         <svg 
           width={size} 
           height={size} 
           viewBox={`0 0 ${size} ${size}`}
-          className="w-[90vw] h-[90vw] max-w-[700px] max-h-[700px] opacity-40"
+          className="w-[95vw] h-[95vw] max-w-[650px] max-h-[650px]"
         >
-          {/* Defs for glow filter and clip paths */}
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
@@ -870,7 +882,7 @@ const TokenCompilationStage = () => {
             </clipPath>
           </defs>
 
-          {/* Connection lines - static, no animation */}
+          {/* Connection lines */}
           {tokens.map((token, i) => (
             <line
               key={`line-${i}`}
@@ -884,7 +896,7 @@ const TokenCompilationStage = () => {
             />
           ))}
 
-          {/* Token circles with images - static, no animation */}
+          {/* Token circles with images */}
           {tokens.map((token, i) => (
             <g key={`token-${i}`} style={{ opacity: token.opacity }}>
               <circle
@@ -916,96 +928,6 @@ const TokenCompilationStage = () => {
               width="48"
               height="48"
               clipPath="url(#center-clip)"
-            />
-          </g>
-        </svg>
-      </div>
-
-      {/* Text content on top */}
-      <div className="relative z-10">
-        <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-          Step 5
-        </p>
-        <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-          Token Overlap Results
-        </h2>
-        <p className="text-lg text-white/60 mb-8 animate-fade-in-up delay-200">
-          Ranked by how many wallets also transact each token
-        </p>
-      </div>
-
-      {/* Foreground chart - smaller, focused */}
-      <div className="relative z-10 flex justify-center animate-fade-in-scale delay-300">
-        <svg 
-          width={size} 
-          height={size} 
-          viewBox={`0 0 ${size} ${size}`}
-          className="w-full max-w-[500px]"
-        >
-          <defs>
-            <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            {tokens.map((token, i) => (
-              <clipPath key={`clip2-${i}`} id={`token-clip2-${i}`}>
-                <circle cx={token.x} cy={token.y} r={token.r - 1} />
-              </clipPath>
-            ))}
-            <clipPath id="center-clip2">
-              <circle cx={center} cy={center} r={28} />
-            </clipPath>
-          </defs>
-
-          {/* Connection lines */}
-          {tokens.map((token, i) => (
-            <line
-              key={`line2-${i}`}
-              x1={center}
-              y1={center}
-              x2={token.x}
-              y2={token.y}
-              stroke={`rgba(139, 92, 246, ${token.opacity * 0.3})`}
-              strokeWidth="1"
-              strokeDasharray="3 3"
-            />
-          ))}
-
-          {/* Token circles with images */}
-          {tokens.map((token, i) => (
-            <g key={`token2-${i}`} style={{ opacity: token.opacity }}>
-              <circle
-                cx={token.x}
-                cy={token.y}
-                r={token.r}
-                fill="rgba(255, 255, 255, 0.1)"
-                stroke={`rgba(139, 92, 246, ${token.opacity * 0.6})`}
-                strokeWidth="1"
-              />
-              <image
-                href={token.logo}
-                x={token.x - token.r + 1}
-                y={token.y - token.r + 1}
-                width={(token.r - 1) * 2}
-                height={(token.r - 1) * 2}
-                clipPath={`url(#token-clip2-${i})`}
-              />
-            </g>
-          ))}
-
-          {/* Central SHIB node */}
-          <g filter="url(#glow2)">
-            <circle cx={center} cy={center} r={32} fill="#7c3aed" stroke="white" strokeWidth="2" />
-            <image
-              href="https://s2.coinmarketcap.com/static/img/coins/128x128/5994.png"
-              x={center - 24}
-              y={center - 24}
-              width="48"
-              height="48"
-              clipPath="url(#center-clip2)"
             />
           </g>
         </svg>
