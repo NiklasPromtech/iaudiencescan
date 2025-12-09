@@ -7,22 +7,94 @@ interface Token {
   logo: string;
 }
 
-const tokens: Token[] = [
+interface OverlapToken {
+  score: number;
+  symbol: string;
+  name: string;
+  logo: string;
+  twitter?: string;
+  telegram?: string;
+  reddit?: string;
+}
+
+const categories = [
+  "Meme Tokens",
+  "AI Agents",
+  "Real Estate",
+  "DeFi",
+  "Gaming",
+  "Layer 2",
+  "NFT",
+  "Privacy",
+];
+
+const memeTokens: Token[] = [
   { name: "Dogecoin", symbol: "DOGE", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png" },
   { name: "Shiba Inu", symbol: "SHIB", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png" },
   { name: "Pepe", symbol: "PEPE", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/24478.png" },
 ];
 
+const overlapResults: OverlapToken[] = [
+  { score: 1.0, symbol: "WETH", name: "Wrapped Ether", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/2396.png" },
+  { score: 0.8523, symbol: "UNI", name: "Uniswap", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/7083.png", twitter: "Uniswap", reddit: "Uniswap" },
+  { score: 0.6818, symbol: "USDC", name: "USD Coin", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png", twitter: "circle" },
+  { score: 0.6341, symbol: "USDT", name: "Tether USD", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png", twitter: "tether_to", telegram: "OfficialTether" },
+  { score: 0.5743, symbol: "SHIB", name: "SHIBA INU", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png", twitter: "shibtoken", reddit: "SHIBArmy", telegram: "ShibaInu_Dogecoinkiller" },
+  { score: 0.4773, symbol: "KITE", name: "Kite", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/38828.png", twitter: "GoKiteAI" },
+  { score: 0.4091, symbol: "MOVE", name: "Movement", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/32452.png", twitter: "movementfdn", telegram: "movementlabsxyz" },
+  { score: 0.4091, symbol: "ENA", name: "ENA", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/30171.png", twitter: "ethena_labs", telegram: "ethena_labs" },
+  { score: 0.4091, symbol: "SUPER", name: "SuperFarm", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/8290.png", twitter: "SuperVerse", telegram: "SuperVerseDAO" },
+  { score: 0.375, symbol: "VRA", name: "VERA", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3816.png", twitter: "verasitytech", telegram: "VRAchannel", reddit: "Verasity" },
+  { score: 0.3409, symbol: "MUBI", name: "MUBI", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/28412.png", twitter: "Multibit_Bridge", telegram: "multibitprotocol" },
+  { score: 0.2727, symbol: "TURBO", name: "Turbo", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/24911.png", twitter: "TurboToadToken", reddit: "TurboToadX" },
+];
+
 const Creation = () => {
   const [stage, setStage] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [autoSelectStep, setAutoSelectStep] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-advance through stages
+  // Auto-selection animation for category and token
   useEffect(() => {
-    if (stage === 0) return; // Wait for token selection
-    if (stage >= 6) return; // Final stage
+    if (stage !== 0) return;
+    
+    const timers: NodeJS.Timeout[] = [];
+    
+    // Auto-select "Meme Tokens" category after 2s
+    timers.push(setTimeout(() => {
+      setAutoSelectStep(1);
+      setSelectedCategory("Meme Tokens");
+    }, 2000));
+    
+    // Move to token selection after 3s
+    timers.push(setTimeout(() => {
+      setAutoSelectStep(2);
+    }, 3500));
+    
+    // Auto-select "Shiba Inu" after 5s
+    timers.push(setTimeout(() => {
+      setAutoSelectStep(3);
+      setSelectedToken(memeTokens[1]); // Shiba Inu
+    }, 5500));
+    
+    // Move to next stage after 6.5s
+    timers.push(setTimeout(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setStage(1);
+        setIsAnimating(false);
+      }, 500);
+    }, 7000));
+    
+    return () => timers.forEach(clearTimeout);
+  }, [stage]);
+
+  // Auto-advance through remaining stages
+  useEffect(() => {
+    if (stage === 0 || stage >= 7) return;
 
     const timer = setTimeout(() => {
       setIsAnimating(true);
@@ -30,25 +102,18 @@ const Creation = () => {
         setStage((prev) => prev + 1);
         setIsAnimating(false);
       }, 500);
-    }, 4000);
+    }, 4500);
 
     return () => clearTimeout(timer);
   }, [stage]);
-
-  const handleTokenSelect = (token: Token) => {
-    setSelectedToken(token);
-    setIsAnimating(true);
-    setTimeout(() => {
-      setStage(1);
-      setIsAnimating(false);
-    }, 500);
-  };
 
   const resetDemo = () => {
     setIsAnimating(true);
     setTimeout(() => {
       setStage(0);
+      setSelectedCategory(null);
       setSelectedToken(null);
+      setAutoSelectStep(0);
       setIsAnimating(false);
     }, 500);
   };
@@ -93,7 +158,7 @@ const Creation = () => {
 
       {/* Progress Indicator */}
       <div className="fixed left-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-2">
-        {[0, 1, 2, 3, 4, 5, 6].map((s) => (
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((s) => (
           <div
             key={s}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -110,13 +175,20 @@ const Creation = () => {
           isAnimating ? "opacity-0" : "opacity-100"
         }`}
       >
-        {stage === 0 && <TokenSelectionStage tokens={tokens} onSelect={handleTokenSelect} />}
-        {stage === 1 && selectedToken && <WalletExtractionStage token={selectedToken} />}
-        {stage === 2 && selectedToken && <WalletAnalysisStage token={selectedToken} />}
-        {stage === 3 && <TokenCompilationStage />}
-        {stage === 4 && <DataEnrichmentStage />}
-        {stage === 5 && <FinalDatasetStage />}
-        {stage === 6 && <ValuePropositionStage onReset={resetDemo} />}
+        {stage === 0 && (
+          <CategoryTokenSelectionStage 
+            autoSelectStep={autoSelectStep}
+            selectedCategory={selectedCategory}
+            selectedToken={selectedToken}
+          />
+        )}
+        {stage === 1 && selectedToken && <WalletDiscoveryStage token={selectedToken} />}
+        {stage === 2 && <WalletFilteringStage />}
+        {stage === 3 && <TransactionAnalysisStage />}
+        {stage === 4 && <TokenCompilationStage />}
+        {stage === 5 && <DataEnrichmentStage />}
+        {stage === 6 && <FinalDatasetStage />}
+        {stage === 7 && <ValuePropositionStage onReset={resetDemo} />}
       </div>
 
       <style>{`
@@ -152,10 +224,19 @@ const Creation = () => {
           80% { opacity: 1; }
           100% { transform: translateX(100%); opacity: 0; }
         }
+        @keyframes countUp {
+          from { opacity: 0; transform: scale(0.5); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes highlightPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+        }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
         .animate-fade-in-scale { animation: fadeInScale 0.8s ease-out forwards; }
         .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
         .animate-node-appear { animation: nodeAppear 0.6s ease-out forwards; }
+        .animate-highlight { animation: highlightPulse 1s ease-in-out infinite; }
         .delay-100 { animation-delay: 0.1s; opacity: 0; }
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
         .delay-300 { animation-delay: 0.3s; opacity: 0; }
@@ -200,7 +281,6 @@ const NetworkBackground = ({ stage }: { stage: number }) => {
 
   return (
     <svg className="absolute inset-0 w-full h-full opacity-30">
-      {/* Connection lines */}
       {nodes.map((node, i) =>
         nodes.slice(i + 1, i + 4).map((target, j) => (
           <line
@@ -219,7 +299,6 @@ const NetworkBackground = ({ stage }: { stage: number }) => {
           />
         ))
       )}
-      {/* Nodes */}
       {nodes.map((node, i) => (
         <circle
           key={i}
@@ -237,58 +316,95 @@ const NetworkBackground = ({ stage }: { stage: number }) => {
   );
 };
 
-// Stage 0: Token Selection
-const TokenSelectionStage = ({
-  tokens,
-  onSelect,
+// Stage 0: Category and Token Selection with Auto-Animation
+const CategoryTokenSelectionStage = ({
+  autoSelectStep,
+  selectedCategory,
+  selectedToken,
 }: {
-  tokens: Token[];
-  onSelect: (token: Token) => void;
+  autoSelectStep: number;
+  selectedCategory: string | null;
+  selectedToken: Token | null;
 }) => (
-  <div className="max-w-4xl mx-auto text-center">
+  <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
       Step 1
     </p>
     <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in-up delay-100">
-      Select a Token to Analyze
+      {autoSelectStep < 2 ? "Select a Token Category" : "Select a Token"}
     </h1>
     <p className="text-lg md:text-xl text-white/60 mb-12 animate-fade-in-up delay-200">
-      Choose from meme tokens to see how AudienceScan works
+      {autoSelectStep < 2 
+        ? "Choose from 400+ token categories" 
+        : `Pick a ${selectedCategory?.toLowerCase() || "meme"} token to analyze`}
     </p>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-      {tokens.map((token, i) => (
-        <button
-          key={token.symbol}
-          onClick={() => onSelect(token)}
-          className={`group relative bg-white/5 border border-white/10 hover:border-violet-500/50 rounded-2xl p-8 transition-all duration-300 hover:bg-violet-500/10 animate-fade-in-up`}
-          style={{ animationDelay: `${0.3 + i * 0.1}s`, opacity: 0 }}
+    {autoSelectStep < 2 ? (
+      // Category Selection
+      <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
+        {categories.map((category, i) => (
+          <div
+            key={category}
+            className={`px-6 py-3 rounded-full border text-sm md:text-base transition-all duration-500 animate-fade-in-up ${
+              selectedCategory === category
+                ? "bg-violet-600 border-violet-500 text-white animate-highlight"
+                : "bg-white/5 border-white/10 text-white/70"
+            }`}
+            style={{ animationDelay: `${0.3 + i * 0.05}s`, opacity: 0 }}
+          >
+            {category}
+          </div>
+        ))}
+        <div
+          className="px-6 py-3 rounded-full border border-white/10 bg-white/5 text-white/40 text-sm animate-fade-in-up"
+          style={{ animationDelay: "0.7s", opacity: 0 }}
         >
-          <div className="absolute inset-0 bg-violet-500/0 group-hover:bg-violet-500/10 rounded-2xl transition-colors" />
-          <img
-            src={token.logo}
-            alt={token.name}
-            className="w-16 h-16 mx-auto mb-4 rounded-full"
-          />
-          <h3 className="text-xl font-bold mb-1">{token.name}</h3>
-          <p className="text-white/50">${token.symbol}</p>
-        </button>
-      ))}
-    </div>
+          +392 more...
+        </div>
+      </div>
+    ) : (
+      // Token Selection
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+        {memeTokens.map((token, i) => (
+          <div
+            key={token.symbol}
+            className={`relative bg-white/5 border rounded-2xl p-8 transition-all duration-500 animate-fade-in-up ${
+              selectedToken?.symbol === token.symbol
+                ? "border-violet-500 bg-violet-500/20 animate-highlight"
+                : "border-white/10"
+            }`}
+            style={{ animationDelay: `${0.1 + i * 0.1}s`, opacity: 0 }}
+          >
+            <img
+              src={token.logo}
+              alt={token.name}
+              className="w-16 h-16 mx-auto mb-4 rounded-full"
+            />
+            <h3 className="text-xl font-bold mb-1">{token.name}</h3>
+            <p className="text-white/50">${token.symbol}</p>
+            {selectedToken?.symbol === token.symbol && (
+              <div className="absolute top-4 right-4">
+                <span className="material-icons-outlined text-violet-400">check_circle</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 );
 
-// Stage 1: Wallet Extraction
-const WalletExtractionStage = ({ token }: { token: Token }) => (
+// Stage 1: Wallet Discovery
+const WalletDiscoveryStage = ({ token }: { token: Token }) => (
   <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
       Step 2
     </p>
     <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Extracting Verified Wallets
+      Scanning Token Contract
     </h2>
     <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Scanning the ${token.symbol} contract for human-verified wallet transactions
+      Analyzing the last 1,000 transactions for relevance
     </p>
 
     <div className="relative max-w-3xl mx-auto animate-fade-in-scale delay-300">
@@ -298,7 +414,7 @@ const WalletExtractionStage = ({ token }: { token: Token }) => (
           <img src={token.logo} alt={token.name} className="w-16 h-16 md:w-20 md:h-20 rounded-full" />
         </div>
         
-        {/* Scanning Lines */}
+        {/* Scanning Rings */}
         <div className="absolute inset-0 flex items-center justify-center">
           {[0, 1, 2, 3].map((i) => (
             <div
@@ -312,42 +428,112 @@ const WalletExtractionStage = ({ token }: { token: Token }) => (
         </div>
       </div>
 
-      {/* Extracted Wallets */}
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-4 mt-12">
-        {Array.from({ length: 10 }).map((_, i) => (
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-8 mt-12 max-w-md mx-auto">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-400">
+          <p className="text-4xl font-bold text-violet-400 mb-2">1,000</p>
+          <p className="text-white/50 text-sm">Transactions Scanned</p>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-500">
+          <p className="text-4xl font-bold text-violet-400 mb-2">851</p>
+          <p className="text-white/50 text-sm">Wallets Found</p>
+        </div>
+      </div>
+
+      {/* Wallet Grid Preview */}
+      <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mt-8">
+        {Array.from({ length: 20 }).map((_, i) => (
           <div
             key={i}
-            className="bg-white/5 border border-white/10 rounded-lg p-3 animate-fade-in-up"
-            style={{ animationDelay: `${0.5 + i * 0.1}s`, opacity: 0 }}
+            className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded-lg flex items-center justify-center animate-fade-in-up"
+            style={{ animationDelay: `${0.6 + i * 0.03}s`, opacity: 0 }}
           >
-            <span className="material-icons-outlined text-violet-400 text-lg">account_balance_wallet</span>
-            <p className="text-xs text-white/40 mt-1 font-mono">0x...{(Math.random() * 9999).toFixed(0).padStart(4, "0")}</p>
+            <span className="material-icons-outlined text-violet-400/60 text-sm">account_balance_wallet</span>
           </div>
         ))}
       </div>
-
-      <p className="text-white/40 mt-8 animate-fade-in-up delay-800">
-        <span className="text-violet-400 font-semibold">2,847</span> verified wallets found
-      </p>
     </div>
   </div>
 );
 
-// Stage 2: Wallet Analysis
-const WalletAnalysisStage = ({ token }: { token: Token }) => (
+// Stage 2: Wallet Filtering
+const WalletFilteringStage = () => (
   <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
       Step 3
     </p>
     <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Analyzing Wallet Activity
+      Filtering for Relevance
     </h2>
     <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Examining each wallet's token transactions and volume
+      Focusing on normal wallet behavior (2-3 transactions)
     </p>
 
     <div className="relative animate-fade-in-scale delay-300">
-      {/* Wallet Grid with Activity */}
+      {/* Filter Visualization */}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
+        {/* Before */}
+        <div className="text-center">
+          <div className="w-32 h-32 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-4">
+            <p className="text-3xl font-bold text-white/60">851</p>
+          </div>
+          <p className="text-white/40 text-sm">All Wallets</p>
+        </div>
+
+        {/* Arrow with filter */}
+        <div className="flex flex-col items-center gap-2 py-4 md:py-0">
+          <span className="material-icons-outlined text-violet-400 text-3xl md:rotate-0 rotate-90">arrow_forward</span>
+          <div className="bg-violet-500/20 border border-violet-500/50 rounded-lg px-4 py-2">
+            <p className="text-sm text-violet-300">2-3 txs filter</p>
+          </div>
+        </div>
+
+        {/* After */}
+        <div className="text-center">
+          <div className="w-32 h-32 rounded-full bg-violet-500/20 border-2 border-violet-500 flex items-center justify-center mb-4 animate-pulse-slow">
+            <p className="text-3xl font-bold text-violet-400">70</p>
+          </div>
+          <p className="text-white/60 text-sm">Filtered Wallets</p>
+        </div>
+      </div>
+
+      {/* Explanation */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto animate-fade-in-up delay-500">
+        <div className="flex items-start gap-4">
+          <span className="material-icons-outlined text-violet-400 text-2xl">info</span>
+          <div className="text-left">
+            <p className="text-white/80 mb-2">Why filter by transaction count?</p>
+            <p className="text-white/50 text-sm">
+              Wallets with 2-3 transactions represent typical user behavior. 
+              Wallets with 15+ transactions are often bots or traders, not your target audience.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Sample size note */}
+      <p className="text-white/40 mt-8 animate-fade-in-up delay-600">
+        Scanning <span className="text-violet-400 font-semibold">100 wallets</span> as a representative sample
+      </p>
+    </div>
+  </div>
+);
+
+// Stage 3: Transaction Analysis
+const TransactionAnalysisStage = () => (
+  <div className="max-w-5xl mx-auto text-center">
+    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+      Step 4
+    </p>
+    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+      Analyzing Wallet Activity
+    </h2>
+    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+      Examining token transactions and volume for each wallet
+    </p>
+
+    <div className="relative animate-fade-in-scale delay-300">
+      {/* Wallet Analysis Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
@@ -370,7 +556,7 @@ const WalletAnalysisStage = ({ token }: { token: Token }) => (
                 {[0, 1, 2].map((j) => (
                   <div key={j} className="flex items-center gap-2 text-xs">
                     <div className="w-4 h-4 rounded-full bg-violet-500/40" />
-                    <span className="text-white/50">${Math.floor(Math.random() * 10000)}</span>
+                    <span className="text-white/50">${["UNI", "WETH", "USDC"][j]}</span>
                   </div>
                 ))}
               </div>
@@ -379,104 +565,124 @@ const WalletAnalysisStage = ({ token }: { token: Token }) => (
         ))}
       </div>
 
-      <p className="text-white/40 mt-8 animate-fade-in-up delay-700">
-        <span className="text-violet-400 font-semibold">47,293</span> transactions analyzed
-      </p>
-    </div>
-  </div>
-);
-
-// Stage 3: Token Compilation
-const TokenCompilationStage = () => (
-  <div className="max-w-5xl mx-auto text-center">
-    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 4
-    </p>
-    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Compiling Token Overlaps
-    </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Identifying which tokens your audience also transacts
-    </p>
-
-    <div className="relative animate-fade-in-scale delay-300">
-      {/* Token Network Visualization */}
-      <div className="relative h-80 md:h-96">
-        {/* Central Node */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <div className="w-20 h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center">
-            <span className="material-icons-outlined text-white text-3xl">hub</span>
-          </div>
+      {/* Results */}
+      <div className="grid grid-cols-2 gap-8 mt-12 max-w-lg mx-auto">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-700">
+          <p className="text-4xl font-bold text-violet-400 mb-2">750</p>
+          <p className="text-white/50 text-sm">Transactions Analyzed</p>
         </div>
-
-        {/* Surrounding Tokens */}
-        {[
-          { x: 20, y: 20, size: "lg", label: "Arbitrum" },
-          { x: 75, y: 15, size: "md", label: "Optimism" },
-          { x: 85, y: 60, size: "lg", label: "Base" },
-          { x: 70, y: 85, size: "sm", label: "Polygon" },
-          { x: 25, y: 80, size: "md", label: "Avalanche" },
-          { x: 10, y: 50, size: "sm", label: "Solana" },
-        ].map((token, i) => (
-          <div
-            key={i}
-            className="absolute animate-node-appear"
-            style={{
-              left: `${token.x}%`,
-              top: `${token.y}%`,
-              animationDelay: `${0.5 + i * 0.15}s`,
-              opacity: 0,
-            }}
-          >
-            {/* Connection Line */}
-            <svg className="absolute inset-0 w-full h-full" style={{ left: 0, top: 0, overflow: "visible" }}>
-              <line
-                x1="0"
-                y1="0"
-                x2={`${50 - token.x}%`}
-                y2={`${50 - token.y}%`}
-                stroke="rgba(139, 92, 246, 0.4)"
-                strokeWidth="2"
-                strokeDasharray="4 4"
-              />
-            </svg>
-            
-            <div
-              className={`rounded-full bg-white/10 border border-violet-500/50 flex items-center justify-center ${
-                token.size === "lg" ? "w-16 h-16" : token.size === "md" ? "w-12 h-12" : "w-10 h-10"
-              }`}
-            >
-              <span className="text-white/80 text-xs font-medium">{token.label.slice(0, 3)}</span>
-            </div>
-          </div>
-        ))}
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 animate-fade-in-up delay-800">
+          <p className="text-4xl font-bold text-violet-400 mb-2">130</p>
+          <p className="text-white/50 text-sm">Tokens Found</p>
+        </div>
       </div>
-
-      <p className="text-white/40 mt-4 animate-fade-in-up delay-800">
-        <span className="text-violet-400 font-semibold">127</span> overlapping tokens discovered
-      </p>
     </div>
   </div>
 );
 
-// Stage 4: Data Enrichment
-const DataEnrichmentStage = () => (
+// Stage 4: Token Compilation
+const TokenCompilationStage = () => (
   <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
       Step 5
     </p>
     <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+      Token Overlap Results
+    </h2>
+    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+      Ranked by how many wallets also transact each token
+    </p>
+
+    <div className="relative animate-fade-in-scale delay-300">
+      {/* Token Network Visualization */}
+      <div className="relative h-64 md:h-80 max-w-3xl mx-auto mb-8">
+        {/* Central Node */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png" alt="SHIB" className="w-10 h-10 md:w-12 md:h-12 rounded-full" />
+          </div>
+        </div>
+
+        {/* Surrounding Tokens */}
+        {overlapResults.slice(0, 8).map((token, i) => {
+          const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+          const radius = 35;
+          const x = 50 + Math.cos(angle) * radius;
+          const y = 50 + Math.sin(angle) * radius;
+          const size = token.score > 0.6 ? "w-12 h-12" : token.score > 0.4 ? "w-10 h-10" : "w-8 h-8";
+          
+          return (
+            <div
+              key={i}
+              className="absolute animate-node-appear"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: "translate(-50%, -50%)",
+                animationDelay: `${0.3 + i * 0.1}s`,
+                opacity: 0,
+              }}
+            >
+              <div className={`${size} rounded-full bg-white/10 border border-violet-500/50 flex items-center justify-center overflow-hidden`}>
+                <img src={token.logo} alt={token.symbol} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Connection Lines (SVG) */}
+        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 10 }}>
+          {overlapResults.slice(0, 8).map((token, i) => {
+            const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+            const radius = 35;
+            const x = 50 + Math.cos(angle) * radius;
+            const y = 50 + Math.sin(angle) * radius;
+            
+            return (
+              <line
+                key={i}
+                x1="50%"
+                y1="50%"
+                x2={`${x}%`}
+                y2={`${y}%`}
+                stroke={`rgba(139, 92, 246, ${token.score * 0.6})`}
+                strokeWidth={token.score > 0.5 ? 2 : 1}
+                strokeDasharray="4 4"
+                style={{
+                  animation: `flowLine 1s ${0.3 + i * 0.1}s ease-out forwards`,
+                  strokeDashoffset: 100,
+                }}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      <p className="text-white/40 animate-fade-in-up delay-700">
+        <span className="text-violet-400 font-semibold">130</span> overlapping tokens discovered
+      </p>
+    </div>
+  </div>
+);
+
+// Stage 5: Data Enrichment
+const DataEnrichmentStage = () => (
+  <div className="max-w-5xl mx-auto text-center">
+    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+      Step 6
+    </p>
+    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
       Enriching with Social Data
     </h2>
     <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Adding social handles, platform tags, and community info
+      Adding social handles and community tags
     </p>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
       {[
-        { icon: "tag", title: "X (Twitter)", count: "12,847", desc: "Social handles matched" },
-        { icon: "send", title: "Telegram", count: "8,293", desc: "Community channels found" },
-        { icon: "forum", title: "Discord", count: "5,412", desc: "Server memberships" },
+        { icon: "tag", title: "X (Twitter)", count: "89", desc: "Handles found" },
+        { icon: "send", title: "Telegram", count: "67", desc: "Channels found" },
+        { icon: "forum", title: "Reddit", count: "43", desc: "Communities found" },
       ].map((platform, i) => (
         <div
           key={i}
@@ -505,49 +711,49 @@ const DataEnrichmentStage = () => (
   </div>
 );
 
-// Stage 5: Final Dataset
+// Stage 6: Final Dataset
 const FinalDatasetStage = () => (
   <div className="max-w-5xl mx-auto text-center">
     <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 6
+      Step 7
     </p>
     <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
       Your Actionable Dataset
     </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+    <p className="text-lg text-white/60 mb-8 animate-fade-in-up delay-200">
       Ready for strategy, paid ads, and KOL outreach
     </p>
 
     <div className="relative animate-fade-in-scale delay-300">
       {/* Dataset Preview Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden max-w-4xl mx-auto">
-        <div className="grid grid-cols-4 gap-4 p-4 bg-violet-500/20 border-b border-white/10 text-sm font-medium">
-          <span>Community</span>
-          <span>Platform</span>
-          <span>Overlap %</span>
-          <span>Volume</span>
+        <div className="grid grid-cols-5 gap-2 p-3 bg-violet-500/20 border-b border-white/10 text-xs md:text-sm font-medium">
+          <span>Score</span>
+          <span>Token</span>
+          <span className="hidden md:block">Name</span>
+          <span>Twitter</span>
+          <span>Telegram</span>
         </div>
-        {[
-          { community: "Arbitrum DAO", platform: "Telegram", overlap: "34%", volume: "$2.4M" },
-          { community: "Base Builders", platform: "Discord", overlap: "28%", volume: "$1.8M" },
-          { community: "DeFi Alpha", platform: "X", overlap: "22%", volume: "$1.2M" },
-          { community: "NFT Collectors", platform: "Telegram", overlap: "18%", volume: "$890K" },
-        ].map((row, i) => (
+        {overlapResults.slice(0, 6).map((token, i) => (
           <div
             key={i}
-            className="grid grid-cols-4 gap-4 p-4 border-b border-white/5 text-sm animate-fade-in-up"
-            style={{ animationDelay: `${0.4 + i * 0.1}s`, opacity: 0 }}
+            className="grid grid-cols-5 gap-2 p-3 border-b border-white/5 text-xs md:text-sm animate-fade-in-up items-center"
+            style={{ animationDelay: `${0.4 + i * 0.08}s`, opacity: 0 }}
           >
-            <span className="text-white/80">{row.community}</span>
-            <span className="text-white/60">{row.platform}</span>
-            <span className="text-violet-400 font-medium">{row.overlap}</span>
-            <span className="text-white/60">{row.volume}</span>
+            <span className="text-violet-400 font-medium">{(token.score * 100).toFixed(0)}%</span>
+            <div className="flex items-center gap-2">
+              <img src={token.logo} alt={token.symbol} className="w-5 h-5 rounded-full" />
+              <span className="text-white/80">{token.symbol}</span>
+            </div>
+            <span className="text-white/60 hidden md:block truncate">{token.name}</span>
+            <span className="text-white/50 truncate">{token.twitter ? `@${token.twitter}` : "-"}</span>
+            <span className="text-white/50 truncate">{token.telegram || "-"}</span>
           </div>
         ))}
       </div>
 
       {/* Export Options */}
-      <div className="flex flex-wrap justify-center gap-4 mt-8">
+      <div className="flex flex-wrap justify-center gap-3 mt-8">
         {["DV360", "X Ads", "Telegram Ads", "KOL Outreach"].map((option, i) => (
           <div
             key={i}
@@ -563,7 +769,7 @@ const FinalDatasetStage = () => (
   </div>
 );
 
-// Stage 6: Value Proposition
+// Stage 7: Value Proposition
 const ValuePropositionStage = ({ onReset }: { onReset: () => void }) => (
   <div className="max-w-4xl mx-auto text-center">
     <div className="mb-8 animate-fade-in-up">
