@@ -1160,7 +1160,7 @@ const FinalDatasetStage = () => (
     <div className="relative animate-fade-in-scale delay-300">
       {/* Dataset Preview Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden max-w-4xl mx-auto">
-        <div className="grid grid-cols-5 gap-2 p-3 bg-violet-500/20 border-b border-white/10 text-xs md:text-sm font-medium">
+        <div className="grid grid-cols-5 gap-2 p-3 bg-violet-500/20 border-b border-white/10 text-xs md:text-sm font-medium text-left">
           <span>Score</span>
           <span>Token</span>
           <span className="hidden md:block">Name</span>
@@ -1170,7 +1170,7 @@ const FinalDatasetStage = () => (
         {overlapResults.slice(0, 6).map((token, i) => (
           <div
             key={i}
-            className="grid grid-cols-5 gap-2 p-3 border-b border-white/5 text-xs md:text-sm animate-fade-in-up items-center"
+            className="grid grid-cols-5 gap-2 p-3 border-b border-white/5 text-xs md:text-sm animate-fade-in-up items-center text-left"
             style={{ animationDelay: `${0.4 + i * 0.08}s`, opacity: 0 }}
           >
             <span className="text-violet-400 font-medium">{(token.score * 100).toFixed(0)}%</span>
@@ -1183,11 +1183,16 @@ const FinalDatasetStage = () => (
             <span className="text-white/50 truncate">{token.telegram || "-"}</span>
           </div>
         ))}
+        {/* More rows indicator */}
+        <div className="p-3 text-center text-white/40 text-xs border-t border-white/5 animate-fade-in-up" style={{ animationDelay: '0.9s', opacity: 0 }}>
+          <span className="material-icons-outlined text-sm align-middle mr-1">more_horiz</span>
+          +97 more results
+        </div>
       </div>
 
       {/* Export Options */}
       <div className="flex flex-wrap justify-center gap-3 mt-8">
-        {["DV360", "X Ads", "Telegram Ads", "KOL Outreach"].map((option, i) => (
+        {["DV360", "X Ads", "Telegram Ads", "Google Ads"].map((option, i) => (
           <div
             key={i}
             className="px-4 py-2 bg-white/5 border border-violet-500/30 rounded-full text-sm text-white/70 animate-fade-in-up"
