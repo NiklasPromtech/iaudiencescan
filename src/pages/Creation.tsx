@@ -561,39 +561,44 @@ const WalletDiscoveryStage = ({ token }: { token: Token }) => (
         </div>
       </div>
 
-      {/* Wallet Grid Preview - many wallets with random intervals and fading opacity */}
-      <div className="grid grid-cols-8 md:grid-cols-16 gap-1.5 mt-8 max-w-4xl mx-auto">
-        {Array.from({ length: 96 }).map((_, i) => {
-          // Random delay between 0.3s and 3s for gathering effect
-          const randomDelay = 0.3 + Math.random() * 2.7;
-          // Calculate row (0-5) and column position for opacity fading
-          const row = Math.floor(i / 16);
-          const col = i % 16;
-          // Fade based on distance from center-top
-          const centerCol = 7.5;
-          const colDist = Math.abs(col - centerCol) / 8;
-          const rowDist = row / 5;
-          const opacity = Math.max(0.15, 1 - (colDist * 0.6 + rowDist * 0.5));
-          
-          return (
+      {/* Wallet Grid Preview - pyramid layout with fading opacity */}
+      <div className="flex flex-col items-center gap-2 mt-8">
+        {/* Row 1: 15 wallets */}
+        <div className="flex gap-2 justify-center">
+          {Array.from({ length: 15 }).map((_, i) => (
             <div
-              key={i}
-              className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded flex items-center justify-center animate-fade-in-up"
-              style={{ 
-                animationDelay: `${randomDelay}s`, 
-                opacity: 0,
-                '--final-opacity': opacity,
-              } as React.CSSProperties}
+              key={`r1-${i}`}
+              className="w-8 h-8 md:w-10 md:h-10 bg-violet-500/20 border border-violet-500/30 rounded flex items-center justify-center animate-fade-in-up"
+              style={{ animationDelay: `${0.3 + Math.random() * 2}s`, opacity: 0 }}
             >
-              <span 
-                className="material-icons-outlined text-violet-400 text-xs"
-                style={{ opacity }}
-              >
-                account_balance_wallet
-              </span>
+              <span className="material-icons-outlined text-violet-400 text-xs">account_balance_wallet</span>
             </div>
-          );
-        })}
+          ))}
+        </div>
+        {/* Row 2: 12 wallets */}
+        <div className="flex gap-2 justify-center">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={`r2-${i}`}
+              className="w-8 h-8 md:w-10 md:h-10 bg-violet-500/15 border border-violet-500/25 rounded flex items-center justify-center animate-fade-in-up"
+              style={{ animationDelay: `${0.5 + Math.random() * 2}s`, opacity: 0 }}
+            >
+              <span className="material-icons-outlined text-violet-400/70 text-xs">account_balance_wallet</span>
+            </div>
+          ))}
+        </div>
+        {/* Row 3: 10 wallets */}
+        <div className="flex gap-2 justify-center">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={`r3-${i}`}
+              className="w-8 h-8 md:w-10 md:h-10 bg-violet-500/10 border border-violet-500/20 rounded flex items-center justify-center animate-fade-in-up"
+              style={{ animationDelay: `${0.7 + Math.random() * 2}s`, opacity: 0 }}
+            >
+              <span className="material-icons-outlined text-violet-400/50 text-xs">account_balance_wallet</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </div>
