@@ -735,7 +735,7 @@ const WalletFilteringStage = () => {
 
       <div className="relative animate-fade-in-scale delay-300">
         {/* Filter Selection */}
-        <div className="flex flex-col items-center gap-8 mb-12">
+        <div className="flex flex-col items-center gap-12 mb-12">
           {/* Filter Type Selection */}
           <div className="flex flex-wrap justify-center gap-3">
             <div className="px-5 py-3 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
