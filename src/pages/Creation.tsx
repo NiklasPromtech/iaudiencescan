@@ -648,79 +648,116 @@ const WalletDiscoveryStage = ({ token }: { token: Token }) => (
   </div>
 );
 
+// Count down hook for filtering animation
+const useCountDown = (start: number, end: number, duration: number = 1500, delay: number = 800) => {
+  const [count, setCount] = useState(start);
+  
+  useEffect(() => {
+    const startTime = Date.now() + delay;
+    
+    const animate = () => {
+      const now = Date.now();
+      if (now < startTime) {
+        requestAnimationFrame(animate);
+        return;
+      }
+      
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      setCount(Math.floor(start - (start - end) * eased));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [start, end, duration, delay]);
+  
+  return count;
+};
+
 // Stage 2: Wallet Filtering
-const WalletFilteringStage = () => (
-  <div className="max-w-5xl mx-auto text-center">
-    <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
-      Step 3
-    </p>
-    <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
-      Filtering for Relevance
-    </h2>
-    <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
-      Selecting wallets by transfer volume
-    </p>
+const WalletFilteringStage = () => {
+  const filteredCount = useCountDown(851, 70, 1500, 800);
+  
+  return (
+    <div className="max-w-5xl mx-auto text-center">
+      <p className="text-violet-400 text-sm md:text-base mb-4 tracking-widest uppercase animate-fade-in-up">
+        Step 3
+      </p>
+      <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in-up delay-100">
+        Filtering for Relevance
+      </h2>
+      <p className="text-lg text-white/60 mb-12 animate-fade-in-up delay-200">
+        Selecting wallets by transfer volume
+      </p>
 
-    <div className="relative animate-fade-in-scale delay-300">
-      {/* Filter Selection */}
-      <div className="flex flex-col items-center gap-6 mb-12">
-        {/* Filter Type Selection */}
-        <div className="flex flex-wrap justify-center gap-3">
-          <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
-            Transaction Count
-          </div>
-          <div className="px-4 py-2 rounded-lg bg-violet-500/20 border-2 border-violet-500 text-violet-300 text-sm font-medium flex items-center gap-2">
-            <span className="material-icons-outlined text-base">attach_money</span>
-            Transaction Volume
-          </div>
-          <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
-            Token Holdings
-          </div>
-        </div>
-
-        {/* Volume Range Selection */}
-        <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-6 animate-fade-in-up delay-400">
-          <p className="text-white/60 text-sm mb-3">Selected range:</p>
-          <div className="flex items-center gap-4">
-            <div className="px-4 py-2 bg-violet-600/30 border border-violet-400 rounded-lg">
-              <span className="text-violet-200 font-mono font-bold">$100</span>
+      <div className="relative animate-fade-in-scale delay-300">
+        {/* Filter Selection */}
+        <div className="flex flex-col items-center gap-8 mb-12">
+          {/* Filter Type Selection */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <div className="px-5 py-3 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
+              Transaction Count
             </div>
-            <span className="text-violet-400">to</span>
-            <div className="px-4 py-2 bg-violet-600/30 border border-violet-400 rounded-lg">
-              <span className="text-violet-200 font-mono font-bold">$500</span>
+            <div className="px-5 py-3 rounded-lg bg-violet-500/20 border-2 border-violet-500 text-violet-300 text-sm font-medium flex items-center gap-2">
+              <span className="material-icons-outlined text-base">attach_money</span>
+              Transaction Volume
             </div>
-            <span className="text-white/50 text-sm">USD</span>
+            <div className="px-5 py-3 rounded-lg bg-white/5 border border-white/10 text-white/40 text-sm">
+              Token Holdings
+            </div>
+          </div>
+
+          {/* Volume Range Selection */}
+          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl px-8 py-5 animate-fade-in-up delay-400">
+            <p className="text-white/60 text-sm mb-3">Selected range:</p>
+            <div className="flex items-center gap-4">
+              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg">
+                <span className="text-violet-200 font-mono font-bold">$100</span>
+              </div>
+              <span className="text-violet-400">to</span>
+              <div className="px-5 py-3 bg-violet-600/30 border border-violet-400 rounded-lg">
+                <span className="text-violet-200 font-mono font-bold">$500</span>
+              </div>
+              <span className="text-white/50 text-sm">USD</span>
+            </div>
           </div>
         </div>
+
+        {/* Before/After Visualization */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
+          {/* Before */}
+          <div className="text-center">
+            <div className="w-28 h-28 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-3">
+              <p className="text-2xl font-bold text-white/60">851</p>
+            </div>
+            <p className="text-white/40 text-sm">All Wallets</p>
+          </div>
+
+          {/* Arrow */}
+          <div className="flex items-center gap-2 py-4 md:py-0">
+            <span className="material-icons-outlined text-violet-400 text-2xl md:rotate-0 rotate-90">arrow_forward</span>
+          </div>
+
+          {/* After */}
+          <div className="text-center">
+            <div className="w-28 h-28 rounded-full bg-violet-500/20 border-2 border-violet-500 flex items-center justify-center mb-3 animate-pulse-slow">
+              <p className="text-2xl font-bold text-violet-400">{filteredCount}</p>
+            </div>
+            <p className="text-white/60 text-sm">Filtered Wallets</p>
+          </div>
+        </div>
+
       </div>
-
-      {/* Before/After Visualization */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
-        {/* Before */}
-        <div className="text-center">
-          <div className="w-28 h-28 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-3">
-            <p className="text-2xl font-bold text-white/60">851</p>
-          </div>
-          <p className="text-white/40 text-sm">All Wallets</p>
-        </div>
-
-        {/* Arrow */}
-        <div className="flex items-center gap-2 py-4 md:py-0">
-          <span className="material-icons-outlined text-violet-400 text-2xl md:rotate-0 rotate-90">arrow_forward</span>
-        </div>
-
-        {/* After */}
-        <div className="text-center">
-          <div className="w-28 h-28 rounded-full bg-violet-500/20 border-2 border-violet-500 flex items-center justify-center mb-3 animate-pulse-slow">
-            <p className="text-2xl font-bold text-violet-400">70</p>
-          </div>
-          <p className="text-white/60 text-sm">Filtered Wallets</p>
-        </div>
-      </div>
-
     </div>
-  </div>
-);
+  );
+};
 
 // Easing count-up hook
 const useCountUp = (target: number, duration: number = 2500, delay: number = 500) => {
