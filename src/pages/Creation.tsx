@@ -541,14 +541,17 @@ const CategoryTokenSelectionStage = ({
           </div>
         </div>
         
-        {/* Selected token info below wheel */}
-        {selectedToken && (
-          <div className="mt-6 text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
-              <span className="text-sm text-violet-200 font-medium">Analyzing {selectedToken.name}...</span>
-            </div>
+        {/* Selected token info below wheel - always present, opacity toggles */}
+        <div 
+          className="mt-6 text-center transition-opacity duration-300"
+          style={{ opacity: selectedToken ? 1 : 0 }}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
+            <span className="text-sm text-violet-200 font-medium">
+              Analyzing {selectedToken?.name || 'token'}...
+            </span>
           </div>
-        )}
+        </div>
       </div>
     )}
   </div>
