@@ -383,96 +383,63 @@ const CategoryTokenSelectionStage = ({
     </p>
 
     {autoSelectStep < 2 ? (
-      // Category Selection - circular layout with varying sizes
-      <div className="relative h-64 md:h-80 max-w-3xl mx-auto">
+      // Category Selection - simple grid layout
+      <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
         {categories.map((category, i) => {
           const isSelected = selectedCategory === category;
           const hasSelection = selectedCategory !== null;
           
-          // Position categories in a scattered circular pattern
-          const positions = [
-            { x: 50, y: 15, size: 1.1 },    // top center
-            { x: 20, y: 25, size: 0.9 },    // top left
-            { x: 80, y: 22, size: 1.0 },    // top right
-            { x: 8, y: 50, size: 0.85 },    // left
-            { x: 92, y: 48, size: 0.95 },   // right
-            { x: 25, y: 75, size: 1.05 },   // bottom left
-            { x: 75, y: 78, size: 0.9 },    // bottom right
-            { x: 50, y: 88, size: 0.85 },   // bottom center
-          ];
-          const pos = positions[i];
-          
           return (
             <div
               key={category}
-              className="absolute animate-fade-in-up"
+              className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap animate-fade-in-up relative ${
+                isSelected
+                  ? "bg-violet-600 border-violet-400 text-white"
+                  : "bg-white/5 border-white/10 text-white/70"
+              }`}
               style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-                transform: `translate(-50%, -50%) scale(${isSelected ? 1.2 : hasSelection && !isSelected ? 0.8 : pos.size})`,
-                zIndex: isSelected ? 20 : 1,
                 opacity: hasSelection && !isSelected ? 0.3 : 1,
-                transition: "all 0.5s ease",
-                animationDelay: `${0.2 + i * 0.08}s`,
+                transform: isSelected ? "scale(1.1)" : hasSelection ? "scale(0.95)" : "scale(1)",
+                boxShadow: isSelected ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
+                transition: "all 0.4s ease",
+                animationDelay: `${0.2 + i * 0.05}s`,
               }}
             >
-              <div
-                className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap ${
-                  isSelected
-                    ? "bg-violet-600 border-violet-400 text-white shadow-2xl"
-                    : "bg-white/5 border-white/10 text-white/70"
-                }`}
-                style={{
-                  boxShadow: isSelected ? "0 0 40px 15px rgba(139, 92, 246, 0.4)" : "none",
-                }}
-              >
-                {/* Checkmark icon */}
-                {isSelected && (
-                  <span className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <span className="material-icons-outlined text-violet-600 text-sm">check</span>
-                  </span>
-                )}
-                <span className="relative z-10 font-medium">{category}</span>
-              </div>
+              {isSelected && (
+                <span className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <span className="material-icons-outlined text-violet-600 text-sm">check</span>
+                </span>
+              )}
+              <span className="font-medium">{category}</span>
             </div>
           );
         })}
       </div>
     ) : (
-      // Token Selection - simplified for performance
+      // Token Selection - Shiba pre-selected immediately, no delay
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-        {memeTokens.map((token, i) => {
-          const isSelected = selectedToken?.symbol === token.symbol;
-          const hasSelection = selectedToken !== null;
-          const shouldShow = autoSelectStep >= 2;
+        {memeTokens.map((token) => {
+          const isShiba = token.symbol === "SHIB";
           
           return (
             <div
               key={token.symbol}
               className="relative rounded-2xl p-8 text-center"
               style={{ 
-                opacity: !shouldShow ? 0 : hasSelection && !isSelected ? 0.25 : 1,
-                transform: !shouldShow 
-                  ? "translateY(20px)" 
-                  : hasSelection && !isSelected
-                  ? "scale(0.92)"
-                  : "scale(1)",
-                background: isSelected 
+                opacity: isShiba ? 1 : 0.25,
+                transform: isShiba ? "scale(1)" : "scale(0.92)",
+                background: isShiba 
                   ? "rgba(139, 92, 246, 0.15)" 
                   : "rgba(255, 255, 255, 0.05)",
-                border: isSelected 
+                border: isShiba 
                   ? "2px solid rgba(139, 92, 246, 0.7)" 
                   : "1px solid rgba(255, 255, 255, 0.1)",
-                transition: "all 0.4s ease",
-                transitionDelay: !shouldShow ? `${0.1 + i * 0.1}s` : "0s",
-                zIndex: isSelected ? 20 : 1,
+                zIndex: isShiba ? 20 : 1,
               }}
             >
               {/* Checkmark badge */}
-              {isSelected && (
-                <div 
-                  className="absolute -right-3 -top-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-30"
-                >
+              {isShiba && (
+                <div className="absolute -right-3 -top-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-30">
                   <span className="material-icons-outlined text-violet-600 text-lg">check</span>
                 </div>
               )}
@@ -483,8 +450,7 @@ const CategoryTokenSelectionStage = ({
                   style={{
                     width: "5rem",
                     height: "5rem",
-                    borderColor: isSelected ? "rgba(139, 92, 246, 0.7)" : "rgba(255,255,255,0.1)",
-                    transition: "border-color 0.3s ease",
+                    borderColor: isShiba ? "rgba(139, 92, 246, 0.7)" : "rgba(255,255,255,0.1)",
                   }}
                 >
                   <img
@@ -501,7 +467,7 @@ const CategoryTokenSelectionStage = ({
                 </p>
                 
                 {/* Selected label */}
-                {isSelected && (
+                {isShiba && (
                   <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
                     <span className="text-sm text-violet-200 font-medium">Analyzing...</span>
                   </div>
