@@ -69,25 +69,25 @@ const Creation = () => {
       setSelectedCategory("Meme Tokens");
     }, 2000));
     
-    // Move to token selection after 3s
+    // Move to token selection after 3.5s (give time for category selection animation)
     timers.push(setTimeout(() => {
       setAutoSelectStep(2);
-    }, 3500));
+    }, 4000));
     
-    // Auto-select "Shiba Inu" after 5s
+    // Auto-select "Shiba Inu" after tokens are visible (2s after token UI appears)
     timers.push(setTimeout(() => {
       setAutoSelectStep(3);
       setSelectedToken(memeTokens[1]); // Shiba Inu
-    }, 5500));
+    }, 6500));
     
-    // Move to next stage after 6.5s
+    // Move to next stage after selection animation plays (2s after selection)
     timers.push(setTimeout(() => {
       setIsAnimating(true);
       setTimeout(() => {
         setStage(1);
         setIsAnimating(false);
       }, 500);
-    }, 7000));
+    }, 8500));
     
     return () => timers.forEach(clearTimeout);
   }, [stage]);
@@ -424,59 +424,66 @@ const CategoryTokenSelectionStage = ({
           return (
             <div
               key={token.symbol}
-              className={`relative rounded-2xl p-8 transition-all duration-500 animate-fade-in-up ${
+              className={`relative rounded-2xl p-8 transition-all duration-700 ${
                 isSelected
-                  ? "bg-violet-600/30 border-2 border-violet-400 scale-110 z-20 animate-select-glow"
+                  ? "bg-violet-600/30 border-2 border-violet-400 scale-110 z-20"
                   : hasSelection
-                  ? "bg-white/5 border border-white/5 scale-90 opacity-40"
-                  : "bg-white/5 border border-white/10 hover:border-white/30"
+                  ? "bg-white/5 border border-white/5 scale-75 opacity-30 blur-[1px]"
+                  : "bg-white/5 border border-white/10 hover:border-white/30 animate-fade-in-up"
               }`}
               style={{ 
-                animationDelay: `${0.1 + i * 0.1}s`, 
-                opacity: 0,
-                boxShadow: isSelected ? "0 0 80px 30px rgba(139, 92, 246, 0.4)" : "none"
+                animationDelay: hasSelection ? "0s" : `${0.1 + i * 0.1}s`, 
+                opacity: hasSelection ? undefined : 0,
+                boxShadow: isSelected ? "0 0 100px 40px rgba(139, 92, 246, 0.5), 0 0 200px 80px rgba(139, 92, 246, 0.2)" : "none",
+                transform: isSelected ? "scale(1.15)" : hasSelection ? "scale(0.75)" : undefined,
               }}
             >
               {/* Ripple effects on selection */}
               {isSelected && (
                 <>
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 animate-ripple" />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-ripple" style={{ animationDelay: "0.15s" }} />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/5 animate-ripple" style={{ animationDelay: "0.3s" }} />
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/30 animate-ripple" />
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 animate-ripple" style={{ animationDelay: "0.15s" }} />
+                  <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-ripple" style={{ animationDelay: "0.3s" }} />
                 </>
+              )}
+              
+              {/* Glowing border animation */}
+              {isSelected && (
+                <div className="absolute inset-0 rounded-2xl border-2 border-violet-400 animate-highlight" />
               )}
               
               {/* Large checkmark badge */}
               {isSelected && (
                 <div 
-                  className="absolute -right-3 -top-3 w-10 h-10 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-xl z-30"
+                  className="absolute -right-4 -top-4 w-12 h-12 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-2xl z-30"
+                  style={{ boxShadow: "0 0 30px 10px rgba(255, 255, 255, 0.3)" }}
                 >
-                  <span className="material-icons-outlined text-violet-600 text-xl">check</span>
+                  <span className="material-icons-outlined text-violet-600 text-2xl">check</span>
                 </div>
               )}
               
               <div className="relative z-10">
-                <div className={`mx-auto mb-4 rounded-full transition-all duration-500 ${
-                  isSelected ? "w-20 h-20 ring-4 ring-violet-400 ring-offset-4 ring-offset-black" : "w-16 h-16"
+                <div className={`mx-auto mb-4 rounded-full transition-all duration-700 ${
+                  isSelected ? "w-24 h-24 ring-4 ring-violet-300 ring-offset-4 ring-offset-black" : "w-16 h-16"
                 }`}>
                   <img
                     src={token.logo}
                     alt={token.name}
-                    className="w-full h-full rounded-full"
+                    className={`w-full h-full rounded-full transition-all duration-700 ${isSelected ? "shadow-2xl" : ""}`}
                   />
                 </div>
                 <h3 className={`font-bold mb-1 transition-all duration-500 ${isSelected ? "text-2xl text-white" : "text-xl"}`}>
                   {token.name}
                 </h3>
-                <p className={`transition-all duration-500 ${isSelected ? "text-violet-300" : "text-white/50"}`}>
+                <p className={`transition-all duration-500 ${isSelected ? "text-violet-300 text-lg" : "text-white/50"}`}>
                   ${token.symbol}
                 </p>
                 
                 {/* Selected label */}
                 {isSelected && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/30 rounded-full animate-fade-in-up">
-                    <span className="material-icons-outlined text-violet-300 text-sm">trending_up</span>
-                    <span className="text-sm text-violet-200 font-medium">Analyzing...</span>
+                  <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-violet-500/40 border border-violet-400/50 rounded-full animate-fade-in-up">
+                    <span className="material-icons-outlined text-violet-200 text-lg animate-pulse-slow">trending_up</span>
+                    <span className="text-base text-violet-100 font-semibold">Analyzing...</span>
                   </div>
                 )}
               </div>
