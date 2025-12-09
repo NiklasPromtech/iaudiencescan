@@ -383,25 +383,28 @@ const CategoryTokenSelectionStage = ({
     </p>
 
     {autoSelectStep < 2 ? (
-      // Category Selection - simple grid layout, no animation delays
+      // Category Selection - with fade-in animation starting from hidden
       <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-        {categories.map((category) => {
+        {categories.map((category, i) => {
           const isSelected = selectedCategory === category;
           const hasSelection = selectedCategory !== null;
           
           return (
             <div
               key={category}
-              className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap relative ${
+              className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap relative animate-fade-in-up ${
                 isSelected
                   ? "bg-violet-600 border-violet-400 text-white"
                   : "bg-white/5 border-white/10 text-white/70"
               }`}
               style={{
-                opacity: hasSelection && !isSelected ? 0.3 : 1,
+                opacity: 0,
+                animationDelay: `${0.3 + i * 0.05}s`,
+                animationFillMode: "forwards",
+                ...(hasSelection && !isSelected ? { opacity: 0.3 } : {}),
                 transform: isSelected ? "scale(1.1)" : hasSelection ? "scale(0.95)" : "scale(1)",
                 boxShadow: isSelected ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
-                transition: "all 0.4s ease",
+                transition: "transform 0.4s ease, box-shadow 0.4s ease",
               }}
             >
               {isSelected && (
@@ -415,24 +418,27 @@ const CategoryTokenSelectionStage = ({
         })}
       </div>
     ) : (
-      // Token Selection - same style as categories, no animation delays
+      // Token Selection - with fade-in animation starting from hidden
       <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-        {memeTokens.map((token) => {
+        {memeTokens.map((token, i) => {
           const isShiba = token.symbol === "SHIB";
           
           return (
             <div
               key={token.symbol}
-              className={`relative rounded-2xl p-6 text-center ${
+              className={`relative rounded-2xl p-6 text-center animate-fade-in-up ${
                 isShiba
                   ? "bg-violet-600/20 border-2 border-violet-400"
                   : "bg-white/5 border border-white/10"
               }`}
               style={{
-                opacity: isShiba ? 1 : 0.3,
+                opacity: 0,
+                animationDelay: `${0.3 + i * 0.1}s`,
+                animationFillMode: "forwards",
+                ...(isShiba ? {} : { opacity: 0.3 }),
                 transform: isShiba ? "scale(1.05)" : "scale(0.95)",
                 boxShadow: isShiba ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
-                transition: "all 0.4s ease",
+                transition: "transform 0.4s ease, box-shadow 0.4s ease",
               }}
             >
               {/* Checkmark badge */}
