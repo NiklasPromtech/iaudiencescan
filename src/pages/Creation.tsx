@@ -420,22 +420,34 @@ const CategoryTokenSelectionStage = ({
         {memeTokens.map((token, i) => {
           const isSelected = selectedToken?.symbol === token.symbol;
           const hasSelection = selectedToken !== null;
+          const shouldShow = autoSelectStep >= 2;
           
           return (
             <div
               key={token.symbol}
-              className={`relative rounded-2xl p-8 transition-all duration-700 ${
-                isSelected
-                  ? "bg-violet-600/30 border-2 border-violet-400 scale-110 z-20"
-                  : hasSelection
-                  ? "bg-white/5 border border-white/5 scale-75 opacity-30 blur-[1px]"
-                  : "bg-white/5 border border-white/10 hover:border-white/30 animate-fade-in-up"
-              }`}
+              className="relative rounded-2xl p-8 text-center"
               style={{ 
-                animationDelay: hasSelection ? "0s" : `${0.1 + i * 0.1}s`, 
-                opacity: hasSelection ? undefined : 0,
-                boxShadow: isSelected ? "0 0 100px 40px rgba(139, 92, 246, 0.5), 0 0 200px 80px rgba(139, 92, 246, 0.2)" : "none",
-                transform: isSelected ? "scale(1.15)" : hasSelection ? "scale(0.75)" : undefined,
+                opacity: !shouldShow ? 0 : 1,
+                transform: !shouldShow 
+                  ? "scale(0.9) translateY(20px)" 
+                  : isSelected 
+                  ? "scale(1.1)" 
+                  : hasSelection 
+                  ? "scale(0.85)" 
+                  : "scale(1)",
+                filter: hasSelection && !isSelected ? "blur(2px)" : "none",
+                background: isSelected 
+                  ? "rgba(139, 92, 246, 0.2)" 
+                  : "rgba(255, 255, 255, 0.05)",
+                border: isSelected 
+                  ? "2px solid rgba(139, 92, 246, 0.8)" 
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+                boxShadow: isSelected 
+                  ? "0 0 80px 30px rgba(139, 92, 246, 0.4), 0 0 150px 60px rgba(139, 92, 246, 0.2)" 
+                  : "none",
+                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transitionDelay: !shouldShow ? `${0.1 + i * 0.1}s` : "0s",
+                zIndex: isSelected ? 20 : 1,
               }}
             >
               {/* Ripple effects on selection */}
@@ -443,13 +455,7 @@ const CategoryTokenSelectionStage = ({
                 <>
                   <div className="absolute inset-0 rounded-2xl bg-violet-500/30 animate-ripple" />
                   <div className="absolute inset-0 rounded-2xl bg-violet-500/20 animate-ripple" style={{ animationDelay: "0.15s" }} />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/10 animate-ripple" style={{ animationDelay: "0.3s" }} />
                 </>
-              )}
-              
-              {/* Glowing border animation */}
-              {isSelected && (
-                <div className="absolute inset-0 rounded-2xl border-2 border-violet-400 animate-highlight" />
               )}
               
               {/* Large checkmark badge */}
@@ -463,19 +469,38 @@ const CategoryTokenSelectionStage = ({
               )}
               
               <div className="relative z-10">
-                <div className={`mx-auto mb-4 rounded-full transition-all duration-700 ${
-                  isSelected ? "w-24 h-24 ring-4 ring-violet-300 ring-offset-4 ring-offset-black" : "w-16 h-16"
-                }`}>
+                <div 
+                  className="mx-auto mb-4 rounded-full overflow-hidden"
+                  style={{
+                    width: isSelected ? "6rem" : "4rem",
+                    height: isSelected ? "6rem" : "4rem",
+                    boxShadow: isSelected ? "0 0 20px 5px rgba(139, 92, 246, 0.5)" : "none",
+                    transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  }}
+                >
                   <img
                     src={token.logo}
                     alt={token.name}
-                    className={`w-full h-full rounded-full transition-all duration-700 ${isSelected ? "shadow-2xl" : ""}`}
+                    className="w-full h-full rounded-full"
                   />
                 </div>
-                <h3 className={`font-bold mb-1 transition-all duration-500 ${isSelected ? "text-2xl text-white" : "text-xl"}`}>
+                <h3 
+                  className="font-bold mb-1"
+                  style={{
+                    fontSize: isSelected ? "1.5rem" : "1.25rem",
+                    color: isSelected ? "#fff" : "rgba(255,255,255,0.9)",
+                    transition: "all 0.5s ease",
+                  }}
+                >
                   {token.name}
                 </h3>
-                <p className={`transition-all duration-500 ${isSelected ? "text-violet-300 text-lg" : "text-white/50"}`}>
+                <p 
+                  style={{
+                    fontSize: isSelected ? "1.125rem" : "1rem",
+                    color: isSelected ? "rgb(196, 181, 253)" : "rgba(255,255,255,0.5)",
+                    transition: "all 0.5s ease",
+                  }}
+                >
                   ${token.symbol}
                 </p>
                 
@@ -704,35 +729,8 @@ const TokenCompilationStage = () => (
           </div>
         </div>
 
-        {/* Surrounding Tokens */}
-        {overlapResults.slice(0, 8).map((token, i) => {
-          const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-          const radius = 35;
-          const x = 50 + Math.cos(angle) * radius;
-          const y = 50 + Math.sin(angle) * radius;
-          const size = token.score > 0.6 ? "w-12 h-12" : token.score > 0.4 ? "w-10 h-10" : "w-8 h-8";
-          
-          return (
-            <div
-              key={i}
-              className="absolute animate-node-appear"
-              style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                transform: "translate(-50%, -50%)",
-                animationDelay: `${0.3 + i * 0.1}s`,
-                opacity: 0,
-              }}
-            >
-              <div className={`${size} rounded-full bg-white/10 border border-violet-500/50 flex items-center justify-center overflow-hidden`}>
-                <img src={token.logo} alt={token.symbol} className="w-full h-full object-cover" />
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Connection Lines (SVG) */}
-        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 10 }}>
+        {/* Connection Lines (SVG) - Rendered first so they appear behind tokens */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
           {overlapResults.slice(0, 8).map((token, i) => {
             const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
             const radius = 35;
@@ -757,6 +755,37 @@ const TokenCompilationStage = () => (
             );
           })}
         </svg>
+
+        {/* Surrounding Tokens - All same size for consistent line alignment */}
+        {overlapResults.slice(0, 8).map((token, i) => {
+          const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+          const radius = 35;
+          const x = 50 + Math.cos(angle) * radius;
+          const y = 50 + Math.sin(angle) * radius;
+          // Opacity based on score for visual hierarchy instead of size
+          const opacity = 0.6 + token.score * 0.4;
+          
+          return (
+            <div
+              key={i}
+              className="absolute animate-node-appear z-20"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: "translate(-50%, -50%)",
+                animationDelay: `${0.3 + i * 0.1}s`,
+                opacity: 0,
+              }}
+            >
+              <div 
+                className="w-12 h-12 rounded-full bg-white/10 border border-violet-500/50 flex items-center justify-center overflow-hidden"
+                style={{ opacity }}
+              >
+                <img src={token.logo} alt={token.symbol} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <p className="text-white/40 animate-fade-in-up delay-700">
