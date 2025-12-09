@@ -383,63 +383,60 @@ const CategoryTokenSelectionStage = ({
     </p>
 
     {autoSelectStep < 2 ? (
-      // Category Selection
-      <div className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto relative">
+      // Category Selection - circular layout with varying sizes
+      <div className="relative h-64 md:h-80 max-w-3xl mx-auto">
         {categories.map((category, i) => {
           const isSelected = selectedCategory === category;
           const hasSelection = selectedCategory !== null;
           
+          // Position categories in a scattered circular pattern
+          const positions = [
+            { x: 50, y: 15, size: 1.1 },    // top center
+            { x: 20, y: 25, size: 0.9 },    // top left
+            { x: 80, y: 22, size: 1.0 },    // top right
+            { x: 8, y: 50, size: 0.85 },    // left
+            { x: 92, y: 48, size: 0.95 },   // right
+            { x: 25, y: 75, size: 1.05 },   // bottom left
+            { x: 75, y: 78, size: 0.9 },    // bottom right
+            { x: 50, y: 88, size: 0.85 },   // bottom center
+          ];
+          const pos = positions[i];
+          
           return (
             <div
               key={category}
-              className={`relative px-6 py-3 rounded-full border text-sm md:text-base transition-all duration-500 animate-fade-in-up ${
-                isSelected
-                  ? "bg-violet-600 border-violet-400 text-white scale-125 z-20 shadow-2xl animate-select-glow"
-                  : hasSelection
-                  ? "bg-white/5 border-white/5 text-white/30 scale-90 animate-shrink-out"
-                  : "bg-white/5 border-white/10 text-white/70"
-              }`}
-              style={{ 
-                animationDelay: isSelected ? "0s" : `${0.3 + i * 0.05}s`, 
-                opacity: isSelected ? 1 : 0,
-                boxShadow: isSelected ? "0 0 60px 20px rgba(139, 92, 246, 0.4)" : "none"
+              className="absolute animate-fade-in-up"
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                transform: `translate(-50%, -50%) scale(${isSelected ? 1.2 : hasSelection && !isSelected ? 0.8 : pos.size})`,
+                zIndex: isSelected ? 20 : 1,
+                opacity: hasSelection && !isSelected ? 0.3 : 1,
+                transition: "all 0.5s ease",
+                animationDelay: `${0.2 + i * 0.08}s`,
               }}
             >
-              {/* Ripple effect on selection */}
-              {isSelected && (
-                <>
-                  <div className="absolute inset-0 rounded-full bg-violet-500/30 animate-ripple" />
-                  <div className="absolute inset-0 rounded-full bg-violet-500/20 animate-ripple" style={{ animationDelay: "0.2s" }} />
-                </>
-              )}
-              
-              {/* Checkmark icon */}
-              {isSelected && (
-                <span 
-                  className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center animate-checkmark shadow-lg"
-                >
-                  <span className="material-icons-outlined text-violet-600 text-sm">check</span>
-                </span>
-              )}
-              
-              <span className="relative z-10 font-medium">{category}</span>
+              <div
+                className={`px-5 py-2.5 md:px-6 md:py-3 rounded-full border text-sm md:text-base whitespace-nowrap ${
+                  isSelected
+                    ? "bg-violet-600 border-violet-400 text-white shadow-2xl"
+                    : "bg-white/5 border-white/10 text-white/70"
+                }`}
+                style={{
+                  boxShadow: isSelected ? "0 0 40px 15px rgba(139, 92, 246, 0.4)" : "none",
+                }}
+              >
+                {/* Checkmark icon */}
+                {isSelected && (
+                  <span className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <span className="material-icons-outlined text-violet-600 text-sm">check</span>
+                  </span>
+                )}
+                <span className="relative z-10 font-medium">{category}</span>
+              </div>
             </div>
           );
         })}
-        <div
-          className="px-6 py-3 rounded-full border text-sm animate-fade-in-up"
-          style={{ 
-            animationDelay: "0.7s", 
-            opacity: 0,
-            background: selectedCategory ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
-            borderColor: selectedCategory ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)",
-            color: selectedCategory ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.4)",
-            transform: selectedCategory ? "scale(0.9)" : "scale(1)",
-            transition: "all 0.5s ease-out",
-          }}
-        >
-          +392 more...
-        </div>
       </div>
     ) : (
       // Token Selection - simplified for performance
@@ -564,17 +561,21 @@ const WalletDiscoveryStage = ({ token }: { token: Token }) => (
         </div>
       </div>
 
-      {/* Wallet Grid Preview */}
+      {/* Wallet Grid Preview - random intervals */}
       <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mt-8">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded-lg flex items-center justify-center animate-fade-in-up"
-            style={{ animationDelay: `${0.6 + i * 0.03}s`, opacity: 0 }}
-          >
-            <span className="material-icons-outlined text-violet-400/60 text-sm">account_balance_wallet</span>
-          </div>
-        ))}
+        {Array.from({ length: 20 }).map((_, i) => {
+          // Random delay between 0.5s and 2.5s for gathering effect
+          const randomDelay = 0.5 + Math.random() * 2;
+          return (
+            <div
+              key={i}
+              className="aspect-square bg-violet-500/20 border border-violet-500/30 rounded-lg flex items-center justify-center animate-fade-in-up"
+              style={{ animationDelay: `${randomDelay}s`, opacity: 0 }}
+            >
+              <span className="material-icons-outlined text-violet-400/60 text-sm">account_balance_wallet</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   </div>
@@ -829,17 +830,16 @@ const displayTokens = tokenLogos.slice(0, 30);
 
 // Stage 4: Token Compilation
 const TokenCompilationStage = () => {
-  // Fixed container dimensions for consistent positioning
-  const containerWidth = 700;
-  const containerHeight = 350;
-  const centerX = containerWidth / 2;
-  const centerY = containerHeight / 2;
+  // Fixed square container for circular layout
+  const containerSize = 450;
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
   
-  // Ring configuration: [count, radiusX, radiusY, tokenSize, opacity]
+  // Ring configuration: circular (same radius for X and Y)
   const ringConfig = [
-    { count: 6, radiusX: 80, radiusY: 60, size: 40, opacity: 1 },
-    { count: 10, radiusX: 150, radiusY: 100, size: 32, opacity: 0.85 },
-    { count: 14, radiusX: 240, radiusY: 140, size: 26, opacity: 0.7 },
+    { count: 6, radius: 70, size: 40, opacity: 1 },
+    { count: 10, radius: 130, size: 32, opacity: 0.85 },
+    { count: 14, radius: 190, size: 26, opacity: 0.7 },
   ];
 
   // Calculate positions
@@ -851,8 +851,8 @@ const TokenCompilationStage = () => {
       for (let i = 0; i < ring.count && tokenIndex < displayTokens.length; i++) {
         const angle = (i / ring.count) * Math.PI * 2 - Math.PI / 2;
         positions.push({
-          x: centerX + Math.cos(angle) * ring.radiusX,
-          y: centerY + Math.sin(angle) * ring.radiusY,
+          x: centerX + Math.cos(angle) * ring.radius,
+          y: centerY + Math.sin(angle) * ring.radius,
           size: ring.size,
           opacity: ring.opacity,
           logo: displayTokens[tokenIndex],
@@ -880,21 +880,21 @@ const TokenCompilationStage = () => {
       </p>
 
       <div className="relative animate-fade-in-scale delay-300 flex justify-center">
-        {/* Token Network Visualization - Fixed size container */}
+        {/* Token Network Visualization - Square container for circle */}
         <div 
           className="relative"
           style={{ 
-            width: containerWidth, 
-            height: containerHeight,
+            width: containerSize, 
+            height: containerSize,
             maxWidth: "100%",
           }}
         >
           {/* Connection Lines (SVG) - using exact pixel positions */}
           <svg 
             className="absolute inset-0 pointer-events-none" 
-            width={containerWidth} 
-            height={containerHeight}
-            viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+            width={containerSize} 
+            height={containerSize}
+            viewBox={`0 0 ${containerSize} ${containerSize}`}
             style={{ zIndex: 5 }}
           >
             {tokenPositions.map((pos, i) => (
