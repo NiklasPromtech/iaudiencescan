@@ -415,42 +415,38 @@ const CategoryTokenSelectionStage = ({
         })}
       </div>
     ) : (
-      // Token Selection - Shiba pre-selected immediately, no delay
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+      // Token Selection - same style as categories, no animation delays
+      <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
         {memeTokens.map((token) => {
           const isShiba = token.symbol === "SHIB";
           
           return (
             <div
               key={token.symbol}
-              className="relative rounded-2xl p-8 text-center"
-              style={{ 
-                opacity: isShiba ? 1 : 0.25,
-                transform: isShiba ? "scale(1)" : "scale(0.92)",
-                background: isShiba 
-                  ? "rgba(139, 92, 246, 0.15)" 
-                  : "rgba(255, 255, 255, 0.05)",
-                border: isShiba 
-                  ? "2px solid rgba(139, 92, 246, 0.7)" 
-                  : "1px solid rgba(255, 255, 255, 0.1)",
-                zIndex: isShiba ? 20 : 1,
+              className={`relative rounded-2xl p-6 text-center ${
+                isShiba
+                  ? "bg-violet-600/20 border-2 border-violet-400"
+                  : "bg-white/5 border border-white/10"
+              }`}
+              style={{
+                opacity: isShiba ? 1 : 0.3,
+                transform: isShiba ? "scale(1.05)" : "scale(0.95)",
+                boxShadow: isShiba ? "0 0 30px 10px rgba(139, 92, 246, 0.4)" : "none",
+                transition: "all 0.4s ease",
               }}
             >
               {/* Checkmark badge */}
               {isShiba && (
-                <div className="absolute -right-3 -top-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-30">
-                  <span className="material-icons-outlined text-violet-600 text-lg">check</span>
-                </div>
+                <span className="absolute -right-2 -top-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <span className="material-icons-outlined text-violet-600 text-sm">check</span>
+                </span>
               )}
               
               <div className="relative z-10">
                 <div 
-                  className="mx-auto mb-4 rounded-full overflow-hidden border-2"
-                  style={{
-                    width: "5rem",
-                    height: "5rem",
-                    borderColor: isShiba ? "rgba(139, 92, 246, 0.7)" : "rgba(255,255,255,0.1)",
-                  }}
+                  className={`mx-auto mb-3 rounded-full overflow-hidden border-2 w-16 h-16 ${
+                    isShiba ? "border-violet-400" : "border-white/10"
+                  }`}
                 >
                   <img
                     src={token.logo}
@@ -458,17 +454,17 @@ const CategoryTokenSelectionStage = ({
                     className="w-full h-full rounded-full"
                   />
                 </div>
-                <h3 className="font-bold mb-1 text-xl text-white">
+                <h3 className="font-bold mb-1 text-lg text-white">
                   {token.name}
                 </h3>
-                <p className="text-white/50">
+                <p className="text-white/50 text-sm">
                   ${token.symbol}
                 </p>
                 
                 {/* Selected label */}
                 {isShiba && (
-                  <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-violet-500/20 border border-violet-400/30 rounded-full">
-                    <span className="text-sm text-violet-200 font-medium">Analyzing...</span>
+                  <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-violet-500/20 border border-violet-400/30 rounded-full">
+                    <span className="text-xs text-violet-200 font-medium">Analyzing...</span>
                   </div>
                 )}
               </div>
