@@ -645,7 +645,7 @@ const Wizard = () => {
 
               {/* Info box when scan selected */}
               {selectedScan && (
-                <div className="absolute top-28 right-8 max-w-[280px] animate-fade-in">
+                <div className="absolute bottom-24 right-8 max-w-[280px] animate-fade-in">
                   <div className="bg-black/70 backdrop-blur-md px-5 py-4 rounded-xl border border-purple-500/20">
                     <p className="text-purple-400 text-xs font-medium uppercase tracking-wider mb-2">
                       How this data is used
