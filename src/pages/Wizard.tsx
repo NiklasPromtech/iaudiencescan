@@ -228,14 +228,17 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
   const remainingTags = (node.tags?.length || 0) - 4;
   const scoreDots = Math.ceil(node.score * 5);
 
+  // If position is near top of screen, show panel below instead of above
+  const showBelow = position.y < 250;
+
   return (
     <div
       className="fixed z-[100] bg-black/95 backdrop-blur-md border border-purple-500/40 rounded-xl p-4 shadow-2xl shadow-purple-900/30 pointer-events-none"
       style={{
         left: position.x,
         top: position.y,
-        transform: 'translate(-50%, -100%)',
-        marginTop: -16,
+        transform: showBelow ? 'translate(-50%, 20px)' : 'translate(-50%, -100%)',
+        marginTop: showBelow ? 0 : -16,
         maxWidth: 280,
         minWidth: 220,
       }}
