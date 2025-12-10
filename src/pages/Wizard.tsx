@@ -549,12 +549,11 @@ const Wizard = () => {
 
   const handleBack = () => {
     setIsTransitioning(true);
+    setChartLoading(false);
     setTimeout(() => {
-      if (selectedScan) {
-        setSelectedScan(null);
-      } else {
-        setSelectedOption(null);
-      }
+      // Always go back to main wizard
+      setSelectedScan(null);
+      setSelectedOption(null);
       setIsTransitioning(false);
     }, 300);
   };
