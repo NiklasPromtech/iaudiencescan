@@ -1,9 +1,20 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
+import iconX from "@/assets/icon-x.jpg";
+import iconTelegram from "@/assets/icon-telegram.jpg";
+import iconReddit from "@/assets/icon-reddit.jpg";
+import iconYoutube from "@/assets/icon-youtube.jpg";
+import iconGoogleAds from "@/assets/icon-googleads.jpg";
 
 interface TokenData {
   logo: string;
+  ticker: string;
   score: number;
+  x: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
 }
 
 interface Node {
@@ -11,8 +22,14 @@ interface Node {
   x: number;
   y: number;
   logo: string;
+  ticker: string;
   score: number;
   size: number;
+  socialX: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
 }
 
 interface Edge {
@@ -21,11 +38,123 @@ interface Edge {
   strength: number;
 }
 
+interface HoverPanelProps {
+  node: Node;
+  position: { x: number; y: number };
+}
+
+const HoverPanel = ({ node, position }: HoverPanelProps) => {
+  const hasSocials = node.socialX || node.telegram || node.reddit || node.youtube;
+  const hasTags = node.tags && node.tags.length > 0;
+  const displayTags = node.tags?.slice(0, 4) || [];
+  const remainingTags = (node.tags?.length || 0) - 4;
+
+  // Score visualization (1-5 dots)
+  const scoreDots = Math.ceil(node.score * 5);
+
+  return (
+    <div
+      className="absolute z-50 bg-black/95 backdrop-blur-md border border-purple-500/40 rounded-xl p-4 shadow-2xl shadow-purple-900/30 pointer-events-none"
+      style={{
+        left: position.x,
+        top: position.y,
+        transform: 'translate(-50%, -100%)',
+        marginTop: -16,
+        maxWidth: 280,
+        minWidth: 220,
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-3">
+        <img
+          src={node.logo}
+          alt={node.ticker}
+          className="w-10 h-10 rounded-full border border-purple-500/30"
+        />
+        <div>
+          <div className="text-white font-bold text-base">{node.ticker || 'Unknown'}</div>
+          <div className="text-white/40 text-[10px]">Derived from on-chain wallet overlap</div>
+        </div>
+      </div>
+
+      {/* Score row */}
+      <div className="flex items-center justify-between mb-3 py-2 border-t border-b border-purple-500/20">
+        <span className="text-white/60 text-xs">Overlap strength</span>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className={`w-2 h-2 rounded-full ${
+                i <= scoreDots ? 'bg-purple-500' : 'bg-purple-500/20'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Action signals */}
+      {(hasSocials || hasTags) && (
+        <div className="flex items-center gap-2 mb-3">
+          {node.socialX && (
+            <div className="group relative">
+              <img src={iconX} alt="X" className="w-6 h-6 rounded" />
+            </div>
+          )}
+          {node.telegram && (
+            <div className="group relative">
+              <img src={iconTelegram} alt="Telegram" className="w-6 h-6 rounded" />
+            </div>
+          )}
+          {node.reddit && (
+            <div className="group relative">
+              <img src={iconReddit} alt="Reddit" className="w-6 h-6 rounded" />
+            </div>
+          )}
+          {node.youtube && (
+            <div className="group relative">
+              <img src={iconYoutube} alt="YouTube" className="w-6 h-6 rounded" />
+            </div>
+          )}
+          {hasTags && (
+            <div className="group relative">
+              <img src={iconGoogleAds} alt="Google Ads" className="w-6 h-6 rounded" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tags */}
+      {hasTags && (
+        <div>
+          <div className="text-white/40 text-[10px] mb-2">Paid targeting signals</div>
+          <div className="flex flex-wrap gap-1">
+            {displayTags.map((tag, i) => (
+              <span
+                key={i}
+                className="text-[10px] px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+            {remainingTags > 0 && (
+              <span className="text-[10px] px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded-full">
+                +{remainingTags} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Network = () => {
   const { studyId } = useParams<{ studyId: string }>();
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,8 +238,14 @@ const Network = () => {
         x,
         y,
         logo: token.logo,
+        ticker: token.ticker || '',
         score: token.score,
         size: nodeSize,
+        socialX: token.x || '',
+        telegram: token.telegram || '',
+        reddit: token.reddit || '',
+        youtube: token.youtube || '',
+        tags: token.tags || [],
       });
     });
 
@@ -146,6 +281,24 @@ const Network = () => {
     return { nodes: generatedNodes, edges: generatedEdges };
   }, [tokens, studyId]);
 
+  const handleNodeHover = (node: Node, event: React.MouseEvent) => {
+    const rect = event.currentTarget.closest('svg')?.getBoundingClientRect();
+    if (rect) {
+      const svgSize = 1000;
+      const scaleX = rect.width / svgSize;
+      const scaleY = rect.height / svgSize;
+      setHoverPosition({
+        x: rect.left + node.x * scaleX,
+        y: rect.top + node.y * scaleY,
+      });
+    }
+    setHoveredNode(node);
+  };
+
+  const handleNodeLeave = () => {
+    setHoveredNode(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -171,6 +324,11 @@ const Network = () => {
         <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[200px]" />
         <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[180px]" />
       </div>
+
+      {/* Hover Panel */}
+      {hoveredNode && (
+        <HoverPanel node={hoveredNode} position={hoverPosition} />
+      )}
 
       <div className="relative w-full h-screen flex items-center justify-center">
         <svg
@@ -220,7 +378,12 @@ const Network = () => {
               const isCenter = node.id === 0;
 
               return (
-                <g key={node.id}>
+                <g
+                  key={node.id}
+                  onMouseEnter={(e) => handleNodeHover(node, e)}
+                  onMouseLeave={handleNodeLeave}
+                  style={{ cursor: 'pointer' }}
+                >
                   {/* Ring */}
                   <circle
                     cx={node.x}
