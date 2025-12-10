@@ -4,33 +4,35 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import Sample1 from "./pages/Sample1";
+import Sitemap from "./pages/Sitemap";
 import CaseStudies from "./pages/CaseStudies";
-import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
-import BlogPostTutorials from "./pages/BlogPostTutorials";
-import BlogPostAddressableAudiences from "./pages/BlogPostAddressableAudiences";
-import BlogPostGuarantee from "./pages/BlogPostGuarantee";
-import BlogPostROI from "./pages/BlogPostROI";
-import BlogPostAudienceScanAds from "./pages/BlogPostAudienceScanAds";
 import BlogPostTracking from "./pages/BlogPostTracking";
-import BlogPostAgencyDifferentiation from "./pages/BlogPostAgencyDifferentiation";
+import BlogPostROI from "./pages/BlogPostROI";
+import BlogPostGuarantee from "./pages/BlogPostGuarantee";
+import BlogPostTutorials from "./pages/BlogPostTutorials";
 import BlogPostWhatAmILookingAt from "./pages/BlogPostWhatAmILookingAt";
-import ProposedFeatures from "./pages/ProposedFeatures";
-import NotFound from "./pages/NotFound";
-import Sitemap from "./pages/Sitemap";
-import DMAssistant from "./pages/DMAssistant";
-import ManagedService from "./pages/ManagedService";
-import CreateScan from "./pages/CreateScan";
-import SalesPitch from "./pages/SalesPitch";
-import SDTerms from "./pages/SDTerms";
-import Sample1 from "./pages/Sample1";
-import StrategyPlaybook from "./pages/StrategyPlaybook";
+import BlogPostAddressableAudiences from "./pages/BlogPostAddressableAudiences";
+import BlogPostAgencyDifferentiation from "./pages/BlogPostAgencyDifferentiation";
+import BlogPostFoundersLetter from "./pages/BlogPostFoundersLetter";
+import BlogPostAudienceScanAds from "./pages/BlogPostAudienceScanAds";
 import Video from "./pages/Video";
 import Video1 from "./pages/Video1";
 import VideoWhite from "./pages/VideoWhite";
+import SalesPitch from "./pages/SalesPitch";
+import Pricing from "./pages/Pricing";
+import ManagedService from "./pages/ManagedService";
+import SDTerms from "./pages/SDTerms";
+import StrategyPlaybook from "./pages/StrategyPlaybook";
+import DMAssistant from "./pages/DMAssistant";
+import CreateScan from "./pages/CreateScan";
+import ProposedFeatures from "./pages/ProposedFeatures";
 import Creation from "./pages/Creation";
 import Artifact from "./pages/Artifact";
+import Network from "./pages/Network";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +70,7 @@ const App = () => (
           <Route path="/video/white" element={<VideoWhite />} />
           <Route path="/creation" element={<Creation />} />
           <Route path="/artifact/:studyId" element={<Artifact />} />
+          <Route path="/network/:studyId" element={<Network />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
