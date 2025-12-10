@@ -164,6 +164,7 @@ const WizardMobile = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
+  const [selectedScan, setSelectedScan] = useState<ScanOption | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isLaunching, setIsLaunching] = useState(false);
@@ -196,6 +197,15 @@ const WizardMobile = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setSelectedOption(option);
+      setSelectedScan(null);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const handleSelectScan = (scan: ScanOption) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSelectedScan(scan);
       setIsTransitioning(false);
     }, 300);
   };
@@ -203,7 +213,11 @@ const WizardMobile = () => {
   const handleBack = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setSelectedOption(null);
+      if (selectedScan) {
+        setSelectedScan(null);
+      } else {
+        setSelectedOption(null);
+      }
       setIsTransitioning(false);
     }, 300);
   };
@@ -386,7 +400,7 @@ const WizardMobile = () => {
               Powered by real on-chain transaction data
             </p>
           </div>
-        ) : (
+        ) : !selectedScan ? (
           /* Detail Screen */
           <div className="min-h-screen flex flex-col px-4 pb-6">
             {/* Back button */}
@@ -423,7 +437,7 @@ const WizardMobile = () => {
               {selectedOption.scanOptions.map((scan, index) => (
                 <button
                   key={scan.id}
-                  onClick={handleLaunchApp}
+                  onClick={() => handleSelectScan(scan)}
                   className="group relative w-full bg-white/[0.03] active:bg-purple-500/20 border border-white/[0.08] active:border-purple-500/40 rounded-xl p-4 text-left transition-all"
                   style={{
                     animation: `fadeInUp 0.4s ${index * 0.1}s ease-out backwards`,
@@ -459,6 +473,165 @@ const WizardMobile = () => {
               </button>
               <p className="text-white/30 text-xs text-center">
                 Based on real on-chain transactions
+              </p>
+            </div>
+          </div>
+        ) : (
+          /* Scan Result Preview Screen */
+          <div className="min-h-screen flex flex-col px-4 pb-6">
+            {/* Back button */}
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 text-white/50 text-sm py-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+
+            {/* Preview Header */}
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="text-purple-400 p-1.5 bg-purple-500/10 rounded-lg">
+                  {selectedScan.icon}
+                </div>
+                <span className="text-purple-400 text-sm font-medium">{selectedScan.title}</span>
+              </div>
+              <h1 className="text-xl font-bold leading-tight">
+                Sample results preview
+              </h1>
+              <p className="text-white/50 text-sm">
+                Real data from on-chain analysis
+              </p>
+            </div>
+
+            {/* Network Graph Preview */}
+            <div className="flex-1 flex items-center justify-center py-4">
+              <div className="relative w-full max-w-[320px] aspect-square">
+                <svg className="w-full h-full" viewBox="0 0 320 320">
+                  {/* Connection lines */}
+                  <g className="opacity-40">
+                    {/* Inner connections */}
+                    <line x1="160" y1="160" x2="80" y2="80" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="240" y2="80" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    <line x1="160" y1="160" x2="160" y2="270" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                    {/* Cross connections */}
+                    <line x1="80" y1="80" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                    <line x1="240" y1="80" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                    <line x1="60" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                    <line x1="260" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                    <line x1="80" y1="80" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                    <line x1="240" y1="80" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                  </g>
+                  
+                  {/* Gradient definitions */}
+                  <defs>
+                    <linearGradient id="previewLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#a855f7" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                    <radialGradient id="previewNodeGlow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.5" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+                  
+                  {/* Outer nodes */}
+                  {[
+                    { x: 80, y: 80, size: 14 },
+                    { x: 240, y: 80, size: 16 },
+                    { x: 60, y: 160, size: 12 },
+                    { x: 260, y: 160, size: 15 },
+                    { x: 80, y: 240, size: 13 },
+                    { x: 240, y: 240, size: 14 },
+                    { x: 160, y: 50, size: 11 },
+                    { x: 160, y: 270, size: 12 },
+                  ].map((node, i) => (
+                    <g key={i} style={{ animation: `fadeInUp 0.5s ${i * 0.05}s ease-out backwards` }}>
+                      <circle cx={node.x} cy={node.y} r={node.size + 6} fill="url(#previewNodeGlow)" />
+                      <circle 
+                        cx={node.x} 
+                        cy={node.y} 
+                        r={node.size} 
+                        fill="#1a1a1a" 
+                        stroke="#a855f7" 
+                        strokeWidth="2"
+                        className="opacity-70"
+                      />
+                    </g>
+                  ))}
+                  
+                  {/* Center node (larger, highlighted) */}
+                  <circle cx="160" cy="160" r="36" fill="url(#previewNodeGlow)" />
+                  <circle 
+                    cx="160" 
+                    cy="160" 
+                    r="28" 
+                    fill="#1a1a1a" 
+                    stroke="url(#previewLineGrad)" 
+                    strokeWidth="2.5"
+                  />
+                  <text 
+                    x="160" 
+                    y="164" 
+                    textAnchor="middle" 
+                    fill="white" 
+                    fontSize="11" 
+                    fontWeight="600"
+                    className="opacity-90"
+                  >
+                    YOUR
+                  </text>
+                  <text 
+                    x="160" 
+                    y="176" 
+                    textAnchor="middle" 
+                    fill="white" 
+                    fontSize="11" 
+                    fontWeight="600"
+                    className="opacity-90"
+                  >
+                    TOKEN
+                  </text>
+                </svg>
+                
+                {/* Subtle radial glow behind */}
+                <div className="absolute inset-0 bg-gradient-radial from-purple-500/15 via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Stats preview */}
+            <div className="grid grid-cols-3 gap-2 mb-6">
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
+                <p className="text-purple-400 text-lg font-bold">127</p>
+                <p className="text-white/40 text-[10px]">Tokens found</p>
+              </div>
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
+                <p className="text-purple-400 text-lg font-bold">851</p>
+                <p className="text-white/40 text-[10px]">Wallets analyzed</p>
+              </div>
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
+                <p className="text-purple-400 text-lg font-bold">42</p>
+                <p className="text-white/40 text-[10px]">Communities</p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="space-y-3">
+              <button
+                onClick={handleLaunchApp}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl text-white font-semibold transition-all active:scale-98"
+              >
+                <span>✓</span>
+                Run this scan
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <p className="text-white/30 text-xs text-center">
+                Launch app to see full results
               </p>
             </div>
           </div>
