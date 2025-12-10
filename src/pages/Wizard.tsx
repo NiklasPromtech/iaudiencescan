@@ -327,7 +327,7 @@ const Wizard = () => {
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
                       Make{" "}
-                      <span className="inline-block align-bottom overflow-hidden min-w-[320px] md:min-w-[420px]" style={{ height: WORD_HEIGHT }}>
+                      <span className="inline-block align-bottom overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
                         <span
                           className="flex flex-col"
                           style={{
@@ -345,8 +345,7 @@ const Wizard = () => {
                             </span>
                           ))}
                         </span>
-                      </span>
-                      <br />
+                      </span>{" "}
                       growth decisions
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
