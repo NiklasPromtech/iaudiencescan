@@ -289,9 +289,9 @@ const WizardMobile = () => {
     }, 300);
   };
 
-  // Get display tokens (center + 8 outer nodes)
+  // Get display tokens (center + 16 outer nodes)
   const centerToken = tokens[0];
-  const outerTokens = tokens.slice(1, 9);
+  const outerTokens = tokens.slice(1, 17);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -648,27 +648,6 @@ const WizardMobile = () => {
               ) : (
                 <div className="relative w-full max-w-[320px] aspect-square animate-fade-in">
                   <svg className="w-full h-full" viewBox="0 0 320 320">
-                    {/* Connection lines from center to outer nodes */}
-                    <g className="opacity-40">
-                      {[
-                        { x: 80, y: 80 },
-                        { x: 240, y: 80 },
-                        { x: 60, y: 160 },
-                        { x: 260, y: 160 },
-                        { x: 80, y: 240 },
-                        { x: 240, y: 240 },
-                        { x: 160, y: 50 },
-                        { x: 160, y: 270 },
-                      ].slice(0, outerTokens.length).map((pos, i) => (
-                        <line key={i} x1="160" y1="160" x2={pos.x} y2={pos.y} stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                      ))}
-                      {/* Cross connections */}
-                      <line x1="80" y1="80" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                      <line x1="240" y1="80" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                      <line x1="60" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                      <line x1="260" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    </g>
-                    
                     {/* Gradient definitions */}
                     <defs>
                       <linearGradient id="previewLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -679,49 +658,102 @@ const WizardMobile = () => {
                         <stop offset="0%" stopColor="#a855f7" stopOpacity="0.5" />
                         <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
                       </radialGradient>
-                      <clipPath id="centerClip">
-                        <circle cx="160" cy="160" r="26" />
+                      <clipPath id="centerClipPreview">
+                        <circle cx="160" cy="160" r="22" />
                       </clipPath>
-                      {outerTokens.map((_, i) => (
-                        <clipPath key={i} id={`outerClip${i}`}>
-                          <circle cx={[80, 240, 60, 260, 80, 240, 160, 160][i]} cy={[80, 80, 160, 160, 240, 240, 50, 270][i]} r="14" />
-                        </clipPath>
-                      ))}
+                      {/* Generate clip paths for 16 outer tokens using golden angle distribution */}
+                      {outerTokens.map((_, i) => {
+                        const golden = 0.618033988749895;
+                        const angle = i * golden * Math.PI * 2;
+                        const radius = 55 + Math.sqrt((i + 1) / 16) * 85;
+                        const x = 160 + Math.cos(angle) * radius;
+                        const y = 160 + Math.sin(angle) * radius;
+                        const size = 10 + (outerTokens[i]?.score || 0.5) * 6;
+                        return (
+                          <clipPath key={i} id={`previewOuterClip${i}`}>
+                            <circle cx={x} cy={y} r={size - 1} />
+                          </clipPath>
+                        );
+                      })}
                     </defs>
                     
-                    {/* Outer nodes with token logos */}
+                    {/* Edge connections - random interconnections like desktop */}
+                    <g className="opacity-30">
+                      {outerTokens.slice(0, 16).map((_, i) => {
+                        const golden = 0.618033988749895;
+                        const angle = i * golden * Math.PI * 2;
+                        const radius = 55 + Math.sqrt((i + 1) / 16) * 85;
+                        const x = 160 + Math.cos(angle) * radius;
+                        const y = 160 + Math.sin(angle) * radius;
+                        return (
+                          <line 
+                            key={`center-${i}`} 
+                            x1="160" 
+                            y1="160" 
+                            x2={x} 
+                            y2={y} 
+                            stroke="#a855f7" 
+                            strokeWidth={0.8 + (outerTokens[i]?.score || 0.5) * 0.8}
+                            strokeOpacity={0.3 + (outerTokens[i]?.score || 0.5) * 0.3}
+                          />
+                        );
+                      })}
+                      {/* Random cross-connections between outer nodes */}
+                      {[
+                        [0, 3], [1, 4], [2, 5], [3, 6], [4, 7], [5, 8], 
+                        [6, 9], [7, 10], [8, 11], [9, 12], [10, 13], [11, 14],
+                        [0, 5], [2, 7], [4, 9], [6, 11], [1, 8], [3, 10]
+                      ].map(([from, to], idx) => {
+                        if (from >= outerTokens.length || to >= outerTokens.length) return null;
+                        const golden = 0.618033988749895;
+                        const angle1 = from * golden * Math.PI * 2;
+                        const radius1 = 55 + Math.sqrt((from + 1) / 16) * 85;
+                        const x1 = 160 + Math.cos(angle1) * radius1;
+                        const y1 = 160 + Math.sin(angle1) * radius1;
+                        const angle2 = to * golden * Math.PI * 2;
+                        const radius2 = 55 + Math.sqrt((to + 1) / 16) * 85;
+                        const x2 = 160 + Math.cos(angle2) * radius2;
+                        const y2 = 160 + Math.sin(angle2) * radius2;
+                        return (
+                          <line 
+                            key={`edge-${idx}`} 
+                            x1={x1} y1={y1} x2={x2} y2={y2} 
+                            stroke="#a855f7" 
+                            strokeWidth="0.6"
+                            strokeOpacity="0.25"
+                          />
+                        );
+                      })}
+                    </g>
+                    
+                    {/* Outer nodes with token logos - golden angle distribution */}
                     {outerTokens.map((token, i) => {
-                      const positions = [
-                        { x: 80, y: 80 },
-                        { x: 240, y: 80 },
-                        { x: 60, y: 160 },
-                        { x: 260, y: 160 },
-                        { x: 80, y: 240 },
-                        { x: 240, y: 240 },
-                        { x: 160, y: 50 },
-                        { x: 160, y: 270 },
-                      ];
-                      const pos = positions[i];
-                      const size = 14 + token.score * 4;
+                      const golden = 0.618033988749895;
+                      const angle = i * golden * Math.PI * 2;
+                      const radius = 55 + Math.sqrt((i + 1) / 16) * 85;
+                      const x = 160 + Math.cos(angle) * radius;
+                      const y = 160 + Math.sin(angle) * radius;
+                      const size = 10 + token.score * 6;
                       return (
-                        <g key={i} style={{ animation: `fadeInUp 0.5s ${i * 0.05}s ease-out backwards` }}>
-                          <circle cx={pos.x} cy={pos.y} r={size + 6} fill="url(#previewNodeGlow)" />
+                        <g key={i} style={{ animation: `fadeInUp 0.5s ${i * 0.03}s ease-out backwards` }}>
+                          <circle cx={x} cy={y} r={size + 4} fill="url(#previewNodeGlow)" />
                           <circle 
-                            cx={pos.x} 
-                            cy={pos.y} 
+                            cx={x} 
+                            cy={y} 
                             r={size} 
                             fill="#1a1a1a" 
                             stroke="#a855f7" 
-                            strokeWidth="2"
+                            strokeWidth={i < 4 ? 1.5 : 1}
+                            strokeOpacity={0.5 + token.score * 0.5}
                           />
                           {token.logo && (
                             <image
                               href={token.logo}
-                              x={pos.x - size + 2}
-                              y={pos.y - size + 2}
-                              width={(size - 2) * 2}
-                              height={(size - 2) * 2}
-                              clipPath={`url(#outerClip${i})`}
+                              x={x - size + 1}
+                              y={y - size + 1}
+                              width={(size - 1) * 2}
+                              height={(size - 1) * 2}
+                              clipPath={`url(#previewOuterClip${i})`}
                               preserveAspectRatio="xMidYMid slice"
                             />
                           )}
@@ -730,50 +762,37 @@ const WizardMobile = () => {
                     })}
                     
                     {/* Center node with token logo */}
-                    <circle cx="160" cy="160" r="36" fill="url(#previewNodeGlow)" />
+                    <circle cx="160" cy="160" r="30" fill="url(#previewNodeGlow)" />
                     <circle 
                       cx="160" 
                       cy="160" 
-                      r="28" 
+                      r="24" 
                       fill="#1a1a1a" 
                       stroke="url(#previewLineGrad)" 
-                      strokeWidth="2.5"
+                      strokeWidth="2"
                     />
                     {centerToken?.logo ? (
                       <image
                         href={centerToken.logo}
-                        x="134"
-                        y="134"
-                        width="52"
-                        height="52"
-                        clipPath="url(#centerClip)"
+                        x="138"
+                        y="138"
+                        width="44"
+                        height="44"
+                        clipPath="url(#centerClipPreview)"
                         preserveAspectRatio="xMidYMid slice"
                       />
                     ) : (
-                      <>
-                        <text 
-                          x="160" 
-                          y="164" 
-                          textAnchor="middle" 
-                          fill="white" 
-                          fontSize="11" 
-                          fontWeight="600"
-                          className="opacity-90"
-                        >
-                          {centerToken?.ticker || "YOUR"}
-                        </text>
-                        <text 
-                          x="160" 
-                          y="176" 
-                          textAnchor="middle" 
-                          fill="white" 
-                          fontSize="11" 
-                          fontWeight="600"
-                          className="opacity-90"
-                        >
-                          TOKEN
-                        </text>
-                      </>
+                      <text 
+                        x="160" 
+                        y="165" 
+                        textAnchor="middle" 
+                        fill="white" 
+                        fontSize="10" 
+                        fontWeight="600"
+                        className="opacity-90"
+                      >
+                        {centerToken?.ticker || "TOKEN"}
+                      </text>
                     )}
                   </svg>
                   
