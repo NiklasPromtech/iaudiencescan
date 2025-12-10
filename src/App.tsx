@@ -30,6 +30,7 @@ import Video from "./pages/Video";
 import Video1 from "./pages/Video1";
 import VideoWhite from "./pages/VideoWhite";
 import Creation from "./pages/Creation";
+import Artifact from "./pages/Artifact";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
           <Route path="/video1" element={<Video1 />} />
           <Route path="/video/white" element={<VideoWhite />} />
           <Route path="/creation" element={<Creation />} />
+          <Route path="/artifact/:studyId" element={<Artifact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
