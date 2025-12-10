@@ -187,6 +187,9 @@ const WizardMobile = () => {
   const [isLaunching, setIsLaunching] = useState(false);
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState(false);
+  const [defaultTokens, setDefaultTokens] = useState<TokenData[]>([]);
+
+  const DEFAULT_STUDY_ID = "FnBmNZv2Ik2x8xJwHjRf";
 
   // Redirect to desktop version if not mobile
   useEffect(() => {
@@ -194,6 +197,24 @@ const WizardMobile = () => {
       navigate("/wizard", { replace: true });
     }
   }, [isMobile]);
+
+  // Fetch default token data on mount for hero mini-graph
+  useEffect(() => {
+    const fetchDefaultTokens = async () => {
+      try {
+        const response = await fetch(
+          `https://token-analysis-final.nw.r.appspot.com/chart/${DEFAULT_STUDY_ID}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setDefaultTokens(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch default token data:", error);
+      }
+    };
+    fetchDefaultTokens();
+  }, []);
 
   // Fetch token data when scan is selected
   useEffect(() => {
@@ -304,22 +325,6 @@ const WizardMobile = () => {
             <div className="pt-6 pb-4">
               <div className="relative w-full h-40 flex items-center justify-center overflow-hidden">
                 <svg className="w-full h-full" viewBox="0 0 280 140">
-                  {/* Connection lines */}
-                  <g className="opacity-30">
-                    {/* Lines from center to outer nodes */}
-                    <line x1="140" y1="70" x2="60" y2="35" stroke="url(#lineGrad)" strokeWidth="1" />
-                    <line x1="140" y1="70" x2="220" y2="35" stroke="url(#lineGrad)" strokeWidth="1" />
-                    <line x1="140" y1="70" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="1" />
-                    <line x1="140" y1="70" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="1" />
-                    <line x1="140" y1="70" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="1" />
-                    <line x1="140" y1="70" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="1" />
-                    {/* Cross connections */}
-                    <line x1="60" y1="35" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="220" y1="35" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="45" y1="90" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="235" y1="90" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                  </g>
-                  
                   {/* Gradient definitions */}
                   <defs>
                     <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -330,9 +335,44 @@ const WizardMobile = () => {
                       <stop offset="0%" stopColor="#a855f7" stopOpacity="0.4" />
                       <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
                     </radialGradient>
+                    {/* Clip paths for outer tokens */}
+                    {[
+                      { x: 60, y: 35, size: 10 },
+                      { x: 220, y: 35, size: 12 },
+                      { x: 45, y: 90, size: 8 },
+                      { x: 235, y: 90, size: 11 },
+                      { x: 80, y: 120, size: 9 },
+                      { x: 200, y: 120, size: 10 },
+                    ].map((node, i) => (
+                      <clipPath key={`clip-${i}`} id={`heroClip${i}`}>
+                        <circle cx={node.x} cy={node.y} r={node.size - 1} />
+                      </clipPath>
+                    ))}
+                    <clipPath id="heroCenterClip">
+                      <circle cx="140" cy="70" r="16" />
+                    </clipPath>
                   </defs>
+
+                  {/* Connection lines */}
+                  <g className="opacity-30">
+                    {[
+                      { x: 60, y: 35 },
+                      { x: 220, y: 35 },
+                      { x: 45, y: 90 },
+                      { x: 235, y: 90 },
+                      { x: 80, y: 120 },
+                      { x: 200, y: 120 },
+                    ].map((node, i) => (
+                      <line key={i} x1="140" y1="70" x2={node.x} y2={node.y} stroke="url(#lineGrad)" strokeWidth="1" />
+                    ))}
+                    {/* Cross connections */}
+                    <line x1="60" y1="35" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="220" y1="35" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="45" y1="90" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="235" y1="90" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                  </g>
                   
-                  {/* Outer nodes */}
+                  {/* Outer nodes with real token logos */}
                   {[
                     { x: 60, y: 35, size: 10 },
                     { x: 220, y: 35, size: 12 },
@@ -340,22 +380,35 @@ const WizardMobile = () => {
                     { x: 235, y: 90, size: 11 },
                     { x: 80, y: 120, size: 9 },
                     { x: 200, y: 120, size: 10 },
-                  ].map((node, i) => (
-                    <g key={i}>
-                      <circle cx={node.x} cy={node.y} r={node.size + 4} fill="url(#nodeGlow)" />
-                      <circle 
-                        cx={node.x} 
-                        cy={node.y} 
-                        r={node.size} 
-                        fill="#1a1a1a" 
-                        stroke="#a855f7" 
-                        strokeWidth="1.5"
-                        className="opacity-60"
-                      />
-                    </g>
-                  ))}
+                  ].map((node, i) => {
+                    const token = defaultTokens[i + 1];
+                    return (
+                      <g key={i}>
+                        <circle cx={node.x} cy={node.y} r={node.size + 4} fill="url(#nodeGlow)" />
+                        <circle 
+                          cx={node.x} 
+                          cy={node.y} 
+                          r={node.size} 
+                          fill="#1a1a1a" 
+                          stroke="#a855f7" 
+                          strokeWidth="1.5"
+                          className="opacity-60"
+                        />
+                        {token?.logo && (
+                          <image
+                            href={token.logo}
+                            x={node.x - node.size + 1}
+                            y={node.y - node.size + 1}
+                            width={(node.size - 1) * 2}
+                            height={(node.size - 1) * 2}
+                            clipPath={`url(#heroClip${i})`}
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
                   
-                  {/* Center node (larger, highlighted) */}
+                  {/* Center node with real token logo */}
                   <circle cx="140" cy="70" r="24" fill="url(#nodeGlow)" />
                   <circle 
                     cx="140" 
@@ -365,17 +418,28 @@ const WizardMobile = () => {
                     stroke="url(#lineGrad)" 
                     strokeWidth="2"
                   />
-                  <text 
-                    x="140" 
-                    y="74" 
-                    textAnchor="middle" 
-                    fill="white" 
-                    fontSize="10" 
-                    fontWeight="600"
-                    className="opacity-80"
-                  >
-                    TOKEN
-                  </text>
+                  {defaultTokens[0]?.logo ? (
+                    <image
+                      href={defaultTokens[0].logo}
+                      x={140 - 16}
+                      y={70 - 16}
+                      width={32}
+                      height={32}
+                      clipPath="url(#heroCenterClip)"
+                    />
+                  ) : (
+                    <text 
+                      x="140" 
+                      y="74" 
+                      textAnchor="middle" 
+                      fill="white" 
+                      fontSize="10" 
+                      fontWeight="600"
+                      className="opacity-80"
+                    >
+                      TOKEN
+                    </text>
+                  )}
                 </svg>
                 
                 {/* Subtle radial glow behind */}
