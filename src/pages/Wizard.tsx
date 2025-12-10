@@ -635,15 +635,26 @@ const Wizard = () => {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-600/20 via-transparent to-transparent rounded-full blur-3xl" />
               
               {/* Chart - oversized */}
-              <div className="relative w-[110%] h-[110%] max-w-[900px] max-h-[900px]">
+              <div className={`relative w-[110%] h-[110%] max-w-[900px] max-h-[900px] transition-opacity duration-500 ${!selectedScan ? 'opacity-50' : 'opacity-100'}`}>
                 <NetworkGraph 
                   studyId={
                     selectedScan 
                       ? selectedOption.scanOptions.find(s => s.id === selectedScan)?.studyId || "FnBmNZv2Ik2x8xJwHjRf"
-                      : selectedOption.scanOptions[0].studyId
+                      : "FnBmNZv2Ik2x8xJwHjRf"
                   } 
                 />
               </div>
+
+              {/* Overlay prompt when no scan selected */}
+              {!selectedScan && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/10">
+                    <p className="text-white/70 text-sm">
+                      Select an option to see real data
+                    </p>
+                  </div>
+                </div>
+              )}
               
               {/* Label */}
               <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/20 text-xs">
@@ -658,7 +669,7 @@ const Wizard = () => {
                 studyId={
                   selectedScan 
                     ? selectedOption.scanOptions.find(s => s.id === selectedScan)?.studyId || "FnBmNZv2Ik2x8xJwHjRf"
-                    : selectedOption.scanOptions[0].studyId
+                    : "FnBmNZv2Ik2x8xJwHjRf"
                 } 
               />
             </div>
