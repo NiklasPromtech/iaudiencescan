@@ -690,107 +690,73 @@ const Wizard = () => {
                       </button>
                     );
                   })}
+                </div>
+              </div>
             </div>
+            
+            {/* Separator */}
+            <div className="border-t-2 border-white/20 mx-6 max-w-6xl lg:mx-auto" />
 
-            {/* Footer - Dark theme */}
-            <footer className="border-t-2 border-white/20 py-16 px-6">
+            {/* Footer - Dark theme, compact */}
+            <footer className="py-8 px-6">
               <div className="max-w-6xl mx-auto">
-                <div className="grid md:grid-cols-4 gap-8">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                   {/* Brand */}
-                  <div className="col-span-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <img 
-                        src={logoSquareWhite} 
-                        alt="AudienceScan Logo" 
-                        className="h-8 w-8"
-                      />
-                      <span className="text-lg font-bold text-white">AudienceScan</span>
-                    </div>
-                    <p className="text-sm text-white/50 leading-relaxed">
-                      Built by marketers & devs who've scaled Web3 projects. 
-                      Turn wallet data into marketing signal.
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={logoSquareWhite} 
+                      alt="AudienceScan Logo" 
+                      className="h-6 w-6"
+                    />
+                    <span className="text-sm font-semibold text-white">AudienceScan</span>
                   </div>
                   
-                  {/* Product */}
-                  <div>
-                    <h3 className="font-semibold text-white mb-4">Product</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li><a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-colors">Proposed Features</a></li>
-                      <li><a href="#" className="text-white/50 hover:text-purple-400 transition-colors">API docs (Coming soon)</a></li>
-                      <li><a href="#" className="text-white/50 hover:text-purple-400 transition-colors">Integrations (Coming soon)</a></li>
-                    </ul>
+                  {/* Links */}
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                    <a href="/blog" className="text-white/50 hover:text-purple-400 transition-colors">Blog</a>
+                    <a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-colors">Case Studies</a>
+                    <a href="/pricing" className="text-white/50 hover:text-purple-400 transition-colors">Pricing</a>
+                    <a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-colors">Features</a>
                   </div>
                   
-                  {/* Company */}
-                  <div>
-                    <h3 className="font-semibold text-white mb-4">Company</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li><a href="/blog" className="text-white/50 hover:text-purple-400 transition-colors">Blog</a></li>
-                      <li><a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-colors">Case Studies</a></li>
-                      <li><a href="/pricing" className="text-white/50 hover:text-purple-400 transition-colors">Pricing</a></li>
-                    </ul>
-                  </div>
-                  
-                  {/* Connect */}
-                  <div>
-                    <h3 className="font-semibold text-white mb-4">Connect</h3>
-                    <div className="flex gap-4">
-                      <a 
-                        href="https://www.linkedin.com/company/audiencescanio/" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors group"
-                      >
-                        <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-5 h-5 invert group-hover:invert transition-all" />
-                      </a>
-                      <a 
-                        href="https://t.me/audienceScan" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors group"
-                      >
-                        <img src={telegramLogo} alt="Telegram" className="w-5 h-5 invert group-hover:invert transition-all" />
-                      </a>
-                      <a 
-                        href="https://x.com/AudienceScanIO" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors group"
-                      >
-                        <img src={xLogo} alt="X" className="w-5 h-5 invert group-hover:invert transition-all" />
-                      </a>
-                    </div>
-                    
-                    <div className="mt-6">
-                      <h4 className="font-semibold text-white mb-2 text-sm">Useable for</h4>
-                      <div className="flex flex-wrap gap-2">
-                        <a href="https://ads.google.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">Google Ads</a>
-                        <a href="https://marketingplatform.google.com/about/display-video-360/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">DV360</a>
-                        <a href="https://ads.x.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">X ads</a>
-                        <a href="https://ads.telegram.org/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">Telegram ads</a>
-                        <a href="https://ads.reddit.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">Reddit Ads</a>
-                        <a href="https://www.drippiai.link/onboarding?&inviterUid=rhsjratWHLVB6BYKS4qx8j6HO662&inviterName=AudienceScan" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">X DMs - Drippi</a>
-                        <a href="https://www.enreach.ai/telegram-messenger" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white/50 hover:text-white transition-colors">TG DMs - Enreach</a>
-                      </div>
-                    </div>
+                  {/* Social Icons */}
+                  <div className="flex gap-3">
+                    <a 
+                      href="https://www.linkedin.com/company/audiencescanio/" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                    >
+                      <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 brightness-0 invert" />
+                    </a>
+                    <a 
+                      href="https://t.me/audienceScan" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                    >
+                      <img src={telegramLogo} alt="Telegram" className="w-4 h-4 brightness-0 invert" />
+                    </a>
+                    <a 
+                      href="https://x.com/AudienceScanIO" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                    >
+                      <img src={xLogo} alt="X" className="w-4 h-4 brightness-0 invert" />
+                    </a>
                   </div>
                 </div>
                 
-                <div className="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
-                  <p className="text-sm text-white/40">
-                    © 2024 AudienceScan. All rights reserved.
-                  </p>
-                  <div className="flex gap-6 mt-4 sm:mt-0">
-                    <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-colors">Privacy</a>
-                    <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-colors">Terms</a>
-                    <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-colors">Support</a>
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-white/10 text-xs text-white/40">
+                  <p>© 2024 AudienceScan. All rights reserved.</p>
+                  <div className="flex gap-4 mt-2 sm:mt-0">
+                    <a href="#" className="hover:text-purple-400 transition-colors">Privacy</a>
+                    <a href="#" className="hover:text-purple-400 transition-colors">Terms</a>
                   </div>
                 </div>
               </div>
             </footer>
-          </div>
-            </div>
           </div>
         ) : (
           // Role Detail Screen - Chart dominant with options on left
