@@ -531,12 +531,11 @@ const Wizard = () => {
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
-    // Wait for animation to complete, then navigate
+    // Wait for smooth fade to complete, then navigate
     setTimeout(() => {
       window.open("https://app.audiencescan.io", "_blank");
-      // Reset after a delay so it's ready if they come back
-      setTimeout(() => setIsLaunching(false), 500);
-    }, 600);
+      setTimeout(() => setIsLaunching(false), 300);
+    }, 800);
   };
 
   // Continuous random word cycling every 3 seconds with bigger jumps
@@ -592,33 +591,24 @@ const Wizard = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
         <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
-        <div className="relative">
-          {/* Expanding white circle */}
-          <div 
-            className={`absolute inset-0 bg-white rounded-full transition-all duration-1000 ease-out ${
-              isLaunching ? 'scale-[100] opacity-100' : 'scale-100 opacity-0'
-            }`}
-            style={{ transformOrigin: 'center' }}
-          />
-          <button
-            onClick={handleLaunchApp}
-            className="relative px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all"
-          >
-            Launch App
-          </button>
-        </div>
+        <button
+          onClick={handleLaunchApp}
+          className="px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all hover:scale-105"
+        >
+          Launch App
+        </button>
       </header>
 
-      {/* Full screen white overlay for launch transition */}
+      {/* Smooth white transition overlay */}
       <div 
-        className={`fixed inset-0 bg-white z-[100] pointer-events-none transition-opacity duration-700 delay-300 ${
-          isLaunching ? 'opacity-100' : 'opacity-0'
+        className={`fixed inset-0 bg-white z-[100] pointer-events-none transition-opacity ease-in-out ${
+          isLaunching ? 'opacity-100 duration-700' : 'opacity-0 duration-300'
         }`}
       />
 
       <div
-        className={`min-h-screen transition-all duration-500 ${
-          isLaunching ? "opacity-0 scale-98" : isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"
+        className={`min-h-screen transition-all ease-in-out ${
+          isLaunching ? "opacity-0 duration-500" : isTransitioning ? "opacity-0 scale-98 duration-300" : "opacity-100 scale-100 duration-300"
         }`}
       >
         {!selectedOption ? (
