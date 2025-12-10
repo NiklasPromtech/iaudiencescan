@@ -693,7 +693,7 @@ const Wizard = () => {
             </div>
 
             {/* Footer - Dark theme */}
-            <footer className="border-t border-white/10 py-16 px-6">
+            <footer className="border-t-2 border-white/20 py-16 px-6">
               <div className="max-w-6xl mx-auto">
                 <div className="grid md:grid-cols-4 gap-8">
                   {/* Brand */}
