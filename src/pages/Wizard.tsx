@@ -291,13 +291,19 @@ interface NetworkGraphProps {
   studyId: string;
   onNodeHover?: (node: Node, position: { x: number; y: number }) => void;
   onNodeLeave?: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave }: NetworkGraphProps) => {
+const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: NetworkGraphProps) => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+    setShowChart(false);
+    onLoadingChange?.(true);
+    
     const fetchData = async () => {
       try {
         const response = await fetch(
@@ -310,10 +316,13 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave }: NetworkGraphProps) 
         // Silently fail
       } finally {
         setLoading(false);
+        onLoadingChange?.(false);
+        // Slight delay before showing chart for smooth animation
+        setTimeout(() => setShowChart(true), 100);
       }
     };
     fetchData();
-  }, [studyId]);
+  }, [studyId, onLoadingChange]);
 
   const { nodes, edges } = useMemo(() => {
     if (tokens.length === 0) return { nodes: [], edges: [] };
@@ -419,13 +428,21 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave }: NetworkGraphProps) 
   if (loading || nodes.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="w-32 h-32 rounded-full border border-purple-500/30 animate-pulse" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+          <p className="text-white/40 text-sm animate-pulse">Loading network data...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <svg width="100%" height="100%" viewBox="0 0 600 600" className="opacity-90">
+    <svg 
+      width="100%" 
+      height="100%" 
+      viewBox="0 0 600 600" 
+      className={`transition-all duration-700 ease-out ${showChart ? 'opacity-90 scale-100' : 'opacity-0 scale-95'}`}
+    >
       <defs>
         {nodes.map((node) => (
           <clipPath key={`clip-${node.id}`} id={`wizard-clip-${studyId}-${node.id}`}>
@@ -495,6 +512,7 @@ const Wizard = () => {
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [showInfoBox, setShowInfoBox] = useState(true);
+  const [chartLoading, setChartLoading] = useState(false);
 
   // Continuous random word cycling every 3 seconds with bigger jumps
   useEffect(() => {
@@ -748,11 +766,22 @@ const Wizard = () => {
                     setHoverPosition(position);
                   }}
                   onNodeLeave={() => setHoveredNode(null)}
+                  onLoadingChange={setChartLoading}
                 />
+                
+                {/* Loading overlay */}
+                {chartLoading && selectedScan && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+                      <p className="text-white/60 text-sm">Loading scan data...</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Overlay prompt when no scan selected */}
-              {!selectedScan && (
+              {!selectedScan && !chartLoading && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/10">
                     <p className="text-white/70 text-sm">
