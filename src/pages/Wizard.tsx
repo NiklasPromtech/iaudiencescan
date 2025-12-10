@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Building2, Rocket, Coins, Wallet, Building, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Building2, Rocket, Coins, Wallet, Building, ArrowRight } from "lucide-react";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 
 interface WizardOption {
@@ -10,129 +9,247 @@ interface WizardOption {
   smallText: string;
   title: string;
   cta: string;
+  gradient: string;
 }
 
 const wizardOptions: WizardOption[] = [
   {
     id: "agency",
-    icon: <Building2 className="w-7 h-7" />,
+    icon: <Building2 className="w-8 h-8" />,
     label: "Agency",
     smallText: "Win more pitches",
     title: "Build Web3 pitches and GTMs backed by real on-chain behavior",
     cta: "Validate your next Web3 pitch",
+    gradient: "from-violet-600 to-purple-600",
   },
   {
     id: "launchpad",
-    icon: <Rocket className="w-7 h-7" />,
+    icon: <Rocket className="w-8 h-8" />,
     label: "Launchpads",
     smallText: "Attract the right tokens",
     title: "Show token teams you already understand their audience",
     cta: "Show audience demand to token teams",
+    gradient: "from-purple-600 to-fuchsia-600",
   },
   {
     id: "token",
-    icon: <Coins className="w-7 h-7" />,
+    icon: <Coins className="w-8 h-8" />,
     label: "Token owners",
     smallText: "Grow token adoption",
     title: "Find the communities your users are already part of — and reach more like them",
     cta: "Find where your next users are",
+    gradient: "from-fuchsia-600 to-pink-600",
   },
   {
     id: "wallet",
-    icon: <Wallet className="w-7 h-7" />,
+    icon: <Wallet className="w-8 h-8" />,
     label: "Web3 wallets",
     smallText: "Find more wallet users",
     title: "Use your existing users' wallets to find where similar users already are",
     cta: "Upload wallets to find more users",
+    gradient: "from-pink-600 to-rose-600",
   },
   {
     id: "cex",
-    icon: <Building className="w-7 h-7" />,
+    icon: <Building className="w-8 h-8" />,
     label: "CEX",
     smallText: "Find your next token listing",
     title: "Identify high-signal tokens by analyzing where users of other CEXs transact",
     cta: "Discover listing opportunities",
+    gradient: "from-rose-600 to-orange-600",
   },
 ];
 
-// Floating Particles
-const FloatingParticles = () => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: 3 + Math.random() * 6,
-    duration: 15 + Math.random() * 20,
-    delay: Math.random() * 10,
-    opacity: 0.1 + Math.random() * 0.2,
-  }));
+// Network Graph Component (embedded from Network page)
+interface TokenData {
+  logo: string;
+  ticker: string;
+  score: number;
+  x: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
+}
 
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full bg-purple-400"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            opacity: p.opacity,
-            animation: `float ${p.duration}s ${p.delay}s ease-in-out infinite`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+interface Node {
+  id: number;
+  x: number;
+  y: number;
+  logo: string;
+  ticker: string;
+  score: number;
+  size: number;
+}
 
-// Network Background Animation
-const NetworkBackground = () => {
-  const [nodes, setNodes] = useState<{ x: number; y: number; delay: number; size: number }[]>([]);
+interface Edge {
+  from: number;
+  to: number;
+  strength: number;
+}
+
+const NetworkGraph = ({ studyId }: { studyId: string }) => {
+  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const newNodes = Array.from({ length: 40 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 3,
-      size: 2 + Math.random() * 3,
-    }));
-    setNodes(newNodes);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
+        setTokens(data);
+      } catch {
+        // Silently fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [studyId]);
+
+  const { nodes, edges } = useMemo(() => {
+    if (tokens.length === 0) return { nodes: [], edges: [] };
+
+    const size = 600;
+    const padding = 60;
+    const maxTokens = Math.min(tokens.length, 50);
+
+    const seed = studyId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const seededRandom = (i: number) => {
+      const x = Math.sin(seed * i) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const generatedNodes: Node[] = [];
+
+    tokens.slice(0, maxTokens).forEach((token, index) => {
+      const nodeSize = 16 + token.score * 24;
+      let x: number, y: number;
+      let attempts = 0;
+
+      do {
+        if (index === 0) {
+          x = size / 2;
+          y = size / 2;
+        } else {
+          const golden = 0.618033988749895;
+          const angle = index * golden * Math.PI * 2 + seededRandom(index * 7) * 0.5;
+          const baseRadius = 50 + Math.sqrt(index / maxTokens) * (size / 2 - padding - 50);
+          const jitter = (seededRandom(index * 13 + attempts) - 0.5) * 60;
+          x = size / 2 + Math.cos(angle) * (baseRadius + jitter);
+          y = size / 2 + Math.sin(angle) * (baseRadius + jitter);
+        }
+        x = Math.max(padding, Math.min(size - padding, x));
+        y = Math.max(padding, Math.min(size - padding, y));
+
+        const hasOverlap = generatedNodes.some((other) => {
+          const dx = x - other.x;
+          const dy = y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          return dist < (nodeSize + other.size) / 2 + 8;
+        });
+
+        if (!hasOverlap || attempts >= 30) break;
+        attempts++;
+      } while (true);
+
+      generatedNodes.push({
+        id: index,
+        x,
+        y,
+        logo: token.logo,
+        ticker: token.ticker || '',
+        score: token.score,
+        size: nodeSize,
+      });
+    });
+
+    const generatedEdges: Edge[] = [];
+    const edgeCount = Math.floor(maxTokens * 1.5);
+
+    for (let i = 0; i < edgeCount; i++) {
+      const from = Math.floor(seededRandom(i * 3) * maxTokens);
+      const to = Math.floor(seededRandom(i * 3 + 1) * maxTokens);
+      if (from !== to) {
+        const exists = generatedEdges.some(
+          e => (e.from === from && e.to === to) || (e.from === to && e.to === from)
+        );
+        if (!exists) {
+          generatedEdges.push({ from, to, strength: (generatedNodes[from].score + generatedNodes[to].score) / 2 });
+        }
+      }
+    }
+
+    for (let i = 1; i < Math.min(5, maxTokens); i++) {
+      if (!generatedEdges.some(e => (e.from === 0 && e.to === i) || (e.from === i && e.to === 0))) {
+        generatedEdges.push({ from: 0, to: i, strength: generatedNodes[i].score });
+      }
+    }
+
+    return { nodes: generatedNodes, edges: generatedEdges };
+  }, [tokens, studyId]);
+
+  if (loading || nodes.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full border border-purple-500/30 animate-pulse" />
+      </div>
+    );
+  }
 
   return (
-    <svg className="absolute inset-0 w-full h-full opacity-20">
-      {nodes.map((node, i) =>
-        nodes.slice(i + 1, i + 3).map((target, j) => (
+    <svg width="100%" height="100%" viewBox="0 0 600 600" className="opacity-80">
+      <defs>
+        {nodes.map((node) => (
+          <clipPath key={`clip-${node.id}`} id={`wizard-clip-${node.id}`}>
+            <circle cx={node.x} cy={node.y} r={node.size / 2 - 1} />
+          </clipPath>
+        ))}
+      </defs>
+
+      {edges.map((edge, index) => {
+        const fromNode = nodes[edge.from];
+        const toNode = nodes[edge.to];
+        if (!fromNode || !toNode) return null;
+        return (
           <line
-            key={`${i}-${j}`}
-            x1={`${node.x}%`}
-            y1={`${node.y}%`}
-            x2={`${target.x}%`}
-            y2={`${target.y}%`}
-            stroke="rgba(168, 85, 247, 0.4)"
-            strokeWidth="1"
-            style={{
-              animation: `flowLine 3s ${node.delay}s ease-out forwards`,
-              strokeDasharray: 100,
-              strokeDashoffset: 100,
-            }}
+            key={index}
+            x1={fromNode.x}
+            y1={fromNode.y}
+            x2={toNode.x}
+            y2={toNode.y}
+            stroke="#a855f7"
+            strokeWidth={0.5 + edge.strength}
+            strokeOpacity={0.15 + edge.strength * 0.3}
           />
-        ))
-      )}
-      {nodes.map((node, i) => (
-        <circle
-          key={i}
-          cx={`${node.x}%`}
-          cy={`${node.y}%`}
-          r={node.size}
-          fill="rgba(168, 85, 247, 0.6)"
-          style={{
-            animation: `nodeAppear 0.6s ${node.delay}s ease-out forwards`,
-            opacity: 0,
-          }}
-        />
+        );
+      })}
+
+      {nodes.map((node) => (
+        <g key={node.id}>
+          <circle
+            cx={node.x}
+            cy={node.y}
+            r={node.size / 2 + 1}
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth={node.id === 0 ? 2 : 1.5}
+            strokeOpacity={0.4 + node.score * 0.4}
+          />
+          <circle cx={node.x} cy={node.y} r={node.size / 2} fill="#0a0a0a" />
+          <image
+            href={node.logo}
+            x={node.x - node.size / 2 + 1}
+            y={node.y - node.size / 2 + 1}
+            width={node.size - 2}
+            height={node.size - 2}
+            clipPath={`url(#wizard-clip-${node.id})`}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
       ))}
     </svg>
   );
@@ -141,14 +258,13 @@ const NetworkBackground = () => {
 const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const handleSelect = (option: WizardOption) => {
     setIsTransitioning(true);
     setTimeout(() => {
       setSelectedOption(option);
       setIsTransitioning(false);
-    }, 400);
+    }, 300);
   };
 
   const handleBack = () => {
@@ -156,162 +272,148 @@ const Wizard = () => {
     setTimeout(() => {
       setSelectedOption(null);
       setIsTransitioning(false);
-    }, 400);
+    }, 300);
   };
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
-      {/* Ambient glows */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[200px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-[600px] h-[600px] bg-violet-500/8 rounded-full blur-[180px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[150px]" />
-      </div>
-
-      {/* Animated network background */}
-      <div className="fixed inset-0 overflow-hidden">
-        <NetworkBackground />
-        <FloatingParticles />
-      </div>
-
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
-        <img src={logoWhite} alt="AudienceScan" className="h-8" />
+        <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
         <a
           href="https://app.audiencescan.xyz"
           target="_blank"
           rel="noopener noreferrer"
-          className="px-6 py-2 bg-violet-600 hover:bg-violet-500 rounded-full text-sm font-medium transition-colors"
+          className="px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all"
         >
           Launch App
         </a>
       </header>
 
-      {/* Main Content */}
       <div
-        className={`min-h-screen flex items-center justify-center px-6 py-24 transition-all duration-500 ${
-          isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+        className={`min-h-screen transition-all duration-300 ${
+          isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"
         }`}
       >
         {!selectedOption ? (
           // Selection Screen
-          <div className="max-w-5xl w-full space-y-16 relative z-10">
-            <div className="text-center space-y-6 animate-fade-in-up">
-              <p className="text-violet-400 text-sm tracking-[0.3em] uppercase">
-                Welcome
-              </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                What best describes you?
-              </h1>
-              <p className="text-white/50 text-lg md:text-xl max-w-2xl mx-auto">
-                Select your role to discover how on-chain insights can transform your strategy
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-              {wizardOptions.map((option, index) => (
-                <button
-                  key={option.id}
-                  onClick={() => handleSelect(option)}
-                  onMouseEnter={() => setHoveredId(option.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  className={`group relative bg-white/[0.03] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-6 md:p-7 text-left transition-all duration-300 overflow-hidden animate-fade-in-up ${
-                    hoveredId && hoveredId !== option.id ? 'opacity-50' : 'opacity-100'
-                  }`}
-                  style={{
-                    animationDelay: `${0.1 + index * 0.08}s`,
-                    animationFillMode: 'backwards',
-                  }}
-                >
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute inset-0 border border-purple-500/0 group-hover:border-purple-500/40 rounded-2xl transition-all duration-300" />
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400 group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-all duration-300">
-                        {option.icon}
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-purple-400 group-hover:translate-x-1 transition-all duration-300" />
-                    </div>
-                    
-                    <h3 className="text-white font-semibold text-xl mb-2 group-hover:text-white transition-colors">
-                      {option.label}
-                    </h3>
-                    <p className="text-white/40 text-sm group-hover:text-white/60 transition-colors">
-                      {option.smallText}
+          <div className="min-h-screen flex flex-col">
+            {/* Hero area with network preview */}
+            <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
+              <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
+                {/* Left: Text */}
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <p className="text-purple-400 text-sm tracking-widest uppercase font-medium">
+                      On-chain audience intelligence
+                    </p>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+                      Who are you<br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                        building for?
+                      </span>
+                    </h1>
+                    <p className="text-white/50 text-lg max-w-md">
+                      Select your role to see how on-chain data reveals your next audience.
                     </p>
                   </div>
-                </button>
-              ))}
+                </div>
+
+                {/* Right: Network preview */}
+                <div className="relative aspect-square max-w-[500px] mx-auto w-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
+                  <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom: Options */}
+            <div className="px-6 pb-12">
+              <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {wizardOptions.map((option, index) => (
+                    <button
+                      key={option.id}
+                      onClick={() => handleSelect(option)}
+                      className="group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300"
+                      style={{
+                        animation: `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
+                      }}
+                    >
+                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                      
+                      <div className="relative">
+                        <div className="text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          {option.icon}
+                        </div>
+                        <h3 className="text-white font-semibold text-base mb-1">
+                          {option.label}
+                        </h3>
+                        <p className="text-white/40 text-xs">
+                          {option.smallText}
+                        </p>
+                        <ArrowRight className="absolute top-0 right-0 w-4 h-4 text-white/0 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-0.5" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ) : (
           // Result Screen
-          <div className="max-w-3xl w-full text-center space-y-10 relative z-10">
+          <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
             <button
               onClick={handleBack}
-              className="text-white/40 hover:text-white text-sm inline-flex items-center gap-2 transition-colors animate-fade-in-up"
+              className="absolute top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors"
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
               Back
             </button>
 
-            <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full">
-                <span className="text-purple-400 text-sm tracking-wider uppercase">
-                  {selectedOption.smallText}
-                </span>
+            <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left: Network */}
+              <div className="relative aspect-square max-w-[500px] mx-auto w-full order-2 lg:order-1">
+                <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20 rounded-full blur-3xl`} />
+                <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
               </div>
-              
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white">
-                {selectedOption.title}
-              </h1>
-            </div>
 
-            <div className="pt-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <a
-                href="https://app.audiencescan.xyz"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="lg"
-                  className="bg-violet-600 hover:bg-violet-500 text-white px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25"
+              {/* Right: Content */}
+              <div className="space-y-8 order-1 lg:order-2">
+                <div className="space-y-6">
+                  <div className={`inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r ${selectedOption.gradient} rounded-full`}>
+                    <span className="text-white/90">{selectedOption.icon}</span>
+                    <span className="text-white text-sm font-medium">
+                      {selectedOption.smallText}
+                    </span>
+                  </div>
+                  
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                    {selectedOption.title}
+                  </h1>
+                </div>
+
+                <a
+                  href="https://app.audiencescan.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
                 >
-                  <CheckCircle2 className="w-5 h-5 mr-2" />
                   {selectedOption.cta}
-                </Button>
-              </a>
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              </div>
             </div>
-
-            {/* Decorative elements */}
-            <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
           </div>
         )}
       </div>
 
       <style>{`
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes flowLine {
-          0% { stroke-dashoffset: 100; }
-          100% { stroke-dashoffset: 0; }
-        }
-        @keyframes nodeAppear {
-          0% { opacity: 0; transform: scale(0); }
-          50% { opacity: 1; transform: scale(1.2); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          25% { transform: translateY(-20px) translateX(10px); }
-          50% { transform: translateY(-10px) translateX(-15px); }
-          75% { transform: translateY(-25px) translateX(5px); }
-        }
-        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .scale-98 { transform: scale(0.98); }
       `}</style>
     </div>
   );
