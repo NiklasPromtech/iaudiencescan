@@ -481,7 +481,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave }: NetworkGraphProps) 
   );
 };
 
-const baseWords = ["confident", "smarter", "defensible", "data-backed", "signal-driven"];
+const baseWords = ["confident", "smarter", "defensible", "data-backed"];
 const WORD_HEIGHT = 56;
 
 const Wizard = () => {
