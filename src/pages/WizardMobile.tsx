@@ -4,12 +4,19 @@ import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target,
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface TokenData {
+  logo: string;
+  ticker: string;
+  score: number;
+}
+
 interface ScanOption {
   id: string;
   title: string;
   description: string;
   cta: string;
   icon: React.ReactNode;
+  studyId: string;
 }
 
 interface WizardOption {
@@ -41,6 +48,7 @@ const wizardOptions: WizardOption[] = [
         description: "Validate where users overlap on-chain.",
         cta: "Scan token",
         icon: <Search className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
       {
         id: "competitor",
@@ -48,6 +56,7 @@ const wizardOptions: WizardOption[] = [
         description: "Reveal competing communities.",
         cta: "Scan competitor",
         icon: <Target className="w-5 h-5" />,
+        studyId: "jKqLmNoPrStUvWxYz123",
       },
     ],
   },
@@ -67,6 +76,7 @@ const wizardOptions: WizardOption[] = [
         description: "Find aligned communities.",
         cta: "Scan category",
         icon: <Search className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
       {
         id: "competitor-launchpad",
@@ -74,6 +84,7 @@ const wizardOptions: WizardOption[] = [
         description: "See competitor audiences.",
         cta: "Scan competitors",
         icon: <Target className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
     ],
   },
@@ -93,6 +104,7 @@ const wizardOptions: WizardOption[] = [
         description: "Discover holder communities.",
         cta: "Scan my token",
         icon: <Search className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
       {
         id: "similar-token",
@@ -100,6 +112,7 @@ const wizardOptions: WizardOption[] = [
         description: "Find untapped communities.",
         cta: "Scan similar",
         icon: <Target className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
     ],
   },
@@ -119,6 +132,7 @@ const wizardOptions: WizardOption[] = [
         description: "Analyze for lookalikes.",
         cta: "Upload wallets",
         icon: <Search className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
       {
         id: "competitor-wallet",
@@ -126,6 +140,7 @@ const wizardOptions: WizardOption[] = [
         description: "See competitor communities.",
         cta: "Scan competitors",
         icon: <Target className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
     ],
   },
@@ -145,6 +160,7 @@ const wizardOptions: WizardOption[] = [
         description: "See active tokens.",
         cta: "Analyze",
         icon: <Search className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
       {
         id: "competitor-cex",
@@ -152,6 +168,7 @@ const wizardOptions: WizardOption[] = [
         description: "Find trending tokens.",
         cta: "Scan CEX",
         icon: <Target className="w-5 h-5" />,
+        studyId: "FnBmNZv2Ik2x8xJwHjRf",
       },
     ],
   },
@@ -168,6 +185,8 @@ const WizardMobile = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
   // Redirect to desktop version if not mobile
   useEffect(() => {
@@ -175,6 +194,33 @@ const WizardMobile = () => {
       navigate("/wizard", { replace: true });
     }
   }, [isMobile]);
+
+  // Fetch token data when scan is selected
+  useEffect(() => {
+    if (!selectedScan) {
+      setTokens([]);
+      return;
+    }
+
+    const fetchTokens = async () => {
+      setIsLoadingTokens(true);
+      try {
+        const response = await fetch(
+          `https://token-analysis-final.nw.r.appspot.com/chart/${selectedScan.studyId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setTokens(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch token data:", error);
+      } finally {
+        setTimeout(() => setIsLoadingTokens(false), 750);
+      }
+    };
+
+    fetchTokens();
+  }, [selectedScan]);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -221,6 +267,10 @@ const WizardMobile = () => {
       setIsTransitioning(false);
     }, 300);
   };
+
+  // Get display tokens (center + 8 outer nodes)
+  const centerToken = tokens[0];
+  const outerTokens = tokens.slice(1, 9);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -506,108 +556,153 @@ const WizardMobile = () => {
 
             {/* Network Graph Preview */}
             <div className="flex-1 flex items-center justify-center py-4">
-              <div className="relative w-full max-w-[320px] aspect-square">
-                <svg className="w-full h-full" viewBox="0 0 320 320">
-                  {/* Connection lines */}
-                  <g className="opacity-40">
-                    {/* Inner connections */}
-                    <line x1="160" y1="160" x2="80" y2="80" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="240" y2="80" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    <line x1="160" y1="160" x2="160" y2="270" stroke="url(#previewLineGrad)" strokeWidth="1.5" />
-                    {/* Cross connections */}
-                    <line x1="80" y1="80" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    <line x1="240" y1="80" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    <line x1="60" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    <line x1="260" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    <line x1="80" y1="80" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                    <line x1="240" y1="80" x2="160" y2="50" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
-                  </g>
-                  
-                  {/* Gradient definitions */}
-                  <defs>
-                    <linearGradient id="previewLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#a855f7" />
-                      <stop offset="100%" stopColor="#ec4899" />
-                    </linearGradient>
-                    <radialGradient id="previewNodeGlow" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.5" />
-                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
-                    </radialGradient>
-                  </defs>
-                  
-                  {/* Outer nodes */}
-                  {[
-                    { x: 80, y: 80, size: 14 },
-                    { x: 240, y: 80, size: 16 },
-                    { x: 60, y: 160, size: 12 },
-                    { x: 260, y: 160, size: 15 },
-                    { x: 80, y: 240, size: 13 },
-                    { x: 240, y: 240, size: 14 },
-                    { x: 160, y: 50, size: 11 },
-                    { x: 160, y: 270, size: 12 },
-                  ].map((node, i) => (
-                    <g key={i} style={{ animation: `fadeInUp 0.5s ${i * 0.05}s ease-out backwards` }}>
-                      <circle cx={node.x} cy={node.y} r={node.size + 6} fill="url(#previewNodeGlow)" />
-                      <circle 
-                        cx={node.x} 
-                        cy={node.y} 
-                        r={node.size} 
-                        fill="#1a1a1a" 
-                        stroke="#a855f7" 
-                        strokeWidth="2"
-                        className="opacity-70"
-                      />
+              {isLoadingTokens ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-white/50 text-sm">Loading scan data...</p>
+                </div>
+              ) : (
+                <div className="relative w-full max-w-[320px] aspect-square animate-fade-in">
+                  <svg className="w-full h-full" viewBox="0 0 320 320">
+                    {/* Connection lines from center to outer nodes */}
+                    <g className="opacity-40">
+                      {[
+                        { x: 80, y: 80 },
+                        { x: 240, y: 80 },
+                        { x: 60, y: 160 },
+                        { x: 260, y: 160 },
+                        { x: 80, y: 240 },
+                        { x: 240, y: 240 },
+                        { x: 160, y: 50 },
+                        { x: 160, y: 270 },
+                      ].slice(0, outerTokens.length).map((pos, i) => (
+                        <line key={i} x1="160" y1="160" x2={pos.x} y2={pos.y} stroke="url(#previewLineGrad)" strokeWidth="1.5" />
+                      ))}
+                      {/* Cross connections */}
+                      <line x1="80" y1="80" x2="60" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                      <line x1="240" y1="80" x2="260" y2="160" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                      <line x1="60" y1="160" x2="80" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
+                      <line x1="260" y1="160" x2="240" y2="240" stroke="url(#previewLineGrad)" strokeWidth="0.8" className="opacity-60" />
                     </g>
-                  ))}
+                    
+                    {/* Gradient definitions */}
+                    <defs>
+                      <linearGradient id="previewLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#a855f7" />
+                        <stop offset="100%" stopColor="#ec4899" />
+                      </linearGradient>
+                      <radialGradient id="previewNodeGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#a855f7" stopOpacity="0.5" />
+                        <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                      </radialGradient>
+                      <clipPath id="centerClip">
+                        <circle cx="160" cy="160" r="26" />
+                      </clipPath>
+                      {outerTokens.map((_, i) => (
+                        <clipPath key={i} id={`outerClip${i}`}>
+                          <circle cx={[80, 240, 60, 260, 80, 240, 160, 160][i]} cy={[80, 80, 160, 160, 240, 240, 50, 270][i]} r="14" />
+                        </clipPath>
+                      ))}
+                    </defs>
+                    
+                    {/* Outer nodes with token logos */}
+                    {outerTokens.map((token, i) => {
+                      const positions = [
+                        { x: 80, y: 80 },
+                        { x: 240, y: 80 },
+                        { x: 60, y: 160 },
+                        { x: 260, y: 160 },
+                        { x: 80, y: 240 },
+                        { x: 240, y: 240 },
+                        { x: 160, y: 50 },
+                        { x: 160, y: 270 },
+                      ];
+                      const pos = positions[i];
+                      const size = 14 + token.score * 4;
+                      return (
+                        <g key={i} style={{ animation: `fadeInUp 0.5s ${i * 0.05}s ease-out backwards` }}>
+                          <circle cx={pos.x} cy={pos.y} r={size + 6} fill="url(#previewNodeGlow)" />
+                          <circle 
+                            cx={pos.x} 
+                            cy={pos.y} 
+                            r={size} 
+                            fill="#1a1a1a" 
+                            stroke="#a855f7" 
+                            strokeWidth="2"
+                          />
+                          {token.logo && (
+                            <image
+                              href={token.logo}
+                              x={pos.x - size + 2}
+                              y={pos.y - size + 2}
+                              width={(size - 2) * 2}
+                              height={(size - 2) * 2}
+                              clipPath={`url(#outerClip${i})`}
+                              preserveAspectRatio="xMidYMid slice"
+                            />
+                          )}
+                        </g>
+                      );
+                    })}
+                    
+                    {/* Center node with token logo */}
+                    <circle cx="160" cy="160" r="36" fill="url(#previewNodeGlow)" />
+                    <circle 
+                      cx="160" 
+                      cy="160" 
+                      r="28" 
+                      fill="#1a1a1a" 
+                      stroke="url(#previewLineGrad)" 
+                      strokeWidth="2.5"
+                    />
+                    {centerToken?.logo ? (
+                      <image
+                        href={centerToken.logo}
+                        x="134"
+                        y="134"
+                        width="52"
+                        height="52"
+                        clipPath="url(#centerClip)"
+                        preserveAspectRatio="xMidYMid slice"
+                      />
+                    ) : (
+                      <>
+                        <text 
+                          x="160" 
+                          y="164" 
+                          textAnchor="middle" 
+                          fill="white" 
+                          fontSize="11" 
+                          fontWeight="600"
+                          className="opacity-90"
+                        >
+                          {centerToken?.ticker || "YOUR"}
+                        </text>
+                        <text 
+                          x="160" 
+                          y="176" 
+                          textAnchor="middle" 
+                          fill="white" 
+                          fontSize="11" 
+                          fontWeight="600"
+                          className="opacity-90"
+                        >
+                          TOKEN
+                        </text>
+                      </>
+                    )}
+                  </svg>
                   
-                  {/* Center node (larger, highlighted) */}
-                  <circle cx="160" cy="160" r="36" fill="url(#previewNodeGlow)" />
-                  <circle 
-                    cx="160" 
-                    cy="160" 
-                    r="28" 
-                    fill="#1a1a1a" 
-                    stroke="url(#previewLineGrad)" 
-                    strokeWidth="2.5"
-                  />
-                  <text 
-                    x="160" 
-                    y="164" 
-                    textAnchor="middle" 
-                    fill="white" 
-                    fontSize="11" 
-                    fontWeight="600"
-                    className="opacity-90"
-                  >
-                    YOUR
-                  </text>
-                  <text 
-                    x="160" 
-                    y="176" 
-                    textAnchor="middle" 
-                    fill="white" 
-                    fontSize="11" 
-                    fontWeight="600"
-                    className="opacity-90"
-                  >
-                    TOKEN
-                  </text>
-                </svg>
-                
-                {/* Subtle radial glow behind */}
-                <div className="absolute inset-0 bg-gradient-radial from-purple-500/15 via-transparent to-transparent pointer-events-none" />
-              </div>
+                  {/* Subtle radial glow behind */}
+                  <div className="absolute inset-0 bg-gradient-radial from-purple-500/15 via-transparent to-transparent pointer-events-none" />
+                </div>
+              )}
             </div>
 
             {/* Stats preview */}
             <div className="grid grid-cols-3 gap-2 mb-6">
               <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
-                <p className="text-purple-400 text-lg font-bold">127</p>
+                <p className="text-purple-400 text-lg font-bold">{tokens.length || "—"}</p>
                 <p className="text-white/40 text-[10px]">Tokens found</p>
               </div>
               <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
@@ -615,7 +710,7 @@ const WizardMobile = () => {
                 <p className="text-white/40 text-[10px]">Wallets analyzed</p>
               </div>
               <div className="bg-white/[0.03] border border-white/[0.08] rounded-lg p-3 text-center">
-                <p className="text-purple-400 text-lg font-bold">42</p>
+                <p className="text-purple-400 text-lg font-bold">{Math.min(tokens.length, 42) || "—"}</p>
                 <p className="text-white/40 text-[10px]">Communities</p>
               </div>
             </div>
