@@ -388,9 +388,9 @@ const WizardMobile = () => {
               <p className="text-purple-400 text-xs tracking-widest uppercase font-medium">
                 On-chain audience intelligence
               </p>
-              <h1 className="text-2xl font-bold leading-tight">
+              <h1 className="text-2xl font-bold" style={{ lineHeight: `${WORD_HEIGHT}px` }}>
                 Make{" "}
-                <span className="inline-block align-bottom overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
+                <span className="inline-block align-middle overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
                   <span
                     className="flex flex-col"
                     style={{
