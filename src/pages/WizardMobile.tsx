@@ -236,8 +236,91 @@ const WizardMobile = () => {
         {!selectedOption ? (
           /* Selection Screen */
           <div className="min-h-screen flex flex-col px-4 pb-6">
+            {/* Mini Network Visualization */}
+            <div className="pt-6 pb-4">
+              <div className="relative w-full h-40 flex items-center justify-center overflow-hidden">
+                <svg className="w-full h-full" viewBox="0 0 280 140">
+                  {/* Connection lines */}
+                  <g className="opacity-30">
+                    {/* Lines from center to outer nodes */}
+                    <line x1="140" y1="70" x2="60" y2="35" stroke="url(#lineGrad)" strokeWidth="1" />
+                    <line x1="140" y1="70" x2="220" y2="35" stroke="url(#lineGrad)" strokeWidth="1" />
+                    <line x1="140" y1="70" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="1" />
+                    <line x1="140" y1="70" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="1" />
+                    <line x1="140" y1="70" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="1" />
+                    <line x1="140" y1="70" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="1" />
+                    {/* Cross connections */}
+                    <line x1="60" y1="35" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="220" y1="35" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="45" y1="90" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="235" y1="90" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                  </g>
+                  
+                  {/* Gradient definitions */}
+                  <defs>
+                    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#a855f7" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+                  
+                  {/* Outer nodes */}
+                  {[
+                    { x: 60, y: 35, size: 10 },
+                    { x: 220, y: 35, size: 12 },
+                    { x: 45, y: 90, size: 8 },
+                    { x: 235, y: 90, size: 11 },
+                    { x: 80, y: 120, size: 9 },
+                    { x: 200, y: 120, size: 10 },
+                  ].map((node, i) => (
+                    <g key={i}>
+                      <circle cx={node.x} cy={node.y} r={node.size + 4} fill="url(#nodeGlow)" />
+                      <circle 
+                        cx={node.x} 
+                        cy={node.y} 
+                        r={node.size} 
+                        fill="#1a1a1a" 
+                        stroke="#a855f7" 
+                        strokeWidth="1.5"
+                        className="opacity-60"
+                      />
+                    </g>
+                  ))}
+                  
+                  {/* Center node (larger, highlighted) */}
+                  <circle cx="140" cy="70" r="24" fill="url(#nodeGlow)" />
+                  <circle 
+                    cx="140" 
+                    cy="70" 
+                    r="18" 
+                    fill="#1a1a1a" 
+                    stroke="url(#lineGrad)" 
+                    strokeWidth="2"
+                  />
+                  <text 
+                    x="140" 
+                    y="74" 
+                    textAnchor="middle" 
+                    fill="white" 
+                    fontSize="10" 
+                    fontWeight="600"
+                    className="opacity-80"
+                  >
+                    TOKEN
+                  </text>
+                </svg>
+                
+                {/* Subtle radial glow behind */}
+                <div className="absolute inset-0 bg-gradient-radial from-purple-500/10 via-transparent to-transparent pointer-events-none" />
+              </div>
+            </div>
+
             {/* Hero Text */}
-            <div className="pt-8 pb-6 space-y-3">
+            <div className="pb-5 space-y-2">
               <p className="text-purple-400 text-xs tracking-widest uppercase font-medium">
                 On-chain audience intelligence
               </p>
