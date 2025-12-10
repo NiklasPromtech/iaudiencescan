@@ -55,6 +55,38 @@ const wizardOptions: WizardOption[] = [
   },
 ];
 
+// Floating Particles
+const FloatingParticles = () => {
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: 3 + Math.random() * 6,
+    duration: 15 + Math.random() * 20,
+    delay: Math.random() * 10,
+    opacity: 0.1 + Math.random() * 0.2,
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full bg-purple-400"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            opacity: p.opacity,
+            animation: `float ${p.duration}s ${p.delay}s ease-in-out infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 // Network Background Animation
 const NetworkBackground = () => {
   const [nodes, setNodes] = useState<{ x: number; y: number; delay: number; size: number }[]>([]);
@@ -139,6 +171,7 @@ const Wizard = () => {
       {/* Animated network background */}
       <div className="fixed inset-0 overflow-hidden">
         <NetworkBackground />
+        <FloatingParticles />
       </div>
 
       {/* Header */}
@@ -271,6 +304,12 @@ const Wizard = () => {
           0% { opacity: 0; transform: scale(0); }
           50% { opacity: 1; transform: scale(1.2); }
           100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-20px) translateX(10px); }
+          50% { transform: translateY(-10px) translateX(-15px); }
+          75% { transform: translateY(-25px) translateX(5px); }
         }
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
       `}</style>
