@@ -579,7 +579,7 @@ const Wizard = () => {
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
         <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
         <a
-          href="https://app.audiencescan.xyz"
+          href="https://app.audiencescan.io"
           target="_blank"
           rel="noopener noreferrer"
           className="px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all"
@@ -763,7 +763,7 @@ const Wizard = () => {
               {/* Bottom CTA */}
               <div>
                 <a
-                  href="https://app.audiencescan.xyz"
+                  href="https://app.audiencescan.io"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
