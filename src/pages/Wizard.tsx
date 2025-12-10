@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight } from "lucide-react";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 
@@ -254,50 +254,36 @@ const NetworkGraph = ({ studyId }: { studyId: string }) => {
     </svg>
   );
 };
-const scrollingWords = [
-  "confident", "smarter", "defensible", "data-backed", "signal-driven",
-  "confident", "smarter", "defensible", "data-backed", "signal-driven",
-  "confident", "smarter", "defensible", "data-backed", "signal-driven",
-  "confident", "smarter"
-];
+const baseWords = ["confident", "smarter", "defensible", "data-backed", "signal-driven"];
 const WORD_HEIGHT = 56;
-const FINAL_WORD_INDEX = scrollingWords.length - 2; // Second to last (confident)
 
 const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(true);
-  const [hasSettled, setHasSettled] = useState(false);
-  const scrollStarted = useRef(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Scroll animation for the headline
+  // Continuous random word cycling every 2 seconds
   useEffect(() => {
-    if (scrollStarted.current || selectedOption) return;
-    scrollStarted.current = true;
+    if (selectedOption) return;
 
-    const targetOffset = FINAL_WORD_INDEX * WORD_HEIGHT;
-    const totalDuration = 3500;
-    const startTime = Date.now();
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      
+      // Pick a random different word
+      setCurrentWordIndex(prev => {
+        let next;
+        do {
+          next = Math.floor(Math.random() * baseWords.length);
+        } while (next === prev);
+        return next;
+      });
 
-    const animateScroll = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / totalDuration, 1);
-      
-      // Easing: starts fast, slows down at end (easeOutCubic)
-      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      
-      setScrollOffset(easeOutCubic * targetOffset);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      } else {
-        setIsScrolling(false);
-        setHasSettled(true);
-      }
-    };
-    
-    requestAnimationFrame(animateScroll);
+      // Reset animation state after transition
+      setTimeout(() => setIsAnimating(false), 400);
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [selectedOption]);
 
   const handleSelect = (option: WizardOption) => {
@@ -352,13 +338,13 @@ const Wizard = () => {
                       Make{" "}
                       <span className="inline-block align-bottom overflow-hidden" style={{ height: WORD_HEIGHT }}>
                         <span
-                          className="flex flex-col transition-transform"
+                          className="flex flex-col"
                           style={{
-                            transform: `translateY(-${scrollOffset}px)`,
-                            transitionDuration: isScrolling ? "0ms" : "300ms",
+                            transform: `translateY(-${currentWordIndex * WORD_HEIGHT}px)`,
+                            transition: "transform 400ms ease-out",
                           }}
                         >
-                          {scrollingWords.map((word, i) => (
+                          {baseWords.map((word, i) => (
                             <span
                               key={i}
                               className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
