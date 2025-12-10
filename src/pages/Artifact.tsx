@@ -92,9 +92,9 @@ const TokenOverlapChart = ({ tokens }: TokenOverlapChartProps) => {
   const size = 700;
   const center = size / 2;
   
-  // Get the center token (highest score, should be 1.0)
-  const centerToken = tokens.find(t => t.score === 1) || tokens[0];
-  const otherTokens = tokens.filter(t => t !== centerToken).slice(0, 99); // Max 99 outer tokens
+  // Use first token as center (the scanned token)
+  const centerToken = tokens[0];
+  const otherTokens = tokens.slice(1, 100); // Max 99 outer tokens
   
   // Ring configurations: [count, radius, tokenSize, baseOpacity]
   const rings: [number, number, number, number][] = [
