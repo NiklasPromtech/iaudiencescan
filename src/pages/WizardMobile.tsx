@@ -175,7 +175,7 @@ const wizardOptions: WizardOption[] = [
 ];
 
 const baseWords = ["confident", "smarter", "defensible", "data-backed"];
-const WORD_HEIGHT = 40;
+const WORD_HEIGHT = 32;
 
 const WizardMobile = () => {
   const navigate = useNavigate();
@@ -388,9 +388,9 @@ const WizardMobile = () => {
               <p className="text-purple-400 text-xs tracking-widest uppercase font-medium">
                 On-chain audience intelligence
               </p>
-              <h1 className="text-2xl font-bold" style={{ lineHeight: `${WORD_HEIGHT}px` }}>
-                Make{" "}
-                <span className="inline-block align-middle overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
+              <h1 className="text-2xl font-bold leading-tight flex flex-wrap items-center gap-x-2">
+                <span>Make</span>
+                <span className="inline-block overflow-hidden" style={{ height: WORD_HEIGHT }}>
                   <span
                     className="flex flex-col"
                     style={{
@@ -408,8 +408,8 @@ const WizardMobile = () => {
                       </span>
                     ))}
                   </span>
-                </span>{" "}
-                growth decisions
+                </span>
+                <span>growth decisions</span>
               </h1>
               <p className="text-white/50 text-sm">
                 Select your role to get started.
