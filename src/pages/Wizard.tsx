@@ -532,7 +532,7 @@ const Wizard = () => {
           // Role Detail Screen - Chart dominant with options on left
           <div className="min-h-screen flex">
             {/* Left side - Content */}
-            <div className="w-full lg:w-[400px] xl:w-[480px] flex-shrink-0 flex flex-col justify-center px-6 lg:px-10 py-24 relative z-10">
+            <div className="w-full lg:w-[400px] xl:w-[480px] flex-shrink-0 flex flex-col justify-between px-6 lg:px-10 pt-24 pb-12 relative z-10 min-h-screen">
               <button
                 onClick={handleBack}
                 className="absolute top-24 left-6 lg:left-10 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors"
@@ -541,7 +541,8 @@ const Wizard = () => {
                 Back
               </button>
 
-              <div className="space-y-8">
+              {/* Top content */}
+              <div className="space-y-8 mt-12">
                 {/* Header */}
                 <div className="space-y-3">
                   <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold leading-tight">
@@ -594,24 +595,23 @@ const Wizard = () => {
                     ))}
                   </div>
                 </div>
+              </div>
 
-
-                {/* CTA */}
-                <div className="pt-4">
-                  <a
-                    href="https://app.audiencescan.xyz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
-                  >
-                    <span>✓</span>
-                    {selectedOption.cta}
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
-                  <p className="text-white/30 text-xs mt-3">
-                    No guesses. Based on real on-chain transactions.
-                  </p>
-                </div>
+              {/* Bottom CTA */}
+              <div>
+                <a
+                  href="https://app.audiencescan.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
+                >
+                  <span>✓</span>
+                  {selectedOption.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <p className="text-white/30 text-xs mt-3">
+                  No guesses. Based on real on-chain transactions.
+                </p>
               </div>
             </div>
 
