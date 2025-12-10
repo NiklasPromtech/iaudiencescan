@@ -348,16 +348,16 @@ const Wizard = () => {
                     <p className="text-purple-400 text-sm tracking-widest uppercase font-medium">
                       On-chain audience intelligence
                     </p>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      Make{" "}
-                      <span className="inline-block align-middle overflow-hidden relative" style={{ height: WORD_HEIGHT * 2.5 }}>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight flex flex-wrap items-baseline">
+                      <span>Make</span>{" "}
+                      <span className="inline-block overflow-hidden relative" style={{ height: WORD_HEIGHT * 1.5 }}>
                         {/* Gradient masks */}
-                        <span className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-                        <span className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+                        <span className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+                        <span className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
                         <span
                           className="flex flex-col transition-transform"
                           style={{
-                            transform: `translateY(-${scrollOffset - WORD_HEIGHT * 0.75}px)`,
+                            transform: `translateY(-${scrollOffset - WORD_HEIGHT * 0.25}px)`,
                             transitionDuration: isScrolling ? "0ms" : "300ms",
                           }}
                         >
@@ -372,8 +372,8 @@ const Wizard = () => {
                           ))}
                         </span>
                       </span>
-                      <br />
-                      growth decisions
+                      <br className="w-full" />
+                      <span>growth decisions</span>
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
                       Select your role to see how on-chain data reveals your next audience.
