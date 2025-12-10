@@ -527,6 +527,17 @@ const Wizard = () => {
   const [showInfoBox, setShowInfoBox] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
   const [fallingCards, setFallingCards] = useState<number | null>(null);
+  const [isLaunching, setIsLaunching] = useState(false);
+
+  const handleLaunchApp = () => {
+    setIsLaunching(true);
+    // Wait for animation to complete, then navigate
+    setTimeout(() => {
+      window.open("https://app.audiencescan.io", "_blank");
+      // Reset after a delay so it's ready if they come back
+      setTimeout(() => setIsLaunching(false), 500);
+    }, 600);
+  };
 
   // Continuous random word cycling every 3 seconds with bigger jumps
   useEffect(() => {
@@ -581,15 +592,29 @@ const Wizard = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
         <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
-        <a
-          href="https://app.audiencescan.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all"
-        >
-          Launch App
-        </a>
+        <div className="relative">
+          {/* Expanding white circle */}
+          <div 
+            className={`absolute inset-0 bg-white rounded-full transition-transform duration-500 ease-out ${
+              isLaunching ? 'scale-[100]' : 'scale-100'
+            }`}
+            style={{ transformOrigin: 'center' }}
+          />
+          <button
+            onClick={handleLaunchApp}
+            className="relative px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all"
+          >
+            Launch App
+          </button>
+        </div>
       </header>
+
+      {/* Full screen white overlay for launch transition */}
+      <div 
+        className={`fixed inset-0 bg-white z-[100] pointer-events-none transition-opacity duration-300 ${
+          isLaunching ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
 
       <div
         className={`min-h-screen transition-all duration-300 ${
