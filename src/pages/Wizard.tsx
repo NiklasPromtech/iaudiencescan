@@ -304,6 +304,9 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: Ne
     setShowChart(false);
     onLoadingChange?.(true);
     
+    const startTime = Date.now();
+    const minLoadTime = 750; // Minimum loading time in ms
+    
     const fetchData = async () => {
       try {
         const response = await fetch(
@@ -315,10 +318,16 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: Ne
       } catch {
         // Silently fail
       } finally {
-        setLoading(false);
-        onLoadingChange?.(false);
-        // Slight delay before showing chart for smooth animation
-        setTimeout(() => setShowChart(true), 100);
+        // Ensure minimum load time for better UX
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, minLoadTime - elapsed);
+        
+        setTimeout(() => {
+          setLoading(false);
+          onLoadingChange?.(false);
+          // Additional delay before showing chart for smooth animation
+          setTimeout(() => setShowChart(true), 100);
+        }, remainingDelay);
       }
     };
     fetchData();
