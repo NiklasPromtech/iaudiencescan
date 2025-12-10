@@ -1,6 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
-import { Building2, Rocket, Coins, Wallet, Building, ArrowRight } from "lucide-react";
+import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target } from "lucide-react";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
+
+interface ScanOption {
+  id: string;
+  title: string;
+  description: string;
+  cta: string;
+  icon: React.ReactNode;
+}
 
 interface WizardOption {
   id: string;
@@ -8,8 +16,12 @@ interface WizardOption {
   label: string;
   smallText: string;
   title: string;
+  subline: string;
   cta: string;
   gradient: string;
+  scanOptions: ScanOption[];
+  explanationA: string;
+  explanationB: string;
 }
 
 const wizardOptions: WizardOption[] = [
@@ -19,8 +31,27 @@ const wizardOptions: WizardOption[] = [
     label: "Agency",
     smallText: "Win more Web3 pitches",
     title: "Build Web3 pitches and GTMs backed by real on-chain behavior",
+    subline: "Use on-chain behavior to remove guesswork.",
     cta: "Validate your next Web3 pitch",
     gradient: "from-violet-600 to-purple-600",
+    scanOptions: [
+      {
+        id: "pitch-token",
+        title: "Scan a token you're pitching",
+        description: "Validate where this project's users already overlap on-chain.",
+        cta: "Scan a pitching token",
+        icon: <Search className="w-6 h-6" />,
+      },
+      {
+        id: "competitor",
+        title: "Scan a competitor in the same category",
+        description: "Reveal communities actively transacting with competing projects.",
+        cta: "Scan a competitor",
+        icon: <Target className="w-6 h-6" />,
+      },
+    ],
+    explanationA: "On-chain audience overlap for [Token Name]",
+    explanationB: "On-chain audience overlap for competing tokens in [Category]",
   },
   {
     id: "launchpad",
@@ -28,8 +59,27 @@ const wizardOptions: WizardOption[] = [
     label: "Launchpads",
     smallText: "Attract the right token teams",
     title: "Show token teams you already understand their audience",
+    subline: "Prove demand with real on-chain data.",
     cta: "Show audience demand to token teams",
     gradient: "from-purple-600 to-fuchsia-600",
+    scanOptions: [
+      {
+        id: "category-scan",
+        title: "Scan tokens in your target category",
+        description: "See which communities align with your launchpad's focus.",
+        cta: "Scan by category",
+        icon: <Search className="w-6 h-6" />,
+      },
+      {
+        id: "competitor-launchpad",
+        title: "Analyze a competing launchpad's tokens",
+        description: "Understand the audience your competitors are attracting.",
+        cta: "Scan competitor tokens",
+        icon: <Target className="w-6 h-6" />,
+      },
+    ],
+    explanationA: "On-chain audience overlap for [Category] tokens",
+    explanationB: "On-chain audience overlap for competing launchpad tokens",
   },
   {
     id: "token",
@@ -37,8 +87,27 @@ const wizardOptions: WizardOption[] = [
     label: "Token owners",
     smallText: "Grow token adoption",
     title: "Find the communities your users are already part of — and reach more like them",
+    subline: "Your holders' wallets reveal your next audience.",
     cta: "Find where your next users are",
     gradient: "from-fuchsia-600 to-pink-600",
+    scanOptions: [
+      {
+        id: "own-token",
+        title: "Scan your own token holders",
+        description: "Discover which communities your existing users belong to.",
+        cta: "Scan my token",
+        icon: <Search className="w-6 h-6" />,
+      },
+      {
+        id: "similar-token",
+        title: "Scan a similar token's audience",
+        description: "Find overlapping communities you haven't targeted yet.",
+        cta: "Scan similar token",
+        icon: <Target className="w-6 h-6" />,
+      },
+    ],
+    explanationA: "On-chain audience overlap for your token holders",
+    explanationB: "On-chain audience overlap for similar token holders",
   },
   {
     id: "wallet",
@@ -46,8 +115,27 @@ const wizardOptions: WizardOption[] = [
     label: "Web3 wallets",
     smallText: "Acquire more wallet users",
     title: "Use your existing users' wallets to find where similar users already are",
+    subline: "Your user base is your targeting blueprint.",
     cta: "Upload wallets to find more users",
     gradient: "from-pink-600 to-rose-600",
+    scanOptions: [
+      {
+        id: "upload-wallets",
+        title: "Upload your user wallet list",
+        description: "Analyze your existing users to find lookalike communities.",
+        cta: "Upload wallet list",
+        icon: <Search className="w-6 h-6" />,
+      },
+      {
+        id: "competitor-wallet",
+        title: "Scan a competing wallet's users",
+        description: "See which communities your competitors' users belong to.",
+        cta: "Scan competitor wallets",
+        icon: <Target className="w-6 h-6" />,
+      },
+    ],
+    explanationA: "On-chain audience overlap for your wallet users",
+    explanationB: "On-chain audience overlap for competing wallet users",
   },
   {
     id: "cex",
@@ -55,8 +143,27 @@ const wizardOptions: WizardOption[] = [
     label: "CEX",
     smallText: "Identify your next token listing",
     title: "Identify high-signal tokens by analyzing where users of other CEXs transact",
+    subline: "On-chain behavior reveals listing opportunities.",
     cta: "Discover listing opportunities",
     gradient: "from-rose-600 to-orange-600",
+    scanOptions: [
+      {
+        id: "deposit-analysis",
+        title: "Analyze deposit patterns to your exchange",
+        description: "See which tokens your users are most actively transacting.",
+        cta: "Analyze deposits",
+        icon: <Search className="w-6 h-6" />,
+      },
+      {
+        id: "competitor-cex",
+        title: "Scan deposits to a competing exchange",
+        description: "Discover tokens gaining traction on other platforms.",
+        cta: "Scan competitor exchange",
+        icon: <Target className="w-6 h-6" />,
+      },
+    ],
+    explanationA: "On-chain audience overlap for your exchange deposits",
+    explanationB: "On-chain audience overlap for competing exchange deposits",
   },
 ];
 
@@ -201,7 +308,7 @@ const NetworkGraph = ({ studyId }: { studyId: string }) => {
   }
 
   return (
-    <svg width="100%" height="100%" viewBox="0 0 600 600" className="opacity-80">
+    <svg width="100%" height="100%" viewBox="0 0 600 600" className="opacity-90">
       <defs>
         {nodes.map((node) => (
           <clipPath key={`clip-${node.id}`} id={`wizard-clip-${node.id}`}>
@@ -254,11 +361,13 @@ const NetworkGraph = ({ studyId }: { studyId: string }) => {
     </svg>
   );
 };
+
 const baseWords = ["confident", "smarter", "defensible", "data-backed", "signal-driven"];
 const WORD_HEIGHT = 56;
 
 const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
+  const [selectedScan, setSelectedScan] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
@@ -281,6 +390,7 @@ const Wizard = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setSelectedOption(option);
+      setSelectedScan(null);
       setIsTransitioning(false);
     }, 300);
   };
@@ -288,7 +398,19 @@ const Wizard = () => {
   const handleBack = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setSelectedOption(null);
+      if (selectedScan) {
+        setSelectedScan(null);
+      } else {
+        setSelectedOption(null);
+      }
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const handleScanSelect = (scanId: string) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setSelectedScan(scanId);
       setIsTransitioning(false);
     }, 300);
   };
@@ -395,48 +517,117 @@ const Wizard = () => {
               </div>
             </div>
           </div>
-        ) : (
-          // Result Screen
-          <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+        ) : !selectedScan ? (
+          // Scan Selection Screen
+          <div className="min-h-screen flex flex-col pt-24 px-6">
             <button
               onClick={handleBack}
-              className="absolute top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors"
+              className="fixed top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors z-40"
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
               Back
             </button>
 
-            <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left: Network */}
-              <div className="relative aspect-square max-w-[500px] mx-auto w-full order-2 lg:order-1">
-                <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20 rounded-full blur-3xl`} />
-                <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+            <div className="max-w-4xl mx-auto w-full space-y-12">
+              {/* Header */}
+              <div className="space-y-4 text-center">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                  {selectedOption.title}
+                </h1>
+                <p className="text-white/50 text-lg">
+                  {selectedOption.subline}
+                </p>
               </div>
 
-              {/* Right: Content */}
-              <div className="space-y-8 order-1 lg:order-2">
-                <div className="space-y-6">
-                  <div className={`inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r ${selectedOption.gradient} rounded-full`}>
-                    <span className="text-white/90">{selectedOption.icon}</span>
-                    <span className="text-white text-sm font-medium">
-                      {selectedOption.smallText}
-                    </span>
-                  </div>
-                  
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                    {selectedOption.title}
-                  </h1>
+              {/* Scan Selection */}
+              <div className="space-y-6">
+                <p className="text-white/60 text-sm uppercase tracking-wider text-center">
+                  Choose what you want to validate
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  {selectedOption.scanOptions.map((scan, index) => (
+                    <button
+                      key={scan.id}
+                      onClick={() => handleScanSelect(scan.id)}
+                      className="group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-8 text-left transition-all duration-300"
+                      style={{
+                        animation: `fadeInUp 0.5s ${index * 0.1}s ease-out backwards`,
+                      }}
+                    >
+                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${selectedOption.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                      
+                      <div className="relative space-y-4">
+                        <div className="text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                          {scan.icon}
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="text-white font-semibold text-xl">
+                            {scan.title}
+                          </h3>
+                          <p className="text-white/40 text-sm">
+                            {scan.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-purple-400 text-sm font-medium pt-2">
+                          <span>{scan.cta}</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Artifact Display Screen
+          <div className="min-h-screen flex flex-col pt-24 px-6 pb-12">
+            <button
+              onClick={handleBack}
+              className="fixed top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors z-40"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180" />
+              Back
+            </button>
 
+            <div className="max-w-5xl mx-auto w-full flex flex-col items-center space-y-8">
+              {/* Explanation Block */}
+              <div className="text-center space-y-2 max-w-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold">
+                  {selectedScan === selectedOption.scanOptions[0].id 
+                    ? selectedOption.explanationA 
+                    : selectedOption.explanationB}
+                </h2>
+                <p className="text-white/40 text-sm">
+                  This scan is built from wallets that have financially interacted with these tokens.
+                </p>
+              </div>
+
+              {/* Artifact - Centerpiece */}
+              <div className="relative w-full max-w-[700px] aspect-square">
+                <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20 rounded-full blur-3xl scale-110`} />
+                <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+                <p className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-white/30 text-xs">
+                  Derived from real on-chain wallet activity
+                </p>
+              </div>
+
+              {/* Primary CTA */}
+              <div className="text-center space-y-3 pt-4">
                 <a
                   href="https://app.audiencescan.xyz"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
                 >
+                  <span>✓</span>
                   {selectedOption.cta}
                   <ArrowRight className="w-5 h-5" />
                 </a>
+                <p className="text-white/30 text-sm">
+                  No guesses. Based on real on-chain transactions.
+                </p>
               </div>
             </div>
           </div>
