@@ -323,8 +323,8 @@ const WizardMobile = () => {
           <div className="min-h-screen flex flex-col px-4 pb-6">
             {/* Mini Network Visualization */}
             <div className="pt-6 pb-4">
-              <div className="relative w-full h-40 flex items-center justify-center overflow-hidden">
-                <svg className="w-full h-full" viewBox="0 0 280 140">
+              <div className="relative w-full h-44 flex items-center justify-center overflow-hidden">
+                <svg className="w-full h-full" viewBox="0 0 280 160">
                   {/* Gradient definitions */}
                   <defs>
                     <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -335,93 +335,102 @@ const WizardMobile = () => {
                       <stop offset="0%" stopColor="#a855f7" stopOpacity="0.4" />
                       <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
                     </radialGradient>
-                    {/* Clip paths for outer tokens */}
-                    {[
-                      { x: 50, y: 25, size: 9 },
-                      { x: 100, y: 20, size: 10 },
-                      { x: 180, y: 20, size: 10 },
-                      { x: 230, y: 25, size: 9 },
-                      { x: 35, y: 60, size: 8 },
-                      { x: 245, y: 60, size: 8 },
-                      { x: 35, y: 100, size: 9 },
-                      { x: 245, y: 100, size: 9 },
-                      { x: 55, y: 125, size: 8 },
-                      { x: 105, y: 130, size: 10 },
-                      { x: 175, y: 130, size: 10 },
-                      { x: 225, y: 125, size: 8 },
-                    ].map((node, i) => (
-                      <clipPath key={`clip-${i}`} id={`heroClip${i}`}>
-                        <circle cx={node.x} cy={node.y} r={node.size - 1} />
-                      </clipPath>
-                    ))}
                     <clipPath id="heroCenterClip">
-                      <circle cx="140" cy="70" r="16" />
+                      <circle cx="140" cy="80" r="16" />
                     </clipPath>
+                    {/* Generate clip paths for 12 outer tokens using golden angle distribution */}
+                    {defaultTokens.slice(1, 13).map((token, i) => {
+                      const golden = 0.618033988749895;
+                      const angle = i * golden * Math.PI * 2;
+                      const radius = 35 + Math.sqrt((i + 1) / 12) * 55;
+                      const x = 140 + Math.cos(angle) * radius;
+                      const y = 80 + Math.sin(angle) * radius;
+                      const size = 7 + (token?.score || 0.5) * 5;
+                      return (
+                        <clipPath key={i} id={`heroClip${i}`}>
+                          <circle cx={x} cy={y} r={size - 1} />
+                        </clipPath>
+                      );
+                    })}
                   </defs>
 
-                  {/* Connection lines */}
+                  {/* Edge connections - golden angle distribution */}
                   <g className="opacity-30">
+                    {defaultTokens.slice(1, 13).map((token, i) => {
+                      const golden = 0.618033988749895;
+                      const angle = i * golden * Math.PI * 2;
+                      const radius = 35 + Math.sqrt((i + 1) / 12) * 55;
+                      const x = 140 + Math.cos(angle) * radius;
+                      const y = 80 + Math.sin(angle) * radius;
+                      return (
+                        <line 
+                          key={`center-${i}`} 
+                          x1="140" 
+                          y1="80" 
+                          x2={x} 
+                          y2={y} 
+                          stroke="#a855f7" 
+                          strokeWidth={0.6 + (token?.score || 0.5) * 0.6}
+                          strokeOpacity={0.3 + (token?.score || 0.5) * 0.3}
+                        />
+                      );
+                    })}
+                    {/* Random cross-connections between outer nodes */}
                     {[
-                      { x: 50, y: 25 },
-                      { x: 100, y: 20 },
-                      { x: 180, y: 20 },
-                      { x: 230, y: 25 },
-                      { x: 35, y: 60 },
-                      { x: 245, y: 60 },
-                      { x: 35, y: 100 },
-                      { x: 245, y: 100 },
-                      { x: 55, y: 125 },
-                      { x: 105, y: 130 },
-                      { x: 175, y: 130 },
-                      { x: 225, y: 125 },
-                    ].map((node, i) => (
-                      <line key={i} x1="140" y1="70" x2={node.x} y2={node.y} stroke="url(#lineGrad)" strokeWidth="1" />
-                    ))}
-                    {/* Cross connections */}
-                    <line x1="50" y1="25" x2="100" y2="20" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="180" y1="20" x2="230" y2="25" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="35" y1="60" x2="35" y2="100" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="245" y1="60" x2="245" y2="100" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="55" y1="125" x2="105" y2="130" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="175" y1="130" x2="225" y2="125" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                      [0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7],
+                      [6, 8], [7, 9], [8, 10], [9, 11], [0, 4], [2, 6]
+                    ].map(([from, to], idx) => {
+                      if (from >= 12 || to >= 12) return null;
+                      const golden = 0.618033988749895;
+                      const angle1 = from * golden * Math.PI * 2;
+                      const radius1 = 35 + Math.sqrt((from + 1) / 12) * 55;
+                      const x1 = 140 + Math.cos(angle1) * radius1;
+                      const y1 = 80 + Math.sin(angle1) * radius1;
+                      const angle2 = to * golden * Math.PI * 2;
+                      const radius2 = 35 + Math.sqrt((to + 1) / 12) * 55;
+                      const x2 = 140 + Math.cos(angle2) * radius2;
+                      const y2 = 80 + Math.sin(angle2) * radius2;
+                      return (
+                        <line 
+                          key={`edge-${idx}`} 
+                          x1={x1} y1={y1} x2={x2} y2={y2} 
+                          stroke="#a855f7" 
+                          strokeWidth="0.5"
+                          strokeOpacity="0.2"
+                        />
+                      );
+                    })}
                   </g>
                   
-                  {/* Outer nodes with real token logos */}
-                  {[
-                    { x: 50, y: 25, size: 9 },
-                    { x: 100, y: 20, size: 10 },
-                    { x: 180, y: 20, size: 10 },
-                    { x: 230, y: 25, size: 9 },
-                    { x: 35, y: 60, size: 8 },
-                    { x: 245, y: 60, size: 8 },
-                    { x: 35, y: 100, size: 9 },
-                    { x: 245, y: 100, size: 9 },
-                    { x: 55, y: 125, size: 8 },
-                    { x: 105, y: 130, size: 10 },
-                    { x: 175, y: 130, size: 10 },
-                    { x: 225, y: 125, size: 8 },
-                  ].map((node, i) => {
-                    const token = defaultTokens[i + 1];
+                  {/* Outer nodes with real token logos - golden angle distribution */}
+                  {defaultTokens.slice(1, 13).map((token, i) => {
+                    const golden = 0.618033988749895;
+                    const angle = i * golden * Math.PI * 2;
+                    const radius = 35 + Math.sqrt((i + 1) / 12) * 55;
+                    const x = 140 + Math.cos(angle) * radius;
+                    const y = 80 + Math.sin(angle) * radius;
+                    const size = 7 + (token?.score || 0.5) * 5;
                     return (
                       <g key={i}>
-                        <circle cx={node.x} cy={node.y} r={node.size + 4} fill="url(#nodeGlow)" />
+                        <circle cx={x} cy={y} r={size + 3} fill="url(#nodeGlow)" />
                         <circle 
-                          cx={node.x} 
-                          cy={node.y} 
-                          r={node.size} 
+                          cx={x} 
+                          cy={y} 
+                          r={size} 
                           fill="#1a1a1a" 
                           stroke="#a855f7" 
-                          strokeWidth="1.5"
-                          className="opacity-60"
+                          strokeWidth={i < 3 ? 1.5 : 1}
+                          strokeOpacity={0.5 + (token?.score || 0.5) * 0.5}
                         />
                         {token?.logo && (
                           <image
                             href={token.logo}
-                            x={node.x - node.size + 1}
-                            y={node.y - node.size + 1}
-                            width={(node.size - 1) * 2}
-                            height={(node.size - 1) * 2}
+                            x={x - size + 1}
+                            y={y - size + 1}
+                            width={(size - 1) * 2}
+                            height={(size - 1) * 2}
                             clipPath={`url(#heroClip${i})`}
+                            preserveAspectRatio="xMidYMid slice"
                           />
                         )}
                       </g>
@@ -429,10 +438,10 @@ const WizardMobile = () => {
                   })}
                   
                   {/* Center node with real token logo */}
-                  <circle cx="140" cy="70" r="24" fill="url(#nodeGlow)" />
+                  <circle cx="140" cy="80" r="24" fill="url(#nodeGlow)" />
                   <circle 
                     cx="140" 
-                    cy="70" 
+                    cy="80" 
                     r="18" 
                     fill="#1a1a1a" 
                     stroke="url(#lineGrad)" 
@@ -442,15 +451,16 @@ const WizardMobile = () => {
                     <image
                       href={defaultTokens[0].logo}
                       x={140 - 16}
-                      y={70 - 16}
+                      y={80 - 16}
                       width={32}
                       height={32}
                       clipPath="url(#heroCenterClip)"
+                      preserveAspectRatio="xMidYMid slice"
                     />
                   ) : (
                     <text 
                       x="140" 
-                      y="74" 
+                      y="84" 
                       textAnchor="middle" 
                       fill="white" 
                       fontSize="10" 
