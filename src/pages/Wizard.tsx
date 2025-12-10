@@ -292,9 +292,10 @@ interface NetworkGraphProps {
   onNodeHover?: (node: Node, position: { x: number; y: number }) => void;
   onNodeLeave?: () => void;
   onLoadingChange?: (loading: boolean) => void;
+  skipMinLoadTime?: boolean;
 }
 
-const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: NetworkGraphProps) => {
+const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skipMinLoadTime = false }: NetworkGraphProps) => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showChart, setShowChart] = useState(false);
@@ -305,7 +306,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: Ne
     onLoadingChange?.(true);
     
     const startTime = Date.now();
-    const minLoadTime = 750; // Minimum loading time in ms
+    const minLoadTime = skipMinLoadTime ? 0 : 750; // Skip minimum loading time if specified
     
     const fetchData = async () => {
       try {
@@ -318,7 +319,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: Ne
       } catch {
         // Silently fail
       } finally {
-        // Ensure minimum load time for better UX
+        // Ensure minimum load time for better UX (unless skipped)
         const elapsed = Date.now() - startTime;
         const remainingDelay = Math.max(0, minLoadTime - elapsed);
         
@@ -326,12 +327,12 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange }: Ne
           setLoading(false);
           onLoadingChange?.(false);
           // Additional delay before showing chart for smooth animation
-          setTimeout(() => setShowChart(true), 100);
+          setTimeout(() => setShowChart(true), skipMinLoadTime ? 0 : 100);
         }, remainingDelay);
       }
     };
     fetchData();
-  }, [studyId, onLoadingChange]);
+  }, [studyId, onLoadingChange, skipMinLoadTime]);
 
   const { nodes, edges } = useMemo(() => {
     if (tokens.length === 0) return { nodes: [], edges: [] };
@@ -522,6 +523,7 @@ const Wizard = () => {
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [showInfoBox, setShowInfoBox] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
+  const [fallingCards, setFallingCards] = useState<number | null>(null);
 
   // Continuous random word cycling every 3 seconds with bigger jumps
   useEffect(() => {
@@ -538,13 +540,18 @@ const Wizard = () => {
     return () => clearInterval(interval);
   }, [selectedOption]);
 
-  const handleSelect = (option: WizardOption) => {
-    setIsTransitioning(true);
+  const handleSelect = (option: WizardOption, clickedIndex: number) => {
+    setFallingCards(clickedIndex);
+    // Wait for fall animation to complete before transitioning
     setTimeout(() => {
-      setSelectedOption(option);
-      setSelectedScan(null);
-      setIsTransitioning(false);
-    }, 300);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setSelectedOption(option);
+        setSelectedScan(null);
+        setIsTransitioning(false);
+        setFallingCards(null);
+      }, 300);
+    }, 400);
   };
 
   const handleBack = () => {
@@ -630,7 +637,7 @@ const Wizard = () => {
                 {/* Right: Network preview */}
                 <div className="relative aspect-square max-w-[500px] mx-auto w-full">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
-                  <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+                  <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime />
                 </div>
               </div>
             </div>
@@ -639,31 +646,47 @@ const Wizard = () => {
             <div className="px-6 pb-12">
               <div className="max-w-6xl mx-auto">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {wizardOptions.map((option, index) => (
-                    <button
-                      key={option.id}
-                      onClick={() => handleSelect(option)}
-                      className="group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300"
-                      style={{
-                        animation: `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
-                      }}
-                    >
-                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                      
-                      <div className="relative">
-                        <div className="text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300">
-                          {option.icon}
+                  {wizardOptions.map((option, index) => {
+                    // Calculate delay based on distance from clicked card
+                    const getFallDelay = () => {
+                      if (fallingCards === null) return 0;
+                      const distance = Math.abs(index - fallingCards);
+                      return distance * 60; // 60ms delay per step away
+                    };
+                    
+                    const isFalling = fallingCards !== null;
+                    
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => handleSelect(option, index)}
+                        disabled={isFalling}
+                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 ${
+                          isFalling ? 'pointer-events-none' : ''
+                        }`}
+                        style={{
+                          animation: isFalling 
+                            ? `cardFallDown 0.5s ${getFallDelay()}ms ease-in forwards`
+                            : `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
+                        }}
+                      >
+                        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                        
+                        <div className="relative">
+                          <div className="text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+                            {option.icon}
+                          </div>
+                          <h3 className="text-white font-semibold text-base mb-1">
+                            {option.label}
+                          </h3>
+                          <p className="text-white/40 text-xs">
+                            {option.smallText}
+                          </p>
+                          <ArrowRight className="absolute top-0 right-0 w-4 h-4 text-white/0 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-0.5" />
                         </div>
-                        <h3 className="text-white font-semibold text-base mb-1">
-                          {option.label}
-                        </h3>
-                        <p className="text-white/40 text-xs">
-                          {option.smallText}
-                        </p>
-                        <ArrowRight className="absolute top-0 right-0 w-4 h-4 text-white/0 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-0.5" />
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
