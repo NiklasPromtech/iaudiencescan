@@ -34,6 +34,7 @@ import Creation from "./pages/Creation";
 import Artifact from "./pages/Artifact";
 import Network from "./pages/Network";
 import Wizard from "./pages/Wizard";
+import WizardMobile from "./pages/WizardMobile";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/artifact/:studyId" element={<Artifact />} />
           <Route path="/network/:studyId" element={<Network />} />
           <Route path="/wizard" element={<Wizard />} />
+          <Route path="/wizard/mobile" element={<WizardMobile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
