@@ -173,7 +173,7 @@ const WizardMobile = () => {
     if (isMobile === false) {
       navigate("/wizard", { replace: true });
     }
-  }, [isMobile, navigate]);
+  }, [isMobile]);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
