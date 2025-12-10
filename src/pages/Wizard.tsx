@@ -254,9 +254,14 @@ const NetworkGraph = ({ studyId }: { studyId: string }) => {
     </svg>
   );
 };
-const scrollingWords = ["confident", "smarter", "defensible", "data-backed", "signal-driven"];
-const WORD_HEIGHT = 56; // Height of each word in pixels
-const FINAL_WORD_INDEX = 0; // "confident" is at index 0
+const scrollingWords = [
+  "confident", "smarter", "defensible", "data-backed", "signal-driven",
+  "confident", "smarter", "defensible", "data-backed", "signal-driven",
+  "confident", "smarter", "defensible", "data-backed", "signal-driven",
+  "confident", "smarter"
+];
+const WORD_HEIGHT = 56;
+const FINAL_WORD_INDEX = scrollingWords.length - 2; // Second to last (confident)
 
 const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
@@ -271,9 +276,7 @@ const Wizard = () => {
     if (scrollStarted.current || selectedOption) return;
     scrollStarted.current = true;
 
-    const totalWords = scrollingWords.length;
-    const totalCycles = 2; // Go through all words twice
-    const targetOffset = (totalCycles * totalWords + FINAL_WORD_INDEX) * WORD_HEIGHT;
+    const targetOffset = FINAL_WORD_INDEX * WORD_HEIGHT;
     const totalDuration = 3500;
     const startTime = Date.now();
 
@@ -284,15 +287,13 @@ const Wizard = () => {
       // Easing: starts fast, slows down at end (easeOutCubic)
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
       
-      const currentOffset = easeOutCubic * targetOffset;
-      setScrollOffset(currentOffset % (totalWords * WORD_HEIGHT));
+      setScrollOffset(easeOutCubic * targetOffset);
       
       if (progress < 1) {
         requestAnimationFrame(animateScroll);
       } else {
         setIsScrolling(false);
         setHasSettled(true);
-        setScrollOffset(FINAL_WORD_INDEX * WORD_HEIGHT);
       }
     };
     
