@@ -528,7 +528,7 @@ const Wizard = () => {
     if (isMobile === true) {
       navigate("/wizard/mobile", { replace: true });
     }
-  }, [isMobile, navigate]);
+  }, [isMobile]);
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [selectedScan, setSelectedScan] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
