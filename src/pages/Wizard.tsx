@@ -698,7 +698,7 @@ const Wizard = () => {
                           <h3 className="text-white font-semibold text-base mb-1">
                             {option.label}
                           </h3>
-                          <p className="text-white/40 text-xs">
+                          <p className="text-white/70 text-xs">
                             {option.smallText}
                           </p>
                           <ArrowRight className="absolute top-0 right-0 w-4 h-4 text-white/0 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-0.5" />
