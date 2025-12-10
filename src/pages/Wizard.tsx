@@ -846,16 +846,14 @@ const Wizard = () => {
 
               {/* Bottom CTA */}
               <div>
-                <a
-                  href="https://app.audiencescan.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handleLaunchApp}
                   className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
                 >
                   <span>✓</span>
                   {selectedOption.cta}
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
                 <p className="text-white/30 text-xs mt-3">
                   No guesses. Based on real on-chain transactions.
                 </p>
