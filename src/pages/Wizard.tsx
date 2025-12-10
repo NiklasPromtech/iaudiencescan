@@ -617,8 +617,8 @@ const Wizard = () => {
       />
 
       <div
-        className={`min-h-screen transition-all duration-300 ${
-          isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"
+        className={`min-h-screen transition-all duration-500 ${
+          isLaunching ? "opacity-0 scale-98" : isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"
         }`}
       >
         {!selectedOption ? (
