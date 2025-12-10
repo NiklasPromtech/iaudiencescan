@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 import logoSquareWhite from "@/assets/logo-square-white.png";
 import iconX from "@/assets/icon-x.jpg";
@@ -518,6 +520,15 @@ const baseWords = ["confident", "smarter", "defensible", "data-backed"];
 const WORD_HEIGHT = 56;
 
 const Wizard = () => {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
+  // Redirect mobile users to mobile version
+  useEffect(() => {
+    if (isMobile === true) {
+      navigate("/wizard/mobile", { replace: true });
+    }
+  }, [isMobile, navigate]);
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [selectedScan, setSelectedScan] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
