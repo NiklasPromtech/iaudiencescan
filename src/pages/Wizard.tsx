@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight } from "lucide-react";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 
@@ -254,10 +254,50 @@ const NetworkGraph = ({ studyId }: { studyId: string }) => {
     </svg>
   );
 };
+const scrollingWords = ["confident", "smarter", "defensible", "data-backed", "signal-driven"];
+const WORD_HEIGHT = 56; // Height of each word in pixels
+const FINAL_WORD_INDEX = 0; // "confident" is at index 0
 
 const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(true);
+  const [hasSettled, setHasSettled] = useState(false);
+  const scrollStarted = useRef(false);
+
+  // Scroll animation for the headline
+  useEffect(() => {
+    if (scrollStarted.current || selectedOption) return;
+    scrollStarted.current = true;
+
+    const totalWords = scrollingWords.length;
+    const totalCycles = 2; // Go through all words twice
+    const targetOffset = (totalCycles * totalWords + FINAL_WORD_INDEX) * WORD_HEIGHT;
+    const totalDuration = 3500;
+    const startTime = Date.now();
+
+    const animateScroll = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / totalDuration, 1);
+      
+      // Easing: starts fast, slows down at end (easeOutCubic)
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      
+      const currentOffset = easeOutCubic * targetOffset;
+      setScrollOffset(currentOffset % (totalWords * WORD_HEIGHT));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      } else {
+        setIsScrolling(false);
+        setHasSettled(true);
+        setScrollOffset(FINAL_WORD_INDEX * WORD_HEIGHT);
+      }
+    };
+    
+    requestAnimationFrame(animateScroll);
+  }, [selectedOption]);
 
   const handleSelect = (option: WizardOption) => {
     setIsTransitioning(true);
@@ -308,10 +348,28 @@ const Wizard = () => {
                       On-chain audience intelligence
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      Who are you<br />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                        building for?
+                      Make{" "}
+                      <span className="inline-block align-bottom overflow-hidden" style={{ height: WORD_HEIGHT }}>
+                        <span
+                          className="flex flex-col transition-transform"
+                          style={{
+                            transform: `translateY(-${scrollOffset}px)`,
+                            transitionDuration: isScrolling ? "0ms" : "300ms",
+                          }}
+                        >
+                          {scrollingWords.map((word, i) => (
+                            <span
+                              key={i}
+                              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                              style={{ height: WORD_HEIGHT, lineHeight: `${WORD_HEIGHT}px` }}
+                            >
+                              {word}
+                            </span>
+                          ))}
+                        </span>
                       </span>
+                      <br />
+                      growth decisions
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
                       Select your role to see how on-chain data reveals your next audience.
