@@ -517,118 +517,127 @@ const Wizard = () => {
               </div>
             </div>
           </div>
-        ) : !selectedScan ? (
-          // Scan Selection Screen
-          <div className="min-h-screen flex flex-col pt-24 px-6">
-            <button
-              onClick={handleBack}
-              className="fixed top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors z-40"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              Back
-            </button>
+        ) : (
+          // Role Detail Screen - Chart dominant with options on left
+          <div className="min-h-screen flex">
+            {/* Left side - Content */}
+            <div className="w-full lg:w-[400px] xl:w-[480px] flex-shrink-0 flex flex-col justify-center px-6 lg:px-10 py-24 relative z-10">
+              <button
+                onClick={handleBack}
+                className="absolute top-24 left-6 lg:left-10 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors"
+              >
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                Back
+              </button>
 
-            <div className="max-w-4xl mx-auto w-full space-y-12">
-              {/* Header */}
-              <div className="space-y-4 text-center">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                  {selectedOption.title}
-                </h1>
-                <p className="text-white/50 text-lg">
-                  {selectedOption.subline}
-                </p>
-              </div>
+              <div className="space-y-8">
+                {/* Header */}
+                <div className="space-y-3">
+                  <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold leading-tight">
+                    {selectedOption.title}
+                  </h1>
+                  <p className="text-white/50 text-base">
+                    {selectedOption.subline}
+                  </p>
+                </div>
 
-              {/* Scan Selection */}
-              <div className="space-y-6">
-                <p className="text-white/60 text-sm uppercase tracking-wider text-center">
-                  Choose what you want to validate
-                </p>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  {selectedOption.scanOptions.map((scan, index) => (
-                    <button
-                      key={scan.id}
-                      onClick={() => handleScanSelect(scan.id)}
-                      className="group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-8 text-left transition-all duration-300"
-                      style={{
-                        animation: `fadeInUp 0.5s ${index * 0.1}s ease-out backwards`,
-                      }}
-                    >
-                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${selectedOption.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                      
-                      <div className="relative space-y-4">
-                        <div className="text-purple-400 group-hover:scale-110 transition-transform duration-300">
-                          {scan.icon}
+                {/* Scan Selection */}
+                <div className="space-y-3">
+                  <p className="text-white/40 text-xs uppercase tracking-wider">
+                    Choose what you want to validate
+                  </p>
+                  
+                  <div className="space-y-3">
+                    {selectedOption.scanOptions.map((scan, index) => (
+                      <button
+                        key={scan.id}
+                        onClick={() => setSelectedScan(scan.id)}
+                        className={`group relative w-full bg-white/[0.02] hover:bg-white/[0.06] border rounded-xl p-5 text-left transition-all duration-300 ${
+                          selectedScan === scan.id 
+                            ? 'border-purple-500/60 bg-purple-500/10' 
+                            : 'border-white/[0.06] hover:border-purple-500/40'
+                        }`}
+                        style={{
+                          animation: `fadeInUp 0.4s ${index * 0.1}s ease-out backwards`,
+                        }}
+                      >
+                        <div className="relative flex items-start gap-4">
+                          <div className={`text-purple-400 mt-0.5 transition-transform duration-300 ${selectedScan === scan.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                            {scan.icon}
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <h3 className="text-white font-semibold text-sm">
+                              {scan.title}
+                            </h3>
+                            <p className="text-white/40 text-xs leading-relaxed">
+                              {scan.description}
+                            </p>
+                          </div>
+                          <ArrowRight className={`w-4 h-4 mt-1 transition-all duration-300 ${
+                            selectedScan === scan.id 
+                              ? 'text-purple-400 translate-x-0.5' 
+                              : 'text-white/0 group-hover:text-purple-400 group-hover:translate-x-0.5'
+                          }`} />
                         </div>
-                        <div className="space-y-2">
-                          <h3 className="text-white font-semibold text-xl">
-                            {scan.title}
-                          </h3>
-                          <p className="text-white/40 text-sm">
-                            {scan.description}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 text-purple-400 text-sm font-medium pt-2">
-                          <span>{scan.cta}</span>
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Explanation when scan selected */}
+                {selectedScan && (
+                  <div className="space-y-2 animate-fade-in">
+                    <p className="text-white/60 text-sm font-medium">
+                      {selectedScan === selectedOption.scanOptions[0].id 
+                        ? selectedOption.explanationA 
+                        : selectedOption.explanationB}
+                    </p>
+                    <p className="text-white/30 text-xs">
+                      Built from wallets that have financially interacted with these tokens.
+                    </p>
+                  </div>
+                )}
+
+                {/* CTA */}
+                <div className="pt-4">
+                  <a
+                    href="https://app.audiencescan.xyz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
+                  >
+                    <span>✓</span>
+                    {selectedOption.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                  <p className="text-white/30 text-xs mt-3">
+                    No guesses. Based on real on-chain transactions.
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          // Artifact Display Screen
-          <div className="min-h-screen flex flex-col pt-24 px-6 pb-12">
-            <button
-              onClick={handleBack}
-              className="fixed top-24 left-6 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors z-40"
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-              Back
-            </button>
 
-            <div className="max-w-5xl mx-auto w-full flex flex-col items-center space-y-8">
-              {/* Explanation Block */}
-              <div className="text-center space-y-2 max-w-2xl">
-                <h2 className="text-2xl md:text-3xl font-bold">
-                  {selectedScan === selectedOption.scanOptions[0].id 
-                    ? selectedOption.explanationA 
-                    : selectedOption.explanationB}
-                </h2>
-                <p className="text-white/40 text-sm">
-                  This scan is built from wallets that have financially interacted with these tokens.
-                </p>
-              </div>
-
-              {/* Artifact - Centerpiece */}
-              <div className="relative w-full max-w-[700px] aspect-square">
-                <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20 rounded-full blur-3xl scale-110`} />
+            {/* Right side - Chart (dominant) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center relative min-h-screen">
+              {/* Background glow */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-10`} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-600/20 via-transparent to-transparent rounded-full blur-3xl" />
+              
+              {/* Chart - oversized */}
+              <div className="relative w-[110%] h-[110%] max-w-[900px] max-h-[900px]">
                 <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
-                <p className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-white/30 text-xs">
-                  Derived from real on-chain wallet activity
-                </p>
               </div>
+              
+              {/* Label */}
+              <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/20 text-xs">
+                Derived from real on-chain wallet activity
+              </p>
+            </div>
 
-              {/* Primary CTA */}
-              <div className="text-center space-y-3 pt-4">
-                <a
-                  href="https://app.audiencescan.xyz"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20`}
-                >
-                  <span>✓</span>
-                  {selectedOption.cta}
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-                <p className="text-white/30 text-sm">
-                  No guesses. Based on real on-chain transactions.
-                </p>
-              </div>
+            {/* Mobile chart (below content) */}
+            <div className="lg:hidden fixed inset-0 pointer-events-none opacity-20">
+              <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20`} />
+              <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
             </div>
           </div>
         )}
