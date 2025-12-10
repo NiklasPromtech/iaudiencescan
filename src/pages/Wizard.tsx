@@ -261,27 +261,18 @@ const Wizard = () => {
   const [selectedOption, setSelectedOption] = useState<WizardOption | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Continuous random word cycling every 2 seconds
+  // Continuous random word cycling every 3 seconds with bigger jumps
   useEffect(() => {
     if (selectedOption) return;
 
     const interval = setInterval(() => {
-      setIsAnimating(true);
-      
-      // Pick a random different word
       setCurrentWordIndex(prev => {
-        let next;
-        do {
-          next = Math.floor(Math.random() * baseWords.length);
-        } while (next === prev);
-        return next;
+        // Jump 2-4 positions (wrapping around)
+        const jumpAmount = 2 + Math.floor(Math.random() * 3); // 2, 3, or 4
+        return (prev + jumpAmount) % baseWords.length;
       });
-
-      // Reset animation state after transition
-      setTimeout(() => setIsAnimating(false), 400);
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [selectedOption]);
@@ -341,7 +332,7 @@ const Wizard = () => {
                           className="flex flex-col"
                           style={{
                             transform: `translateY(-${currentWordIndex * WORD_HEIGHT}px)`,
-                            transition: "transform 400ms ease-out",
+                            transition: "transform 800ms cubic-bezier(0.22, 1, 0.36, 1)",
                           }}
                         >
                           {baseWords.map((word, i) => (
