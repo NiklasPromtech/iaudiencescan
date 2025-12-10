@@ -597,7 +597,8 @@ const Wizard = () => {
         }`}
       >
         {!selectedOption ? (
-          // Selection Screen
+          <>
+          {/* Selection Screen */}
           <div className="min-h-[110vh] flex flex-col">
             {/* Hero area with network preview */}
             <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
@@ -693,71 +694,72 @@ const Wizard = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Separator */}
-            <div className="border-t-2 border-white/20 mx-6 max-w-6xl lg:mx-auto" />
+          </div>
+          
+          {/* Separator */}
+          <div className="border-t-2 border-white/20 mx-6 max-w-6xl lg:mx-auto" />
 
-            {/* Footer - Dark theme, compact */}
-            <footer className="py-8 px-6">
-              <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                  {/* Brand */}
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={logoSquareWhite} 
-                      alt="AudienceScan Logo" 
-                      className="h-6 w-6"
-                    />
-                    <span className="text-sm font-semibold text-white">AudienceScan</span>
-                  </div>
-                  
-                  {/* Links */}
-                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-                    <a href="/blog" className="text-white/50 hover:text-purple-400 transition-colors">Blog</a>
-                    <a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-colors">Case Studies</a>
-                    <a href="/pricing" className="text-white/50 hover:text-purple-400 transition-colors">Pricing</a>
-                    <a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-colors">Features</a>
-                  </div>
-                  
-                  {/* Social Icons */}
-                  <div className="flex gap-3">
-                    <a 
-                      href="https://www.linkedin.com/company/audiencescanio/" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                    >
-                      <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 brightness-0 invert" />
-                    </a>
-                    <a 
-                      href="https://t.me/audienceScan" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                    >
-                      <img src={telegramLogo} alt="Telegram" className="w-4 h-4 brightness-0 invert" />
-                    </a>
-                    <a 
-                      href="https://x.com/AudienceScanIO" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                    >
-                      <img src={xLogo} alt="X" className="w-4 h-4 brightness-0 invert" />
-                    </a>
-                  </div>
+          {/* Footer - Dark theme, compact */}
+          <footer className="py-8 px-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                {/* Brand */}
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={logoSquareWhite} 
+                    alt="AudienceScan Logo" 
+                    className="h-6 w-6"
+                  />
+                  <span className="text-sm font-semibold text-white">AudienceScan</span>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-white/10 text-xs text-white/40">
-                  <p>© 2024 AudienceScan. All rights reserved.</p>
-                  <div className="flex gap-4 mt-2 sm:mt-0">
-                    <a href="#" className="hover:text-purple-400 transition-colors">Privacy</a>
-                    <a href="#" className="hover:text-purple-400 transition-colors">Terms</a>
-                  </div>
+                {/* Links */}
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                  <a href="/blog" className="text-white/50 hover:text-purple-400 transition-colors">Blog</a>
+                  <a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-colors">Case Studies</a>
+                  <a href="/pricing" className="text-white/50 hover:text-purple-400 transition-colors">Pricing</a>
+                  <a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-colors">Features</a>
+                </div>
+                
+                {/* Social Icons */}
+                <div className="flex gap-3">
+                  <a 
+                    href="https://www.linkedin.com/company/audiencescanio/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                  >
+                    <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 brightness-0 invert" />
+                  </a>
+                  <a 
+                    href="https://t.me/audienceScan" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                  >
+                    <img src={telegramLogo} alt="Telegram" className="w-4 h-4 brightness-0 invert" />
+                  </a>
+                  <a 
+                    href="https://x.com/AudienceScanIO" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
+                  >
+                    <img src={xLogo} alt="X" className="w-4 h-4 brightness-0 invert" />
+                  </a>
                 </div>
               </div>
-            </footer>
-          </div>
+              
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-white/10 text-xs text-white/40">
+                <p>© 2024 AudienceScan. All rights reserved.</p>
+                <div className="flex gap-4 mt-2 sm:mt-0">
+                  <a href="#" className="hover:text-purple-400 transition-colors">Privacy</a>
+                  <a href="#" className="hover:text-purple-400 transition-colors">Terms</a>
+                </div>
+              </div>
+            </div>
+          </footer>
+          </>
         ) : (
           // Role Detail Screen - Chart dominant with options on left
           <div className="min-h-screen flex">
