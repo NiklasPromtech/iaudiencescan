@@ -337,12 +337,18 @@ const WizardMobile = () => {
                     </radialGradient>
                     {/* Clip paths for outer tokens */}
                     {[
-                      { x: 60, y: 35, size: 10 },
-                      { x: 220, y: 35, size: 12 },
-                      { x: 45, y: 90, size: 8 },
-                      { x: 235, y: 90, size: 11 },
-                      { x: 80, y: 120, size: 9 },
-                      { x: 200, y: 120, size: 10 },
+                      { x: 50, y: 25, size: 9 },
+                      { x: 100, y: 20, size: 10 },
+                      { x: 180, y: 20, size: 10 },
+                      { x: 230, y: 25, size: 9 },
+                      { x: 35, y: 60, size: 8 },
+                      { x: 245, y: 60, size: 8 },
+                      { x: 35, y: 100, size: 9 },
+                      { x: 245, y: 100, size: 9 },
+                      { x: 55, y: 125, size: 8 },
+                      { x: 105, y: 130, size: 10 },
+                      { x: 175, y: 130, size: 10 },
+                      { x: 225, y: 125, size: 8 },
                     ].map((node, i) => (
                       <clipPath key={`clip-${i}`} id={`heroClip${i}`}>
                         <circle cx={node.x} cy={node.y} r={node.size - 1} />
@@ -356,30 +362,44 @@ const WizardMobile = () => {
                   {/* Connection lines */}
                   <g className="opacity-30">
                     {[
-                      { x: 60, y: 35 },
-                      { x: 220, y: 35 },
-                      { x: 45, y: 90 },
-                      { x: 235, y: 90 },
-                      { x: 80, y: 120 },
-                      { x: 200, y: 120 },
+                      { x: 50, y: 25 },
+                      { x: 100, y: 20 },
+                      { x: 180, y: 20 },
+                      { x: 230, y: 25 },
+                      { x: 35, y: 60 },
+                      { x: 245, y: 60 },
+                      { x: 35, y: 100 },
+                      { x: 245, y: 100 },
+                      { x: 55, y: 125 },
+                      { x: 105, y: 130 },
+                      { x: 175, y: 130 },
+                      { x: 225, y: 125 },
                     ].map((node, i) => (
                       <line key={i} x1="140" y1="70" x2={node.x} y2={node.y} stroke="url(#lineGrad)" strokeWidth="1" />
                     ))}
                     {/* Cross connections */}
-                    <line x1="60" y1="35" x2="45" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="220" y1="35" x2="235" y2="90" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="45" y1="90" x2="80" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
-                    <line x1="235" y1="90" x2="200" y2="120" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="50" y1="25" x2="100" y2="20" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="180" y1="20" x2="230" y2="25" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="35" y1="60" x2="35" y2="100" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="245" y1="60" x2="245" y2="100" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="55" y1="125" x2="105" y2="130" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
+                    <line x1="175" y1="130" x2="225" y2="125" stroke="url(#lineGrad)" strokeWidth="0.5" className="opacity-50" />
                   </g>
                   
                   {/* Outer nodes with real token logos */}
                   {[
-                    { x: 60, y: 35, size: 10 },
-                    { x: 220, y: 35, size: 12 },
-                    { x: 45, y: 90, size: 8 },
-                    { x: 235, y: 90, size: 11 },
-                    { x: 80, y: 120, size: 9 },
-                    { x: 200, y: 120, size: 10 },
+                    { x: 50, y: 25, size: 9 },
+                    { x: 100, y: 20, size: 10 },
+                    { x: 180, y: 20, size: 10 },
+                    { x: 230, y: 25, size: 9 },
+                    { x: 35, y: 60, size: 8 },
+                    { x: 245, y: 60, size: 8 },
+                    { x: 35, y: 100, size: 9 },
+                    { x: 245, y: 100, size: 9 },
+                    { x: 55, y: 125, size: 8 },
+                    { x: 105, y: 130, size: 10 },
+                    { x: 175, y: 130, size: 10 },
+                    { x: 225, y: 125, size: 8 },
                   ].map((node, i) => {
                     const token = defaultTokens[i + 1];
                     return (
