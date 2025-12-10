@@ -599,7 +599,7 @@ const Wizard = () => {
         {!selectedOption ? (
           <>
           {/* Selection Screen */}
-          <div className="min-h-[110vh] flex flex-col">
+          <div className="min-h-screen flex flex-col">
             {/* Hero area with network preview */}
             <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
               <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
