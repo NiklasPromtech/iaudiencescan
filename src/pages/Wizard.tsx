@@ -69,7 +69,7 @@ const wizardOptions: WizardOption[] = [
     title: "Show token teams you already understand their audience",
     subline: "Prove demand with real on-chain data.",
     cta: "Show audience demand to token teams",
-    gradient: "from-purple-600 to-fuchsia-600",
+    gradient: "from-violet-600 to-purple-600",
     scanOptions: [
       {
         id: "category-scan",
@@ -99,7 +99,7 @@ const wizardOptions: WizardOption[] = [
     title: "Find the communities your users are already part of — and reach more like them",
     subline: "Your holders' wallets reveal your next audience.",
     cta: "Find where your next users are",
-    gradient: "from-fuchsia-600 to-pink-600",
+    gradient: "from-violet-600 to-purple-600",
     scanOptions: [
       {
         id: "own-token",
@@ -129,7 +129,7 @@ const wizardOptions: WizardOption[] = [
     title: "Use your existing users' wallets to find where similar users already are",
     subline: "Your user base is your targeting blueprint.",
     cta: "Upload wallets to find more users",
-    gradient: "from-pink-600 to-rose-600",
+    gradient: "from-violet-600 to-purple-600",
     scanOptions: [
       {
         id: "upload-wallets",
@@ -159,7 +159,7 @@ const wizardOptions: WizardOption[] = [
     title: "Identify high-signal tokens by analyzing where users of other CEXs transact",
     subline: "On-chain behavior reveals listing opportunities.",
     cta: "Discover listing opportunities",
-    gradient: "from-rose-600 to-orange-600",
+    gradient: "from-violet-600 to-purple-600",
     scanOptions: [
       {
         id: "deposit-analysis",
