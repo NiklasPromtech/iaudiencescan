@@ -8,6 +8,7 @@ interface ScanOption {
   description: string;
   cta: string;
   icon: React.ReactNode;
+  studyId: string;
 }
 
 interface WizardOption {
@@ -41,6 +42,7 @@ const wizardOptions: WizardOption[] = [
         description: "Validate where this project's users already overlap on-chain.",
         cta: "Scan a pitching token",
         icon: <Search className="w-6 h-6" />,
+        studyId: "K2rI6eC3DOjBwEUZbHnL",
       },
       {
         id: "competitor",
@@ -48,6 +50,7 @@ const wizardOptions: WizardOption[] = [
         description: "Reveal communities actively transacting with competing projects.",
         cta: "Scan a competitor",
         icon: <Target className="w-6 h-6" />,
+        studyId: "LLMHf63Un8Ei0lzOOFFz",
       },
     ],
     explanationA: "On-chain audience overlap for [Token Name]",
@@ -69,6 +72,7 @@ const wizardOptions: WizardOption[] = [
         description: "See which communities align with your launchpad's focus.",
         cta: "Scan by category",
         icon: <Search className="w-6 h-6" />,
+        studyId: "LLMHf63Un8Ei0lzOOFFz",
       },
       {
         id: "competitor-launchpad",
@@ -76,6 +80,7 @@ const wizardOptions: WizardOption[] = [
         description: "Understand the audience your competitors are attracting.",
         cta: "Scan competitor tokens",
         icon: <Target className="w-6 h-6" />,
+        studyId: "K2rI6eC3DOjBwEUZbHnL",
       },
     ],
     explanationA: "On-chain audience overlap for [Category] tokens",
@@ -97,6 +102,7 @@ const wizardOptions: WizardOption[] = [
         description: "Discover which communities your existing users belong to.",
         cta: "Scan my token",
         icon: <Search className="w-6 h-6" />,
+        studyId: "K2rI6eC3DOjBwEUZbHnL",
       },
       {
         id: "similar-token",
@@ -104,6 +110,7 @@ const wizardOptions: WizardOption[] = [
         description: "Find overlapping communities you haven't targeted yet.",
         cta: "Scan similar token",
         icon: <Target className="w-6 h-6" />,
+        studyId: "LLMHf63Un8Ei0lzOOFFz",
       },
     ],
     explanationA: "On-chain audience overlap for your token holders",
@@ -125,6 +132,7 @@ const wizardOptions: WizardOption[] = [
         description: "Analyze your existing users to find lookalike communities.",
         cta: "Upload wallet list",
         icon: <Search className="w-6 h-6" />,
+        studyId: "LLMHf63Un8Ei0lzOOFFz",
       },
       {
         id: "competitor-wallet",
@@ -132,6 +140,7 @@ const wizardOptions: WizardOption[] = [
         description: "See which communities your competitors' users belong to.",
         cta: "Scan competitor wallets",
         icon: <Target className="w-6 h-6" />,
+        studyId: "K2rI6eC3DOjBwEUZbHnL",
       },
     ],
     explanationA: "On-chain audience overlap for your wallet users",
@@ -153,6 +162,7 @@ const wizardOptions: WizardOption[] = [
         description: "See which tokens your users are most actively transacting.",
         cta: "Analyze deposits",
         icon: <Search className="w-6 h-6" />,
+        studyId: "K2rI6eC3DOjBwEUZbHnL",
       },
       {
         id: "competitor-cex",
@@ -160,6 +170,7 @@ const wizardOptions: WizardOption[] = [
         description: "Discover tokens gaining traction on other platforms.",
         cta: "Scan competitor exchange",
         icon: <Target className="w-6 h-6" />,
+        studyId: "LLMHf63Un8Ei0lzOOFFz",
       },
     ],
     explanationA: "On-chain audience overlap for your exchange deposits",
@@ -625,7 +636,13 @@ const Wizard = () => {
               
               {/* Chart - oversized */}
               <div className="relative w-[110%] h-[110%] max-w-[900px] max-h-[900px]">
-                <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+                <NetworkGraph 
+                  studyId={
+                    selectedScan 
+                      ? selectedOption.scanOptions.find(s => s.id === selectedScan)?.studyId || "FnBmNZv2Ik2x8xJwHjRf"
+                      : selectedOption.scanOptions[0].studyId
+                  } 
+                />
               </div>
               
               {/* Label */}
@@ -637,7 +654,13 @@ const Wizard = () => {
             {/* Mobile chart (below content) */}
             <div className="lg:hidden fixed inset-0 pointer-events-none opacity-20">
               <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20`} />
-              <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" />
+              <NetworkGraph 
+                studyId={
+                  selectedScan 
+                    ? selectedOption.scanOptions.find(s => s.id === selectedScan)?.studyId || "FnBmNZv2Ik2x8xJwHjRf"
+                    : selectedOption.scanOptions[0].studyId
+                } 
+              />
             </div>
           </div>
         )}
