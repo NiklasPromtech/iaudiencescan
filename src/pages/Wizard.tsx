@@ -595,19 +595,6 @@ const Wizard = () => {
                   </div>
                 </div>
 
-                {/* Explanation when scan selected */}
-                {selectedScan && (
-                  <div className="space-y-2 animate-fade-in">
-                    <p className="text-white/60 text-sm font-medium">
-                      {selectedScan === selectedOption.scanOptions[0].id 
-                        ? selectedOption.explanationA 
-                        : selectedOption.explanationB}
-                    </p>
-                    <p className="text-white/30 text-xs">
-                      Built from wallets that have financially interacted with these tokens.
-                    </p>
-                  </div>
-                )}
 
                 {/* CTA */}
                 <div className="pt-4">
@@ -651,6 +638,20 @@ const Wizard = () => {
                   <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/10">
                     <p className="text-white/70 text-sm">
                       Select an option to see real data
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Info box when scan selected */}
+              {selectedScan && (
+                <div className="absolute top-28 right-8 max-w-[280px] animate-fade-in">
+                  <div className="bg-black/70 backdrop-blur-md px-5 py-4 rounded-xl border border-purple-500/20">
+                    <p className="text-purple-400 text-xs font-medium uppercase tracking-wider mb-2">
+                      How this data is used
+                    </p>
+                    <p className="text-white/70 text-sm leading-relaxed">
+                      Each node represents a token community with wallet overlap. Use these insights to target ads, find KOLs, or craft outreach to communities already engaged with similar projects.
                     </p>
                   </div>
                 </div>
