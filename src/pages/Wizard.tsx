@@ -350,20 +350,11 @@ const Wizard = () => {
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
                       Make{" "}
-                      <span 
-                        className="inline-block overflow-hidden relative align-bottom" 
-                        style={{ 
-                          height: WORD_HEIGHT * 1.6,
-                          marginBottom: -WORD_HEIGHT * 0.3,
-                        }}
-                      >
-                        {/* Gradient masks */}
-                        <span className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-                        <span className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+                      <span className="inline-block align-bottom overflow-hidden" style={{ height: WORD_HEIGHT }}>
                         <span
                           className="flex flex-col transition-transform"
                           style={{
-                            transform: `translateY(-${scrollOffset - WORD_HEIGHT * 0.3}px)`,
+                            transform: `translateY(-${scrollOffset}px)`,
                             transitionDuration: isScrolling ? "0ms" : "300ms",
                           }}
                         >
