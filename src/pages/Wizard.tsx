@@ -595,8 +595,8 @@ const Wizard = () => {
         <div className="relative">
           {/* Expanding white circle */}
           <div 
-            className={`absolute inset-0 bg-white rounded-full transition-transform duration-500 ease-out ${
-              isLaunching ? 'scale-[100]' : 'scale-100'
+            className={`absolute inset-0 bg-white rounded-full transition-all duration-1000 ease-out ${
+              isLaunching ? 'scale-[100] opacity-100' : 'scale-100 opacity-0'
             }`}
             style={{ transformOrigin: 'center' }}
           />
@@ -611,7 +611,7 @@ const Wizard = () => {
 
       {/* Full screen white overlay for launch transition */}
       <div 
-        className={`fixed inset-0 bg-white z-[100] pointer-events-none transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-white z-[100] pointer-events-none transition-opacity duration-700 delay-300 ${
           isLaunching ? 'opacity-100' : 'opacity-0'
         }`}
       />
