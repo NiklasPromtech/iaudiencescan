@@ -188,6 +188,10 @@ const NetworkAgency = () => {
   // Check if URL has color params (hide editor if so)
   const hasColorParams = searchParams.has('bg') || searchParams.has('accent') || searchParams.has('text');
   
+  // Dynamic title and subtitle from URL params
+  const title = searchParams.get('title') || 'Token Network';
+  const subtitle = searchParams.get('subtitle') || 'Community overlap analysis';
+  
   // Initialize colors from URL params or defaults
   const getInitialColors = (): ColorConfig => {
     const bg = searchParams.get('bg');
@@ -608,8 +612,8 @@ const NetworkAgency = () => {
 
         {/* Title */}
         <div className="absolute top-6 left-6">
-          <h1 className="text-xl font-light tracking-wide" style={{ color: `${colors.textPrimary}e6` }}>Token Network</h1>
-          <p className="text-sm mt-1" style={{ color: `${colors.textPrimary}66` }}>Community overlap analysis</p>
+          <h1 className="text-xl font-light tracking-wide" style={{ color: `${colors.textPrimary}e6` }}>{title}</h1>
+          <p className="text-sm mt-1" style={{ color: `${colors.textPrimary}66` }}>{subtitle}</p>
         </div>
       </div>
     </div>
