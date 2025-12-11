@@ -188,9 +188,9 @@ const NetworkAgency = () => {
   // Check if URL has color params (hide editor if so)
   const hasColorParams = searchParams.has('bg') || searchParams.has('accent') || searchParams.has('text');
   
-  // Dynamic title and subtitle from URL params
-  const title = searchParams.get('title') || 'Token Network';
-  const subtitle = searchParams.get('subtitle') || 'Community overlap analysis';
+  // Dynamic title and subtitle from URL params with state
+  const [title, setTitle] = useState(searchParams.get('title') || 'Token Network');
+  const [subtitle, setSubtitle] = useState(searchParams.get('subtitle') || 'Community overlap analysis');
   
   // Initialize colors from URL params or defaults
   const getInitialColors = (): ColorConfig => {
@@ -352,17 +352,25 @@ const NetworkAgency = () => {
     setColors(prev => ({ ...prev, [key]: value }));
   };
 
-  const resetColors = () => setColors(defaultColors);
+  const resetColors = () => {
+    setColors(defaultColors);
+    setTitle('Token Network');
+    setSubtitle('Community overlap analysis');
+  };
   
   const generateShareUrl = () => {
     const baseUrl = `${window.location.origin}/network/agency/${studyId}`;
     const params = new URLSearchParams();
+    const uid = searchParams.get('uid');
+    if (uid) params.set('uid', uid);
     params.set('bg', colors.background.replace('#', ''));
     params.set('accent', colors.accentPrimary.replace('#', ''));
     params.set('glow', colors.accentGlow.replace('#', ''));
     params.set('text', colors.textPrimary.replace('#', ''));
     params.set('textSec', colors.textSecondary.replace('#', ''));
     params.set('nodeBg', colors.nodeBg.replace('#', ''));
+    if (title !== 'Token Network') params.set('title', title);
+    if (subtitle !== 'Community overlap analysis') params.set('subtitle', subtitle);
     return `${baseUrl}?${params.toString()}`;
   };
   
@@ -456,6 +464,34 @@ const NetworkAgency = () => {
             <ColorPicker label="Text Primary" value={colors.textPrimary} onChange={(v) => updateColor('textPrimary', v)} />
             <ColorPicker label="Text Secondary" value={colors.textSecondary} onChange={(v) => updateColor('textSecondary', v)} />
             <ColorPicker label="Node Background" value={colors.nodeBg} onChange={(v) => updateColor('nodeBg', v)} />
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-purple-500/20">
+            <p className="text-xs mb-3 text-black/40">Customize Text</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-black/70 text-sm block mb-1">Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded text-sm"
+                  style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}
+                  placeholder="Token Network"
+                />
+              </div>
+              <div>
+                <label className="text-black/70 text-sm block mb-1">Subtitle</label>
+                <input
+                  type="text"
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded text-sm"
+                  style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}
+                  placeholder="Community overlap analysis"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 pt-6 border-t border-purple-500/20">
