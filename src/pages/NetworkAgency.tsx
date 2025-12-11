@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Palette } from "lucide-react";
+import { ChevronRight, Palette, Copy, Check } from "lucide-react";
 import iconX from "@/assets/icon-x.jpg";
 import iconTelegram from "@/assets/icon-telegram.jpg";
 import iconReddit from "@/assets/icon-reddit.jpg";
@@ -160,13 +160,15 @@ const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => (
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
+        className="w-8 h-8 rounded cursor-pointer border-0"
+        style={{ backgroundColor: '#1a1a1a' }}
       />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs font-mono"
+        className="w-20 px-2 py-1 rounded text-xs font-mono"
+        style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
       />
     </div>
   </div>
@@ -174,13 +176,35 @@ const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => (
 
 const NetworkAgency = () => {
   const { studyId } = useParams<{ studyId: string }>();
+  const [searchParams] = useSearchParams();
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [panelOpen, setPanelOpen] = useState(false);
-  const [colors, setColors] = useState<ColorConfig>(defaultColors);
+  const [copied, setCopied] = useState(false);
+  
+  // Initialize colors from URL params or defaults
+  const getInitialColors = (): ColorConfig => {
+    const bg = searchParams.get('bg');
+    const accent = searchParams.get('accent');
+    const glow = searchParams.get('glow');
+    const text = searchParams.get('text');
+    const textSec = searchParams.get('textSec');
+    const nodeBg = searchParams.get('nodeBg');
+    
+    return {
+      background: bg ? `#${bg}` : defaultColors.background,
+      accentPrimary: accent ? `#${accent}` : defaultColors.accentPrimary,
+      accentGlow: glow ? `#${glow}` : defaultColors.accentGlow,
+      textPrimary: text ? `#${text}` : defaultColors.textPrimary,
+      textSecondary: textSec ? `#${textSec}` : defaultColors.textSecondary,
+      nodeBg: nodeBg ? `#${nodeBg}` : defaultColors.nodeBg,
+    };
+  };
+  
+  const [colors, setColors] = useState<ColorConfig>(getInitialColors);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -320,6 +344,25 @@ const NetworkAgency = () => {
   };
 
   const resetColors = () => setColors(defaultColors);
+  
+  const generateShareUrl = () => {
+    const baseUrl = `${window.location.origin}/network/agency/${studyId}`;
+    const params = new URLSearchParams();
+    params.set('bg', colors.background.replace('#', ''));
+    params.set('accent', colors.accentPrimary.replace('#', ''));
+    params.set('glow', colors.accentGlow.replace('#', ''));
+    params.set('text', colors.textPrimary.replace('#', ''));
+    params.set('textSec', colors.textSecondary.replace('#', ''));
+    params.set('nodeBg', colors.nodeBg.replace('#', ''));
+    return `${baseUrl}?${params.toString()}`;
+  };
+  
+  const copyShareUrl = async () => {
+    const url = generateShareUrl();
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (loading) {
     return (
@@ -422,6 +465,33 @@ const NetworkAgency = () => {
                 />
               ))}
             </div>
+          </div>
+          
+          <div className="mt-6 pt-6" style={{ borderTop: `1px solid ${colors.accentPrimary}33` }}>
+            <p className="text-xs mb-3" style={{ color: `${colors.textPrimary}66` }}>Export shareable link</p>
+            <button
+              onClick={copyShareUrl}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-200"
+              style={{ 
+                backgroundColor: copied ? '#22c55e' : colors.accentPrimary, 
+                color: '#fff',
+              }}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Copy Share URL
+                </>
+              )}
+            </button>
+            <p className="text-[10px] mt-2 opacity-50" style={{ color: colors.textPrimary }}>
+              Agencies can embed this URL with your brand colors
+            </p>
           </div>
         </div>
       </div>
