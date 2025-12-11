@@ -31,21 +31,12 @@ interface Node {
   reddit: string;
   youtube: string;
   tags: string[];
-  cluster: string;
 }
 
 interface Edge {
   from: number;
   to: number;
   strength: number;
-}
-
-interface ClusterInfo {
-  name: string;
-  color: string;
-  nodes: Node[];
-  centroid: { x: number; y: number };
-  blobPath: string;
 }
 
 interface ColorConfig {
@@ -62,20 +53,6 @@ interface HoverPanelProps {
   position: { x: number; y: number };
   colors: ColorConfig;
 }
-
-// Organic cluster color palette
-const CLUSTER_COLORS = [
-  '#5B8FF9', // Blue
-  '#5AD8A6', // Teal
-  '#E8684A', // Coral/Rose
-  '#F6BD16', // Yellow
-  '#9270CA', // Purple
-  '#FF9845', // Orange
-  '#6DC8EC', // Light Blue
-  '#FF99C3', // Pink
-  '#269A99', // Dark Teal
-  '#BDD2FD', // Pale Blue
-];
 
 const defaultColors: ColorConfig = {
   background: "#ffffff",
@@ -197,81 +174,6 @@ const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => (
   </div>
 );
 
-// Generate organic blob path using catmull-rom spline
-const generateBlobPath = (nodes: Node[], centerX: number, centerY: number, padding: number = 40): string => {
-  if (nodes.length === 0) return '';
-  if (nodes.length === 1) {
-    const n = nodes[0];
-    const r = n.size / 2 + padding;
-    return `M ${n.x - r} ${n.y} 
-            A ${r} ${r} 0 1 1 ${n.x + r} ${n.y} 
-            A ${r} ${r} 0 1 1 ${n.x - r} ${n.y} Z`;
-  }
-
-  // Get all node positions and add some boundary points
-  const points: { x: number; y: number }[] = nodes.map(n => ({ x: n.x, y: n.y }));
-  
-  // Calculate centroid of this cluster
-  const cx = points.reduce((s, p) => s + p.x, 0) / points.length;
-  const cy = points.reduce((s, p) => s + p.y, 0) / points.length;
-  
-  // Sort points by angle from centroid
-  const sortedPoints = points
-    .map(p => ({
-      ...p,
-      angle: Math.atan2(p.y - cy, p.x - cx),
-      dist: Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2)
-    }))
-    .sort((a, b) => a.angle - b.angle);
-
-  // Create expanded boundary points with more padding for outer edges
-  const boundaryPoints = sortedPoints.map((p, i) => {
-    const nodeSize = nodes.find(n => n.x === p.x && n.y === p.y)?.size || 40;
-    const expandDist = nodeSize / 2 + padding + 20;
-    const angle = Math.atan2(p.y - cy, p.x - cx);
-    return {
-      x: p.x + Math.cos(angle) * expandDist * 0.6,
-      y: p.y + Math.sin(angle) * expandDist * 0.6,
-    };
-  });
-
-  // Generate smooth curve through points using quadratic bezier
-  if (boundaryPoints.length < 3) {
-    // For 2 points, create an ellipse-like shape
-    const [p1, p2] = boundaryPoints;
-    const mx = (p1.x + p2.x) / 2;
-    const my = (p1.y + p2.y) / 2;
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const perpX = -dy * 0.5;
-    const perpY = dx * 0.5;
-    return `M ${p1.x} ${p1.y} 
-            Q ${mx + perpX} ${my + perpY} ${p2.x} ${p2.y} 
-            Q ${mx - perpX} ${my - perpY} ${p1.x} ${p1.y} Z`;
-  }
-
-  // Create smooth closed curve
-  let path = `M ${boundaryPoints[0].x} ${boundaryPoints[0].y}`;
-  
-  for (let i = 0; i < boundaryPoints.length; i++) {
-    const p0 = boundaryPoints[(i - 1 + boundaryPoints.length) % boundaryPoints.length];
-    const p1 = boundaryPoints[i];
-    const p2 = boundaryPoints[(i + 1) % boundaryPoints.length];
-    const p3 = boundaryPoints[(i + 2) % boundaryPoints.length];
-
-    // Calculate control points for smooth curve
-    const cp1x = p1.x + (p2.x - p0.x) * 0.2;
-    const cp1y = p1.y + (p2.y - p0.y) * 0.2;
-    const cp2x = p2.x - (p3.x - p1.x) * 0.2;
-    const cp2y = p2.y - (p3.y - p1.y) * 0.2;
-
-    path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-  }
-
-  path += ' Z';
-  return path;
-};
-
 const NetworkAgency = () => {
   const { studyId } = useParams<{ studyId: string }>();
   const [searchParams] = useSearchParams();
@@ -332,11 +234,11 @@ const NetworkAgency = () => {
     if (studyId) fetchData();
   }, [studyId, searchParams]);
 
-  const { nodes, edges, clusters } = useMemo(() => {
-    if (tokens.length === 0) return { nodes: [], edges: [], clusters: [] };
+  const { nodes, edges } = useMemo(() => {
+    if (tokens.length === 0) return { nodes: [], edges: [] };
 
     const size = 1000;
-    const padding = 120;
+    const padding = 100;
     const maxTokens = Math.min(tokens.length, 80);
 
     const seed = studyId?.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
@@ -345,106 +247,26 @@ const NetworkAgency = () => {
       return x - Math.floor(x);
     };
 
-    // Step 1: Count global tag frequency
-    const tagCounts: Record<string, number> = {};
-    tokens.slice(0, maxTokens).forEach(token => {
-      (token.tags || []).forEach(tag => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-      });
-    });
-
-    // Sort tags by frequency (most common first)
-    const sortedTags = Object.entries(tagCounts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([tag]) => tag);
-
-    // Step 2: Assign each token to its most globally-common tag
-    const tokenClusters: string[] = tokens.slice(0, maxTokens).map(token => {
-      const tokenTags = token.tags || [];
-      if (tokenTags.length === 0) return 'Other';
-      
-      // Find the most globally common tag this token has
-      for (const tag of sortedTags) {
-        if (tokenTags.includes(tag)) return tag;
-      }
-      return 'Other';
-    });
-
-    // Get unique clusters and assign colors
-    const uniqueClusters = [...new Set(tokenClusters)].filter(c => c !== 'Other');
-    if (tokenClusters.includes('Other')) uniqueClusters.push('Other');
-    
-    const clusterColors: Record<string, string> = {};
-    uniqueClusters.forEach((cluster, i) => {
-      clusterColors[cluster] = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
-    });
-
-    // Step 3: Calculate cluster sectors and centroids
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const clusterCount = uniqueClusters.length;
-    
-    const clusterCentroids: Record<string, { x: number; y: number; angleStart: number; angleEnd: number }> = {};
-    const sectorRadius = (size / 2 - padding) * 0.65;
-    
-    uniqueClusters.forEach((cluster, i) => {
-      const angleStart = (i / clusterCount) * Math.PI * 2 - Math.PI / 2;
-      const angleEnd = ((i + 1) / clusterCount) * Math.PI * 2 - Math.PI / 2;
-      const angleMid = (angleStart + angleEnd) / 2;
-      
-      clusterCentroids[cluster] = {
-        x: centerX + Math.cos(angleMid) * sectorRadius,
-        y: centerY + Math.sin(angleMid) * sectorRadius,
-        angleStart,
-        angleEnd,
-      };
-    });
-
-    // Step 4: Position nodes within their cluster sectors
     const generatedNodes: Node[] = [];
-    const nodesPerCluster: Record<string, number> = {};
-    
-    // Count nodes per cluster for positioning
-    tokenClusters.forEach(cluster => {
-      nodesPerCluster[cluster] = (nodesPerCluster[cluster] || 0) + 1;
-    });
-    
-    const clusterNodeIndex: Record<string, number> = {};
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
       const nodeSize = 24 + token.score * 36;
-      const cluster = tokenClusters[index];
-      const clusterInfo = clusterCentroids[cluster];
-      
-      clusterNodeIndex[cluster] = (clusterNodeIndex[cluster] || 0);
-      const nodeIdx = clusterNodeIndex[cluster]++;
-      const totalInCluster = nodesPerCluster[cluster];
-      
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
 
       do {
         if (index === 0) {
-          // Center node stays in center
-          x = centerX;
-          y = centerY;
+          x = size / 2;
+          y = size / 2;
         } else {
-          // Position within cluster sector
-          const sectorSpread = (clusterInfo.angleEnd - clusterInfo.angleStart) * 0.8;
-          const baseAngle = clusterInfo.angleStart + sectorSpread * 0.1 + (nodeIdx / Math.max(1, totalInCluster - 1)) * sectorSpread;
-          const angleJitter = (seededRandom(index * 17 + attempts) - 0.5) * 0.4;
-          const angle = baseAngle + angleJitter;
+          const golden = 0.618033988749895;
+          const angle = index * golden * Math.PI * 2 + seededRandom(index * 7) * 0.5;
+          const baseRadius = 80 + Math.sqrt(index / maxTokens) * (size / 2 - padding - 80);
+          const jitter = (seededRandom(index * 13 + attempts) - 0.5) * 100;
           
-          // Vary radius based on node index and score
-          const minRadius = 80;
-          const maxRadius = sectorRadius + 100;
-          const radiusBase = minRadius + (seededRandom(index * 11) * 0.6 + 0.2) * (maxRadius - minRadius);
-          const radiusJitter = (seededRandom(index * 23 + attempts) - 0.5) * 80;
-          const radius = radiusBase + radiusJitter;
-          
-          x = centerX + Math.cos(angle) * radius;
-          y = centerY + Math.sin(angle) * radius;
+          x = size / 2 + Math.cos(angle) * (baseRadius + jitter);
+          y = size / 2 + Math.sin(angle) * (baseRadius + jitter);
         }
 
         x = Math.max(padding, Math.min(size - padding, x));
@@ -454,7 +276,7 @@ const NetworkAgency = () => {
           const dx = x - other.x;
           const dy = y - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = (nodeSize + other.size) / 2 + 12;
+          const minDist = (nodeSize + other.size) / 2 + 15;
           return dist < minDist;
         });
 
@@ -475,25 +297,15 @@ const NetworkAgency = () => {
         reddit: token.reddit || '',
         youtube: token.youtube || '',
         tags: token.tags || [],
-        cluster,
       });
     });
 
-    // Step 5: Generate edges (prefer intra-cluster edges)
     const generatedEdges: Edge[] = [];
-    const edgeCount = Math.floor(maxTokens * 1.5);
+    const edgeCount = Math.floor(maxTokens * 2);
 
     for (let i = 0; i < edgeCount; i++) {
       const from = Math.floor(seededRandom(i * 3) * maxTokens);
-      let to = Math.floor(seededRandom(i * 3 + 1) * maxTokens);
-      
-      // 70% chance to prefer same cluster
-      if (seededRandom(i * 5) < 0.7) {
-        const sameClusterNodes = generatedNodes.filter(n => n.cluster === generatedNodes[from].cluster && n.id !== from);
-        if (sameClusterNodes.length > 0) {
-          to = sameClusterNodes[Math.floor(seededRandom(i * 7) * sameClusterNodes.length)].id;
-        }
-      }
+      const to = Math.floor(seededRandom(i * 3 + 1) * maxTokens);
       
       if (from !== to) {
         const exists = generatedEdges.some(
@@ -506,7 +318,6 @@ const NetworkAgency = () => {
       }
     }
 
-    // Connect center to top nodes
     for (let i = 1; i < Math.min(6, maxTokens); i++) {
       const exists = generatedEdges.some(e => 
         (e.from === 0 && e.to === i) || (e.from === i && e.to === 0)
@@ -516,21 +327,7 @@ const NetworkAgency = () => {
       }
     }
 
-    // Step 6: Generate cluster info with blob paths
-    const clusterInfos: ClusterInfo[] = uniqueClusters.map(clusterName => {
-      const clusterNodes = generatedNodes.filter(n => n.cluster === clusterName);
-      const centroid = clusterCentroids[clusterName];
-      
-      return {
-        name: clusterName,
-        color: clusterColors[clusterName],
-        nodes: clusterNodes,
-        centroid: { x: centroid.x, y: centroid.y },
-        blobPath: generateBlobPath(clusterNodes, centerX, centerY, 35),
-      };
-    });
-
-    return { nodes: generatedNodes, edges: generatedEdges, clusters: clusterInfos };
+    return { nodes: generatedNodes, edges: generatedEdges };
   }, [tokens, studyId]);
 
   const handleNodeHover = (node: Node, event: React.MouseEvent) => {
@@ -738,25 +535,6 @@ const NetworkAgency = () => {
               Agencies can embed this URL with your brand colors
             </p>
           </div>
-
-          {/* Cluster Legend */}
-          {clusters.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-purple-500/20">
-              <p className="text-xs mb-3 text-black/40">Tag Clusters</p>
-              <div className="space-y-2">
-                {clusters.map(cluster => (
-                  <div key={cluster.name} className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: cluster.color }}
-                    />
-                    <span className="text-xs text-black/70">{cluster.name}</span>
-                    <span className="text-[10px] text-black/40">({cluster.nodes.length})</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -773,29 +551,7 @@ const NetworkAgency = () => {
                 <circle cx={node.x} cy={node.y} r={node.size / 2 - 2} />
               </clipPath>
             ))}
-            {/* Blur filter for blob backgrounds */}
-            <filter id="blob-blur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
-            </filter>
           </defs>
-
-          {/* Cluster Blob Backgrounds */}
-          <g className="cluster-blobs">
-            {clusters.map((cluster) => (
-              cluster.blobPath && (
-                <path
-                  key={`blob-${cluster.name}`}
-                  d={cluster.blobPath}
-                  fill={cluster.color}
-                  fillOpacity={0.15}
-                  stroke={cluster.color}
-                  strokeWidth={2}
-                  strokeOpacity={0.3}
-                  filter="url(#blob-blur)"
-                />
-              )
-            ))}
-          </g>
 
           {/* Edges */}
           <g className="edges">
@@ -804,10 +560,8 @@ const NetworkAgency = () => {
               const toNode = nodes[edge.to];
               if (!fromNode || !toNode) return null;
 
-              // Make intra-cluster edges slightly more prominent
-              const sameCluster = fromNode.cluster === toNode.cluster;
-              const opacity = sameCluster ? 0.2 + edge.strength * 0.5 : 0.1 + edge.strength * 0.3;
-              const strokeWidth = sameCluster ? 0.8 + edge.strength * 1.8 : 0.5 + edge.strength * 1.2;
+              const opacity = 0.15 + edge.strength * 0.4;
+              const strokeWidth = 0.5 + edge.strength * 1.5;
 
               return (
                 <line
@@ -829,8 +583,6 @@ const NetworkAgency = () => {
           <g className="nodes">
             {nodes.map((node) => {
               const isCenter = node.id === 0;
-              const clusterInfo = clusters.find(c => c.name === node.cluster);
-              const clusterColor = clusterInfo?.color || colors.accentPrimary;
 
               return (
                 <g
@@ -844,9 +596,9 @@ const NetworkAgency = () => {
                     cy={node.y}
                     r={node.size / 2 + 2}
                     fill="none"
-                    stroke={clusterColor}
+                    stroke={colors.accentPrimary}
                     strokeWidth={isCenter ? 3 : 2}
-                    strokeOpacity={0.5 + node.score * 0.4}
+                    strokeOpacity={0.4 + node.score * 0.5}
                   />
 
                   <circle
@@ -890,12 +642,6 @@ const NetworkAgency = () => {
               <div className="w-6 h-0.5 rounded" style={{ backgroundColor: `${colors.accentPrimary}99` }} />
               <span style={{ color: `${colors.textPrimary}b3` }}>
                 <span className="font-semibold" style={{ color: colors.accentPrimary }}>{edges.length}</span> connections
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: `${colors.accentPrimary}66` }} />
-              <span style={{ color: `${colors.textPrimary}b3` }}>
-                <span className="font-semibold" style={{ color: colors.accentPrimary }}>{clusters.length}</span> clusters
               </span>
             </div>
           </div>
