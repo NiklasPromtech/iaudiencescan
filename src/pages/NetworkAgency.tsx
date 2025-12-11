@@ -407,15 +407,15 @@ const NetworkAgency = () => {
         className="fixed top-1/2 -translate-y-1/2 z-50 p-3 rounded-l-xl transition-all duration-300"
         style={{
           right: panelOpen ? 320 : 0,
-          backgroundColor: `${colors.accentPrimary}33`,
-          border: `1px solid ${colors.accentPrimary}66`,
+          backgroundColor: 'rgba(168, 85, 247, 0.2)',
+          border: '1px solid rgba(168, 85, 247, 0.4)',
           borderRight: 'none',
         }}
       >
         {panelOpen ? (
-          <ChevronRight className="w-5 h-5" style={{ color: colors.accentPrimary }} />
+          <ChevronRight className="w-5 h-5 text-purple-400" />
         ) : (
-          <Palette className="w-5 h-5" style={{ color: colors.accentPrimary }} />
+          <Palette className="w-5 h-5 text-purple-400" />
         )}
       </button>
 
@@ -424,21 +424,16 @@ const NetworkAgency = () => {
         className="fixed top-0 right-0 h-full w-80 z-40 transition-transform duration-300 backdrop-blur-xl overflow-y-auto"
         style={{
           transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',
-          backgroundColor: `${colors.background}e6`,
-          borderLeft: `1px solid ${colors.accentPrimary}33`,
+          backgroundColor: 'rgba(10, 10, 10, 0.95)',
+          borderLeft: '1px solid rgba(168, 85, 247, 0.2)',
         }}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold" style={{ color: colors.textPrimary }}>Customize Colors</h2>
+            <h2 className="text-lg font-semibold text-white">Customize Colors</h2>
             <button
               onClick={resetColors}
-              className="text-xs px-3 py-1 rounded-full transition-colors"
-              style={{ 
-                backgroundColor: `${colors.accentPrimary}1a`, 
-                color: colors.accentPrimary,
-                border: `1px solid ${colors.accentPrimary}33`
-              }}
+              className="text-xs px-3 py-1 rounded-full transition-colors bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20"
             >
               Reset
             </button>
@@ -453,8 +448,8 @@ const NetworkAgency = () => {
             <ColorPicker label="Node Background" value={colors.nodeBg} onChange={(v) => updateColor('nodeBg', v)} />
           </div>
 
-          <div className="mt-8 pt-6" style={{ borderTop: `1px solid ${colors.accentPrimary}33` }}>
-            <p className="text-xs mb-2" style={{ color: `${colors.textPrimary}66` }}>Preview your brand colors</p>
+          <div className="mt-8 pt-6 border-t border-purple-500/20">
+            <p className="text-xs mb-2 text-white/40">Preview your brand colors</p>
             <div className="flex gap-2 flex-wrap">
               {Object.entries(colors).map(([key, value]) => (
                 <div
@@ -467,13 +462,13 @@ const NetworkAgency = () => {
             </div>
           </div>
           
-          <div className="mt-6 pt-6" style={{ borderTop: `1px solid ${colors.accentPrimary}33` }}>
-            <p className="text-xs mb-3" style={{ color: `${colors.textPrimary}66` }}>Export shareable link</p>
+          <div className="mt-6 pt-6 border-t border-purple-500/20">
+            <p className="text-xs mb-3 text-white/40">Export shareable link</p>
             <button
               onClick={copyShareUrl}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-200"
               style={{ 
-                backgroundColor: copied ? '#22c55e' : colors.accentPrimary, 
+                backgroundColor: copied ? '#22c55e' : '#a855f7', 
                 color: '#fff',
               }}
             >
@@ -489,7 +484,7 @@ const NetworkAgency = () => {
                 </>
               )}
             </button>
-            <p className="text-[10px] mt-2 opacity-50" style={{ color: colors.textPrimary }}>
+            <p className="text-[10px] mt-2 text-white/30">
               Agencies can embed this URL with your brand colors
             </p>
           </div>
