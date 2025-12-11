@@ -161,14 +161,14 @@ const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => (
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-8 h-8 rounded cursor-pointer border-0"
-        style={{ backgroundColor: '#1a1a1a' }}
+        style={{ backgroundColor: '#f5f5f5' }}
       />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-20 px-2 py-1 rounded text-xs font-mono"
-        style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
+        style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}
       />
     </div>
   </div>
