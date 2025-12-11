@@ -55,10 +55,10 @@ interface HoverPanelProps {
 }
 
 const defaultColors: ColorConfig = {
-  background: "#000000",
+  background: "#ffffff",
   accentPrimary: "#a855f7",
   accentGlow: "#9333ea",
-  textPrimary: "#ffffff",
+  textPrimary: "#000000",
   textSecondary: "#a1a1aa",
   nodeBg: "#0a0a0a",
 };
@@ -154,7 +154,7 @@ interface ColorPickerProps {
 
 const ColorPicker = ({ label, value, onChange }: ColorPickerProps) => (
   <div className="flex items-center justify-between gap-3">
-    <label className="text-white/70 text-sm whitespace-nowrap">{label}</label>
+    <label className="text-black/70 text-sm whitespace-nowrap">{label}</label>
     <div className="flex items-center gap-2">
       <input
         type="color"
@@ -434,13 +434,13 @@ const NetworkAgency = () => {
         className="fixed top-0 right-0 h-full w-80 z-40 transition-transform duration-300 backdrop-blur-xl overflow-y-auto"
         style={{
           transform: panelOpen ? 'translateX(0)' : 'translateX(100%)',
-          backgroundColor: 'rgba(10, 10, 10, 0.95)',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
           borderLeft: '1px solid rgba(168, 85, 247, 0.2)',
         }}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">Customize Colors</h2>
+            <h2 className="text-lg font-semibold text-black">Customize Colors</h2>
             <button
               onClick={resetColors}
               className="text-xs px-3 py-1 rounded-full transition-colors bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20"
@@ -459,7 +459,7 @@ const NetworkAgency = () => {
           </div>
 
           <div className="mt-8 pt-6 border-t border-purple-500/20">
-            <p className="text-xs mb-2 text-white/40">Preview your brand colors</p>
+            <p className="text-xs mb-2 text-black/40">Preview your brand colors</p>
             <div className="flex gap-2 flex-wrap">
               {Object.entries(colors).map(([key, value]) => (
                 <div
@@ -473,7 +473,7 @@ const NetworkAgency = () => {
           </div>
           
           <div className="mt-6 pt-6 border-t border-purple-500/20">
-            <p className="text-xs mb-3 text-white/40">Export shareable link</p>
+            <p className="text-xs mb-3 text-black/40">Export shareable link</p>
             <button
               onClick={copyShareUrl}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all duration-200"
@@ -494,7 +494,7 @@ const NetworkAgency = () => {
                 </>
               )}
             </button>
-            <p className="text-[10px] mt-2 text-white/30">
+            <p className="text-[10px] mt-2 text-black/30">
               Agencies can embed this URL with your brand colors
             </p>
           </div>
