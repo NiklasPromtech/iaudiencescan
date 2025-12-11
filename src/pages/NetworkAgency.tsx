@@ -190,7 +190,7 @@ const NetworkAgency = () => {
   
   // Dynamic title and subtitle from URL params with state
   const [title, setTitle] = useState(searchParams.get('title') || 'Token Network');
-  const [subtitle, setSubtitle] = useState(searchParams.get('subtitle') || 'Community overlap analysis');
+  const [subtitle, setSubtitle] = useState(searchParams.get('subtitle') || 'Token overlap analysis');
   
   // Initialize colors from URL params or defaults
   const getInitialColors = (): ColorConfig => {
@@ -355,7 +355,7 @@ const NetworkAgency = () => {
   const resetColors = () => {
     setColors(defaultColors);
     setTitle('Token Network');
-    setSubtitle('Community overlap analysis');
+    setSubtitle('Token overlap analysis');
   };
   
   const generateShareUrl = () => {
@@ -370,7 +370,7 @@ const NetworkAgency = () => {
     params.set('textSec', colors.textSecondary.replace('#', ''));
     params.set('nodeBg', colors.nodeBg.replace('#', ''));
     if (title !== 'Token Network') params.set('title', title);
-    if (subtitle !== 'Community overlap analysis') params.set('subtitle', subtitle);
+    if (subtitle !== 'Token overlap analysis') params.set('subtitle', subtitle);
     return `${baseUrl}?${params.toString()}`;
   };
   
@@ -488,7 +488,7 @@ const NetworkAgency = () => {
                   onChange={(e) => setSubtitle(e.target.value)}
                   className="w-full px-3 py-2 rounded text-sm"
                   style={{ backgroundColor: '#f5f5f5', border: '1px solid #e0e0e0', color: '#000' }}
-                  placeholder="Community overlap analysis"
+                  placeholder="Token overlap analysis"
                 />
               </div>
             </div>
