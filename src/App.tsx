@@ -33,6 +33,7 @@ import ProposedFeatures from "./pages/ProposedFeatures";
 import Creation from "./pages/Creation";
 import Artifact from "./pages/Artifact";
 import Network from "./pages/Network";
+import NetworkAgency from "./pages/NetworkAgency";
 import Wizard from "./pages/Wizard";
 import WizardMobile from "./pages/WizardMobile";
 
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/creation" element={<Creation />} />
           <Route path="/artifact/:studyId" element={<Artifact />} />
           <Route path="/network/:studyId" element={<Network />} />
+          <Route path="/network/agency/:studyId" element={<NetworkAgency />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
