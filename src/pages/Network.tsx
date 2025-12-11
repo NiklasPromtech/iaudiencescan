@@ -6,6 +6,50 @@ import iconReddit from "@/assets/icon-reddit.jpg";
 import iconYoutube from "@/assets/icon-youtube.jpg";
 import iconGoogleAds from "@/assets/icon-googleads.jpg";
 
+// Dynamic meta tags for social sharing
+const updateMetaTags = (ticker: string, tokenCount: number) => {
+  const title = `${ticker} Token Network | AudienceScan`;
+  const description = `Discover ${tokenCount} related tokens in the ${ticker} community network. On-chain audience intelligence for Web3 marketing.`;
+  const imageUrl = `${window.location.origin}/og-network-preview.png`;
+  
+  // Update document title
+  document.title = title;
+  
+  // Helper to update or create meta tag
+  const setMetaTag = (property: string, content: string) => {
+    let meta = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('property', property);
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', content);
+  };
+  
+  const setMetaName = (name: string, content: string) => {
+    let meta = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', name);
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', content);
+  };
+  
+  // Open Graph tags
+  setMetaTag('og:title', title);
+  setMetaTag('og:description', description);
+  setMetaTag('og:image', imageUrl);
+  setMetaTag('og:type', 'website');
+  setMetaTag('og:url', window.location.href);
+  
+  // Twitter Card tags
+  setMetaName('twitter:card', 'summary_large_image');
+  setMetaName('twitter:title', title);
+  setMetaName('twitter:description', description);
+  setMetaName('twitter:image', imageUrl);
+};
+
 interface TokenData {
   logo: string;
   ticker: string;
@@ -174,6 +218,14 @@ const Network = () => {
 
     if (studyId) fetchData();
   }, [studyId]);
+
+  // Update meta tags when tokens load
+  useEffect(() => {
+    if (tokens.length > 0) {
+      const primaryToken = tokens[0];
+      updateMetaTags(primaryToken.ticker, tokens.length);
+    }
+  }, [tokens]);
 
   // Generate network graph with collision avoidance
   const { nodes, edges } = useMemo(() => {
