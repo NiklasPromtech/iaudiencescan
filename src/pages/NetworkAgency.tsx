@@ -369,8 +369,9 @@ const NetworkAgency = () => {
     params.set('text', colors.textPrimary.replace('#', ''));
     params.set('textSec', colors.textSecondary.replace('#', ''));
     params.set('nodeBg', colors.nodeBg.replace('#', ''));
-    if (title !== 'Token Network') params.set('title', title);
-    if (subtitle !== 'Token overlap analysis') params.set('subtitle', subtitle);
+    // Always include title and subtitle in share URL
+    params.set('title', title);
+    params.set('subtitle', subtitle);
     return `${baseUrl}?${params.toString()}`;
   };
   
