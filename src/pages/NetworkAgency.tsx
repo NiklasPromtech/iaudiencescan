@@ -383,15 +383,15 @@ const NetworkAgency = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white/60 animate-pulse">Loading network...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
+        <div className="animate-pulse" style={{ color: `${colors.textSecondary}99` }}>Loading network...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
         <div className="text-red-500">Error: {error}</div>
       </div>
     );
