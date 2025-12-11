@@ -185,6 +185,9 @@ const NetworkAgency = () => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   
+  // Check if URL has color params (hide editor if so)
+  const hasColorParams = searchParams.has('bg') || searchParams.has('accent') || searchParams.has('text');
+  
   // Initialize colors from URL params or defaults
   const getInitialColors = (): ColorConfig => {
     const bg = searchParams.get('bg');
@@ -401,9 +404,9 @@ const NetworkAgency = () => {
         <HoverPanel node={hoveredNode} position={hoverPosition} colors={colors} />
       )}
 
-      {/* Color Panel Toggle Button */}
-      <button
-        onClick={() => setPanelOpen(!panelOpen)}
+      {/* Color Panel Toggle Button - Hidden when URL has color params */}
+      {!hasColorParams && (
+        <button
         className="fixed top-1/2 -translate-y-1/2 z-50 p-3 rounded-l-xl transition-all duration-300"
         style={{
           right: panelOpen ? 320 : 0,
@@ -418,8 +421,10 @@ const NetworkAgency = () => {
           <Palette className="w-5 h-5 text-purple-400" />
         )}
       </button>
+      )}
 
-      {/* Color Panel */}
+      {/* Color Panel - Hidden when URL has color params */}
+      {!hasColorParams && (
       <div
         className="fixed top-0 right-0 h-full w-80 z-40 transition-transform duration-300 backdrop-blur-xl overflow-y-auto"
         style={{
@@ -490,6 +495,7 @@ const NetworkAgency = () => {
           </div>
         </div>
       </div>
+      )}
 
       <div className="relative w-full h-screen flex items-center justify-center">
         <svg
