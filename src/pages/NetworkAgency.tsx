@@ -212,9 +212,11 @@ const NetworkAgency = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}`
-        );
+        const uid = searchParams.get('uid');
+        const apiUrl = uid 
+          ? `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}?uid=${uid}`
+          : `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}`;
+        const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch data");
         const data = await response.json();
         setTokens(data);
@@ -226,7 +228,7 @@ const NetworkAgency = () => {
     };
 
     if (studyId) fetchData();
-  }, [studyId]);
+  }, [studyId, searchParams]);
 
   const { nodes, edges } = useMemo(() => {
     if (tokens.length === 0) return { nodes: [], edges: [] };
