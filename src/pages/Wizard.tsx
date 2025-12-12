@@ -489,6 +489,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         // Create staggered animation delay based on node position
         const animationDelay = enableBreathing ? `${(node.id * 0.3) % 4}s` : '0s';
         const animationDuration = enableBreathing ? `${4 + (node.id % 3)}s` : '0s';
+        const isCentralNode = node.id === 0;
         
         return (
           <g 
@@ -499,7 +500,9 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
               cursor: 'pointer',
               transformOrigin: `${node.x}px ${node.y}px`,
               animation: enableBreathing 
-                ? `nodeBreathing ${animationDuration} ease-in-out ${animationDelay} infinite`
+                ? isCentralNode
+                  ? `nodeBreathing ${animationDuration} ease-in-out ${animationDelay} infinite, centralNodeGlow 3s ease-in-out infinite`
+                  : `nodeBreathing ${animationDuration} ease-in-out ${animationDelay} infinite`
                 : 'none',
             }}
           >
@@ -509,7 +512,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
               r={node.size / 2 + 1}
               fill="none"
               stroke="#a855f7"
-              strokeWidth={node.id === 0 ? 2 : 1.5}
+              strokeWidth={isCentralNode ? 2 : 1.5}
               strokeOpacity={0.4 + node.score * 0.4}
             />
             <circle cx={node.x} cy={node.y} r={node.size / 2} fill="#0a0a0a" />
