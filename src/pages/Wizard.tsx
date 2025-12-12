@@ -746,17 +746,25 @@ const Wizard = () => {
                       >
                         {/* Shimmer border overlay */}
                         <div 
-                          className="absolute inset-0 rounded-2xl pointer-events-none"
+                          className="absolute inset-0 rounded-2xl pointer-events-none overflow-hidden"
                           style={{
-                            padding: '1px',
+                            padding: '1.5px',
                             background: isShimmering 
-                              ? 'linear-gradient(90deg, transparent 0%, transparent 25%, rgba(168, 85, 247, 0.8) 50%, transparent 75%, transparent 100%)'
+                              ? 'linear-gradient(135deg, transparent 0%, transparent 40%, rgba(168, 85, 247, 0.9) 45%, rgba(192, 132, 252, 1) 50%, rgba(168, 85, 247, 0.9) 55%, transparent 60%, transparent 100%)'
                               : 'rgba(255, 255, 255, 0.06)',
-                            backgroundSize: '200% 100%',
-                            animation: isShimmering ? 'borderShimmer 1s ease-in-out' : 'none',
+                            backgroundSize: '400% 400%',
+                            animation: isShimmering ? 'borderShimmer 1.2s ease-in-out' : 'none',
                             WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                             WebkitMaskComposite: 'xor',
                             maskComposite: 'exclude',
+                          }}
+                        />
+                        {/* Glow effect behind the shimmer */}
+                        <div 
+                          className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300"
+                          style={{
+                            opacity: isShimmering ? 1 : 0,
+                            boxShadow: '0 0 20px rgba(168, 85, 247, 0.4), inset 0 0 20px rgba(168, 85, 247, 0.1)',
                           }}
                         />
                         
