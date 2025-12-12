@@ -759,12 +759,12 @@ const Wizard = () => {
                             maskComposite: 'exclude',
                           }}
                         />
-                        {/* Glow effect behind the shimmer */}
+                        {/* Trailing glow effect that fades after shimmer */}
                         <div 
-                          className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300"
+                          className="absolute inset-0 rounded-2xl pointer-events-none"
                           style={{
-                            opacity: isShimmering ? 1 : 0,
-                            boxShadow: '0 0 20px rgba(168, 85, 247, 0.4), inset 0 0 20px rgba(168, 85, 247, 0.1)',
+                            animation: isShimmering ? 'shimmerTrailGlow 1.8s ease-out' : 'none',
+                            opacity: 0,
                           }}
                         />
                         
