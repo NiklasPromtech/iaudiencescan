@@ -595,8 +595,8 @@ const Wizard = () => {
     // Initial shimmer after a short delay
     const initialTimeout = setTimeout(triggerShimmer, 1500);
     
-    // Continue shimmer cycle every 3 seconds
-    const interval = setInterval(triggerShimmer, 3000);
+    // Continue shimmer cycle every 5 seconds
+    const interval = setInterval(triggerShimmer, 5000);
 
     return () => {
       clearTimeout(initialTimeout);
