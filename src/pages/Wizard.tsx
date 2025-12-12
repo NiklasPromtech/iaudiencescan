@@ -49,8 +49,8 @@ interface AgencyCategoryOption {
 }
 
 const agencyTokenOptions: AgencyTokenOption[] = [
-  { id: "holders", title: "Holders of $100 - $200 worth", studyId: "K2rI6eC3DOjBwEUZbHnL" },
-  { id: "transactors", title: "People that recently transacted the token", studyId: "LLMHf63Un8Ei0lzOOFFz" },
+  { id: "holders", title: "Wallets holding $100–$200 worth of the token", studyId: "K2rI6eC3DOjBwEUZbHnL" },
+  { id: "transactors", title: "Wallets that recently transacted the token", studyId: "LLMHf63Un8Ei0lzOOFFz" },
 ];
 
 const agencyCategoryOptions: AgencyCategoryOption[] = [
