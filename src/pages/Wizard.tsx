@@ -588,8 +588,8 @@ const Wizard = () => {
     const triggerShimmer = () => {
       const randomIndex = Math.floor(Math.random() * wizardOptions.length);
       setShimmerIndex(randomIndex);
-      // Remove shimmer class after animation completes
-      setTimeout(() => setShimmerIndex(null), 1200);
+      // Remove shimmer class after animation completes (matches 2.4s animation)
+      setTimeout(() => setShimmerIndex(null), 2400);
     };
 
     // Initial shimmer after a short delay
