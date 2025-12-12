@@ -85,3 +85,12 @@ All colors MUST be HSL.
     opacity: 0;
   }
 }
+
+@keyframes nodeBreathing {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}

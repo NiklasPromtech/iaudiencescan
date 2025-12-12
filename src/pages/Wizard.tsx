@@ -298,9 +298,10 @@ interface NetworkGraphProps {
   onNodeLeave?: () => void;
   onLoadingChange?: (loading: boolean) => void;
   skipMinLoadTime?: boolean;
+  enableBreathing?: boolean;
 }
 
-const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skipMinLoadTime = false }: NetworkGraphProps) => {
+const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skipMinLoadTime = false, enableBreathing = false }: NetworkGraphProps) => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showChart, setShowChart] = useState(false);
@@ -484,34 +485,46 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         );
       })}
 
-      {nodes.map((node) => (
-        <g 
-          key={node.id}
-          onMouseEnter={(e) => handleNodeHover(node, e)}
-          onMouseLeave={onNodeLeave}
-          style={{ cursor: 'pointer' }}
-        >
-          <circle
-            cx={node.x}
-            cy={node.y}
-            r={node.size / 2 + 1}
-            fill="none"
-            stroke="#a855f7"
-            strokeWidth={node.id === 0 ? 2 : 1.5}
-            strokeOpacity={0.4 + node.score * 0.4}
-          />
-          <circle cx={node.x} cy={node.y} r={node.size / 2} fill="#0a0a0a" />
-          <image
-            href={node.logo}
-            x={node.x - node.size / 2 + 1}
-            y={node.y - node.size / 2 + 1}
-            width={node.size - 2}
-            height={node.size - 2}
-            clipPath={`url(#wizard-clip-${studyId}-${node.id})`}
-            preserveAspectRatio="xMidYMid slice"
-          />
-        </g>
-      ))}
+      {nodes.map((node) => {
+        // Create staggered animation delay based on node position
+        const animationDelay = enableBreathing ? `${(node.id * 0.3) % 4}s` : '0s';
+        const animationDuration = enableBreathing ? `${4 + (node.id % 3)}s` : '0s';
+        
+        return (
+          <g 
+            key={node.id}
+            onMouseEnter={(e) => handleNodeHover(node, e)}
+            onMouseLeave={onNodeLeave}
+            style={{ 
+              cursor: 'pointer',
+              transformOrigin: `${node.x}px ${node.y}px`,
+              animation: enableBreathing 
+                ? `nodeBreathing ${animationDuration} ease-in-out ${animationDelay} infinite`
+                : 'none',
+            }}
+          >
+            <circle
+              cx={node.x}
+              cy={node.y}
+              r={node.size / 2 + 1}
+              fill="none"
+              stroke="#a855f7"
+              strokeWidth={node.id === 0 ? 2 : 1.5}
+              strokeOpacity={0.4 + node.score * 0.4}
+            />
+            <circle cx={node.x} cy={node.y} r={node.size / 2} fill="#0a0a0a" />
+            <image
+              href={node.logo}
+              x={node.x - node.size / 2 + 1}
+              y={node.y - node.size / 2 + 1}
+              width={node.size - 2}
+              height={node.size - 2}
+              clipPath={`url(#wizard-clip-${studyId}-${node.id})`}
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </g>
+        );
+      })}
     </svg>
   );
 };
@@ -665,9 +678,9 @@ const Wizard = () => {
                 </div>
 
                 {/* Right: Network preview */}
-                <div className="relative aspect-square max-w-[500px] mx-auto w-full">
+                <div className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
-                  <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime />
+                  <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime enableBreathing />
                 </div>
               </div>
             </div>
