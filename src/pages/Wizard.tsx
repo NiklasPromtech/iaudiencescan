@@ -555,6 +555,7 @@ const Wizard = () => {
   const [chartLoading, setChartLoading] = useState(false);
   const [fallingCards, setFallingCards] = useState<number | null>(null);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [shimmeringCard, setShimmeringCard] = useState<number | null>(null);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -579,6 +580,32 @@ const Wizard = () => {
 
     return () => clearInterval(interval);
   }, [selectedOption]);
+
+  // Random shimmer effect on cards
+  useEffect(() => {
+    if (selectedOption || fallingCards !== null) return;
+
+    const triggerShimmer = () => {
+      const randomIndex = Math.floor(Math.random() * wizardOptions.length);
+      setShimmeringCard(randomIndex);
+      
+      // Clear shimmer after animation completes
+      setTimeout(() => setShimmeringCard(null), 1000);
+    };
+
+    // Initial shimmer after a short delay
+    const initialTimeout = setTimeout(triggerShimmer, 500);
+    
+    // Continue shimmering at random intervals (800-1200ms apart)
+    const interval = setInterval(() => {
+      triggerShimmer();
+    }, 1000 + Math.random() * 400);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [selectedOption, fallingCards]);
 
   const handleSelect = (option: WizardOption, clickedIndex: number) => {
     setFallingCards(clickedIndex);
@@ -701,13 +728,14 @@ const Wizard = () => {
                     };
                     
                     const isFalling = fallingCards !== null;
+                    const isShimmering = shimmeringCard === index;
                     
                     return (
                       <button
                         key={option.id}
                         onClick={() => handleSelect(option, index)}
                         disabled={isFalling}
-                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 ${
+                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] rounded-2xl p-5 text-left transition-all duration-300 ${
                           isFalling ? 'pointer-events-none' : ''
                         }`}
                         style={{
@@ -716,6 +744,22 @@ const Wizard = () => {
                             : `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
                         }}
                       >
+                        {/* Shimmer border overlay */}
+                        <div 
+                          className="absolute inset-0 rounded-2xl pointer-events-none"
+                          style={{
+                            padding: '1px',
+                            background: isShimmering 
+                              ? 'linear-gradient(90deg, transparent 0%, transparent 25%, rgba(168, 85, 247, 0.8) 50%, transparent 75%, transparent 100%)'
+                              : 'rgba(255, 255, 255, 0.06)',
+                            backgroundSize: '200% 100%',
+                            animation: isShimmering ? 'borderShimmer 1s ease-in-out' : 'none',
+                            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                            WebkitMaskComposite: 'xor',
+                            maskComposite: 'exclude',
+                          }}
+                        />
+                        
                         <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                         
                         <div className="relative">
