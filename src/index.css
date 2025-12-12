@@ -1,4 +1,31 @@
 @tailwind base;
+
+/* Shimmer effect for buttons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.15) 25%,
+    rgba(168, 85, 247, 0.3) 50%,
+    rgba(168, 85, 247, 0.15) 75%,
+    transparent 100%
+  );
+  border-radius: inherit;
+  animation: shimmer 1.2s ease-in-out;
+  pointer-events: none;
+}
 @tailwind components;
 @tailwind utilities;
 

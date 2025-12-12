@@ -555,6 +555,7 @@ const Wizard = () => {
   const [chartLoading, setChartLoading] = useState(false);
   const [fallingCards, setFallingCards] = useState<number | null>(null);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [shimmerIndex, setShimmerIndex] = useState<number | null>(null);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -578,6 +579,29 @@ const Wizard = () => {
     }, 3000);
 
     return () => clearInterval(interval);
+  }, [selectedOption]);
+
+  // Random shimmer effect on buttons
+  useEffect(() => {
+    if (selectedOption) return;
+
+    const triggerShimmer = () => {
+      const randomIndex = Math.floor(Math.random() * wizardOptions.length);
+      setShimmerIndex(randomIndex);
+      // Remove shimmer class after animation completes
+      setTimeout(() => setShimmerIndex(null), 1200);
+    };
+
+    // Initial shimmer after a short delay
+    const initialTimeout = setTimeout(triggerShimmer, 1500);
+    
+    // Continue shimmer cycle every 3 seconds
+    const interval = setInterval(triggerShimmer, 3000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [selectedOption]);
 
   const handleSelect = (option: WizardOption, clickedIndex: number) => {
@@ -701,15 +725,16 @@ const Wizard = () => {
                     };
                     
                     const isFalling = fallingCards !== null;
+                    const hasShimmer = shimmerIndex === index;
                     
                     return (
                       <button
                         key={option.id}
                         onClick={() => handleSelect(option, index)}
                         disabled={isFalling}
-                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 ${
+                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 overflow-hidden ${
                           isFalling ? 'pointer-events-none' : ''
-                        }`}
+                        } ${hasShimmer ? 'shimmer-active' : ''}`}
                         style={{
                           animation: isFalling 
                             ? `cardFallDown 0.5s ${getFallDelay()}ms ease-in forwards`
