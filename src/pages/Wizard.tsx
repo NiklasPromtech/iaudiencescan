@@ -35,34 +35,43 @@ interface WizardOption {
   explanationB: string;
 }
 
+// Agency-specific options
+interface AgencyTokenOption {
+  id: string;
+  title: string;
+  studyId: string;
+}
+
+interface AgencyCategoryOption {
+  id: string;
+  title: string;
+  studyId: string;
+}
+
+const agencyTokenOptions: AgencyTokenOption[] = [
+  { id: "holders", title: "Holders of $100 - $200 worth", studyId: "K2rI6eC3DOjBwEUZbHnL" },
+  { id: "transactors", title: "People that recently transacted the token", studyId: "LLMHf63Un8Ei0lzOOFFz" },
+];
+
+const agencyCategoryOptions: AgencyCategoryOption[] = [
+  { id: "meme", title: "Meme", studyId: "FnBmNZv2Ik2x8xJwHjRf" },
+  { id: "ai-agents", title: "AI Agents", studyId: "K2rI6eC3DOjBwEUZbHnL" },
+  { id: "real-estate", title: "Real Estate", studyId: "LLMHf63Un8Ei0lzOOFFz" },
+  { id: "defi", title: "DeFi", studyId: "FnBmNZv2Ik2x8xJwHjRf" },
+  { id: "gaming", title: "Gaming", studyId: "K2rI6eC3DOjBwEUZbHnL" },
+];
+
 const wizardOptions: WizardOption[] = [
   {
     id: "agency",
     icon: <Building2 className="w-8 h-8" />,
     label: "Agency",
     smallText: "Win more Web3 pitches",
-    title: "Build Web3 pitches and GTMs backed by real on-chain behavior",
-    subline: "Use on-chain behavior to remove guesswork.",
-    cta: "Validate your next Web3 pitch",
+    title: "Validate your client's market",
+    subline: "Use on-chain behavior to build pitches backed by real data.",
+    cta: "Validate your client's market",
     gradient: "from-violet-600 to-purple-600",
-    scanOptions: [
-      {
-        id: "pitch-token",
-        title: "Scan a token you're pitching",
-        description: "Validate where this project's users already overlap on-chain.",
-        cta: "Scan a pitching token",
-        icon: <Search className="w-6 h-6" />,
-        studyId: "K2rI6eC3DOjBwEUZbHnL",
-      },
-      {
-        id: "competitor",
-        title: "Scan a competitor in the same category",
-        description: "Reveal communities actively transacting with competing projects.",
-        cta: "Scan a competitor",
-        icon: <Target className="w-6 h-6" />,
-        studyId: "LLMHf63Un8Ei0lzOOFFz",
-      },
-    ],
+    scanOptions: [], // Agency uses custom flow
     explanationA: "On-chain audience overlap for [Token Name]",
     explanationB: "On-chain audience overlap for competing tokens in [Category]",
   },
@@ -556,6 +565,11 @@ const Wizard = () => {
   const [fallingCards, setFallingCards] = useState<number | null>(null);
   const [isLaunching, setIsLaunching] = useState(false);
   const [shimmerIndex, setShimmerIndex] = useState<number | null>(null);
+  
+  // Agency-specific state
+  const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
+  const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
+  const [expandedReassurance, setExpandedReassurance] = useState<string | null>(null);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -625,6 +639,9 @@ const Wizard = () => {
       // Always go back to main wizard
       setSelectedScan(null);
       setSelectedOption(null);
+      setAgencyHasToken(null);
+      setAgencySelectedOption(null);
+      setExpandedReassurance(null);
       setIsTransitioning(false);
     }, 300);
   };
@@ -635,6 +652,16 @@ const Wizard = () => {
       setSelectedScan(scanId);
       setIsTransitioning(false);
     }, 300);
+  };
+
+  // Get current study ID for agency flow
+  const getAgencyStudyId = () => {
+    if (!agencySelectedOption) return "FnBmNZv2Ik2x8xJwHjRf";
+    if (agencyHasToken) {
+      return agencyTokenOptions.find(o => o.id === agencySelectedOption)?.studyId || "FnBmNZv2Ik2x8xJwHjRf";
+    } else {
+      return agencyCategoryOptions.find(o => o.id === agencySelectedOption)?.studyId || "FnBmNZv2Ik2x8xJwHjRf";
+    }
   };
 
   return (
@@ -827,8 +854,272 @@ const Wizard = () => {
             </div>
           </footer>
           </>
+        ) : selectedOption.id === "agency" ? (
+          // Agency-specific flow with question-based navigation
+          <div className="min-h-screen flex">
+            {/* Left side - Content */}
+            <div className="w-full lg:w-[440px] xl:w-[520px] flex-shrink-0 flex flex-col justify-between px-6 lg:px-10 pt-24 pb-12 relative z-10 min-h-screen">
+              <button
+                onClick={handleBack}
+                className="absolute top-24 left-6 lg:left-10 text-white/40 hover:text-white text-sm flex items-center gap-2 transition-colors"
+              >
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                Back
+              </button>
+
+              {/* Top content */}
+              <div className="space-y-8 mt-12">
+                {/* Header - Main CTA */}
+                <div className="space-y-2">
+                  <h1 className="text-2xl md:text-3xl xl:text-4xl font-bold leading-tight">
+                    {selectedOption.title}
+                  </h1>
+                  <p className="text-white/50 text-base">
+                    {selectedOption.subline}
+                  </p>
+                </div>
+
+                {/* Question: Does your client have a token? */}
+                <div className="space-y-4" style={{ animation: 'fadeInUp 0.4s ease-out backwards' }}>
+                  <p className="text-white/80 text-base font-medium">
+                    Does your client already have a token?
+                  </p>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setAgencyHasToken(true);
+                        setAgencySelectedOption(null);
+                      }}
+                      className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
+                        agencyHasToken === true
+                          ? 'bg-purple-500/20 border-purple-500/60 text-white'
+                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      Yes, they have a token
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAgencyHasToken(false);
+                        setAgencySelectedOption(null);
+                      }}
+                      className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
+                        agencyHasToken === false
+                          ? 'bg-purple-500/20 border-purple-500/60 text-white'
+                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      No, they don't
+                    </button>
+                  </div>
+                </div>
+
+                {/* Conditional content based on answer */}
+                {agencyHasToken === true && (
+                  <div className="space-y-3" style={{ animation: 'fadeInUp 0.4s ease-out backwards' }}>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Analyze on-chain behavior of their token
+                      </p>
+                      <p className="text-white/40 text-xs mt-1">
+                        Wallets that hold or transact
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {agencyTokenOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setAgencySelectedOption(option.id)}
+                          className={`py-2.5 px-4 rounded-lg border text-sm transition-all duration-300 ${
+                            agencySelectedOption === option.id
+                              ? 'bg-purple-500/20 border-purple-500/60 text-white'
+                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          {option.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {agencyHasToken === false && (
+                  <div className="space-y-3" style={{ animation: 'fadeInUp 0.4s ease-out backwards' }}>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Find competitors by category
+                      </p>
+                      <p className="text-white/40 text-xs mt-1">
+                        Identify relevant tokens in their vertical
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {agencyCategoryOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setAgencySelectedOption(option.id)}
+                          className={`py-2.5 px-4 rounded-lg border text-sm transition-all duration-300 ${
+                            agencySelectedOption === option.id
+                              ? 'bg-purple-500/20 border-purple-500/60 text-white'
+                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          {option.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Reassurance sections - Secondary, muted */}
+                {agencyHasToken !== null && (
+                  <div className="space-y-2 pt-4 border-t border-white/[0.06]" style={{ animation: 'fadeInUp 0.5s 0.2s ease-out backwards' }}>
+                    <p className="text-white/30 text-[10px] uppercase tracking-wider mb-3">
+                      If you're hesitant
+                    </p>
+                    
+                    {/* How agencies use this data */}
+                    <button
+                      onClick={() => setExpandedReassurance(expandedReassurance === 'how' ? null : 'how')}
+                      className="w-full text-left group"
+                    >
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-white/50 text-sm group-hover:text-white/70 transition-colors">
+                          How agencies use this data
+                        </span>
+                        <ArrowRight className={`w-4 h-4 text-white/30 transition-transform duration-300 ${expandedReassurance === 'how' ? 'rotate-90' : ''}`} />
+                      </div>
+                      {expandedReassurance === 'how' && (
+                        <div className="pb-3 text-white/40 text-xs leading-relaxed space-y-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+                          <p>Agencies use AudienceScan to build data-backed pitches that win clients. The overlap data reveals which communities to target, which KOLs to partner with, and where to allocate ad spend.</p>
+                          <p className="text-purple-400/70">White-label reports available for client presentations.</p>
+                        </div>
+                      )}
+                    </button>
+                    
+                    {/* Does this actually work? */}
+                    <button
+                      onClick={() => setExpandedReassurance(expandedReassurance === 'proof' ? null : 'proof')}
+                      className="w-full text-left group"
+                    >
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-white/50 text-sm group-hover:text-white/70 transition-colors">
+                          Does this actually work?
+                        </span>
+                        <ArrowRight className={`w-4 h-4 text-white/30 transition-transform duration-300 ${expandedReassurance === 'proof' ? 'rotate-90' : ''}`} />
+                      </div>
+                      {expandedReassurance === 'proof' && (
+                        <div className="pb-3 text-white/40 text-xs leading-relaxed space-y-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+                          <p><span className="text-white/60">$8M+</span> in ad budget deployed using AudienceScan data across <span className="text-white/60">314 campaigns</span>.</p>
+                          <p>Agencies we've worked with include teams managing campaigns for BitMEX, OKX, PrimeXBT, Flare Network, and more.</p>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom CTA */}
+              <div className="mt-8">
+                <button
+                  onClick={handleLaunchApp}
+                  disabled={!agencySelectedOption}
+                  className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 ${
+                    agencySelectedOption 
+                      ? 'hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 opacity-100' 
+                      : 'opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <span>✓</span>
+                  {selectedOption.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <p className="text-white/30 text-xs mt-3">
+                  No guesses. Based on real on-chain transactions.
+                </p>
+              </div>
+            </div>
+
+            {/* Right side - Chart (dominant) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center relative min-h-screen">
+              {/* Background glow */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-10`} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-600/20 via-transparent to-transparent rounded-full blur-3xl" />
+              
+              {/* Chart - oversized */}
+              <div className={`relative w-[110%] h-[110%] max-w-[900px] max-h-[900px] transition-opacity duration-500 ${!agencySelectedOption ? 'opacity-50' : 'opacity-100'}`}>
+                <NetworkGraph 
+                  studyId={getAgencyStudyId()}
+                  onNodeHover={(node, position) => {
+                    setHoveredNode(node);
+                    setHoverPosition(position);
+                  }}
+                  onNodeLeave={() => setHoveredNode(null)}
+                  onLoadingChange={setChartLoading}
+                />
+                
+                {/* Loading overlay */}
+                {chartLoading && agencySelectedOption && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+                      <p className="text-white/60 text-sm">Loading scan data...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Overlay prompt when no option selected */}
+              {!agencySelectedOption && !chartLoading && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black/60 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/10">
+                    <p className="text-white/70 text-sm">
+                      Answer the question to see real data
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Info box when option selected - dismissable */}
+              {agencySelectedOption && showInfoBox && (
+                <div className="absolute bottom-24 right-8 max-w-[280px] animate-fade-in">
+                  <div className="bg-black/70 backdrop-blur-md px-5 py-4 rounded-xl border border-purple-500/20 relative">
+                    <button
+                      onClick={() => setShowInfoBox(false)}
+                      className="absolute top-2 right-2 text-white/40 hover:text-white transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <p className="text-purple-400 text-xs font-medium uppercase tracking-wider mb-2 pr-4">
+                      How this data is used
+                    </p>
+                    <p className="text-white/70 text-sm leading-relaxed">
+                      Each node represents a token community with wallet overlap. Use these insights to target ads, find KOLs, or craft outreach to communities already engaged with similar projects.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Label */}
+              <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/20 text-xs">
+                Derived from real on-chain wallet activity
+              </p>
+            </div>
+
+            {/* Mobile chart (below content) */}
+            <div className="lg:hidden fixed inset-0 pointer-events-none opacity-20">
+              <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-20`} />
+              <NetworkGraph studyId={getAgencyStudyId()} />
+            </div>
+
+            {/* Hover Panel */}
+            {hoveredNode && <HoverPanel node={hoveredNode} position={hoverPosition} />}
+          </div>
         ) : (
-          // Role Detail Screen - Chart dominant with options on left
+          // Other roles - Original detail screen
           <div className="min-h-screen flex">
             {/* Left side - Content */}
             <div className="w-full lg:w-[400px] xl:w-[480px] flex-shrink-0 flex flex-col justify-between px-6 lg:px-10 pt-24 pb-12 relative z-10 min-h-screen">
