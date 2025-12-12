@@ -51,7 +51,7 @@
     transparent 60%,
     transparent 100%
   );
-  animation: shimmer 1.2s ease-in-out;
+  animation: shimmer 2.4s ease-in-out;
   pointer-events: none;
 }
 @tailwind components;
