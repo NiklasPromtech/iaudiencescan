@@ -115,9 +115,9 @@ All colors MUST be HSL.
 
 @keyframes borderShimmer {
   0% {
-    background-position: -200% 0;
+    background-position: 200% 200%;
   }
   100% {
-    background-position: 200% 0;
+    background-position: -200% -200%;
   }
 }
