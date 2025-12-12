@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X } from "lucide-react";
+import AgencyHowPanel from "@/components/AgencyHowPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 import logoSquareWhite from "@/assets/logo-square-white.png";
@@ -570,6 +571,7 @@ const Wizard = () => {
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
   const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
   const [expandedReassurance, setExpandedReassurance] = useState<string | null>(null);
+  const [agencyHowPanelOpen, setAgencyHowPanelOpen] = useState(false);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -983,21 +985,15 @@ const Wizard = () => {
                     
                     {/* How agencies use this data */}
                     <button
-                      onClick={() => setExpandedReassurance(expandedReassurance === 'how' ? null : 'how')}
+                      onClick={() => setAgencyHowPanelOpen(true)}
                       className="w-full text-left group"
                     >
                       <div className="flex items-center justify-between py-2">
                         <span className="text-white/50 text-sm group-hover:text-white/70 transition-colors">
                           How agencies use this data
                         </span>
-                        <ArrowRight className={`w-4 h-4 text-white/30 transition-transform duration-300 ${expandedReassurance === 'how' ? 'rotate-90' : ''}`} />
+                        <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white/50 transition-all" />
                       </div>
-                      {expandedReassurance === 'how' && (
-                        <div className="pb-3 text-white/40 text-xs leading-relaxed space-y-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
-                          <p>Agencies use AudienceScan to build data-backed pitches that win clients. The overlap data reveals which communities to target, which KOLs to partner with, and where to allocate ad spend.</p>
-                          <p className="text-purple-400/70">White-label reports available for client presentations.</p>
-                        </div>
-                      )}
                     </button>
                     
                     {/* Does this actually work? */}
@@ -1117,6 +1113,12 @@ const Wizard = () => {
 
             {/* Hover Panel */}
             {hoveredNode && <HoverPanel node={hoveredNode} position={hoverPosition} />}
+            
+            {/* Agency How Panel */}
+            <AgencyHowPanel 
+              open={agencyHowPanelOpen} 
+              onClose={() => setAgencyHowPanelOpen(false)} 
+            />
           </div>
         ) : (
           // Other roles - Original detail screen
