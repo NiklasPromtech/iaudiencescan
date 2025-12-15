@@ -737,7 +737,44 @@ const WizardV2 = () => {
             </div>
           </div>
 
-          {/* Credibility Block */}
+          {/* What This Actually Does */}
+          <div className="py-16 px-6 border-t border-white/[0.06]">
+            <div className="max-w-4xl mx-auto">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-white">
+                    Analyze any group of wallets
+                  </h2>
+                  <p className="text-white/50 text-base">
+                    A comprehensive range of Web3 audience insights.
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-white/40 text-sm uppercase tracking-wider">Includes:</p>
+                  <ul className="space-y-2 text-white/70 text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400 mt-1">•</span>
+                      Network overlap between tokens and communities
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400 mt-1">•</span>
+                      Competitor audience analysis
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400 mt-1">•</span>
+                      White-labeled charts for decks
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-400 mt-1">•</span>
+                      Export-ready audiences for ads & KOL research
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="py-16 px-6 bg-white/[0.02]">
             <div className="max-w-4xl mx-auto text-center space-y-6">
               <h2 className="text-2xl md:text-3xl font-bold text-white">
