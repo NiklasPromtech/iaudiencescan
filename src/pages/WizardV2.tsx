@@ -695,30 +695,32 @@ const WizardV2 = () => {
                       Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      Analyze{" "}
-                      <span className="inline-block align-bottom overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
-                        <span
-                          className="flex flex-col"
-                          style={{
-                            transform: `translateY(-${currentWordIndex * WORD_HEIGHT}px)`,
-                            transition: "transform 800ms cubic-bezier(0.22, 1, 0.36, 1)",
-                          }}
-                        >
-                          {baseWords.map((word, i) => (
-                            <span
-                              key={i}
-                              className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
-                              style={{ height: WORD_HEIGHT, lineHeight: `${WORD_HEIGHT}px` }}
-                            >
-                              {word}
-                            </span>
-                          ))}
+                      <span className="whitespace-nowrap">
+                        Analyze{" "}
+                        <span className="inline-block align-bottom overflow-hidden" style={{ height: WORD_HEIGHT }}>
+                          <span
+                            className="flex flex-col"
+                            style={{
+                              transform: `translateY(-${currentWordIndex * WORD_HEIGHT}px)`,
+                              transition: "transform 800ms cubic-bezier(0.22, 1, 0.36, 1)",
+                            }}
+                          >
+                            {baseWords.map((word, i) => (
+                              <span
+                                key={i}
+                                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                                style={{ height: WORD_HEIGHT, lineHeight: `${WORD_HEIGHT}px` }}
+                              >
+                                {word}
+                              </span>
+                            ))}
+                          </span>
                         </span>
                       </span>
                       <br />
-                      wallet behavior
+                      <span className="whitespace-nowrap">wallet behavior</span>
                       <br />
-                      to back up your pitch.
+                      <span className="whitespace-nowrap">to back up your pitch.</span>
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
                       Built by a Web3 agency that got tired of guessing.
