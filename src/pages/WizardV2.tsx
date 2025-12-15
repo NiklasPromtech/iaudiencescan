@@ -692,7 +692,7 @@ const WizardV2 = () => {
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <p className="text-purple-400 text-sm tracking-widest uppercase font-medium">
-                      On-chain audience intelligence
+                      Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
                       Win Web3 pitches with{" "}
@@ -718,36 +718,9 @@ const WizardV2 = () => {
                       audience proof
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
-                      Built for agencies that need to prove why an audience will work before spending client budget.
-                    </p>
-                    <p className="text-white/30 text-sm">
                       Built by a Web3 agency that got tired of guessing.
                     </p>
                   </div>
-
-                  {/* Single Agency CTA Card - Enlarged */}
-                  <button
-                    onClick={() => handleSelect(wizardOptions[0], 0)}
-                    className="group relative bg-white/[0.03] hover:bg-white/[0.08] border border-purple-500/30 hover:border-purple-500/60 rounded-2xl p-6 text-left transition-all duration-300 overflow-hidden w-full max-w-sm"
-                    style={{ animation: 'fadeInUp 0.5s 0.2s ease-out backwards' }}
-                  >
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-600 opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
-                    
-                    <div className="relative flex items-center gap-4">
-                      <div className="text-purple-400 group-hover:scale-110 transition-transform duration-300">
-                        <Building2 className="w-10 h-10" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg mb-0.5">
-                          Win more Web3 pitches
-                        </h3>
-                        <p className="text-white/50 text-sm">
-                          Validate audiences with on-chain data
-                        </p>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </button>
                 </div>
 
                 {/* Right: Network preview */}
