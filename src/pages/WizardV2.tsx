@@ -714,8 +714,11 @@ const WizardV2 = () => {
                             </span>
                           ))}
                         </span>
-                      </span>{" "}
-                      wallet behavior to back up your pitch.
+                      </span>
+                      <br />
+                      wallet behavior
+                      <br />
+                      to back up your pitch.
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
                       Built by a Web3 agency that got tired of guessing.
