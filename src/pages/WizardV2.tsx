@@ -540,7 +540,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
   );
 };
 
-const baseWords = ["confident", "smarter", "defensible", "data-backed"];
+const baseWords = ["defensible", "data-backed", "proven", "real"];
 const WORD_HEIGHT = 56;
 
 const WizardV2 = () => {
@@ -683,7 +683,7 @@ const WizardV2 = () => {
       >
         {!selectedOption ? (
           <>
-          {/* Selection Screen */}
+          {/* Agency-Focused Landing Page */}
           <div className="min-h-screen flex flex-col">
             {/* Hero area with network preview */}
             <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
@@ -695,7 +695,7 @@ const WizardV2 = () => {
                       On-chain audience intelligence
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      Make{" "}
+                      Win Web3 pitches with{" "}
                       <span className="inline-block align-bottom overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
                         <span
                           className="flex flex-col"
@@ -715,12 +715,39 @@ const WizardV2 = () => {
                           ))}
                         </span>
                       </span>{" "}
-                      growth decisions
+                      audience proof
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
-                      Select your role to see how on-chain data reveals your next audience.
+                      Built for agencies that need to prove why an audience will work before spending client budget.
+                    </p>
+                    <p className="text-white/30 text-sm">
+                      Built by a Web3 agency that got tired of guessing.
                     </p>
                   </div>
+
+                  {/* Single Agency CTA Card - Enlarged */}
+                  <button
+                    onClick={() => handleSelect(wizardOptions[0], 0)}
+                    className="group relative bg-white/[0.03] hover:bg-white/[0.08] border border-purple-500/30 hover:border-purple-500/60 rounded-2xl p-6 text-left transition-all duration-300 overflow-hidden w-full max-w-sm"
+                    style={{ animation: 'fadeInUp 0.5s 0.2s ease-out backwards' }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-600 opacity-0 group-hover:opacity-15 transition-opacity duration-300" />
+                    
+                    <div className="relative flex items-center gap-4">
+                      <div className="text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                        <Building2 className="w-10 h-10" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-lg mb-0.5">
+                          Win more Web3 pitches
+                        </h3>
+                        <p className="text-white/50 text-sm">
+                          Validate audiences with on-chain data
+                        </p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  </button>
                 </div>
 
                 {/* Right: Network preview */}
@@ -730,118 +757,90 @@ const WizardV2 = () => {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Bottom: Options */}
-            <div className="px-6 pb-12">
-              <div className="max-w-6xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {wizardOptions.map((option, index) => {
-                    // Calculate delay based on distance from clicked card
-                    const getFallDelay = () => {
-                      if (fallingCards === null) return 0;
-                      const distance = Math.abs(index - fallingCards);
-                      return distance * 60; // 60ms delay per step away
-                    };
-                    
-                    const isFalling = fallingCards !== null;
-                    const hasShimmer = shimmerIndex === index;
-                    
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => handleSelect(option, index)}
-                        disabled={isFalling}
-                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 overflow-hidden ${
-                          isFalling ? 'pointer-events-none' : ''
-                        } ${hasShimmer ? 'shimmer-active' : ''}`}
-                        style={{
-                          animation: isFalling 
-                            ? `cardFallDown 0.5s ${getFallDelay()}ms ease-in forwards`
-                            : `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
-                        }}
-                      >
-                        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                        
-                        <div className="relative">
-                          <div className="text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300">
-                            {option.icon}
-                          </div>
-                          <h3 className="text-white font-semibold text-base mb-1">
-                            {option.label}
-                          </h3>
-                          <p className="text-white/90 text-xs">
-                            {option.smallText}
-                          </p>
-                          <ArrowRight className="absolute top-0 right-0 w-4 h-4 text-white/0 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-0.5" />
-                        </div>
-                      </button>
-                    );
-                  })}
+          {/* Credibility Block */}
+          <div className="py-16 px-6 bg-white/[0.02]">
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white">
+                Does this actually work?
+              </h2>
+              <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                <span className="text-white font-semibold">$8M+</span> in ad spend deployed using AudienceScan data across{" "}
+                <span className="text-white font-semibold">314 campaigns</span>.
+              </p>
+              <p className="text-white/40 text-sm">
+                Used by agencies running campaigns for BitMEX, OKX, PrimeXBT, Flare Network, and more.
+              </p>
+            </div>
+          </div>
+
+          {/* How Agencies Use This */}
+          <div className="py-16 px-6">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
+                How agencies use AudienceScan
+              </h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.1s ease-out backwards' }}>
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    Prove audience relevance before pitching
+                  </p>
+                </div>
+                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.2s ease-out backwards' }}>
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <Search className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    Identify KOLs and paid ad audiences using real wallet behavior
+                  </p>
+                </div>
+                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.3s ease-out backwards' }}>
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <ArrowRight className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    Drop defensible charts directly into pitch decks
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          
-          {/* Separator */}
-          <div className="border-t-2 border-white/20 mx-6 max-w-6xl lg:mx-auto" />
 
-          {/* Footer - Dark theme, compact */}
-          <footer className="py-8 px-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                {/* Brand */}
-                <div className="flex items-center gap-3">
-                  <img 
-                    src={logoSquareWhite} 
-                    alt="AudienceScan Logo" 
-                    className="h-6 w-6"
-                  />
-                  <span className="text-sm font-semibold text-white">AudienceScan</span>
-                </div>
-                
-                {/* Links */}
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-                  <a href="/blog" className="text-white/50 hover:text-purple-400 transition-colors">Blog</a>
-                  <a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-colors">Case Studies</a>
-                  <a href="/pricing" className="text-white/50 hover:text-purple-400 transition-colors">Pricing</a>
-                  <a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-colors">Features</a>
-                </div>
-                
-                {/* Social Icons */}
-                <div className="flex gap-3">
-                  <a 
-                    href="https://www.linkedin.com/company/audiencescanio/" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 brightness-0 invert" />
-                  </a>
-                  <a 
-                    href="https://t.me/audienceScan" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <img src={telegramLogo} alt="Telegram" className="w-4 h-4 brightness-0 invert" />
-                  </a>
-                  <a 
-                    href="https://x.com/AudienceScanIO" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-8 h-8 bg-white/10 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <img src={xLogo} alt="X" className="w-4 h-4 brightness-0 invert" />
-                  </a>
-                </div>
+          {/* Extends Beyond Agencies - Non-clickable */}
+          <div className="py-12 px-6 border-t border-white/[0.06]">
+            <div className="max-w-4xl mx-auto">
+              <p className="text-white/30 text-xs uppercase tracking-widest mb-4">
+                Extends beyond agencies
+              </p>
+              <p className="text-white/40 text-sm mb-4">
+                Also used by Web3 teams including:
+              </p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/30 text-sm">
+                <span>Token owners (adoption analysis)</span>
+                <span>•</span>
+                <span>Launchpads (ecosystem overlap)</span>
+                <span>•</span>
+                <span>Web3 wallets (user acquisition insights)</span>
+                <span>•</span>
+                <span>Centralized exchanges (listing demand signals)</span>
               </div>
-              
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t border-white/10 text-xs text-white/40">
-                <p>© 2024 AudienceScan. All rights reserved.</p>
-                <div className="flex gap-4 mt-2 sm:mt-0">
-                  <a href="#" className="hover:text-purple-400 transition-colors">Privacy</a>
-                  <a href="#" className="hover:text-purple-400 transition-colors">Terms</a>
-                </div>
+            </div>
+          </div>
+
+          {/* Minimal Footer */}
+          <footer className="py-6 px-6 border-t border-white/[0.06]">
+            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-white/30">
+              <div className="flex items-center gap-2">
+                <img src={logoSquareWhite} alt="AudienceScan" className="h-4 w-4 opacity-50" />
+                <span>© 2024 AudienceScan</span>
+              </div>
+              <div className="flex gap-4">
+                <span>Privacy</span>
+                <span>Terms</span>
               </div>
             </div>
           </footer>
