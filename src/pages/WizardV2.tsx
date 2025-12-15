@@ -540,7 +540,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
   );
 };
 
-const baseWords = ["defensible", "data-backed", "proven", "real"];
+const baseWords = ["defensible", "data-backed", "real"];
 const WORD_HEIGHT = 56;
 
 const WizardV2 = () => {
@@ -695,7 +695,7 @@ const WizardV2 = () => {
                       Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      Win Web3 pitches with{" "}
+                      Analyze{" "}
                       <span className="inline-block align-bottom overflow-hidden whitespace-nowrap" style={{ height: WORD_HEIGHT }}>
                         <span
                           className="flex flex-col"
@@ -715,7 +715,7 @@ const WizardV2 = () => {
                           ))}
                         </span>
                       </span>{" "}
-                      audience proof
+                      wallet behavior to back up your pitch.
                     </h1>
                     <p className="text-white/50 text-lg max-w-md">
                       Built by a Web3 agency that got tired of guessing.
