@@ -21,19 +21,19 @@ const Header = () => {
             </Link>
           </div>
           <a 
-            href="https://app.audiencescan.io" 
+            href="https://calendly.com/niklas-audiencescan/audiencescan-demo" 
             target="_blank" 
             rel="nofollow noopener noreferrer"
             onClick={() => {
               try {
-                (window as any).gtag_report_conversion?.('https://app.audiencescan.io');
+                (window as any).gtag_report_conversion?.('https://calendly.com/niklas-audiencescan/audiencescan-demo');
               } catch (e) {
                 // Conversion tracking failed, link will still work
               }
             }}
           >
-            <Button className="bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(255,255,255,0.4)] text-sm md:text-base px-3 sm:px-4 md:px-6">
-              Launch app
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] text-sm md:text-base px-3 sm:px-4 md:px-6">
+              Book a demo
             </Button>
           </a>
         </div>
