@@ -880,7 +880,7 @@ const WizardV2 = () => {
               </h2>
               
               {/* Sub-section */}
-              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6">
+              <div className="space-y-6">
                 <p className="text-white/70 text-base leading-relaxed">
                   For over 5 years we've optimised how we gather and process data from the chain in order to analyzing and aggregating accurately represent the views of billions of web3 users.
                 </p>
