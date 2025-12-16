@@ -695,10 +695,10 @@ const WizardV2 = () => {
                       Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      <span className="whitespace-nowrap">Understand any</span>
+                      <span className="whitespace-nowrap">Understand any web3</span>
                       <br />
                       <span className="whitespace-nowrap">
-                        web3 audience{" "}
+                        audience{" "}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                           instantly
                         </span>
