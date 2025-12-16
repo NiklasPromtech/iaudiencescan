@@ -747,7 +747,7 @@ const WizardV2 = () => {
           </div>
 
           {/* Section 2: Client Logos */}
-          <div className="py-12 overflow-hidden">
+          <div className="pt-4 pb-12 overflow-hidden">
             <p className="text-white/40 text-sm uppercase tracking-wider mb-8 text-center px-6">
               Used by agencies running activity for
             </p>
