@@ -852,9 +852,25 @@ const WizardV2 = () => {
                   <p className="text-white/50 text-base max-w-xl">
                     Packed with practical tools to help you create charts, audiences, dashboards, and crosstabs, on-chain data access means understanding audiences has never been easier.
                   </p>
+              </div>
+
+              {/* Sub-section 3: Insights have never been easier */}
+              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
+                <h3 className="text-xl md:text-2xl font-bold text-white">
+                  Insights have never been easier
+                </h3>
+                
+                {/* Animation placeholder */}
+                <div className="w-full h-48 rounded-lg border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                  <p className="text-white/30 text-sm">Animation placeholder</p>
                 </div>
+                
+                <p className="text-white/50 text-base max-w-xl">
+                  The future of on-chain research is here. AudienceScan Signal, our AI assistant, is fast and easy to use, opening up the power of insights to absolutely everyone. Just ask AudienceScan Signal a question using natural language, and you'll get instant insights based on a world of on-chain data from billions of enriched on-chain transaction events. Ignite your creativity, win more business, and drive ROI sky high.
+                </p>
               </div>
             </div>
+          </div>
           </div>
 
           <div className="py-16 px-6 bg-white/[0.02]">
