@@ -747,12 +747,21 @@ const WizardV2 = () => {
           </div>
 
           {/* Section 2: Client Logos */}
-          <div className="py-12 px-6">
-            <div className="max-w-4xl mx-auto text-center">
-              <p className="text-white/40 text-sm uppercase tracking-wider mb-8">
-                Used by agencies running activity for
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+          <div className="py-12 overflow-hidden">
+            <p className="text-white/40 text-sm uppercase tracking-wider mb-8 text-center px-6">
+              Used by agencies running activity for
+            </p>
+            <div className="relative w-full">
+              {/* Gradient masks for smooth fade */}
+              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black to-transparent z-10" />
+              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
+              
+              {/* Scrolling container */}
+              <div 
+                className="flex items-center gap-16 animate-[marquee_30s_linear_infinite]"
+                style={{ width: 'max-content' }}
+              >
+                {/* First set */}
                 {[
                   { src: logoBitmex, alt: "BitMEX" },
                   { src: logoOkx, alt: "OKX" },
@@ -766,10 +775,30 @@ const WizardV2 = () => {
                   { src: logoLuxy, alt: "Luxy" },
                 ].map((logo, i) => (
                   <img 
-                    key={i}
+                    key={`a-${i}`}
                     src={logo.src} 
                     alt={logo.alt}
-                    className="h-6 md:h-8 w-auto opacity-50 hover:opacity-80 transition-opacity"
+                    className="h-6 md:h-8 w-auto flex-shrink-0"
+                  />
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {[
+                  { src: logoBitmex, alt: "BitMEX" },
+                  { src: logoOkx, alt: "OKX" },
+                  { src: logoFlare, alt: "Flare" },
+                  { src: logoMantra, alt: "Mantra" },
+                  { src: logoMintlayer, alt: "MintLayer" },
+                  { src: logoSyscoin, alt: "Syscoin" },
+                  { src: logoSynesis, alt: "Synesis One" },
+                  { src: logoVent, alt: "Vent" },
+                  { src: logoSoma, alt: "Soma" },
+                  { src: logoLuxy, alt: "Luxy" },
+                ].map((logo, i) => (
+                  <img 
+                    key={`b-${i}`}
+                    src={logo.src} 
+                    alt={logo.alt}
+                    className="h-6 md:h-8 w-auto flex-shrink-0"
                   />
                 ))}
               </div>

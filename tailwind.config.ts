@@ -126,12 +126,20 @@ export default {
 						boxShadow: '0 0 40px hsl(var(--primary) / 0.6)'
 					}
 				},
-				'reverse-spin': {
+'reverse-spin': {
 					from: {
 						transform: 'rotate(360deg)'
 					},
 					to: {
 						transform: 'rotate(0deg)'
+					}
+				},
+				'marquee': {
+					'0%': {
+						transform: 'translateX(0)'
+					},
+					'100%': {
+						transform: 'translateX(-50%)'
 					}
 				}
 			},
@@ -140,7 +148,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-				'reverse-spin': 'reverse-spin 1s linear infinite'
+				'reverse-spin': 'reverse-spin 1s linear infinite',
+				'marquee': 'marquee 30s linear infinite'
 			}
 		}
 	},
