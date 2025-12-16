@@ -17,7 +17,7 @@ const COMMUNITIES = [
   { ticker: "TURBO", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/24911.png" },
 ];
 
-// Option A: Three Panel Static Flow
+// Option A: Abstract Three-Panel Flow
 const OptionA = () => {
   const [visiblePanels, setVisiblePanels] = useState(0);
 
@@ -34,91 +34,144 @@ const OptionA = () => {
     <div className="w-full">
       <h3 className="text-white/50 text-sm mb-4 text-center">Option A: Three-Panel Illustrative Flow</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Panel 1: Category */}
+        {/* Panel 1: Define Area - Abstract scattered dots converging */}
         <div 
           className={`bg-white/[0.03] border border-white/10 rounded-2xl p-6 transition-all duration-700 ${
             visiblePanels >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Define Audience</div>
-          <div className="space-y-2">
-            {CATEGORIES.map((cat, i) => (
-              <div 
-                key={cat}
-                className={`px-3 py-2 rounded-lg text-sm transition-all duration-300 ${
-                  i === 0 
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                    : 'bg-white/[0.02] text-white/40'
-                }`}
-              >
-                {cat}
-              </div>
+          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Define area</div>
+          <div className="relative h-32 flex items-center justify-center overflow-hidden">
+            {/* Abstract scattered circles representing broad audience */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/10"
+                style={{
+                  width: `${8 + Math.random() * 12}px`,
+                  height: `${8 + Math.random() * 12}px`,
+                  left: `${15 + (i % 4) * 22}%`,
+                  top: `${15 + Math.floor(i / 4) * 30}%`,
+                  opacity: visiblePanels >= 1 ? 0.6 : 0,
+                  transition: `opacity 0.5s ease-out ${i * 0.05}s`,
+                }}
+              />
             ))}
+            {/* Soft glow in center */}
+            <div 
+              className="absolute w-20 h-20 rounded-full bg-purple-500/10 blur-xl"
+              style={{
+                opacity: visiblePanels >= 1 ? 1 : 0,
+                transition: 'opacity 0.8s ease-out 0.3s',
+              }}
+            />
           </div>
         </div>
 
-        {/* Panel 2: Token */}
+        {/* Panel 2: Narrow it down - Dots converging to center */}
         <div 
           className={`bg-white/[0.03] border border-white/10 rounded-2xl p-6 transition-all duration-700 ${
             visiblePanels >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Select Token</div>
-          <div className="flex flex-col items-center gap-3">
-            {TOKENS.map((token, i) => (
-              <div 
-                key={token.ticker}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl w-full transition-all duration-300 ${
-                  i === 0 
-                    ? 'bg-purple-500/20 border border-purple-500/30' 
-                    : 'bg-white/[0.02]'
-                }`}
-              >
-                <img 
-                  src={token.logo} 
-                  alt={token.ticker} 
-                  className="w-8 h-8 rounded-full"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Narrow it down</div>
+          <div className="relative h-32 flex items-center justify-center overflow-hidden">
+            {/* Converging circles toward center */}
+            {Array.from({ length: 8 }).map((_, i) => {
+              const angle = (i / 8) * Math.PI * 2;
+              const radius = 35;
+              return (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-gradient-to-br from-purple-400/40 to-purple-600/20 border border-purple-500/20"
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    left: `calc(50% + ${Math.cos(angle) * radius}px - 5px)`,
+                    top: `calc(50% + ${Math.sin(angle) * radius}px - 5px)`,
+                    opacity: visiblePanels >= 2 ? 0.8 : 0,
+                    transition: `opacity 0.5s ease-out ${i * 0.05}s`,
+                  }}
                 />
-                <span className={i === 0 ? 'text-purple-300' : 'text-white/40'}>{token.ticker}</span>
-              </div>
-            ))}
+              );
+            })}
+            {/* Center focal point */}
+            <div 
+              className="absolute w-6 h-6 rounded-full bg-purple-500/40 border border-purple-400/50"
+              style={{
+                opacity: visiblePanels >= 2 ? 1 : 0,
+                transition: 'opacity 0.6s ease-out 0.4s',
+              }}
+            />
+            {/* Stronger center glow */}
+            <div 
+              className="absolute w-16 h-16 rounded-full bg-purple-500/20 blur-lg"
+              style={{
+                opacity: visiblePanels >= 2 ? 1 : 0,
+                transition: 'opacity 0.8s ease-out 0.3s',
+              }}
+            />
           </div>
         </div>
 
-        {/* Panel 3: Communities */}
+        {/* Panel 3: Answers - Radiant expanding knowledge */}
         <div 
           className={`bg-white/[0.03] border border-white/10 rounded-2xl p-6 transition-all duration-700 ${
             visiblePanels >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Overlapping Communities</div>
-          <div className="relative h-40 flex items-center justify-center">
-            {/* Overlapping token circles */}
-            <div className="relative">
-              {COMMUNITIES.map((token, i) => (
+          <div className="text-white/40 text-xs uppercase tracking-wider mb-3">Answers</div>
+          <div className="relative h-32 flex items-center justify-center overflow-hidden">
+            {/* Radiating rings from center - knowledge expanding */}
+            {[1, 2, 3].map((ring) => (
+              <div
+                key={ring}
+                className="absolute rounded-full border border-purple-500/20"
+                style={{
+                  width: `${ring * 32}px`,
+                  height: `${ring * 32}px`,
+                  opacity: visiblePanels >= 3 ? (0.8 - ring * 0.2) : 0,
+                  transition: `opacity 0.6s ease-out ${ring * 0.15}s`,
+                }}
+              />
+            ))}
+            {/* Glowing orbs representing insights */}
+            {Array.from({ length: 6 }).map((_, i) => {
+              const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+              const radius = 40;
+              return (
                 <div
-                  key={token.ticker}
-                  className="absolute w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center overflow-hidden"
+                  key={i}
+                  className="absolute rounded-full bg-gradient-to-br from-purple-300/60 to-purple-500/30"
                   style={{
-                    left: `${i * 24}px`,
-                    top: `${Math.sin(i * 0.8) * 20}px`,
-                    zIndex: COMMUNITIES.length - i,
-                    animationDelay: `${i * 0.1}s`,
+                    width: '8px',
+                    height: '8px',
+                    left: `calc(50% + ${Math.cos(angle) * radius}px - 4px)`,
+                    top: `calc(50% + ${Math.sin(angle) * radius}px - 4px)`,
+                    opacity: visiblePanels >= 3 ? 1 : 0,
+                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.5)',
+                    transition: `opacity 0.5s ease-out ${0.3 + i * 0.08}s`,
                   }}
-                >
-                  <img 
-                    src={token.logo} 
-                    alt={token.ticker} 
-                    className="w-8 h-8 rounded-full"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="text-center text-white/60 text-sm mt-2">
-            5 related communities found
+                />
+              );
+            })}
+            {/* Bright center - the answer */}
+            <div 
+              className="absolute w-4 h-4 rounded-full bg-purple-400"
+              style={{
+                opacity: visiblePanels >= 3 ? 1 : 0,
+                boxShadow: '0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.4)',
+                transition: 'opacity 0.6s ease-out 0.2s',
+              }}
+            />
+            {/* Ambient glow */}
+            <div 
+              className="absolute w-24 h-24 rounded-full bg-purple-500/15 blur-xl"
+              style={{
+                opacity: visiblePanels >= 3 ? 1 : 0,
+                transition: 'opacity 0.8s ease-out',
+              }}
+            />
           </div>
         </div>
       </div>
