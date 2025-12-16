@@ -852,8 +852,8 @@ const WizardV2 = () => {
                   <p className="text-white/50 text-base max-w-xl">
                     Packed with practical tools to help you create charts, audiences, dashboards, and crosstabs, on-chain data access means understanding audiences has never been easier.
                   </p>
+                </div>
               </div>
-
               {/* Sub-section 3: Insights have never been easier */}
               <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -871,75 +871,22 @@ const WizardV2 = () => {
               </div>
             </div>
           </div>
-          </div>
 
-          <div className="py-16 px-6 bg-white/[0.02]">
-            <div className="max-w-4xl mx-auto text-center space-y-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-white">
-                Does this actually work?
+          {/* Section: We've got the data you need to succeed */}
+          <div className="py-20 px-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
+                We've got the data you need to succeed
               </h2>
-              <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                <span className="text-white font-semibold">$8M+</span> in ad spend deployed using AudienceScan data across{" "}
-                <span className="text-white font-semibold">314 campaigns</span>.
-              </p>
-              <p className="text-white/40 text-sm">
-                Used by agencies running campaigns for BitMEX, OKX, PrimeXBT, Flare Network, and more.
-              </p>
-            </div>
-          </div>
-
-          {/* How Agencies Use This */}
-          <div className="py-16 px-6">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">
-                How agencies use AudienceScan
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.1s ease-out backwards' }}>
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <Target className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <p className="text-white/80 text-sm leading-relaxed">
-                    Prove audience relevance before pitching
-                  </p>
-                </div>
-                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.2s ease-out backwards' }}>
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <Search className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <p className="text-white/80 text-sm leading-relaxed">
-                    Identify KOLs and paid ad audiences using real wallet behavior
-                  </p>
-                </div>
-                <div className="space-y-3" style={{ animation: 'fadeInUp 0.5s 0.3s ease-out backwards' }}>
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <ArrowRight className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <p className="text-white/80 text-sm leading-relaxed">
-                    Drop defensible charts directly into pitch decks
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Extends Beyond Agencies - Non-clickable */}
-          <div className="py-12 px-6 border-t border-white/[0.06]">
-            <div className="max-w-4xl mx-auto">
-              <p className="text-white/30 text-xs uppercase tracking-widest mb-4">
-                Extends beyond agencies
-              </p>
-              <p className="text-white/40 text-sm mb-4">
-                Also used by Web3 teams including:
-              </p>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/30 text-sm">
-                <span>Token owners (adoption analysis)</span>
-                <span>•</span>
-                <span>Launchpads (ecosystem overlap)</span>
-                <span>•</span>
-                <span>Web3 wallets (user acquisition insights)</span>
-                <span>•</span>
-                <span>Centralized exchanges (listing demand signals)</span>
+              
+              {/* Sub-section */}
+              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6">
+                <p className="text-white/70 text-base leading-relaxed">
+                  For over 5 years we've optimised how we gather and process data from the chain in order to analyzing and aggregating accurately represent the views of billions of web3 users.
+                </p>
+                <p className="text-white/70 text-base leading-relaxed">
+                  And if we haven't got what you need at our fingertips, book a quick meeting and we will help your find the wallets relevant to your research to clue you in on any topic imaginable.
+                </p>
               </div>
             </div>
           </div>
