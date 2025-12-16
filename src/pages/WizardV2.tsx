@@ -833,6 +833,27 @@ const WizardV2 = () => {
                   Get the granularity of insight you need to understand every web3 audience under the sun.
                 </p>
               </div>
+
+              {/* Sub-section 2: Confidence comes as standard */}
+              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
+                <h3 className="text-xl md:text-2xl font-bold text-white">
+                  Confidence comes as standard
+                </h3>
+                
+                {/* Animation placeholder */}
+                <div className="w-full h-48 rounded-lg border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                  <p className="text-white/30 text-sm">Animation placeholder</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-white/50 text-base max-w-xl">
+                    Whatever you need, our powerful platform puts you in the know.
+                  </p>
+                  <p className="text-white/50 text-base max-w-xl">
+                    Packed with practical tools to help you create charts, audiences, dashboards, and crosstabs, on-chain data access means understanding audiences has never been easier.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
