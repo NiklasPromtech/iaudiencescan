@@ -888,6 +888,24 @@ const WizardV2 = () => {
                   And if we haven't got what you need at our fingertips, book a quick meeting and we will help your find the wallets relevant to your research to clue you in on any topic imaginable.
                 </p>
               </div>
+
+              {/* Stats row */}
+              <div className="flex items-center justify-center gap-8 md:gap-12 pt-8">
+                <div className="text-center">
+                  <span className="text-2xl md:text-3xl font-bold text-white">5+</span>
+                  <span className="text-2xl md:text-3xl font-bold text-primary ml-1">years</span>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div className="text-center">
+                  <span className="text-2xl md:text-3xl font-bold text-white">9+</span>
+                  <span className="text-2xl md:text-3xl font-bold text-primary ml-1">chains</span>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div className="text-center">
+                  <span className="text-2xl md:text-3xl font-bold text-white">3B+</span>
+                  <span className="text-2xl md:text-3xl font-bold text-primary ml-1">transactions</span>
+                </div>
+              </div>
             </div>
           </div>
 
