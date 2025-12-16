@@ -805,14 +805,23 @@ const WizardV2 = () => {
             </div>
           </div>
 
-          {/* What This Actually Does */}
+          {/* Section 3: Why you need AudienceScan */}
           <div className="py-16 px-6 border-t border-white/[0.06]">
             <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                  Why you need AudienceScan
+                </h2>
+                <p className="text-white/50 text-base">
+                  Just a few of the many ways<br />
+                  on-chain data helps you go further, faster...
+                </p>
+              </div>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">
+                  <h3 className="text-xl md:text-2xl font-bold text-white">
                     Analyze any group of wallets
-                  </h2>
+                  </h3>
                   <p className="text-white/50 text-base">
                     A comprehensive range of Web3 audience insights.
                   </p>
