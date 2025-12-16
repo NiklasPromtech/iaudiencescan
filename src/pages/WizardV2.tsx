@@ -11,6 +11,18 @@ import iconGoogleAds from "@/assets/icon-googleads.jpg";
 import xLogo from "@/assets/x-logo.png";
 import telegramLogo from "@/assets/telegram-logo.png";
 
+// Client logos
+import logoBitmex from "@/assets/client-logos/bitmex.png";
+import logoFlare from "@/assets/client-logos/flare.png";
+import logoLuxy from "@/assets/client-logos/luxy.png";
+import logoMantra from "@/assets/client-logos/mantra.png";
+import logoMintlayer from "@/assets/client-logos/mintlayer.png";
+import logoOkx from "@/assets/client-logos/okx.png";
+import logoSoma from "@/assets/client-logos/soma.png";
+import logoSynesis from "@/assets/client-logos/synesis.png";
+import logoSyscoin from "@/assets/client-logos/syscoin.png";
+import logoVent from "@/assets/client-logos/vent.png";
+
 interface ScanOption {
   id: string;
   title: string;
@@ -730,6 +742,36 @@ const WizardV2 = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
                   <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime enableBreathing />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Client Logos */}
+          <div className="py-12 px-6">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="text-white/40 text-sm uppercase tracking-wider mb-8">
+                Used by agencies running activity for
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                {[
+                  { src: logoBitmex, alt: "BitMEX" },
+                  { src: logoOkx, alt: "OKX" },
+                  { src: logoFlare, alt: "Flare" },
+                  { src: logoMantra, alt: "Mantra" },
+                  { src: logoMintlayer, alt: "MintLayer" },
+                  { src: logoSyscoin, alt: "Syscoin" },
+                  { src: logoSynesis, alt: "Synesis One" },
+                  { src: logoVent, alt: "Vent" },
+                  { src: logoSoma, alt: "Soma" },
+                  { src: logoLuxy, alt: "Luxy" },
+                ].map((logo, i) => (
+                  <img 
+                    key={i}
+                    src={logo.src} 
+                    alt={logo.alt}
+                    className="h-6 md:h-8 w-auto opacity-50 hover:opacity-80 transition-opacity"
+                  />
+                ))}
               </div>
             </div>
           </div>
