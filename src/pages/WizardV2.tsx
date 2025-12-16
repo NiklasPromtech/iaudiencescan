@@ -817,37 +817,21 @@ const WizardV2 = () => {
                   on-chain data helps you go further, faster...
                 </p>
               </div>
+              {/* Sub-section 1: No audience is too niche */}
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-xl md:text-2xl font-bold text-white">
-                    Analyze any group of wallets
-                  </h3>
-                  <p className="text-white/50 text-base">
-                    A comprehensive range of Web3 audience insights.
-                  </p>
+                <h3 className="text-xl md:text-2xl font-bold text-white">
+                  No audience is too niche
+                </h3>
+                
+                {/* Animation placeholder */}
+                <div className="w-full h-48 rounded-lg border border-white/10 bg-white/[0.02] flex items-center justify-center">
+                  <p className="text-white/30 text-sm">Animation placeholder</p>
                 </div>
                 
-                <div className="space-y-3">
-                  <p className="text-white/40 text-sm uppercase tracking-wider">Includes:</p>
-                  <ul className="space-y-2 text-white/70 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400 mt-1">•</span>
-                      Network overlap between tokens and communities
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400 mt-1">•</span>
-                      Competitor audience analysis
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400 mt-1">•</span>
-                      White-labeled charts for decks
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400 mt-1">•</span>
-                      Export-ready audiences for ads & KOL research
-                    </li>
-                  </ul>
-                </div>
+                <p className="text-white/50 text-base max-w-xl">
+                  Need to know about meme coin fans? Or the competitors in a specific token category?
+                  Get the granularity of insight you need to understand every web3 audience under the sun.
+                </p>
               </div>
             </div>
           </div>
