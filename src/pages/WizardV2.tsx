@@ -729,7 +729,7 @@ const WizardV2 = () => {
                     href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
                     target="_blank"
                     rel="nofollow noopener noreferrer"
-                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)]"
+                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8"
                   >
                     <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
                       Book a demo
