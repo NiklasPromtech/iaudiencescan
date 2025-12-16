@@ -818,7 +818,7 @@ const WizardV2 = () => {
                 </p>
               </div>
               {/* Sub-section 1: No audience is too niche */}
-              <div className="space-y-6">
+              <div className="rounded-xl bg-white/[0.03] p-6 md:p-8 space-y-6">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
                   No audience is too niche
                 </h3>
