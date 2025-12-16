@@ -661,12 +661,14 @@ const WizardV2 = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
         <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
-        <button
-          onClick={handleLaunchApp}
-          className="px-5 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-full text-sm transition-all hover:scale-105"
+        <a
+          href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
+          target="_blank"
+          rel="nofollow noopener noreferrer"
+          className="px-5 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] rounded-full text-sm transition-all hover:scale-105"
         >
-          Launch App
-        </button>
+          Book a demo
+        </a>
       </header>
 
       {/* Smooth white transition overlay */}
