@@ -659,7 +659,7 @@ const WizardV2 = () => {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent">
         <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
         <a
           href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
