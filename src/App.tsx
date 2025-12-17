@@ -41,6 +41,7 @@ import NoNiche from "./pages/NoNiche";
 import NoNicheV2 from "./pages/NoNicheV2";
 import NoNicheV3 from "./pages/NoNicheV3";
 import AI from "./pages/AI";
+import Confidence from "./pages/Confidence";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const App = () => (
           <Route path="/no-niche/v2" element={<NoNicheV2 />} />
           <Route path="/no-niche/v3" element={<NoNicheV3 />} />
           <Route path="/ai" element={<AI />} />
+          <Route path="/confidence/:studyId" element={<Confidence />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
