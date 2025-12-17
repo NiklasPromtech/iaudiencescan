@@ -1,5 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Check, Copy, ExternalLink, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 
 interface ChainData {
@@ -26,13 +29,25 @@ interface ConfidenceData {
   };
 }
 
+interface TokenData {
+  ticker: string;
+  logo: string;
+  x?: string;
+  telegram?: string;
+  reddit?: string;
+  youtube?: string;
+  discord?: string;
+  tags?: string[];
+  score?: number;
+}
+
 interface ApiResponse {
   data: {
     chain: ChainData[];
     social: SocialData[];
     categories: CategoryData[];
     confidence: ConfidenceData;
-    token: any[];
+    token: TokenData[];
   };
 }
 
@@ -53,6 +68,27 @@ const chainColors: Record<string, string> = {
   base: "#0052FF",
   optimism: "#FF0420",
   solana: "#9945FF",
+};
+
+const CopyButton = ({ text, label }: { text: string; label: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success(`${label} copied to clipboard`);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg text-sm transition-all"
+    >
+      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+      {copied ? "Copied!" : `Copy ${label}`}
+    </button>
+  );
 };
 
 const Confidence = () => {
@@ -105,6 +141,26 @@ const Confidence = () => {
   const maxChainCount = Math.max(...topChains.map((c) => c.c));
   const maxCategoryCount = Math.max(...topCategories.map((c) => c.c));
 
+  // Extract copyable data
+  const xHandles = data.token?.filter(t => t.x).map(t => `@${t.x}`).slice(0, 20) || [];
+  const telegramChannels = data.token?.filter(t => t.telegram).map(t => t.telegram).slice(0, 20) || [];
+  const redditCommunities = data.token?.filter(t => t.reddit).map(t => `r/${t.reddit}`).slice(0, 20) || [];
+  const allTags = [...new Set(data.token?.flatMap(t => t.tags || []))].slice(0, 30);
+  const categoryKeywords = topCategories.map(c => c.n);
+
+  const confidenceLevel = data.confidence?.overall 
+    ? data.confidence.overall >= 0.8 ? "high" 
+    : data.confidence.overall >= 0.5 ? "medium" 
+    : "low"
+    : "unknown";
+
+  const confidenceMessage = {
+    high: "This scan has high confidence. You can proceed with campaigns across all channels.",
+    medium: "This scan has moderate confidence. Start with lower-risk channels like X ads before scaling.",
+    low: "This scan has lower confidence. Consider running smaller test campaigns first.",
+    unknown: "Confidence data unavailable. Proceed with caution.",
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <link
@@ -149,9 +205,16 @@ const Confidence = () => {
             </div>
           </div>
           <h1 className="text-3xl font-semibold mb-2">Overall Confidence Score</h1>
-          <p className="text-white/50 max-w-md mx-auto">
+          <p className="text-white/50 max-w-md mx-auto mb-4">
             Based on data integrity, behavior quality, and context strength
           </p>
+          <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${
+            confidenceLevel === "high" ? "bg-green-500/20 text-green-400 border border-green-500/30" :
+            confidenceLevel === "medium" ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" :
+            "bg-red-500/20 text-red-400 border border-red-500/30"
+          }`}>
+            {confidenceMessage[confidenceLevel]}
+          </div>
         </section>
 
         {/* Confidence Components */}
@@ -188,6 +251,281 @@ const Confidence = () => {
             </div>
           </section>
         )}
+
+        {/* ACTION SECTION - What to do with this data */}
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold mb-2 flex items-center justify-center gap-2">
+              <span className="material-icons-outlined text-purple-400">rocket_launch</span>
+              Start Your Campaigns
+            </h2>
+            <p className="text-white/50 max-w-lg mx-auto">
+              Copy the data below directly into your advertising platforms. Each section includes ready-to-use targeting data.
+            </p>
+          </div>
+
+          <Accordion type="multiple" className="space-y-4 max-w-4xl mx-auto">
+            {/* X (Twitter) Ads */}
+            {xHandles.length > 0 && (
+              <AccordionItem value="x-ads" className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-white/5">
+                  <div className="flex items-center gap-3">
+                    <span className="material-icons-outlined text-purple-400">X</span>
+                    <div className="text-left">
+                      <h3 className="font-semibold">X (Twitter) Ads</h3>
+                      <p className="text-sm text-white/50">{xHandles.length} communities to target</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <p className="text-sm text-white/70 mb-3">Community handles for targeting:</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {xHandles.slice(0, 10).map(handle => (
+                          <span key={handle} className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded-full text-sm">
+                            {handle}
+                          </span>
+                        ))}
+                        {xHandles.length > 10 && (
+                          <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/50">
+                            +{xHandles.length - 10} more
+                          </span>
+                        )}
+                      </div>
+                      <CopyButton text={xHandles.join("\n")} label="All X Handles" />
+                    </div>
+                    <div className="space-y-2 text-sm text-white/60">
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Go to <a href="https://ads.x.com" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">ads.x.com</a> → Create Campaign → Followers targeting
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Paste handles into "Look-alike followers" section
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Optimize for Profile Views or Followers for brand awareness
+                      </p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* Telegram Ads */}
+            {telegramChannels.length > 0 && (
+              <AccordionItem value="telegram-ads" className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-white/5">
+                  <div className="flex items-center gap-3">
+                    <span className="material-icons-outlined text-purple-400">send</span>
+                    <div className="text-left">
+                      <h3 className="font-semibold">Telegram Ads</h3>
+                      <p className="text-sm text-white/50">{telegramChannels.length} channels to target</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <p className="text-sm text-white/70 mb-3">Telegram channels for targeting:</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {telegramChannels.slice(0, 10).map(channel => (
+                          <span key={channel} className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded-full text-sm">
+                            @{channel}
+                          </span>
+                        ))}
+                        {telegramChannels.length > 10 && (
+                          <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/50">
+                            +{telegramChannels.length - 10} more
+                          </span>
+                        )}
+                      </div>
+                      <CopyButton text={telegramChannels.join("\n")} label="All Telegram Channels" />
+                    </div>
+                    <div className="space-y-2 text-sm text-white/60">
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Go to <a href="https://ads.telegram.org" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">ads.telegram.org</a> → Create Ad
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Add channels one by one (Telegram limitation)
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Pro tip: Send users to a Telegram bot for better conversion tracking
+                      </p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* Reddit Ads */}
+            {redditCommunities.length > 0 && (
+              <AccordionItem value="reddit-ads" className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-white/5">
+                  <div className="flex items-center gap-3">
+                    <span className="material-icons-outlined text-purple-400">reddit</span>
+                    <div className="text-left">
+                      <h3 className="font-semibold">Reddit Ads</h3>
+                      <p className="text-sm text-white/50">{redditCommunities.length} subreddits to target</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <p className="text-sm text-white/70 mb-3">Reddit communities for targeting:</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {redditCommunities.slice(0, 10).map(sub => (
+                          <span key={sub} className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded-full text-sm">
+                            {sub}
+                          </span>
+                        ))}
+                        {redditCommunities.length > 10 && (
+                          <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/50">
+                            +{redditCommunities.length - 10} more
+                          </span>
+                        )}
+                      </div>
+                      <CopyButton text={redditCommunities.join("\n")} label="All Subreddits" />
+                    </div>
+                    <div className="space-y-2 text-sm text-white/60">
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Go to <a href="https://ads.reddit.com" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">ads.reddit.com</a> → Create Campaign
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Select "Community targeting" and paste subreddits
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Optimize for clicks to drive engagement
+                      </p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* Google/DV360 Ads */}
+            {allTags.length > 0 && (
+              <AccordionItem value="google-ads" className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-white/5">
+                  <div className="flex items-center gap-3">
+                    <span className="material-icons-outlined text-purple-400">ads_click</span>
+                    <div className="text-left">
+                      <h3 className="font-semibold">Google / DV360 Ads</h3>
+                      <p className="text-sm text-white/50">{allTags.length} keywords for targeting</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <p className="text-sm text-white/70 mb-3">Token tags for keyword targeting:</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {allTags.slice(0, 12).map(tag => (
+                          <span key={tag} className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded-full text-sm">
+                            {tag}
+                          </span>
+                        ))}
+                        {allTags.length > 12 && (
+                          <span className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/50">
+                            +{allTags.length - 12} more
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <CopyButton text={allTags.join("\n")} label="All Tags" />
+                        <CopyButton text={categoryKeywords.join("\n")} label="Categories" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm text-white/60">
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Go to <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline">ads.google.com</a> or DV360 → Custom intent audiences
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Paste tags as keywords for custom audience creation
+                      </p>
+                      <p className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 mt-0.5 text-purple-400 flex-shrink-0" />
+                        Set to Desktop only for better wallet user targeting
+                      </p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* DM Outreach */}
+            <AccordionItem value="dm-outreach" className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-white/5">
+                <div className="flex items-center gap-3">
+                  <span className="material-icons-outlined text-purple-400">chat</span>
+                  <div className="text-left">
+                    <h3 className="font-semibold">Direct Outreach</h3>
+                    <p className="text-sm text-white/50">X DMs & Telegram DMs via tools</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <span className="material-icons-outlined text-sm">X</span>
+                        X DMs via Drippi
+                      </h4>
+                      <p className="text-sm text-white/50 mb-3">Use X handles to scrape followers for outreach</p>
+                      <a
+                        href="https://www.drippiai.link/onboarding?&inviterUid=rhsjratWHLVB6BYKS4qx8j6HO662&inviterName=AudienceScan"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm transition-colors"
+                      >
+                        Open Drippi <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <span className="material-icons-outlined text-sm">send</span>
+                        TG DMs via Enreach
+                      </h4>
+                      <p className="text-sm text-white/50 mb-3">AI-powered Telegram outreach automation</p>
+                      <a
+                        href="https://enreach.ai"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm transition-colors"
+                      >
+                        Open Enreach <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          {/* Full Playbook Link */}
+          <div className="mt-8 text-center">
+            <Link
+              to="/strategy-playbook"
+              className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              <span className="material-icons-outlined">menu_book</span>
+              View full 10-step Strategy Playbook
+              <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
 
         {/* Social Presence */}
         <section className="mb-16">
