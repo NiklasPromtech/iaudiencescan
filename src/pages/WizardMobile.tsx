@@ -207,7 +207,7 @@ const WizardMobile = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          const tokenArray = Array.isArray(data.token) ? data.token : Array.isArray(data) ? data : [];
+          const tokenArray = Array.isArray(data?.data?.token) ? data.data.token : Array.isArray(data?.token) ? data.token : Array.isArray(data) ? data : [];
           setDefaultTokens(tokenArray);
         }
       } catch (error) {
@@ -232,7 +232,7 @@ const WizardMobile = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          const tokenArray = Array.isArray(data.token) ? data.token : Array.isArray(data) ? data : [];
+          const tokenArray = Array.isArray(data?.data?.token) ? data.data.token : Array.isArray(data?.token) ? data.token : Array.isArray(data) ? data : [];
           setTokens(tokenArray);
         }
       } catch (error) {
