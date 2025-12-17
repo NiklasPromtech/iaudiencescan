@@ -223,7 +223,7 @@ const NetworkAgency = () => {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch data");
         const data = await response.json();
-        setTokens(data);
+        setTokens(data.data?.token || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
