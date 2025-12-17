@@ -674,15 +674,15 @@ const WizardV2 = () => {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent">
-        <img src={logoWhite} alt="AudienceScan" className="h-7 opacity-80" />
+      <header className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent">
+        <img src={logoWhite} alt="AudienceScan" className="h-5 md:h-7 opacity-80" />
         <a
           href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
           target="_blank"
           rel="nofollow noopener noreferrer"
           className="relative p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)]"
         >
-          <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
+          <span className="block px-3 py-1.5 md:px-5 md:py-2 bg-black rounded-[6px] text-xs md:text-sm">
             Book a demo
           </span>
         </a>
