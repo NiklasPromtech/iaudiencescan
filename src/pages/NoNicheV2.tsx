@@ -22,7 +22,7 @@ const NoNicheV2 = () => {
   const animationRef = useRef<number | null>(null);
 
   const ZOOM_DURATION = 3000; // 3 seconds
-  const MAX_SCALE = 1000; // Even deeper zoom
+  const MAX_SCALE = 2000; // Deep zoom
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -136,8 +136,8 @@ const NoNicheV2 = () => {
                   w-16 h-16 rounded-full flex items-center justify-center
                   text-xs font-bold transition-all duration-300
                   ${isTarget 
-                    ? 'bg-white text-black border-2 border-white' 
-                    : 'bg-white/10 text-white/60 border border-white/20'
+                    ? 'bg-black text-white border-2 border-black' 
+                    : 'bg-black/10 text-black/60 border border-black/20'
                   }
                 `}
               >
@@ -190,8 +190,11 @@ const NoNicheV2 = () => {
     );
   };
 
+  // Background changes based on stage for seamless transitions
+  const bgColor = stage === 'tokens' ? 'bg-white' : 'bg-black';
+
   return (
-    <div className="w-full h-screen bg-black overflow-hidden relative">
+    <div className={`w-full h-screen ${bgColor} overflow-hidden relative transition-colors duration-0`}>
       {/* Stage indicator */}
       <div className="absolute top-6 left-6 z-10 flex gap-2">
         {(['categories', 'tokens', 'wallets'] as Stage[]).map((s) => (
@@ -199,7 +202,10 @@ const NoNicheV2 = () => {
             key={s}
             className={`
               px-3 py-1 rounded-full text-xs font-medium capitalize
-              ${stage === s ? 'bg-white text-black' : 'bg-white/10 text-white/50'}
+              ${stage === s 
+                ? (stage === 'tokens' ? 'bg-black text-white' : 'bg-white text-black')
+                : (stage === 'tokens' ? 'bg-black/10 text-black/50' : 'bg-white/10 text-white/50')
+              }
             `}
           >
             {s}
@@ -218,7 +224,9 @@ const NoNicheV2 = () => {
       <div 
         className="absolute inset-0 pointer-events-none transition-opacity duration-500"
         style={{
-          background: 'radial-gradient(circle at center, transparent 20%, black 80%)',
+          background: stage === 'tokens' 
+            ? 'radial-gradient(circle at center, transparent 20%, white 80%)'
+            : 'radial-gradient(circle at center, transparent 20%, black 80%)',
           opacity: isZooming ? 0.7 : 0,
         }}
       />
