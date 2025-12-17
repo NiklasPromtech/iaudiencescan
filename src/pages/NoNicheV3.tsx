@@ -36,23 +36,14 @@ const WALLETS = [
   '0x9a3...f2e', '0x4c8...b6d', '0x7f2...a1c', '0x3d6...e8f'
 ];
 
-const LABEL_MAP: Record<LayerType, string> = {
-  categories: 'Categories',
-  tokens: 'Tokens',
-  wallets: 'Wallets'
-};
-
 const FIELD_DEPTH = 8000; // Total depth of each field
-const FIELD_GAP = 2000; // Gap between fields
+const FIELD_GAP = 4000; // Longer gap between fields for blackout effect
 const VELOCITY = 600; // Speed through the tunnel
 
 const NoNicheV3: React.FC = () => {
   const [asteroids, setAsteroids] = useState<Asteroid[]>([]);
-  const [currentLayerType, setCurrentLayerType] = useState<LayerType>('categories');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const zOffsetRef = useRef(0);
   const animationRef = useRef<number | null>(null);
-  const prevLayerTypeRef = useRef<LayerType>('categories');
 
   // Generate asteroids for a field
   const generateField = (type: LayerType, startZ: number): Asteroid[] => {
@@ -88,16 +79,6 @@ const NoNicheV3: React.FC = () => {
     setAsteroids([...categoriesField, ...tokensField, ...walletsField]);
   }, []);
 
-  // Trigger pulse on layer type change
-  useEffect(() => {
-    if (prevLayerTypeRef.current !== currentLayerType) {
-      setIsTransitioning(true);
-      const timeout = setTimeout(() => setIsTransitioning(false), 500);
-      prevLayerTypeRef.current = currentLayerType;
-      return () => clearTimeout(timeout);
-    }
-  }, [currentLayerType]);
-
   // Animation loop
   useEffect(() => {
     let lastTime = performance.now();
@@ -108,18 +89,7 @@ const NoNicheV3: React.FC = () => {
 
       zOffsetRef.current += VELOCITY * deltaTime;
 
-      // Determine current layer type based on position
       const totalCycleLength = (FIELD_DEPTH + FIELD_GAP) * 3;
-      const cyclePosition = zOffsetRef.current % totalCycleLength;
-      
-      let newLayerType: LayerType = 'categories';
-      if (cyclePosition > (FIELD_DEPTH + FIELD_GAP) * 2) {
-        newLayerType = 'wallets';
-      } else if (cyclePosition > FIELD_DEPTH + FIELD_GAP) {
-        newLayerType = 'tokens';
-      }
-      
-      setCurrentLayerType(newLayerType);
 
       // Recycle asteroids that have passed
       setAsteroids(prevAsteroids => {
@@ -237,24 +207,17 @@ const NoNicheV3: React.FC = () => {
         }}
       />
 
-      {/* Layer type indicator - top right */}
+      {/* Static label - top right */}
       <div className="absolute top-8 right-8 z-50">
         <div 
-          className={`
-            px-4 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider
-            transition-all duration-300
-            ${isTransitioning 
-              ? 'shadow-[0_0_20px_rgba(255,255,255,0.6)] scale-105' 
-              : 'shadow-[0_0_10px_rgba(255,255,255,0.2)]'
-            }
-          `}
+          className="px-4 py-2 rounded-lg text-sm font-semibold tracking-wide"
           style={{ 
             backgroundColor: 'rgba(255,255,255,0.1)',
             color: '#ffffff',
             border: '1px solid rgba(255,255,255,0.3)'
           }}
         >
-          {LABEL_MAP[currentLayerType]}
+          Insights from any corner of web3
         </div>
       </div>
 
