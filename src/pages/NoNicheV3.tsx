@@ -28,17 +28,24 @@ const WALLETS = [
   '0x1d5...e9a', '0x8c3...b7f'
 ];
 
+const LABEL_MAP: Record<LayerType, string> = {
+  categories: 'Categories',
+  tokens: 'Tokens',
+  wallets: 'Wallets'
+};
+
 const NoNicheV3: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [layers, setLayers] = useState<Layer[]>([]);
   const [currentLayerType, setCurrentLayerType] = useState<LayerType>('categories');
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const zOffsetRef = useRef(0);
   const animationRef = useRef<number | null>(null);
+  const prevLayerTypeRef = useRef<LayerType>('categories');
 
   const LAYER_SPACING = 1200;
   const VELOCITY = 400;
   const RECYCLE_Z = -800;
-  const FAR_Z = 4800;
 
   // Initialize layers
   useEffect(() => {
@@ -56,6 +63,16 @@ const NoNicheV3: React.FC = () => {
     setLayers(initialLayers);
   }, []);
 
+  // Trigger pulse on layer type change
+  useEffect(() => {
+    if (prevLayerTypeRef.current !== currentLayerType) {
+      setIsTransitioning(true);
+      const timeout = setTimeout(() => setIsTransitioning(false), 500);
+      prevLayerTypeRef.current = currentLayerType;
+      return () => clearTimeout(timeout);
+    }
+  }, [currentLayerType]);
+
   // Animation loop
   useEffect(() => {
     let lastTime = performance.now();
@@ -66,9 +83,7 @@ const NoNicheV3: React.FC = () => {
 
       zOffsetRef.current += VELOCITY * deltaTime;
 
-      // Recycle layers that have passed the camera
       setLayers(prevLayers => {
-        // Find the closest layer to determine current type
         let closestLayer: Layer | null = null;
         let closestZ = Infinity;
         
@@ -154,38 +169,25 @@ const NoNicheV3: React.FC = () => {
         }}
       >
         <div className="grid grid-cols-6 gap-4 max-w-4xl">
-          {items.map((item, idx) => {
-            const isCenter = idx === 7 || idx === 8;
-            return (
-              <div
-                key={item}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap
-                  transition-all duration-300 border
-                  ${isCenter 
-                    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.4)]' 
-                    : 'bg-transparent text-white/70 border-white/20'
-                  }
-                `}
-              >
-                {item}
-              </div>
-            );
-          })}
+          {items.map((item) => (
+            <div
+              key={item}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap border border-white/30 text-white/80"
+              style={{ backgroundColor: 'transparent' }}
+            >
+              {item}
+            </div>
+          ))}
         </div>
       </div>
     );
   };
 
-  const getLabelStyle = (type: LayerType) => {
-    const isActive = currentLayerType === type;
-    return `text-xs font-medium transition-all duration-300 ${
-      isActive ? 'text-white' : 'text-white/30'
-    }`;
-  };
-
   return (
-    <div className="w-full h-screen bg-black overflow-hidden relative">
+    <div 
+      className="w-full h-screen overflow-hidden relative"
+      style={{ backgroundColor: '#000000' }}
+    >
       {/* 3D Container */}
       <div
         ref={containerRef}
@@ -215,31 +217,33 @@ const NoNicheV3: React.FC = () => {
         }}
       />
 
-      {/* Layer type indicator */}
-      <div className="absolute top-1/2 left-8 -translate-y-1/2 z-10 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-            currentLayerType === 'categories' ? 'bg-white' : 'bg-white/20'
-          }`} />
-          <span className={getLabelStyle('categories')}>Categories</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-            currentLayerType === 'tokens' ? 'bg-white' : 'bg-white/20'
-          }`} />
-          <span className={getLabelStyle('tokens')}>Tokens</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-            currentLayerType === 'wallets' ? 'bg-white' : 'bg-white/20'
-          }`} />
-          <span className={getLabelStyle('wallets')}>Wallets</span>
+      {/* Layer type indicator - top right, single word with background */}
+      <div className="absolute top-8 right-8 z-10">
+        <div 
+          className={`
+            px-4 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider
+            transition-all duration-300
+            ${isTransitioning 
+              ? 'shadow-[0_0_20px_rgba(255,255,255,0.6)] scale-105' 
+              : 'shadow-[0_0_10px_rgba(255,255,255,0.2)]'
+            }
+          `}
+          style={{ 
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)'
+          }}
+        >
+          {LABEL_MAP[currentLayerType]}
         </div>
       </div>
 
       {/* Center crosshair */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="w-4 h-4 border border-white/20 rounded-full" />
+        <div 
+          className="w-4 h-4 rounded-full"
+          style={{ border: '1px solid rgba(255,255,255,0.2)' }}
+        />
       </div>
     </div>
   );
