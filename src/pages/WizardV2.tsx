@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X } from "lucide-react";
 import AgencyHowPanel from "@/components/AgencyHowPanel";
 import AsteroidFieldAnimation from "@/components/AsteroidFieldAnimation";
+import ConfidenceAnimation from "@/components/ConfidenceAnimation";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 import logoSquareWhite from "@/assets/logo-square-white.png";
 import iconX from "@/assets/icon-x.jpg";
@@ -845,10 +846,8 @@ const WizardV2 = () => {
                   Confidence comes as standard
                 </h3>
                 
-                {/* Animation placeholder */}
-                <div className="w-full h-48 rounded-lg border border-white/10 bg-white/[0.02] flex items-center justify-center">
-                  <p className="text-white/30 text-sm">Animation placeholder</p>
-                </div>
+                {/* Confidence Animation */}
+                <ConfidenceAnimation className="w-full h-48 rounded-lg border border-white/10 bg-black/20" />
                 
                 <div className="space-y-4">
                   <p className="text-white/50 text-base max-w-xl">
