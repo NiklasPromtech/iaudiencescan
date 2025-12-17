@@ -149,6 +149,17 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
 
   return (
     <div className={`w-full h-full overflow-hidden relative ${className}`}>
+      {/* Black background container - 20px smaller */}
+      <div 
+        className="absolute bg-black rounded-lg"
+        style={{
+          top: 10,
+          left: 10,
+          right: 10,
+          bottom: 10,
+          borderRadius: 8,
+        }}
+      />
       <div className="absolute inset-0">
         {asteroids.map(asteroid => {
           const style = getAsteroidStyle(asteroid);
