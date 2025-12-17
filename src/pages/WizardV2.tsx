@@ -213,12 +213,17 @@ const wizardOptions: WizardOption[] = [
 interface TokenData {
   logo: string;
   ticker: string;
-  score: number;
-  x: string;
-  telegram: string;
-  reddit: string;
-  youtube: string;
-  tags: string[];
+  score?: number;
+  confidence?: {
+    overall: number;
+    components?: Record<string, number>;
+    signals?: Record<string, unknown>;
+  };
+  x?: string;
+  telegram?: string;
+  reddit?: string;
+  youtube?: string;
+  tags?: string[];
 }
 
 interface Node {
@@ -378,7 +383,8 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
     const generatedNodes: Node[] = [];
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
-      const nodeSize = 16 + token.score * 24;
+      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
+      const nodeSize = 16 + tokenScore * 24;
       let x: number, y: number;
       let attempts = 0;
 
@@ -414,7 +420,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         y,
         logo: token.logo,
         ticker: token.ticker || '',
-        score: token.score,
+        score: tokenScore,
         size: nodeSize,
         socialX: token.x || '',
         telegram: token.telegram || '',

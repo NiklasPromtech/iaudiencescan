@@ -10,12 +10,17 @@ import iconGoogleAds from "@/assets/icon-googleads.jpg";
 interface TokenData {
   logo: string;
   ticker: string;
-  score: number;
-  x: string;
-  telegram: string;
-  reddit: string;
-  youtube: string;
-  tags: string[];
+  score?: number;
+  confidence?: {
+    overall: number;
+    components?: Record<string, number>;
+    signals?: Record<string, unknown>;
+  };
+  x?: string;
+  telegram?: string;
+  reddit?: string;
+  youtube?: string;
+  tags?: string[];
 }
 
 interface Node {
@@ -251,7 +256,8 @@ const NetworkAgency = () => {
     const generatedNodes: Node[] = [];
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
-      const nodeSize = 24 + token.score * 36;
+      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
+      const nodeSize = 24 + tokenScore * 36;
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
@@ -291,7 +297,7 @@ const NetworkAgency = () => {
         y,
         logo: token.logo,
         ticker: token.ticker || '',
-        score: token.score,
+        score: tokenScore,
         size: nodeSize,
         socialX: token.x || '',
         telegram: token.telegram || '',

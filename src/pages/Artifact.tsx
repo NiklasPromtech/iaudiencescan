@@ -4,7 +4,10 @@ import logoWhite from "@/assets/audiencescan-logo-white.png";
 
 interface TokenData {
   logo: string;
-  score: number;
+  score?: number;
+  confidence?: {
+    overall: number;
+  };
 }
 
 const Artifact = () => {
@@ -111,19 +114,20 @@ const TokenOverlapChart = ({ tokens }: TokenOverlapChartProps) => {
   const positionedTokens: { x: number; y: number; r: number; logo: string; opacity: number; score: number }[] = [];
   
   // Sort by score descending so higher scores are in inner rings
-  const sortedTokens = [...otherTokens].sort((a, b) => b.score - a.score);
+  const sortedTokens = [...otherTokens].sort((a, b) => (b.score ?? b.confidence?.overall ?? 0.5) - (a.score ?? a.confidence?.overall ?? 0.5));
   
   rings.forEach(([count, radius, tokenSize, baseOpacity]) => {
     for (let i = 0; i < count && tokenIndex < sortedTokens.length; i++) {
       const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
       const token = sortedTokens[tokenIndex];
+      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
       positionedTokens.push({
         x: center + Math.cos(angle) * radius,
         y: center + Math.sin(angle) * radius,
         r: tokenSize,
         logo: token.logo,
-        opacity: baseOpacity * Math.max(token.score, 0.3),
-        score: token.score,
+        opacity: baseOpacity * Math.max(tokenScore, 0.3),
+        score: tokenScore,
       });
       tokenIndex++;
     }
