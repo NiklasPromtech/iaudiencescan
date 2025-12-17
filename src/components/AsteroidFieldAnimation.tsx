@@ -163,10 +163,10 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
       <style>{`
         @keyframes glow-pulse {
           0%, 100% {
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1), inset 0 0 15px rgba(168, 85, 247, 0.03);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.06);
           }
           50% {
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.25), inset 0 0 25px rgba(168, 85, 247, 0.08);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.5), inset 0 0 25px rgba(168, 85, 247, 0.16);
           }
         }
       `}</style>
