@@ -40,6 +40,7 @@ import WizardV2 from "./pages/WizardV2";
 import NoNiche from "./pages/NoNiche";
 import NoNicheV2 from "./pages/NoNicheV2";
 import NoNicheV3 from "./pages/NoNicheV3";
+import AI from "./pages/AI";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
           <Route path="/no-niche" element={<NoNiche />} />
           <Route path="/no-niche/v2" element={<NoNicheV2 />} />
           <Route path="/no-niche/v3" element={<NoNicheV3 />} />
+          <Route path="/ai" element={<AI />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
