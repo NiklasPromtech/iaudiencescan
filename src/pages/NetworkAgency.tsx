@@ -257,7 +257,9 @@ const NetworkAgency = () => {
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
       const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
-      const nodeSize = 24 + tokenScore * 36;
+      // Use index-based sizing to create more variety since confidence values are often uniform
+      const indexFactor = 1 - (index / maxTokens) * 0.6; // First tokens are larger
+      const nodeSize = 20 + indexFactor * 50 + seededRandom(index * 17) * 15;
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
@@ -283,7 +285,7 @@ const NetworkAgency = () => {
           const dx = x - other.x;
           const dy = y - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = (nodeSize + other.size) / 2 + 15;
+          const minDist = (nodeSize + other.size) / 2 + 25; // Increased spacing
           return dist < minDist;
         });
 
@@ -319,7 +321,9 @@ const NetworkAgency = () => {
           e => (e.from === from && e.to === to) || (e.from === to && e.to === from)
         );
         if (!exists) {
-          const strength = (generatedNodes[from].score + generatedNodes[to].score) / 2;
+          // Create varied strength based on node positions and random factor
+          const baseFactor = seededRandom(from * 7 + to * 11);
+          const strength = 0.2 + baseFactor * 0.8;
           generatedEdges.push({ from, to, strength });
         }
       }
@@ -567,8 +571,8 @@ const NetworkAgency = () => {
               const toNode = nodes[edge.to];
               if (!fromNode || !toNode) return null;
 
-              const opacity = 0.15 + edge.strength * 0.4;
-              const strokeWidth = 0.5 + edge.strength * 1.5;
+              const opacity = 0.08 + edge.strength * 0.5;
+              const strokeWidth = 0.3 + edge.strength * 2;
 
               return (
                 <line
