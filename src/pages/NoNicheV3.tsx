@@ -37,7 +37,7 @@ const WALLETS = [
 ];
 
 const FIELD_DEPTH = 8000; // Total depth of each field
-const FIELD_GAP = 4000; // Longer gap between fields for blackout effect
+const FIELD_GAP = 2000; // Gap between fields for blackout effect
 const VELOCITY = 600; // Speed through the tunnel
 
 const NoNicheV3: React.FC = () => {
