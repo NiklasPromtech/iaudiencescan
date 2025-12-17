@@ -280,7 +280,7 @@ const PlaceholderAI = () => {
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               </div>
-              <div className="relative bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 min-w-[120px] h-12 overflow-hidden">
+              <div className="relative bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 min-w-[120px] h-10 overflow-hidden flex items-center">
                 {/* Particles inside thinking bubble */}
                 {particles.map(p => (
                   <div
