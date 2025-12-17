@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { Search, Sparkles } from "lucide-react";
 
 const QUESTION = "Which communities overlap most with $PEPE holders?";
 const INSIGHTS = [
@@ -13,7 +14,6 @@ const PlaceholderAI = () => {
   const [typedText, setTypedText] = useState("");
   const [visibleInsights, setVisibleInsights] = useState<number>(0);
   const [cursorVisible, setCursorVisible] = useState(true);
-  const animationRef = useRef<number | null>(null);
 
   // Cursor blink
   useEffect(() => {
@@ -36,7 +36,7 @@ const PlaceholderAI = () => {
         clearInterval(typeInterval);
         setTimeout(() => setPhase("thinking"), 500);
       }
-    }, 50);
+    }, 45);
 
     return () => clearInterval(typeInterval);
   }, [phase]);
@@ -44,7 +44,7 @@ const PlaceholderAI = () => {
   // Thinking to responding transition
   useEffect(() => {
     if (phase !== "thinking") return;
-    const timer = setTimeout(() => setPhase("responding"), 1500);
+    const timer = setTimeout(() => setPhase("responding"), 1800);
     return () => clearTimeout(timer);
   }, [phase]);
 
@@ -60,7 +60,7 @@ const PlaceholderAI = () => {
         }
         return prev + 1;
       });
-    }, 300);
+    }, 350);
 
     return () => clearInterval(revealInterval);
   }, [phase]);
@@ -86,18 +86,22 @@ const PlaceholderAI = () => {
       </div>
 
       {/* Main content */}
-      <div className="w-full max-w-lg space-y-8 relative z-10">
+      <div className="w-full max-w-lg space-y-6 relative z-10">
         {/* Input area */}
         <div className="bg-white/[0.06] border border-white/10 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="material-symbols-rounded text-purple-400 text-sm">search</span>
+              <Search className="w-4 h-4 text-purple-400" />
             </div>
             <div className="flex-1 min-h-[24px]">
               <span className="text-white/80 text-sm">
                 {typedText}
                 {phase === "typing" && (
-                  <span className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle ${cursorVisible ? 'opacity-100' : 'opacity-0'}`} />
+                  <span 
+                    className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle transition-opacity duration-100 ${
+                      cursorVisible ? 'opacity-100' : 'opacity-0'
+                    }`} 
+                  />
                 )}
               </span>
             </div>
@@ -106,11 +110,15 @@ const PlaceholderAI = () => {
 
         {/* Thinking indicator */}
         {phase === "thinking" && (
-          <div className="flex items-center justify-center gap-2 animate-fade-in">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse" style={{ animationDelay: "0ms" }} />
-              <div className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse" style={{ animationDelay: "150ms" }} />
-              <div className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse" style={{ animationDelay: "300ms" }} />
+          <div className="flex items-center justify-center gap-3 animate-fade-in py-4">
+            <div className="flex gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <div 
+                  key={i}
+                  className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse" 
+                  style={{ animationDelay: `${i * 150}ms` }} 
+                />
+              ))}
             </div>
             <span className="text-white/40 text-sm">Searching billions of transactions...</span>
           </div>
@@ -121,9 +129,9 @@ const PlaceholderAI = () => {
           <div className="space-y-3 animate-fade-in">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-                <span className="material-symbols-rounded text-white text-xs">auto_awesome</span>
+                <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-white/60 text-xs uppercase tracking-wider">AudienceScan Signal</span>
+              <span className="text-white/50 text-xs uppercase tracking-wider">AudienceScan Signal</span>
             </div>
 
             {INSIGHTS.map((insight, index) => (
@@ -141,7 +149,7 @@ const PlaceholderAI = () => {
             ))}
 
             {visibleInsights >= INSIGHTS.length && (
-              <p className="text-white/40 text-xs mt-4 animate-fade-in">
+              <p className="text-white/30 text-xs mt-4 animate-fade-in">
                 Based on 847,000 wallet transactions across 3 chains
               </p>
             )}
