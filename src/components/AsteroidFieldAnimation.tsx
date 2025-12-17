@@ -149,39 +149,6 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
 
   return (
     <div className={`w-full h-full overflow-hidden relative ${className}`}>
-      {/* Black background container - 20px smaller */}
-      <div 
-        className="absolute bg-black border border-purple-500/30 animate-[glow-pulse_3s_ease-in-out_infinite]"
-        style={{
-          top: 20,
-          left: 60,
-          right: 60,
-          bottom: 20,
-          borderRadius: 8,
-        }}
-      />
-      <style>{`
-        @keyframes glow-pulse {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 15px rgba(168, 85, 247, 0.06);
-          }
-          50% {
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.5), inset 0 0 25px rgba(168, 85, 247, 0.16);
-          }
-        }
-      `}</style>
-      
-      {/* Edge fade overlays */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Left fade */}
-        <div className="absolute left-0 top-0 bottom-0 w-24" style={{ background: 'linear-gradient(to right, #0f0f0f 0%, #0f0f0f 20%, transparent 100%)' }} />
-        {/* Right fade */}
-        <div className="absolute right-0 top-0 bottom-0 w-24" style={{ background: 'linear-gradient(to left, #0f0f0f 0%, #0f0f0f 20%, transparent 100%)' }} />
-        {/* Top fade */}
-        <div className="absolute top-0 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, #0f0f0f 0%, #0f0f0f 20%, transparent 100%)' }} />
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-16" style={{ background: 'linear-gradient(to top, #0f0f0f 0%, #0f0f0f 20%, transparent 100%)' }} />
-      </div>
       <div className="absolute inset-0">
         {asteroids.map(asteroid => {
           const style = getAsteroidStyle(asteroid);
