@@ -19,6 +19,7 @@ const SOCIALS = ["X", "TG", "Reddit", "Discord"];
 
 const PlaceholderConfidence = () => {
   const [elements, setElements] = useState<FloatingElement[]>([]);
+  const [confidenceScore, setConfidenceScore] = useState(0);
   const [phase, setPhase] = useState<"chaos" | "filtering" | "locked">("chaos");
   const [filterProgress, setFilterProgress] = useState(0);
   const animationRef = useRef<number | null>(null);
@@ -152,11 +153,43 @@ const PlaceholderConfidence = () => {
         };
       })
     );
+
+    // Animate confidence score from 0 to 100
+    // 0-99 is fast, 99-100 is very slow
+    let startTime: number | null = null;
+    const fastDuration = 1500; // 0-99 in 1.5s
+    const slowDuration = 3000; // 99-100 in 3s
+
+    const animateScore = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+
+      if (elapsed < fastDuration) {
+        // Fast phase: 0 to 99
+        const progress = elapsed / fastDuration;
+        setConfidenceScore(Math.floor(progress * 99));
+      } else {
+        // Slow phase: 99 to 100
+        const slowElapsed = elapsed - fastDuration;
+        const slowProgress = Math.min(slowElapsed / slowDuration, 1);
+        setConfidenceScore(99 + Math.floor(slowProgress));
+        
+        if (slowProgress >= 1) return;
+      }
+
+      animationRef.current = requestAnimationFrame(animateScore);
+    };
+
+    animationRef.current = requestAnimationFrame(animateScore);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
   }, [phase]);
 
   const reset = () => {
     setPhase("chaos");
     setFilterProgress(0);
+    setConfidenceScore(0);
     const newElements: FloatingElement[] = [];
     for (let i = 0; i < 25; i++) {
       newElements.push(generateElement(i));
@@ -241,7 +274,7 @@ const PlaceholderConfidence = () => {
           {/* Confidence card */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
             <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-12 py-10 text-center backdrop-blur-sm">
-              <div className="text-6xl font-bold text-white mb-2">87%</div>
+              <div className="text-6xl font-bold text-white mb-2 tabular-nums">{confidenceScore}%</div>
               <div className="text-white/40 text-xs uppercase tracking-[0.15em]">
                 Confidence
               </div>
