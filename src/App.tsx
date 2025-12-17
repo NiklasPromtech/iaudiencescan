@@ -38,6 +38,7 @@ import Wizard from "./pages/Wizard";
 import WizardMobile from "./pages/WizardMobile";
 import WizardV2 from "./pages/WizardV2";
 import NoNiche from "./pages/NoNiche";
+import NoNicheV2 from "./pages/NoNicheV2";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           <Route path="/wizard/v2" element={<WizardV2 />} />
           <Route path="/no-niche" element={<NoNiche />} />
+          <Route path="/no-niche/v2" element={<NoNicheV2 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
