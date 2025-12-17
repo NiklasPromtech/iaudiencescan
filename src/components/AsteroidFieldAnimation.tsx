@@ -151,16 +151,25 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
     <div className={`w-full h-full overflow-hidden relative ${className}`}>
       {/* Black background container - 20px smaller */}
       <div 
-        className="absolute bg-black border border-purple-500/30"
+        className="absolute bg-black border border-purple-500/30 animate-[glow-pulse_3s_ease-in-out_infinite]"
         style={{
           top: 20,
           left: 60,
           right: 60,
           bottom: 20,
           borderRadius: 8,
-          boxShadow: '0 0 30px rgba(168, 85, 247, 0.15), inset 0 0 20px rgba(168, 85, 247, 0.05)',
         }}
       />
+      <style>{`
+        @keyframes glow-pulse {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1), inset 0 0 15px rgba(168, 85, 247, 0.03);
+          }
+          50% {
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.25), inset 0 0 25px rgba(168, 85, 247, 0.08);
+          }
+        }
+      `}</style>
       <div className="absolute inset-0">
         {asteroids.map(asteroid => {
           const style = getAsteroidStyle(asteroid);
