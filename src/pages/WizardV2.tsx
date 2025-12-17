@@ -342,7 +342,8 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         );
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
-        setTokens(data.token || data);
+        const tokenArray = Array.isArray(data.token) ? data.token : Array.isArray(data) ? data : [];
+        setTokens(tokenArray);
       } catch {
         // Silently fail
       } finally {

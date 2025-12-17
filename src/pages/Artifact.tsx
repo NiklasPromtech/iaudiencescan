@@ -26,7 +26,8 @@ const Artifact = () => {
         }
         
         const data = await response.json();
-        setTokens(data.token || data);
+        const tokenArray = Array.isArray(data.token) ? data.token : Array.isArray(data) ? data : [];
+        setTokens(tokenArray);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
