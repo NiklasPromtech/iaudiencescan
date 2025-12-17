@@ -15,14 +15,16 @@ const LABELS = ["$ETH", "$SOL", "$DOGE", "Ethereum", "DeFi", "Meme", "X", "TG", 
 
 interface ConfidenceAnimationProps {
   className?: string;
+  isInView?: boolean;
 }
 
-const ConfidenceAnimation = ({ className = "" }: ConfidenceAnimationProps) => {
+const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnimationProps) => {
   const [elements, setElements] = useState<FloatingElement[]>([]);
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const [phase, setPhase] = useState<"chaos" | "filtering" | "locked">("chaos");
+  const [phase, setPhase] = useState<"idle" | "chaos" | "filtering" | "locked">("idle");
   const [filterProgress, setFilterProgress] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
   const animationRef = useRef<number | null>(null);
 
   const generateElement = useCallback((id: number): FloatingElement => {
@@ -47,6 +49,14 @@ const ConfidenceAnimation = ({ className = "" }: ConfidenceAnimationProps) => {
     }
     setElements(initialElements);
   }, [generateElement]);
+
+  // Start animation when in view
+  useEffect(() => {
+    if (isInView && !hasStarted) {
+      setHasStarted(true);
+      setPhase("chaos");
+    }
+  }, [isInView, hasStarted]);
 
   // Animation loop for chaos phase
   useEffect(() => {
@@ -78,11 +88,12 @@ const ConfidenceAnimation = ({ className = "" }: ConfidenceAnimationProps) => {
     };
   }, [phase]);
 
-  // Trigger filter after delay
+  // Trigger filter after delay (only after chaos starts)
   useEffect(() => {
+    if (phase !== "chaos") return;
     const timer = setTimeout(() => setPhase("filtering"), 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [phase]);
 
   // Filter animation
   useEffect(() => {
