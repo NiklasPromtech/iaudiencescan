@@ -132,14 +132,14 @@ const NoNicheV3: React.FC = () => {
                   px-4 py-3 rounded-xl text-sm font-medium text-center
                   transition-all duration-300
                   ${isCenter 
-                    ? 'bg-purple-500 text-white shadow-[0_0_40px_rgba(168,85,247,0.6)] scale-110' 
+                    ? 'bg-white text-black shadow-[0_0_40px_rgba(255,255,255,0.4)] scale-110' 
                     : 'bg-white/10 text-white/70 border border-white/20'
                   }
                 `}
               >
                 {cat}
                 {isCenter && (
-                  <div className="absolute inset-0 rounded-xl bg-purple-400/30 animate-pulse" />
+                  <div className="absolute inset-0 rounded-xl bg-white/20 animate-pulse" />
                 )}
               </div>
             );
@@ -176,12 +176,12 @@ const NoNicheV3: React.FC = () => {
                   w-16 h-16 rounded-full flex items-center justify-center
                   text-xs font-bold transition-all duration-300
                   ${isCenter 
-                    ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-[0_0_50px_rgba(139,92,246,0.7)] scale-125' 
+                    ? 'bg-white text-black shadow-[0_0_50px_rgba(255,255,255,0.5)] scale-125' 
                     : 'bg-white/5 text-white/60 border border-white/10'
                   }
                 `}
               >
-                {token}
+                ${token}
               </div>
             );
           })}
@@ -217,7 +217,7 @@ const NoNicheV3: React.FC = () => {
                   w-8 h-8 rounded-lg flex items-center justify-center
                   transition-all duration-300
                   ${isHighlighted 
-                    ? 'bg-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.5)]' 
+                    ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]' 
                     : 'bg-white/5 border border-white/10'
                   }
                 `}
@@ -225,7 +225,7 @@ const NoNicheV3: React.FC = () => {
                 <span 
                   className="material-icons text-sm"
                   style={{ 
-                    color: isHighlighted ? 'white' : 'rgba(255,255,255,0.3)',
+                    color: isHighlighted ? 'black' : 'rgba(255,255,255,0.3)',
                     fontSize: '14px'
                   }}
                 >
@@ -294,7 +294,7 @@ const NoNicheV3: React.FC = () => {
 
       {/* Center crosshair */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="w-4 h-4 border-2 border-purple-500/30 rounded-full" />
+        <div className="w-4 h-4 border-2 border-white/30 rounded-full" />
       </div>
     </div>
   );
