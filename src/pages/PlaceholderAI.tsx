@@ -1,14 +1,68 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sparkles } from "lucide-react";
 
-const QUESTION = "Which communities overlap with $PEPE?";
-const INSIGHTS = [
-  { label: "$DOGE", value: "78%" },
-  { label: "$SHIB", value: "65%" },
-  { label: "$FLOKI", value: "52%" },
-  { label: "Meme", value: "High" },
-  { label: "$BONK", value: "48%" },
+interface QuestionData {
+  question: string;
+  insights: { label: string; value: string }[];
+  summary: string;
+}
+
+const QUESTIONS: QuestionData[] = [
+  {
+    question: "Which communities overlap with $PEPE?",
+    insights: [
+      { label: "$DOGE", value: "78%" },
+      { label: "$SHIB", value: "65%" },
+      { label: "$FLOKI", value: "52%" },
+      { label: "Meme", value: "High" },
+      { label: "$BONK", value: "48%" },
+    ],
+    summary: "847,000 transactions across 3 chains",
+  },
+  {
+    question: "What chains are $ARB holders most active on?",
+    insights: [
+      { label: "Arbitrum", value: "94%" },
+      { label: "Ethereum", value: "76%" },
+      { label: "Optimism", value: "41%" },
+      { label: "Base", value: "28%" },
+    ],
+    summary: "1.2M wallet interactions analyzed",
+  },
+  {
+    question: "Best platforms to reach DeFi users?",
+    insights: [
+      { label: "X/Twitter", value: "89%" },
+      { label: "Telegram", value: "72%" },
+      { label: "Discord", value: "58%" },
+      { label: "Reddit", value: "34%" },
+    ],
+    summary: "Social coverage across 156 tokens",
+  },
+  {
+    question: "How confident is the $SOL scan data?",
+    insights: [
+      { label: "Overall", value: "87%" },
+      { label: "Data Integrity", value: "92%" },
+      { label: "Behavior Quality", value: "78%" },
+      { label: "Context", value: "91%" },
+    ],
+    summary: "High confidence - ready for campaigns",
+  },
+  {
+    question: "Top categories for gaming token holders?",
+    insights: [
+      { label: "GameFi", value: "High" },
+      { label: "NFT", value: "68%" },
+      { label: "Metaverse", value: "54%" },
+      { label: "DeFi", value: "42%" },
+      { label: "L2", value: "31%" },
+    ],
+    summary: "Category affinity from 92K wallets",
+  },
 ];
+
+const getRandomQuestion = () => QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
 
 interface Particle {
   id: number;
@@ -24,15 +78,20 @@ interface Particle {
 }
 
 const PlaceholderAI = () => {
+  const [currentQuestion, setCurrentQuestion] = useState<QuestionData>(getRandomQuestion);
   const [phase, setPhase] = useState<"typing" | "dissolving" | "processing" | "forming" | "complete">("typing");
   const [typedText, setTypedText] = useState("");
   const [particles, setParticles] = useState<Particle[]>([]);
   const [processingPulse, setProcessingPulse] = useState(0);
-  const [insightOpacity, setInsightOpacity] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [insightOpacity, setInsightOpacity] = useState<number[]>([]);
   const [lineOpacity, setLineOpacity] = useState(0);
   const [cursorVisible, setCursorVisible] = useState(true);
   const animationRef = useRef<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize insight opacity array
+  useEffect(() => {
+    setInsightOpacity(currentQuestion.insights.map(() => 0));
+  }, [currentQuestion]);
 
   // Cursor blink
   useEffect(() => {
@@ -44,9 +103,10 @@ const PlaceholderAI = () => {
   useEffect(() => {
     if (phase !== "typing") return;
     let charIndex = 0;
+    const question = currentQuestion.question;
     const typeInterval = setInterval(() => {
-      if (charIndex <= QUESTION.length) {
-        setTypedText(QUESTION.slice(0, charIndex));
+      if (charIndex <= question.length) {
+        setTypedText(question.slice(0, charIndex));
         charIndex++;
       } else {
         clearInterval(typeInterval);
@@ -54,7 +114,7 @@ const PlaceholderAI = () => {
       }
     }, 40);
     return () => clearInterval(typeInterval);
-  }, [phase]);
+  }, [phase, currentQuestion.question]);
 
   // Create particles when dissolving
   useEffect(() => {
@@ -92,10 +152,8 @@ const PlaceholderAI = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // Pulse effect
       setProcessingPulse(Math.sin(elapsed * 0.008) * 0.5 + 0.5);
       
-      // Orbit particles and gradually pull them in
       setParticles(prev => prev.map(p => {
         const newAngle = p.angle + p.speed;
         const shrinkingRadius = p.orbitRadius * (1 - progress * 0.7);
@@ -125,9 +183,9 @@ const PlaceholderAI = () => {
   useEffect(() => {
     if (phase !== "forming") return;
     
-    // Calculate insight positions in a circle
-    const positions = INSIGHTS.map((_, i) => {
-      const angle = (i / INSIGHTS.length) * Math.PI * 2 - Math.PI / 2;
+    const insights = currentQuestion.insights;
+    const positions = insights.map((_, i) => {
+      const angle = (i / insights.length) * Math.PI * 2 - Math.PI / 2;
       const radius = 32;
       return {
         x: 50 + Math.cos(angle) * radius,
@@ -135,21 +193,19 @@ const PlaceholderAI = () => {
       };
     });
     
-    // Assign particles to positions
     setParticles(prev => prev.map((p, i) => ({
       ...p,
-      targetX: positions[i % INSIGHTS.length].x,
-      targetY: positions[i % INSIGHTS.length].y,
+      targetX: positions[i % insights.length].x,
+      targetY: positions[i % insights.length].y,
     })));
     
-    // Animate particles outward and reveal insights
     let startTime = Date.now();
     const duration = 1200;
     
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out
+      const eased = 1 - Math.pow(1 - progress, 3);
       
       setParticles(prev => prev.map(p => ({
         ...p,
@@ -158,14 +214,12 @@ const PlaceholderAI = () => {
         opacity: (1 - progress) * p.opacity,
       })));
       
-      // Stagger insight reveals
-      setInsightOpacity(INSIGHTS.map((_, i) => {
+      setInsightOpacity(insights.map((_, i) => {
         const delay = i * 0.15;
         const insightProgress = Math.max(0, Math.min(1, (progress - delay) / 0.4));
         return insightProgress;
       }));
       
-      // Fade in lines
       setLineOpacity(Math.max(0, (progress - 0.3) / 0.7));
       
       if (progress < 1) {
@@ -179,20 +233,20 @@ const PlaceholderAI = () => {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [phase]);
+  }, [phase, currentQuestion.insights]);
 
   const reset = () => {
+    setCurrentQuestion(getRandomQuestion());
     setPhase("typing");
     setTypedText("");
     setParticles([]);
     setProcessingPulse(0);
-    setInsightOpacity([0, 0, 0, 0, 0]);
     setLineOpacity(0);
   };
 
   // Calculate insight positions
-  const insightPositions = INSIGHTS.map((_, i) => {
-    const angle = (i / INSIGHTS.length) * Math.PI * 2 - Math.PI / 2;
+  const insightPositions = currentQuestion.insights.map((_, i) => {
+    const angle = (i / currentQuestion.insights.length) * Math.PI * 2 - Math.PI / 2;
     const radius = 32;
     return {
       x: 50 + Math.cos(angle) * radius,
@@ -201,7 +255,7 @@ const PlaceholderAI = () => {
   });
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-purple-900/5 via-transparent to-transparent" />
 
@@ -296,20 +350,20 @@ const PlaceholderAI = () => {
           {/* Insight nodes */}
           {(phase === "forming" || phase === "complete") && insightPositions.map((pos, i) => (
             <div
-              key={INSIGHTS[i].label}
+              key={currentQuestion.insights[i]?.label || i}
               className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
               style={{
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
-                opacity: insightOpacity[i],
-                transform: `translate(-50%, -50%) scale(${0.8 + insightOpacity[i] * 0.2})`,
+                opacity: insightOpacity[i] || 0,
+                transform: `translate(-50%, -50%) scale(${0.8 + (insightOpacity[i] || 0) * 0.2})`,
               }}
             >
               <div className={`bg-white/[0.08] border rounded-xl px-4 py-2.5 text-center backdrop-blur-sm transition-all duration-500 ${
                 phase === "complete" ? "border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]" : "border-white/10"
               }`}>
-                <div className="text-white font-medium text-sm">{INSIGHTS[i].label}</div>
-                <div className="text-purple-400 text-xs">{INSIGHTS[i].value}</div>
+                <div className="text-white font-medium text-sm">{currentQuestion.insights[i]?.label}</div>
+                <div className="text-purple-400 text-xs">{currentQuestion.insights[i]?.value}</div>
               </div>
             </div>
           ))}
@@ -319,7 +373,7 @@ const PlaceholderAI = () => {
       {/* Bottom caption */}
       {phase === "complete" && (
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/30 text-sm animate-fade-in">
-          Analyzed 847,000 transactions across 3 chains
+          {currentQuestion.summary}
         </div>
       )}
 
