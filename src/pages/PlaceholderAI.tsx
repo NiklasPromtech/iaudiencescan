@@ -235,8 +235,33 @@ const PlaceholderAI = () => {
     };
   }, [phase, currentQuestion.insights]);
 
+  // Auto-loop after completion
+  useEffect(() => {
+    if (phase !== "complete") return;
+    
+    const timeout = setTimeout(() => {
+      // Get a different question
+      let newQuestion = getRandomQuestion();
+      while (newQuestion.question === currentQuestion.question && QUESTIONS.length > 1) {
+        newQuestion = getRandomQuestion();
+      }
+      setCurrentQuestion(newQuestion);
+      setPhase("typing");
+      setTypedText("");
+      setParticles([]);
+      setProcessingPulse(0);
+      setLineOpacity(0);
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, [phase, currentQuestion.question]);
+
   const reset = () => {
-    setCurrentQuestion(getRandomQuestion());
+    let newQuestion = getRandomQuestion();
+    while (newQuestion.question === currentQuestion.question && QUESTIONS.length > 1) {
+      newQuestion = getRandomQuestion();
+    }
+    setCurrentQuestion(newQuestion);
     setPhase("typing");
     setTypedText("");
     setParticles([]);
