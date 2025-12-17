@@ -1,64 +1,62 @@
 import { useState, useEffect, useRef } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Bot, User } from "lucide-react";
 
 interface QuestionData {
   question: string;
+  response: string;
   insights: { label: string; value: string }[];
-  summary: string;
 }
 
 const QUESTIONS: QuestionData[] = [
   {
     question: "Which communities overlap with $PEPE?",
+    response: "Based on 847K transactions across 3 chains, I found strong overlap with meme token communities:",
     insights: [
       { label: "$DOGE", value: "78%" },
       { label: "$SHIB", value: "65%" },
       { label: "$FLOKI", value: "52%" },
-      { label: "Meme", value: "High" },
       { label: "$BONK", value: "48%" },
     ],
-    summary: "847,000 transactions across 3 chains",
   },
   {
     question: "What chains are $ARB holders most active on?",
+    response: "Analyzing 1.2M wallet interactions, here's the chain activity breakdown:",
     insights: [
       { label: "Arbitrum", value: "94%" },
       { label: "Ethereum", value: "76%" },
       { label: "Optimism", value: "41%" },
       { label: "Base", value: "28%" },
     ],
-    summary: "1.2M wallet interactions analyzed",
   },
   {
     question: "Best platforms to reach DeFi users?",
+    response: "Social coverage analysis across 156 tokens shows these platforms:",
     insights: [
       { label: "X/Twitter", value: "89%" },
       { label: "Telegram", value: "72%" },
       { label: "Discord", value: "58%" },
       { label: "Reddit", value: "34%" },
     ],
-    summary: "Social coverage across 156 tokens",
   },
   {
     question: "How confident is the $SOL scan data?",
+    response: "High confidence score - this data is ready for campaign activation:",
     insights: [
       { label: "Overall", value: "87%" },
       { label: "Data Integrity", value: "92%" },
-      { label: "Behavior Quality", value: "78%" },
+      { label: "Behavior", value: "78%" },
       { label: "Context", value: "91%" },
     ],
-    summary: "High confidence - ready for campaigns",
   },
   {
     question: "Top categories for gaming token holders?",
+    response: "Category affinity analysis from 92K wallets reveals:",
     insights: [
       { label: "GameFi", value: "High" },
       { label: "NFT", value: "68%" },
       { label: "Metaverse", value: "54%" },
       { label: "DeFi", value: "42%" },
-      { label: "L2", value: "31%" },
     ],
-    summary: "Category affinity from 92K wallets",
   },
 ];
 
@@ -68,30 +66,23 @@ interface Particle {
   id: number;
   x: number;
   y: number;
-  targetX: number;
-  targetY: number;
   size: number;
   opacity: number;
-  angle: number;
   speed: number;
-  orbitRadius: number;
+  angle: number;
 }
 
 const PlaceholderAI = () => {
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData>(getRandomQuestion);
-  const [phase, setPhase] = useState<"typing" | "dissolving" | "processing" | "forming" | "complete">("typing");
+  const [phase, setPhase] = useState<"typing" | "thinking" | "responding" | "insights" | "complete">("typing");
   const [typedText, setTypedText] = useState("");
+  const [responseText, setResponseText] = useState("");
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [processingPulse, setProcessingPulse] = useState(0);
-  const [insightOpacity, setInsightOpacity] = useState<number[]>([]);
-  const [lineOpacity, setLineOpacity] = useState(0);
+  const [insightReveal, setInsightReveal] = useState<number[]>([]);
   const [cursorVisible, setCursorVisible] = useState(true);
+  const [thinkingPulse, setThinkingPulse] = useState(0);
   const animationRef = useRef<number | null>(null);
-
-  // Initialize insight opacity array
-  useEffect(() => {
-    setInsightOpacity(currentQuestion.insights.map(() => 0));
-  }, [currentQuestion]);
+  const chatRef = useRef<HTMLDivElement>(null);
 
   // Cursor blink
   useEffect(() => {
@@ -99,7 +90,7 @@ const PlaceholderAI = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Typing animation
+  // Typing animation for user message
   useEffect(() => {
     if (phase !== "typing") return;
     let charIndex = 0;
@@ -110,129 +101,97 @@ const PlaceholderAI = () => {
         charIndex++;
       } else {
         clearInterval(typeInterval);
-        setTimeout(() => setPhase("dissolving"), 600);
+        setTimeout(() => setPhase("thinking"), 400);
       }
-    }, 40);
+    }, 35);
     return () => clearInterval(typeInterval);
   }, [phase, currentQuestion.question]);
 
-  // Create particles when dissolving
+  // Thinking animation with particles
   useEffect(() => {
-    if (phase !== "dissolving") return;
+    if (phase !== "thinking") return;
     
+    // Create particles
     const newParticles: Particle[] = [];
-    for (let i = 0; i < 40; i++) {
-      const angle = (i / 40) * Math.PI * 2;
+    for (let i = 0; i < 30; i++) {
       newParticles.push({
         id: i,
-        x: 50 + (Math.random() - 0.5) * 30,
-        y: 45 + (Math.random() - 0.5) * 10,
-        targetX: 50,
-        targetY: 50,
-        size: 2 + Math.random() * 3,
-        opacity: 0.6 + Math.random() * 0.4,
-        angle: angle,
-        speed: 0.02 + Math.random() * 0.02,
-        orbitRadius: 8 + Math.random() * 12,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 2 + Math.random() * 4,
+        opacity: 0.3 + Math.random() * 0.7,
+        speed: 0.5 + Math.random() * 1.5,
+        angle: Math.random() * Math.PI * 2,
       });
     }
     setParticles(newParticles);
-    
-    setTimeout(() => setPhase("processing"), 800);
-  }, [phase]);
 
-  // Processing animation - particles orbit center
-  useEffect(() => {
-    if (phase !== "processing") return;
-    
     let startTime = Date.now();
     const duration = 2000;
-    
+
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      setProcessingPulse(Math.sin(elapsed * 0.008) * 0.5 + 0.5);
+      setThinkingPulse(Math.sin(elapsed * 0.01) * 0.5 + 0.5);
       
-      setParticles(prev => prev.map(p => {
-        const newAngle = p.angle + p.speed;
-        const shrinkingRadius = p.orbitRadius * (1 - progress * 0.7);
-        return {
-          ...p,
-          angle: newAngle,
-          x: 50 + Math.cos(newAngle) * shrinkingRadius,
-          y: 50 + Math.sin(newAngle) * shrinkingRadius,
-          opacity: p.opacity * (1 - progress * 0.3),
-        };
-      }));
-      
+      // Spiral particles inward
+      setParticles(prev => prev.map(p => ({
+        ...p,
+        x: 50 + (p.x - 50) * (1 - progress * 0.8) + Math.cos(p.angle + elapsed * 0.003 * p.speed) * (20 - progress * 18),
+        y: 50 + (p.y - 50) * (1 - progress * 0.8) + Math.sin(p.angle + elapsed * 0.003 * p.speed) * (20 - progress * 18),
+        opacity: p.opacity * (1 - progress * 0.5),
+      })));
+
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
-        setPhase("forming");
+        setParticles([]);
+        setPhase("responding");
       }
     };
-    
+
     animationRef.current = requestAnimationFrame(animate);
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, [phase]);
 
-  // Forming animation - particles shoot out to insight positions
+  // Typing animation for AI response
   useEffect(() => {
-    if (phase !== "forming") return;
+    if (phase !== "responding") return;
+    let charIndex = 0;
+    const response = currentQuestion.response;
+    const typeInterval = setInterval(() => {
+      if (charIndex <= response.length) {
+        setResponseText(response.slice(0, charIndex));
+        charIndex++;
+      } else {
+        clearInterval(typeInterval);
+        setTimeout(() => setPhase("insights"), 300);
+      }
+    }, 20);
+    return () => clearInterval(typeInterval);
+  }, [phase, currentQuestion.response]);
+
+  // Insight cards reveal
+  useEffect(() => {
+    if (phase !== "insights") return;
     
     const insights = currentQuestion.insights;
-    const positions = insights.map((_, i) => {
-      const angle = (i / insights.length) * Math.PI * 2 - Math.PI / 2;
-      const radius = 32;
-      return {
-        x: 50 + Math.cos(angle) * radius,
-        y: 50 + Math.sin(angle) * radius,
-      };
-    });
+    let revealed = 0;
     
-    setParticles(prev => prev.map((p, i) => ({
-      ...p,
-      targetX: positions[i % insights.length].x,
-      targetY: positions[i % insights.length].y,
-    })));
-    
-    let startTime = Date.now();
-    const duration = 1200;
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      
-      setParticles(prev => prev.map(p => ({
-        ...p,
-        x: 50 + (p.targetX - 50) * eased,
-        y: 50 + (p.targetY - 50) * eased,
-        opacity: (1 - progress) * p.opacity,
-      })));
-      
-      setInsightOpacity(insights.map((_, i) => {
-        const delay = i * 0.15;
-        const insightProgress = Math.max(0, Math.min(1, (progress - delay) / 0.4));
-        return insightProgress;
-      }));
-      
-      setLineOpacity(Math.max(0, (progress - 0.3) / 0.7));
-      
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
+    const revealInterval = setInterval(() => {
+      if (revealed < insights.length) {
+        setInsightReveal(prev => [...prev, revealed]);
+        revealed++;
       } else {
-        setPhase("complete");
+        clearInterval(revealInterval);
+        setTimeout(() => setPhase("complete"), 500);
       }
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
+    }, 200);
+
+    return () => clearInterval(revealInterval);
   }, [phase, currentQuestion.insights]);
 
   // Auto-loop after completion
@@ -240,7 +199,6 @@ const PlaceholderAI = () => {
     if (phase !== "complete") return;
     
     const timeout = setTimeout(() => {
-      // Get a different question
       let newQuestion = getRandomQuestion();
       while (newQuestion.question === currentQuestion.question && QUESTIONS.length > 1) {
         newQuestion = getRandomQuestion();
@@ -248,167 +206,183 @@ const PlaceholderAI = () => {
       setCurrentQuestion(newQuestion);
       setPhase("typing");
       setTypedText("");
+      setResponseText("");
       setParticles([]);
-      setProcessingPulse(0);
-      setLineOpacity(0);
-    }, 3000);
+      setInsightReveal([]);
+      setThinkingPulse(0);
+    }, 3500);
     
     return () => clearTimeout(timeout);
   }, [phase, currentQuestion.question]);
 
-  const reset = () => {
-    let newQuestion = getRandomQuestion();
-    while (newQuestion.question === currentQuestion.question && QUESTIONS.length > 1) {
-      newQuestion = getRandomQuestion();
-    }
-    setCurrentQuestion(newQuestion);
-    setPhase("typing");
-    setTypedText("");
-    setParticles([]);
-    setProcessingPulse(0);
-    setLineOpacity(0);
-  };
-
-  // Calculate insight positions
-  const insightPositions = currentQuestion.insights.map((_, i) => {
-    const angle = (i / currentQuestion.insights.length) * Math.PI * 2 - Math.PI / 2;
-    const radius = 32;
-    return {
-      x: 50 + Math.cos(angle) * radius,
-      y: 50 + Math.sin(angle) * radius,
-    };
-  });
-
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-900/5 via-transparent to-transparent" />
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+      {/* Ambient background glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-purple-900/5" />
+      <div 
+        className="absolute w-[600px] h-[600px] rounded-full blur-[120px] transition-opacity duration-1000"
+        style={{
+          background: "radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%)",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          opacity: phase === "thinking" ? 0.8 : 0.3,
+        }}
+      />
 
-      {/* Stage label */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20">
-        <span className="text-white/30 text-xs uppercase tracking-[0.2em]">
-          {phase === "typing" && "Ask anything"}
-          {phase === "dissolving" && "Processing query"}
-          {phase === "processing" && "Analyzing on-chain data"}
-          {phase === "forming" && "Generating insights"}
-          {phase === "complete" && "Insights ready"}
-        </span>
-      </div>
+      {/* Chat container */}
+      <div className="relative w-full max-w-2xl mx-4">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6 px-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-white font-medium">AudienceScan Signal</h1>
+            <p className="text-white/40 text-sm">AI Strategy Assistant</p>
+          </div>
+        </div>
 
-      {/* Main visualization area */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-[500px] h-[500px]">
-          
-          {/* Query text - typing phase */}
-          {(phase === "typing" || phase === "dissolving") && (
-            <div 
-              className={`absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500 ${
-                phase === "dissolving" ? "opacity-0 scale-95" : "opacity-100"
-              }`}
-            >
-              <div className="bg-white/[0.06] border border-white/10 rounded-xl px-5 py-3 whitespace-nowrap">
-                <span className="text-white/80 text-sm">
-                  {typedText}
-                  {phase === "typing" && (
-                    <span className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle ${cursorVisible ? 'opacity-100' : 'opacity-0'}`} />
-                  )}
-                </span>
+        {/* Chat area */}
+        <div ref={chatRef} className="space-y-4 px-4">
+          {/* User message */}
+          {(phase !== "typing" || typedText) && (
+            <div className="flex justify-end animate-fade-in">
+              <div className="flex items-start gap-3 max-w-[85%]">
+                <div className="bg-purple-500/20 border border-purple-500/30 rounded-2xl rounded-tr-sm px-4 py-3 backdrop-blur-sm">
+                  <p className="text-white/90 text-sm">
+                    {typedText}
+                    {phase === "typing" && (
+                      <span className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle transition-opacity ${cursorVisible ? 'opacity-100' : 'opacity-0'}`} />
+                    )}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-white/60" />
+                </div>
               </div>
             </div>
           )}
 
-          {/* Particles */}
-          {particles.map(p => (
-            <div
-              key={p.id}
-              className="absolute rounded-full bg-purple-400 pointer-events-none"
-              style={{
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: p.size,
-                height: p.size,
-                opacity: p.opacity,
-                transform: "translate(-50%, -50%)",
-                boxShadow: "0 0 6px rgba(168, 85, 247, 0.6)",
-              }}
-            />
-          ))}
-
-          {/* Central processing orb */}
-          {(phase === "processing" || phase === "forming" || phase === "complete") && (
-            <div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
-              style={{
-                opacity: phase === "processing" ? 1 : phase === "forming" ? 1 - lineOpacity * 0.3 : 0.8,
-              }}
-            >
+          {/* Thinking indicator */}
+          {phase === "thinking" && (
+            <div className="flex items-start gap-3 animate-fade-in">
               <div 
-                className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-700/30 border border-purple-500/40 flex items-center justify-center backdrop-blur-sm"
+                className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 transition-all"
                 style={{
-                  boxShadow: `0 0 ${20 + processingPulse * 20}px rgba(168, 85, 247, ${0.3 + processingPulse * 0.2})`,
-                  transform: `scale(${1 + processingPulse * 0.1})`,
+                  boxShadow: `0 0 ${15 + thinkingPulse * 20}px rgba(168, 85, 247, ${0.4 + thinkingPulse * 0.3})`,
+                  transform: `scale(${1 + thinkingPulse * 0.1})`,
                 }}
               >
-                <Sparkles className="w-6 h-6 text-purple-400" />
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="relative bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 min-w-[120px] h-12 overflow-hidden">
+                {/* Particles inside thinking bubble */}
+                {particles.map(p => (
+                  <div
+                    key={p.id}
+                    className="absolute rounded-full bg-purple-400"
+                    style={{
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      width: p.size,
+                      height: p.size,
+                      opacity: p.opacity,
+                      transform: "translate(-50%, -50%)",
+                      boxShadow: `0 0 ${p.size * 2}px rgba(168, 85, 247, 0.6)`,
+                    }}
+                  />
+                ))}
+                <div className="flex items-center gap-1.5 relative z-10">
+                  <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
             </div>
           )}
 
-          {/* Connection lines */}
-          {(phase === "forming" || phase === "complete") && (
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: lineOpacity }}>
-              {insightPositions.map((pos, i) => (
-                <line
-                  key={`line-${i}`}
-                  x1="50%"
-                  y1="50%"
-                  x2={`${pos.x}%`}
-                  y2={`${pos.y}%`}
-                  stroke="rgba(168, 85, 247, 0.25)"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                />
-              ))}
-            </svg>
-          )}
+          {/* AI Response */}
+          {(phase === "responding" || phase === "insights" || phase === "complete") && (
+            <div className="flex items-start gap-3 animate-fade-in">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1 space-y-3">
+                {/* Response text */}
+                <div className="bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 backdrop-blur-sm">
+                  <p className="text-white/80 text-sm">
+                    {responseText}
+                    {phase === "responding" && (
+                      <span className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle transition-opacity ${cursorVisible ? 'opacity-100' : 'opacity-0'}`} />
+                    )}
+                  </p>
+                </div>
 
-          {/* Insight nodes */}
-          {(phase === "forming" || phase === "complete") && insightPositions.map((pos, i) => (
-            <div
-              key={currentQuestion.insights[i]?.label || i}
-              className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
-              style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-                opacity: insightOpacity[i] || 0,
-                transform: `translate(-50%, -50%) scale(${0.8 + (insightOpacity[i] || 0) * 0.2})`,
-              }}
-            >
-              <div className={`bg-white/[0.08] border rounded-xl px-4 py-2.5 text-center backdrop-blur-sm transition-all duration-500 ${
-                phase === "complete" ? "border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]" : "border-white/10"
-              }`}>
-                <div className="text-white font-medium text-sm">{currentQuestion.insights[i]?.label}</div>
-                <div className="text-purple-400 text-xs">{currentQuestion.insights[i]?.value}</div>
+                {/* Insight cards */}
+                {(phase === "insights" || phase === "complete") && (
+                  <div className="flex flex-wrap gap-2">
+                    {currentQuestion.insights.map((insight, i) => (
+                      <div
+                        key={insight.label}
+                        className={`transform transition-all duration-500 ${
+                          insightReveal.includes(i) 
+                            ? "opacity-100 translate-y-0 scale-100" 
+                            : "opacity-0 translate-y-4 scale-90"
+                        }`}
+                        style={{ transitionDelay: `${i * 50}ms` }}
+                      >
+                        <div 
+                          className="bg-gradient-to-br from-purple-500/20 to-purple-700/20 border border-purple-500/30 rounded-xl px-3 py-2 backdrop-blur-sm"
+                          style={{
+                            boxShadow: insightReveal.includes(i) ? "0 0 20px rgba(168, 85, 247, 0.2)" : "none",
+                          }}
+                        >
+                          <div className="text-white font-medium text-sm">{insight.label}</div>
+                          <div className="text-purple-400 text-xs">{insight.value}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Input field (decorative) */}
+        <div className="mt-8 px-4">
+          <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 flex items-center gap-3">
+            <span className="text-white/30 text-sm flex-1">Ask about your audience...</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom caption */}
-      {phase === "complete" && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/30 text-sm animate-fade-in">
-          {currentQuestion.summary}
-        </div>
-      )}
+      {/* Floating particles decoration */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-purple-400/30"
+            style={{
+              left: `${10 + Math.random() * 80}%`,
+              top: `${10 + Math.random() * 80}%`,
+              animation: `float ${4 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 4}s`,
+            }}
+          />
+        ))}
+      </div>
 
-      {/* Reset button */}
-      <button
-        onClick={reset}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/[0.06] hover:bg-white/10 text-white/50 hover:text-white/70 text-sm rounded-lg transition-all border border-white/5"
-      >
-        Reset
-      </button>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.3; }
+          50% { transform: translateY(-20px) scale(1.5); opacity: 0.6; }
+        }
+      `}</style>
     </div>
   );
 };
