@@ -234,8 +234,10 @@ const PlaceholderAI = () => {
       <div className="relative w-full max-w-2xl mx-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6 px-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-500/30">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="relative w-10 h-10 p-[2px] rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_15px_rgba(168,85,247,0.4),0_0_30px_rgba(236,72,153,0.2)]">
+            <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
           </div>
           <div>
             <h1 className="text-white font-medium">AudienceScan Signal</h1>
@@ -268,13 +270,15 @@ const PlaceholderAI = () => {
           {phase === "thinking" && (
             <div className="flex items-start gap-3 animate-fade-in">
               <div 
-                className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 transition-all"
+                className="relative w-8 h-8 p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex-shrink-0 transition-all"
                 style={{
-                  boxShadow: `0 0 ${15 + thinkingPulse * 20}px rgba(168, 85, 247, ${0.4 + thinkingPulse * 0.3})`,
+                  boxShadow: `0 0 ${15 + thinkingPulse * 20}px rgba(168, 85, 247, ${0.4 + thinkingPulse * 0.3}), 0 0 ${30 + thinkingPulse * 30}px rgba(236, 72, 153, ${0.2 + thinkingPulse * 0.2})`,
                   transform: `scale(${1 + thinkingPulse * 0.1})`,
                 }}
               >
-                <Bot className="w-4 h-4 text-white" />
+                <div className="w-full h-full rounded-[6px] bg-black flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
               </div>
               <div className="relative bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 min-w-[120px] h-12 overflow-hidden">
                 {/* Particles inside thinking bubble */}
@@ -305,8 +309,10 @@ const PlaceholderAI = () => {
           {/* AI Response */}
           {(phase === "responding" || phase === "insights" || phase === "complete") && (
             <div className="flex items-start gap-3 animate-fade-in">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
-                <Bot className="w-4 h-4 text-white" />
+              <div className="relative w-8 h-8 p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex-shrink-0 shadow-[0_0_12px_rgba(168,85,247,0.4),0_0_24px_rgba(236,72,153,0.2)]">
+                <div className="w-full h-full rounded-[6px] bg-black flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
               </div>
               <div className="flex-1 space-y-3">
                 {/* Response text */}
@@ -354,8 +360,10 @@ const PlaceholderAI = () => {
         <div className="mt-8 px-4">
           <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 flex items-center gap-3">
             <span className="text-white/30 text-sm flex-1">Ask about your audience...</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+            <div className="relative w-8 h-8 p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_12px_rgba(168,85,247,0.3),0_0_24px_rgba(236,72,153,0.15)]">
+              <div className="w-full h-full rounded-[6px] bg-black flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
             </div>
           </div>
         </div>
