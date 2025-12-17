@@ -24,16 +24,18 @@ const tokenColors = [
 
 type Stage = 'categories' | 'zoom-category' | 'tokens' | 'zoom-token' | 'wallets' | 'fade-wallets' | 'locked';
 
+const TARGET_CATEGORY = 'AI Agents';
+const TARGET_TOKEN_INDEX = 12; // Purple token
+
 const NoNiche = () => {
   const [stage, setStage] = useState<Stage>('categories');
-  const [zoomScale, setZoomScale] = useState(1);
 
-  // Generate rows for categories (10 rows, 20 words each)
+  // Generate rows for categories
   const categoryRows = useMemo(() => {
     const rows = [];
     for (let i = 0; i < 10; i++) {
       const words = [];
-      for (let j = 0; j < 40; j++) { // Extra for seamless loop
+      for (let j = 0; j < 40; j++) {
         words.push(categories[(i * 20 + j) % categories.length]);
       }
       rows.push({ words, direction: i % 2 === 0 ? 'left' : 'right' });
@@ -41,26 +43,26 @@ const NoNiche = () => {
     return rows;
   }, []);
 
-  // Generate rows for tokens (10 rows, 20 tokens each)
+  // Generate rows for tokens
   const tokenRows = useMemo(() => {
     const rows = [];
     for (let i = 0; i < 10; i++) {
       const tokens = [];
-      for (let j = 0; j < 40; j++) { // Extra for seamless loop
-        tokens.push(tokenColors[(i * 20 + j) % tokenColors.length]);
+      for (let j = 0; j < 40; j++) {
+        tokens.push({ color: tokenColors[(i * 20 + j) % tokenColors.length], id: `${i}-${j}` });
       }
       rows.push({ tokens, direction: i % 2 === 0 ? 'left' : 'right' });
     }
     return rows;
   }, []);
 
-  // Generate wallet dots (50 rows, 100 each - simplified for performance)
+  // Generate wallet icons
   const walletRows = useMemo(() => {
     const rows = [];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 25; i++) {
       const wallets = [];
-      for (let j = 0; j < 150; j++) {
-        wallets.push({ id: `${i}-${j}`, keep: Math.random() > 0.9 });
+      for (let j = 0; j < 80; j++) {
+        wallets.push({ id: `${i}-${j}`, keep: Math.random() > 0.92 });
       }
       rows.push({ wallets, direction: i % 2 === 0 ? 'left' : 'right' });
     }
@@ -68,42 +70,30 @@ const NoNiche = () => {
   }, []);
 
   const keptWallets = useMemo(() => 
-    walletRows.flatMap(r => r.wallets.filter(w => w.keep)).slice(0, 50),
+    walletRows.flatMap(r => r.wallets.filter(w => w.keep)).slice(0, 40),
     [walletRows]
   );
 
   useEffect(() => {
     const timings: Record<Stage, { duration: number; next: Stage }> = {
       'categories': { duration: 3000, next: 'zoom-category' },
-      'zoom-category': { duration: 1200, next: 'tokens' },
+      'zoom-category': { duration: 1500, next: 'tokens' },
       'tokens': { duration: 3000, next: 'zoom-token' },
-      'zoom-token': { duration: 1200, next: 'wallets' },
+      'zoom-token': { duration: 1500, next: 'wallets' },
       'wallets': { duration: 2500, next: 'fade-wallets' },
       'fade-wallets': { duration: 1500, next: 'locked' },
       'locked': { duration: 4000, next: 'categories' },
     };
 
     const { duration, next } = timings[stage];
-
-    // Handle zoom animations
-    if (stage === 'categories') {
-      setZoomScale(1);
-    } else if (stage === 'zoom-category') {
-      setZoomScale(80);
-    } else if (stage === 'tokens') {
-      setZoomScale(1);
-    } else if (stage === 'zoom-token') {
-      setZoomScale(80);
-    } else if (stage === 'wallets' || stage === 'fade-wallets' || stage === 'locked') {
-      setZoomScale(1);
-    }
-
     const timer = setTimeout(() => setStage(next), duration);
     return () => clearTimeout(timer);
   }, [stage]);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+      
       {/* Back link */}
       <div className="fixed top-6 left-6 z-50">
         <Link 
@@ -119,15 +109,8 @@ const NoNiche = () => {
       <div className="relative w-full h-screen overflow-hidden">
         
         {/* Categories Stage */}
-        {(stage === 'categories' || stage === 'zoom-category') && (
-          <div 
-            className="absolute inset-0 flex flex-col justify-center transition-transform ease-in-out"
-            style={{ 
-              transform: `scale(${zoomScale})`,
-              transformOrigin: '50% 45%', // Zoom into "AI Agents" area
-              transitionDuration: stage === 'zoom-category' ? '1200ms' : '0ms',
-            }}
-          >
+        {stage === 'categories' && (
+          <div className="absolute inset-0 flex flex-col justify-center">
             {categoryRows.map((row, rowIndex) => (
               <div 
                 key={rowIndex}
@@ -139,9 +122,9 @@ const NoNiche = () => {
                 {row.words.map((word, wordIndex) => (
                   <span 
                     key={wordIndex}
-                    className={`px-3 py-1 mx-1 text-sm font-medium rounded-full ${
-                      word === 'AI Agents' 
-                        ? 'text-purple-300 bg-purple-500/30 border border-purple-500/50' 
+                    className={`px-3 py-1.5 mx-1 text-sm font-medium rounded-full transition-all ${
+                      word === TARGET_CATEGORY 
+                        ? 'text-purple-300 bg-purple-500/30 border border-purple-500/50 animate-pulse' 
                         : 'text-white/40'
                     }`}
                   >
@@ -153,16 +136,23 @@ const NoNiche = () => {
           </div>
         )}
 
+        {/* Zoom into Category - Card expands to fill screen */}
+        {stage === 'zoom-category' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div 
+              className="flex items-center justify-center text-purple-300 bg-purple-500/30 border border-purple-500/50 rounded-2xl font-medium"
+              style={{
+                animation: 'expand-card 1.5s ease-in forwards',
+              }}
+            >
+              <span className="text-4xl md:text-6xl font-bold text-white/90">{TARGET_CATEGORY}</span>
+            </div>
+          </div>
+        )}
+
         {/* Tokens Stage */}
-        {(stage === 'tokens' || stage === 'zoom-token') && (
-          <div 
-            className="absolute inset-0 flex flex-col justify-center transition-transform ease-in-out"
-            style={{ 
-              transform: `scale(${zoomScale})`,
-              transformOrigin: '50% 50%',
-              transitionDuration: stage === 'zoom-token' ? '1200ms' : '0ms',
-            }}
-          >
+        {stage === 'tokens' && (
+          <div className="absolute inset-0 flex flex-col justify-center">
             {tokenRows.map((row, rowIndex) => (
               <div 
                 key={rowIndex}
@@ -171,47 +161,66 @@ const NoNiche = () => {
                   animation: `slide-${row.direction} 35s linear infinite`,
                 }}
               >
-                {row.tokens.map((color, tokenIndex) => (
-                  <div 
-                    key={tokenIndex}
-                    className="w-10 h-10 mx-1.5 rounded-full flex-shrink-0"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${color}, ${color}88)`,
-                      boxShadow: `0 0 12px ${color}50`
-                    }}
-                  />
-                ))}
+                {row.tokens.map((token, tokenIndex) => {
+                  const isTarget = rowIndex === 5 && tokenIndex === TARGET_TOKEN_INDEX;
+                  return (
+                    <div 
+                      key={token.id}
+                      className={`w-10 h-10 mx-1.5 rounded-full flex-shrink-0 ${isTarget ? 'animate-pulse ring-2 ring-white/50' : ''}`}
+                      style={{ 
+                        background: `linear-gradient(135deg, ${token.color}, ${token.color}88)`,
+                        boxShadow: isTarget ? `0 0 20px ${token.color}` : `0 0 12px ${token.color}50`
+                      }}
+                    />
+                  );
+                })}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Zoom into Token - Circle expands to fill screen */}
+        {stage === 'zoom-token' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div 
+              className="rounded-full"
+              style={{
+                background: `linear-gradient(135deg, ${tokenColors[TARGET_TOKEN_INDEX]}, ${tokenColors[TARGET_TOKEN_INDEX]}88)`,
+                animation: 'expand-circle 1.5s ease-in forwards',
+              }}
+            />
           </div>
         )}
 
         {/* Wallets Stage */}
         {(stage === 'wallets' || stage === 'fade-wallets') && (
           <div className="absolute inset-0 flex flex-col justify-center overflow-hidden">
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-1">
               {walletRows.map((row, rowIndex) => (
                 <div 
                   key={rowIndex}
                   className="flex whitespace-nowrap transition-opacity duration-1000"
                   style={{
-                    animation: `slide-${row.direction} 50s linear infinite`,
-                    opacity: stage === 'fade-wallets' ? 0 : 1,
+                    animation: `slide-${row.direction} 60s linear infinite`,
+                    opacity: stage === 'fade-wallets' ? 0.1 : 1,
                   }}
                 >
-                  {row.wallets.map((wallet, walletIndex) => (
-                    <div 
-                      key={walletIndex}
-                      className={`w-2 h-2 mx-0.5 rounded-full flex-shrink-0 transition-all duration-1000 ${
+                  {row.wallets.map((wallet) => (
+                    <span 
+                      key={wallet.id}
+                      className={`material-icons-outlined mx-0.5 flex-shrink-0 transition-all duration-1000 ${
                         wallet.keep && stage === 'fade-wallets'
-                          ? 'bg-purple-500 opacity-100 scale-150' 
+                          ? 'text-purple-400 opacity-100 scale-125' 
                           : wallet.keep 
-                            ? 'bg-purple-500' 
+                            ? 'text-purple-400' 
                             : stage === 'fade-wallets' 
-                              ? 'bg-white/5' 
-                              : 'bg-white/20'
+                              ? 'text-white/5' 
+                              : 'text-white/30'
                       }`}
-                    />
+                      style={{ fontSize: '20px' }}
+                    >
+                      account_balance_wallet
+                    </span>
                   ))}
                 </div>
               ))}
@@ -223,22 +232,25 @@ const NoNiche = () => {
         {stage === 'locked' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {/* Single row of kept wallets */}
-            <div className="flex flex-wrap justify-center gap-3 max-w-3xl px-8 mb-8">
+            <div className="flex flex-wrap justify-center gap-4 max-w-3xl px-8 mb-8">
               {keptWallets.map((wallet, index) => (
-                <div 
+                <span 
                   key={wallet.id}
-                  className="w-4 h-4 rounded-full bg-purple-500 animate-fade-in"
+                  className="material-icons-outlined text-purple-400 animate-fade-in"
                   style={{ 
-                    animationDelay: `${index * 30}ms`,
-                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.6)'
+                    fontSize: '28px',
+                    animationDelay: `${index * 40}ms`,
+                    filter: 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.6))'
                   }}
-                />
+                >
+                  account_balance_wallet
+                </span>
               ))}
             </div>
             
-            <div className="text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '800ms' }}>
               <p className="text-white/50 text-sm tracking-widest uppercase mb-2">
-                {keptWallets.length * 17} wallets locked in
+                {keptWallets.length * 21} wallets locked in
               </p>
               <p className="text-white text-2xl font-medium">
                 Ready for research
@@ -249,7 +261,7 @@ const NoNiche = () => {
 
         {/* Stage indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3">
-          {['categories', 'tokens', 'wallets', 'locked'].map((s, i) => {
+          {['categories', 'tokens', 'wallets', 'locked'].map((s) => {
             const isActive = 
               (s === 'categories' && (stage === 'categories' || stage === 'zoom-category')) ||
               (s === 'tokens' && (stage === 'tokens' || stage === 'zoom-token')) ||
@@ -276,7 +288,7 @@ const NoNiche = () => {
         </div>
       </div>
 
-      {/* CSS for sliding animations */}
+      {/* CSS for animations */}
       <style>{`
         @keyframes slide-left {
           0% { transform: translateX(0); }
@@ -285,6 +297,46 @@ const NoNiche = () => {
         @keyframes slide-right {
           0% { transform: translateX(-50%); }
           100% { transform: translateX(0); }
+        }
+        @keyframes expand-card {
+          0% { 
+            width: 120px; 
+            height: 40px; 
+            font-size: 14px;
+            border-radius: 9999px;
+          }
+          100% { 
+            width: 200vw; 
+            height: 200vh; 
+            font-size: 0px;
+            border-radius: 0;
+            background: rgba(168, 85, 247, 0.1);
+          }
+        }
+        @keyframes expand-circle {
+          0% { 
+            width: 40px; 
+            height: 40px; 
+          }
+          100% { 
+            width: 300vw; 
+            height: 300vw; 
+          }
+        }
+        .material-icons-outlined {
+          font-family: 'Material Icons Outlined';
+          font-weight: normal;
+          font-style: normal;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          word-wrap: normal;
+          direction: ltr;
+          -webkit-font-feature-settings: 'liga';
+          font-feature-settings: 'liga';
+          -webkit-font-smoothing: antialiased;
         }
       `}</style>
     </div>
