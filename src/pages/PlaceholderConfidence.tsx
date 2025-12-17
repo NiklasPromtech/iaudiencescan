@@ -155,10 +155,10 @@ const PlaceholderConfidence = () => {
       })
     );
 
-    // Animate confidence score from 0 to 99 with ease-out, then very slow 99-100
+    // Animate confidence score from 0 to 99 with ease-out, then slow 99-100
     let startTime: number | null = null;
     const mainDuration = 2500; // 0-99 with easing
-    const finalDuration = 4000; // 99-100 very slow
+    const finalDuration = 2000; // 99-100 slow but not too slow
 
     // Ease-out cubic: starts fast, slows down dramatically
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -272,9 +272,10 @@ const PlaceholderConfidence = () => {
                 y1="50%"
                 x2={`${el.x}%`}
                 y2={`${el.y}%`}
-                stroke="rgba(168, 85, 247, 0.15)"
-                strokeWidth="1"
+                stroke={isComplete ? "rgba(168, 85, 247, 0.4)" : "rgba(168, 85, 247, 0.15)"}
+                strokeWidth={isComplete ? "1.5" : "1"}
                 strokeDasharray="4 4"
+                className="transition-all duration-700"
               />
             ))}
           </svg>
