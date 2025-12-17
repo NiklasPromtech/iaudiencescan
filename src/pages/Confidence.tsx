@@ -26,6 +26,7 @@ interface ConfidenceData {
     dataIntegrity?: number;
     behaviorQuality?: number;
     contextStrength?: number;
+    dominanceScore?: number;
   };
 }
 
@@ -223,11 +224,12 @@ const Confidence = () => {
             <h2 className="text-xl font-semibold mb-6 text-center">
               Confidence Components
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {[
-                { label: "Data Integrity", value: data.confidence.components.dataIntegrity, icon: "verified" },
-                { label: "Behavior Quality", value: data.confidence.components.behaviorQuality, icon: "psychology" },
-                { label: "Context Strength", value: data.confidence.components.contextStrength, icon: "hub" },
+                { label: "Data Integrity", value: data.confidence.components.dataIntegrity, icon: "verified", desc: "Quality of source data" },
+                { label: "Behavior Quality", value: data.confidence.components.behaviorQuality, icon: "psychology", desc: "Wallet activity patterns" },
+                { label: "Context Strength", value: data.confidence.components.contextStrength, icon: "hub", desc: "Chain & category coherence" },
+                { label: "Holder Diversity", value: data.confidence.components.dominanceScore, icon: "diversity_3", desc: "High = diverse portfolios, Low = concentrated or bot risk" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -237,9 +239,10 @@ const Confidence = () => {
                     {item.icon}
                   </span>
                   <div className="text-3xl font-bold mb-1">
-                    {item.value ? Math.round(item.value * 100) : "N/A"}%
+                    {item.value !== undefined ? Math.round(item.value * 100) : "N/A"}%
                   </div>
-                  <p className="text-white/50 text-sm">{item.label}</p>
+                  <p className="text-white/50 text-sm font-medium">{item.label}</p>
+                  <p className="text-white/30 text-xs mt-1">{item.desc}</p>
                   <div className="mt-3 h-2 bg-white/10 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full transition-all duration-500"
