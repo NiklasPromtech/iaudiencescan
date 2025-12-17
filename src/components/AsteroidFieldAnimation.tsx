@@ -158,8 +158,8 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
             <div key={asteroid.id} style={style}>
               <div 
                 className={`
-                  px-2.5 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap 
-                  border border-white/30 text-white/90 bg-white/10 backdrop-blur-sm
+                  px-2.5 py-1 rounded-md text-xs font-semibold text-center whitespace-nowrap 
+                  border border-white/40 text-white bg-white/20
                   ${asteroid.type === 'wallet' ? 'font-mono text-[10px]' : ''}
                 `}
               >
