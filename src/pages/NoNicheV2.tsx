@@ -21,29 +21,30 @@ const NoNicheV2 = () => {
   const [scale, setScale] = useState(1);
   const animationRef = useRef<number | null>(null);
 
-  const ZOOM_DURATION = 2000; // 2 seconds constant pace
-  const HOLD_DURATION = 1500; // 1.5 seconds to view before zoom
-  const MAX_SCALE = 80;
+  const ZOOM_DURATION = 3000; // 3 seconds
+  const MAX_SCALE = 500; // Much deeper zoom
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
+    // Start zooming immediately - no pause
     const startZoom = () => {
       setIsZooming(true);
+
       const startTime = Date.now();
 
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / ZOOM_DURATION, 1);
         
-        // Exponential scale = constant perceived velocity (like traveling through space)
+        // Exponential scale = constant perceived velocity
         const newScale = Math.pow(MAX_SCALE, progress);
         setScale(newScale);
 
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
         } else {
-          // Transition to next stage
+          // Transition to next stage immediately
           setIsZooming(false);
           setScale(1);
           setStage(prev => {
@@ -57,11 +58,10 @@ const NoNicheV2 = () => {
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    // Hold, then zoom
-    timeout = setTimeout(startZoom, HOLD_DURATION);
+    // Start immediately - no hold time
+    startZoom();
 
     return () => {
-      clearTimeout(timeout);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
