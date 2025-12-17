@@ -148,7 +148,7 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
   };
 
   return (
-    <div className={`w-full h-full overflow-hidden relative bg-black ${className}`}>
+    <div className={`w-full h-full overflow-hidden relative ${className}`}>
       <div className="absolute inset-0">
         {asteroids.map(asteroid => {
           const style = getAsteroidStyle(asteroid);
@@ -159,7 +159,7 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
               <div 
                 className={`
                   px-2.5 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap 
-                  border border-white/30 text-white/90 bg-black
+                  border border-white/30 text-white/90 bg-white/10 backdrop-blur-sm
                   ${asteroid.type === 'wallet' ? 'font-mono text-[10px]' : ''}
                 `}
               >
@@ -174,7 +174,7 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.7) 100%)',
+          background: 'radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.3) 100%)',
         }}
       />
 
@@ -182,7 +182,7 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          boxShadow: 'inset 0 0 150px 80px rgba(0,0,0,0.9)',
+          boxShadow: 'inset 0 0 100px 40px rgba(0,0,0,0.4)',
         }}
       />
 
