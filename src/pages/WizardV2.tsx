@@ -819,20 +819,24 @@ const WizardV2 = () => {
                 </p>
               </div>
               {/* Sub-section 1: No audience is too niche */}
-              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6">
-                <h3 className="text-xl md:text-2xl font-bold text-white">
-                  No audience is too niche
-                </h3>
+              <div className="rounded-xl bg-white/[0.06] overflow-hidden">
+                <div className="p-6 md:p-8">
+                  <h3 className="text-xl md:text-2xl font-bold text-white">
+                    No audience is too niche
+                  </h3>
+                </div>
                 
-                {/* Asteroid field animation */}
-                <div className="w-full h-48 rounded-lg overflow-hidden">
+                {/* Asteroid field animation - edge to edge */}
+                <div className="w-full h-48">
                   <AsteroidFieldAnimation />
                 </div>
                 
-                <p className="text-white/50 text-base max-w-xl">
-                  Need to know about meme coin fans? Or the competitors in a specific token category?
-                  Get the granularity of insight you need to understand every web3 audience under the sun.
-                </p>
+                <div className="p-6 md:p-8 pt-0">
+                  <p className="text-white/50 text-base max-w-xl">
+                    Need to know about meme coin fans? Or the competitors in a specific token category?
+                    Get the granularity of insight you need to understand every web3 audience under the sun.
+                  </p>
+                </div>
               </div>
 
               {/* Sub-section 2: Confidence comes as standard */}
