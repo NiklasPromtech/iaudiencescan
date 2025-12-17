@@ -173,7 +173,7 @@ const NoNicheV3: React.FC = () => {
             <div
               key={item}
               className="px-4 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap border border-white/30 text-white/80"
-              style={{ backgroundColor: 'transparent' }}
+              style={{ backgroundColor: '#000000' }}
             >
               {item}
             </div>
