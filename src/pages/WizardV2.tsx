@@ -826,7 +826,7 @@ const WizardV2 = () => {
                 
                 {/* Asteroid field animation */}
                 <div className="w-full h-48 rounded-lg overflow-hidden">
-                  <AsteroidFieldAnimation showLabel />
+                  <AsteroidFieldAnimation />
                 </div>
                 
                 <p className="text-white/50 text-base max-w-xl">
