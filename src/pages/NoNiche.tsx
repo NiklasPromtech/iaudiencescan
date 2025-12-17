@@ -1,63 +1,106 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
-const categories = ['Meme', 'AI Agents', 'DeFi', 'Gaming', 'RWA', 'NFT', 'Layer 2', 'Privacy', 'Oracle', 'DEX', 'Lending', 'Staking', 'Bridge', 'DAO', 'Metaverse', 'Storage', 'Identity', 'Insurance', 'Derivatives', 'Yield'];
-
-const tokens = [
-  { ticker: 'PEPE', logo: 'https://cryptologos.cc/logos/pepe-pepe-logo.png' },
-  { ticker: 'SHIB', logo: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png' },
-  { ticker: 'DOGE', logo: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-  { ticker: 'BONK', logo: 'https://cryptologos.cc/logos/bonk-bonk-logo.png' },
-  { ticker: 'WIF', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/28752.png' },
-  { ticker: 'FLOKI', logo: 'https://cryptologos.cc/logos/floki-inu-floki-logo.png' },
-  { ticker: 'BABYDOGE', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/10407.png' },
-  { ticker: 'ELON', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/9436.png' },
+const categories = [
+  'Meme', 'DeFi', 'Gaming', 'NFT', 'Layer2', 'DAO', 'Metaverse', 'Social', 'Privacy', 'Oracle',
+  'DEX', 'Lending', 'Yield', 'Bridge', 'Staking', 'Governance', 'Identity', 'Storage', 'Compute', 'RWA',
+  'AI Agents', 'Perpetuals', 'Options', 'Insurance', 'Prediction', 'Music', 'Sports', 'Art', 'Collectibles', 'Utility',
+  'Infrastructure', 'Interop', 'Scaling', 'Security', 'Analytics', 'Data', 'Index', 'Derivatives', 'Synthetics', 'Stablecoins',
+  'Cross-chain', 'Rollups', 'Sidechains', 'Validators', 'Nodes', 'Mining', 'Liquid Staking', 'Restaking', 'Points', 'Airdrops',
+  'Launchpads', 'IDO', 'IEO', 'Fair Launch', 'Bonding', 'Vesting', 'Lockups', 'Emissions', 'Tokenomics', 'Burn',
+  'Treasury', 'Grants', 'Ecosystem', 'Partnerships', 'Integrations', 'SDK', 'API', 'Wallets', 'Custody', 'MPC',
+  'Multisig', 'Hardware', 'Mobile', 'Browser', 'Extension', 'Embedded', 'Smart', 'Exchange', 'CEX', 'Orderbook',
+  'AMM', 'Aggregator', 'Router', 'Solver', 'Intent', 'RFQ', 'OTC', 'Social Fi', 'Fan Tokens', 'Creator',
+  'Membership', 'Subscription', 'Tipping', 'Patronage', 'Royalties', 'Splits', 'Streaming', 'L1', 'Modular', 'Appchain'
 ];
 
-type Stage = 'categories' | 'tokens' | 'wallets' | 'locked';
+const tokenColors = [
+  '#F7931A', '#627EEA', '#00D395', '#8247E5', '#E84142', '#2775CA', '#26A17B', '#F0B90B',
+  '#E6007A', '#00ADEF', '#FF007A', '#1A1A1A', '#6B8CEF', '#FF6B35', '#00D9FF', '#9945FF',
+  '#14F195', '#DC1FFF', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6B6B', '#C9B037', '#845EC2',
+  '#FF9671', '#FFC75F', '#F9F871', '#00C9A7', '#4FFBDF', '#B5DEFF', '#CAB8FF', '#FFEAA7'
+];
+
+type Stage = 'categories' | 'zoom-category' | 'tokens' | 'zoom-token' | 'wallets' | 'fade-wallets' | 'locked';
 
 const NoNiche = () => {
   const [stage, setStage] = useState<Stage>('categories');
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
 
-  useEffect(() => {
-    const sequence = [
-      { delay: 2000, next: 'tokens' as Stage },
-      { delay: 4500, next: 'wallets' as Stage },
-      { delay: 7000, next: 'locked' as Stage },
-    ];
-
-    const timeouts = sequence.map(({ delay, next }) =>
-      setTimeout(() => {
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setStage(next);
-          setIsTransitioning(false);
-        }, 400);
-      }, delay)
-    );
-
-    return () => timeouts.forEach(clearTimeout);
+  // Generate rows for categories (10 rows, 20 words each)
+  const categoryRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < 10; i++) {
+      const words = [];
+      for (let j = 0; j < 40; j++) { // Extra for seamless loop
+        words.push(categories[(i * 20 + j) % categories.length]);
+      }
+      rows.push({ words, direction: i % 2 === 0 ? 'left' : 'right' });
+    }
+    return rows;
   }, []);
 
-  // Generate random positions for elements
-  const generatePositions = (count: number, seed: number) => {
-    const positions: { x: number; y: number; scale: number }[] = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + seed;
-      const radius = 20 + (((i * 7 + seed * 3) % 60));
-      const x = 50 + Math.cos(angle) * radius * (0.8 + (i % 3) * 0.2);
-      const y = 50 + Math.sin(angle) * radius * 0.6 * (0.8 + (i % 2) * 0.3);
-      const scale = 0.5 + ((i * 13 + seed) % 50) / 100;
-      positions.push({ x: Math.max(5, Math.min(95, x)), y: Math.max(10, Math.min(90, y)), scale });
+  // Generate rows for tokens (10 rows, 20 tokens each)
+  const tokenRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < 10; i++) {
+      const tokens = [];
+      for (let j = 0; j < 40; j++) { // Extra for seamless loop
+        tokens.push(tokenColors[(i * 20 + j) % tokenColors.length]);
+      }
+      rows.push({ tokens, direction: i % 2 === 0 ? 'left' : 'right' });
     }
-    return positions;
-  };
+    return rows;
+  }, []);
 
-  const categoryPositions = generatePositions(80, 1);
-  const tokenPositions = generatePositions(60, 2);
-  const walletPositions = generatePositions(200, 3);
+  // Generate wallet dots (50 rows, 100 each - simplified for performance)
+  const walletRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < 30; i++) {
+      const wallets = [];
+      for (let j = 0; j < 150; j++) {
+        wallets.push({ id: `${i}-${j}`, keep: Math.random() > 0.9 });
+      }
+      rows.push({ wallets, direction: i % 2 === 0 ? 'left' : 'right' });
+    }
+    return rows;
+  }, []);
+
+  const keptWallets = useMemo(() => 
+    walletRows.flatMap(r => r.wallets.filter(w => w.keep)).slice(0, 50),
+    [walletRows]
+  );
+
+  useEffect(() => {
+    const timings: Record<Stage, { duration: number; next: Stage }> = {
+      'categories': { duration: 3000, next: 'zoom-category' },
+      'zoom-category': { duration: 1200, next: 'tokens' },
+      'tokens': { duration: 3000, next: 'zoom-token' },
+      'zoom-token': { duration: 1200, next: 'wallets' },
+      'wallets': { duration: 2500, next: 'fade-wallets' },
+      'fade-wallets': { duration: 1500, next: 'locked' },
+      'locked': { duration: 4000, next: 'categories' },
+    };
+
+    const { duration, next } = timings[stage];
+
+    // Handle zoom animations
+    if (stage === 'categories') {
+      setZoomScale(1);
+    } else if (stage === 'zoom-category') {
+      setZoomScale(80);
+    } else if (stage === 'tokens') {
+      setZoomScale(1);
+    } else if (stage === 'zoom-token') {
+      setZoomScale(80);
+    } else if (stage === 'wallets' || stage === 'fade-wallets' || stage === 'locked') {
+      setZoomScale(1);
+    }
+
+    const timer = setTimeout(() => setStage(next), duration);
+    return () => clearTimeout(timer);
+  }, [stage]);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
@@ -72,187 +115,176 @@ const NoNiche = () => {
         </Link>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-24">
-        <h1 className="text-4xl md:text-6xl font-bold text-center mb-4">
-          No audience is too niche
-        </h1>
+      {/* Main animation container */}
+      <div className="relative w-full h-screen overflow-hidden">
         
-        <p className="text-white/70 text-lg md:text-xl text-center max-w-2xl mb-8">
-          From broad categories to specific wallets — zoom into any level of granularity.
-        </p>
-
-        {/* Stage indicator */}
-        <div className="flex items-center gap-3 mb-8">
-          {['categories', 'tokens', 'wallets', 'locked'].map((s, i) => (
-            <div key={s} className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                stage === s ? 'bg-purple-500 scale-150' : 
-                ['categories', 'tokens', 'wallets', 'locked'].indexOf(stage) > i ? 'bg-purple-500/50' : 'bg-white/20'
-              }`} />
-              {i < 3 && <div className={`w-8 h-px transition-all duration-500 ${
-                ['categories', 'tokens', 'wallets', 'locked'].indexOf(stage) > i ? 'bg-purple-500/50' : 'bg-white/10'
-              }`} />}
-            </div>
-          ))}
-        </div>
-
-        {/* Current stage label */}
-        <div className="text-sm text-white/50 mb-6 h-6">
-          {stage === 'categories' && '100+ Categories'}
-          {stage === 'tokens' && '200+ Tokens in "Meme"'}
-          {stage === 'wallets' && '10,000+ Wallets'}
-          {stage === 'locked' && 'Your Target Audience'}
-        </div>
-
-        {/* Zoom container */}
-        <div className={`relative w-full max-w-4xl h-[400px] md:h-[500px] rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden transition-all duration-500 ${isTransitioning ? 'scale-110 opacity-0' : 'scale-100 opacity-100'}`}>
-          
-          {/* Categories stage */}
-          {stage === 'categories' && (
-            <div className="absolute inset-0">
-              {categoryPositions.map((pos, i) => (
-                <div
-                  key={i}
-                  className={`absolute px-2 py-1 rounded-full text-[10px] md:text-xs whitespace-nowrap transition-all duration-700 ${
-                    i === 0 ? 'bg-purple-500/30 border border-purple-500/50 text-white ring-2 ring-purple-500/30 animate-pulse' : 'bg-white/5 border border-white/10 text-white/40'
-                  }`}
-                  style={{
-                    left: `${pos.x}%`,
-                    top: `${pos.y}%`,
-                    transform: `translate(-50%, -50%) scale(${pos.scale})`,
-                    animationDelay: `${i * 20}ms`,
-                  }}
-                >
-                  {categories[i % categories.length]}
-                </div>
-              ))}
-              {/* Zoom indicator on Meme */}
-              <div className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-purple-500/50 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
-            </div>
-          )}
-
-          {/* Tokens stage */}
-          {stage === 'tokens' && (
-            <div className="absolute inset-0">
-              {tokenPositions.map((pos, i) => {
-                const token = tokens[i % tokens.length];
-                const isHighlighted = i < 8;
-                return (
-                  <div
-                    key={i}
-                    className={`absolute flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-xs whitespace-nowrap transition-all duration-500 ${
-                      isHighlighted ? 'bg-purple-500/20 border border-purple-500/40 text-white' : 'bg-white/5 border border-white/10 text-white/30'
+        {/* Categories Stage */}
+        {(stage === 'categories' || stage === 'zoom-category') && (
+          <div 
+            className="absolute inset-0 flex flex-col justify-center transition-transform ease-in-out"
+            style={{ 
+              transform: `scale(${zoomScale})`,
+              transformOrigin: '50% 45%', // Zoom into "AI Agents" area
+              transitionDuration: stage === 'zoom-category' ? '1200ms' : '0ms',
+            }}
+          >
+            {categoryRows.map((row, rowIndex) => (
+              <div 
+                key={rowIndex}
+                className="flex whitespace-nowrap py-1.5"
+                style={{
+                  animation: `slide-${row.direction} 40s linear infinite`,
+                }}
+              >
+                {row.words.map((word, wordIndex) => (
+                  <span 
+                    key={wordIndex}
+                    className={`px-3 py-1 mx-1 text-sm font-medium rounded-full ${
+                      word === 'AI Agents' 
+                        ? 'text-purple-300 bg-purple-500/30 border border-purple-500/50' 
+                        : 'text-white/40'
                     }`}
-                    style={{
-                      left: `${pos.x}%`,
-                      top: `${pos.y}%`,
-                      transform: `translate(-50%, -50%) scale(${pos.scale})`,
-                    }}
                   >
-                    <img 
-                      src={token.logo} 
-                      alt={token.ticker}
-                      className="w-3 h-3 md:w-4 md:h-4 rounded-full"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                    <span>${token.ticker}</span>
-                  </div>
-                );
-              })}
-              {/* Zoom indicator */}
-              <div className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-purple-500/50 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
-            </div>
-          )}
-
-          {/* Wallets stage */}
-          {stage === 'wallets' && (
-            <div className="absolute inset-0">
-              {walletPositions.map((pos, i) => {
-                // Different sizes based on wallet "value"
-                const sizeClass = i % 10 === 0 ? 'w-4 h-4 md:w-6 md:h-6' : 
-                                  i % 5 === 0 ? 'w-3 h-3 md:w-4 md:h-4' : 
-                                  i % 3 === 0 ? 'w-2 h-2 md:w-3 md:h-3' : 'w-1.5 h-1.5 md:w-2 md:h-2';
-                const isTarget = i % 10 === 0; // Large wallets are targets
-                return (
-                  <div
-                    key={i}
-                    className={`absolute rounded-full transition-all duration-300 ${
-                      isTarget ? 'bg-purple-500 ring-2 ring-purple-500/50' : 'bg-white/20'
-                    } ${sizeClass}`}
-                    style={{
-                      left: `${pos.x}%`,
-                      top: `${pos.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  />
-                );
-              })}
-              {/* Size filter indicator */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 px-4 py-2 rounded-full bg-black/50 border border-white/10">
-                <span className="text-white/50 text-xs">Filter by size:</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-white/30" />
-                  <div className="w-3 h-3 rounded-full bg-white/30" />
-                  <div className="w-4 h-4 rounded-full bg-purple-500 ring-2 ring-purple-500/50" />
-                </div>
+                    {word}
+                  </span>
+                ))}
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        )}
 
-          {/* Locked stage */}
-          {stage === 'locked' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              {/* Converging wallets animation */}
-              <div className="relative w-48 h-48">
-                {[...Array(20)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-4 h-4 md:w-5 md:h-5 rounded-full bg-purple-500"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      animation: `converge-${i % 4} 2s ease-out forwards`,
-                      animationDelay: `${i * 50}ms`,
+        {/* Tokens Stage */}
+        {(stage === 'tokens' || stage === 'zoom-token') && (
+          <div 
+            className="absolute inset-0 flex flex-col justify-center transition-transform ease-in-out"
+            style={{ 
+              transform: `scale(${zoomScale})`,
+              transformOrigin: '50% 50%',
+              transitionDuration: stage === 'zoom-token' ? '1200ms' : '0ms',
+            }}
+          >
+            {tokenRows.map((row, rowIndex) => (
+              <div 
+                key={rowIndex}
+                className="flex whitespace-nowrap py-2"
+                style={{
+                  animation: `slide-${row.direction} 35s linear infinite`,
+                }}
+              >
+                {row.tokens.map((color, tokenIndex) => (
+                  <div 
+                    key={tokenIndex}
+                    className="w-10 h-10 mx-1.5 rounded-full flex-shrink-0"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${color}, ${color}88)`,
+                      boxShadow: `0 0 12px ${color}50`
                     }}
                   />
                 ))}
-                {/* Center glow */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-purple-500/30 blur-xl animate-pulse" />
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-purple-500/50 blur-md" />
               </div>
-              
-              <div className="mt-8 text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-2">
-                  Locked In
+            ))}
+          </div>
+        )}
+
+        {/* Wallets Stage */}
+        {(stage === 'wallets' || stage === 'fade-wallets') && (
+          <div className="absolute inset-0 flex flex-col justify-center overflow-hidden">
+            <div className="flex flex-col gap-0.5">
+              {walletRows.map((row, rowIndex) => (
+                <div 
+                  key={rowIndex}
+                  className="flex whitespace-nowrap transition-opacity duration-1000"
+                  style={{
+                    animation: `slide-${row.direction} 50s linear infinite`,
+                    opacity: stage === 'fade-wallets' ? 0 : 1,
+                  }}
+                >
+                  {row.wallets.map((wallet, walletIndex) => (
+                    <div 
+                      key={walletIndex}
+                      className={`w-2 h-2 mx-0.5 rounded-full flex-shrink-0 transition-all duration-1000 ${
+                        wallet.keep && stage === 'fade-wallets'
+                          ? 'bg-purple-500 opacity-100 scale-150' 
+                          : wallet.keep 
+                            ? 'bg-purple-500' 
+                            : stage === 'fade-wallets' 
+                              ? 'bg-white/5' 
+                              : 'bg-white/20'
+                      }`}
+                    />
+                  ))}
                 </div>
-                <div className="text-white/50 text-sm">
-                  847 high-value wallets ready for research
-                </div>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Locked Stage */}
+        {stage === 'locked' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {/* Single row of kept wallets */}
+            <div className="flex flex-wrap justify-center gap-3 max-w-3xl px-8 mb-8">
+              {keptWallets.map((wallet, index) => (
+                <div 
+                  key={wallet.id}
+                  className="w-4 h-4 rounded-full bg-purple-500 animate-fade-in"
+                  style={{ 
+                    animationDelay: `${index * 30}ms`,
+                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.6)'
+                  }}
+                />
+              ))}
+            </div>
+            
+            <div className="text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
+              <p className="text-white/50 text-sm tracking-widest uppercase mb-2">
+                {keptWallets.length * 17} wallets locked in
+              </p>
+              <p className="text-white text-2xl font-medium">
+                Ready for research
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Stage indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3">
+          {['categories', 'tokens', 'wallets', 'locked'].map((s, i) => {
+            const isActive = 
+              (s === 'categories' && (stage === 'categories' || stage === 'zoom-category')) ||
+              (s === 'tokens' && (stage === 'tokens' || stage === 'zoom-token')) ||
+              (s === 'wallets' && (stage === 'wallets' || stage === 'fade-wallets')) ||
+              (s === 'locked' && stage === 'locked');
+            
+            return (
+              <div 
+                key={s}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  isActive ? 'bg-purple-500 w-8' : 'bg-white/20 w-2'
+                }`}
+              />
+            );
+          })}
+        </div>
+
+        {/* Stage label */}
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/40 text-sm">
+          {(stage === 'categories' || stage === 'zoom-category') && '100 Categories'}
+          {(stage === 'tokens' || stage === 'zoom-token') && '200 Tokens'}
+          {(stage === 'wallets' || stage === 'fade-wallets') && '10,000+ Wallets'}
+          {stage === 'locked' && 'Target Audience'}
         </div>
       </div>
 
-      {/* Animations */}
+      {/* CSS for sliding animations */}
       <style>{`
-        @keyframes converge-0 {
-          0% { transform: translate(calc(-50% - 80px), calc(-50% - 80px)) scale(0.5); opacity: 0; }
-          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        @keyframes slide-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
-        @keyframes converge-1 {
-          0% { transform: translate(calc(-50% + 80px), calc(-50% - 80px)) scale(0.5); opacity: 0; }
-          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        @keyframes converge-2 {
-          0% { transform: translate(calc(-50% - 80px), calc(-50% + 80px)) scale(0.5); opacity: 0; }
-          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        @keyframes converge-3 {
-          0% { transform: translate(calc(-50% + 80px), calc(-50% + 80px)) scale(0.5); opacity: 0; }
-          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        @keyframes slide-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
         }
       `}</style>
     </div>
