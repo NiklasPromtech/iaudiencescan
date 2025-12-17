@@ -1,32 +1,48 @@
-import { useState, useEffect } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Sparkles } from "lucide-react";
 
-const QUESTION = "Which communities overlap most with $PEPE holders?";
+const QUESTION = "Which communities overlap with $PEPE?";
 const INSIGHTS = [
-  { label: "$DOGE", value: "78% overlap" },
-  { label: "$SHIB", value: "65% overlap" },
-  { label: "$FLOKI", value: "52% overlap" },
-  { label: "Meme category", value: "High affinity" },
+  { label: "$DOGE", value: "78%" },
+  { label: "$SHIB", value: "65%" },
+  { label: "$FLOKI", value: "52%" },
+  { label: "Meme", value: "High" },
+  { label: "$BONK", value: "48%" },
 ];
 
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+  size: number;
+  opacity: number;
+  angle: number;
+  speed: number;
+  orbitRadius: number;
+}
+
 const PlaceholderAI = () => {
-  const [phase, setPhase] = useState<"typing" | "thinking" | "responding">("typing");
+  const [phase, setPhase] = useState<"typing" | "dissolving" | "processing" | "forming" | "complete">("typing");
   const [typedText, setTypedText] = useState("");
-  const [visibleInsights, setVisibleInsights] = useState<number>(0);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [processingPulse, setProcessingPulse] = useState(0);
+  const [insightOpacity, setInsightOpacity] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [lineOpacity, setLineOpacity] = useState(0);
   const [cursorVisible, setCursorVisible] = useState(true);
+  const animationRef = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Cursor blink
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCursorVisible(prev => !prev);
-    }, 530);
+    const interval = setInterval(() => setCursorVisible(prev => !prev), 530);
     return () => clearInterval(interval);
   }, []);
 
   // Typing animation
   useEffect(() => {
     if (phase !== "typing") return;
-
     let charIndex = 0;
     const typeInterval = setInterval(() => {
       if (charIndex <= QUESTION.length) {
@@ -34,128 +50,278 @@ const PlaceholderAI = () => {
         charIndex++;
       } else {
         clearInterval(typeInterval);
-        setTimeout(() => setPhase("thinking"), 500);
+        setTimeout(() => setPhase("dissolving"), 600);
       }
-    }, 45);
-
+    }, 40);
     return () => clearInterval(typeInterval);
   }, [phase]);
 
-  // Thinking to responding transition
+  // Create particles when dissolving
   useEffect(() => {
-    if (phase !== "thinking") return;
-    const timer = setTimeout(() => setPhase("responding"), 1800);
-    return () => clearTimeout(timer);
+    if (phase !== "dissolving") return;
+    
+    const newParticles: Particle[] = [];
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2;
+      newParticles.push({
+        id: i,
+        x: 50 + (Math.random() - 0.5) * 30,
+        y: 45 + (Math.random() - 0.5) * 10,
+        targetX: 50,
+        targetY: 50,
+        size: 2 + Math.random() * 3,
+        opacity: 0.6 + Math.random() * 0.4,
+        angle: angle,
+        speed: 0.02 + Math.random() * 0.02,
+        orbitRadius: 8 + Math.random() * 12,
+      });
+    }
+    setParticles(newParticles);
+    
+    setTimeout(() => setPhase("processing"), 800);
   }, [phase]);
 
-  // Reveal insights one by one
+  // Processing animation - particles orbit center
   useEffect(() => {
-    if (phase !== "responding") return;
+    if (phase !== "processing") return;
+    
+    let startTime = Date.now();
+    const duration = 2000;
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Pulse effect
+      setProcessingPulse(Math.sin(elapsed * 0.008) * 0.5 + 0.5);
+      
+      // Orbit particles and gradually pull them in
+      setParticles(prev => prev.map(p => {
+        const newAngle = p.angle + p.speed;
+        const shrinkingRadius = p.orbitRadius * (1 - progress * 0.7);
+        return {
+          ...p,
+          angle: newAngle,
+          x: 50 + Math.cos(newAngle) * shrinkingRadius,
+          y: 50 + Math.sin(newAngle) * shrinkingRadius,
+          opacity: p.opacity * (1 - progress * 0.3),
+        };
+      }));
+      
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        setPhase("forming");
+      }
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [phase]);
 
-    const revealInterval = setInterval(() => {
-      setVisibleInsights(prev => {
-        if (prev >= INSIGHTS.length) {
-          clearInterval(revealInterval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 350);
-
-    return () => clearInterval(revealInterval);
+  // Forming animation - particles shoot out to insight positions
+  useEffect(() => {
+    if (phase !== "forming") return;
+    
+    // Calculate insight positions in a circle
+    const positions = INSIGHTS.map((_, i) => {
+      const angle = (i / INSIGHTS.length) * Math.PI * 2 - Math.PI / 2;
+      const radius = 32;
+      return {
+        x: 50 + Math.cos(angle) * radius,
+        y: 50 + Math.sin(angle) * radius,
+      };
+    });
+    
+    // Assign particles to positions
+    setParticles(prev => prev.map((p, i) => ({
+      ...p,
+      targetX: positions[i % INSIGHTS.length].x,
+      targetY: positions[i % INSIGHTS.length].y,
+    })));
+    
+    // Animate particles outward and reveal insights
+    let startTime = Date.now();
+    const duration = 1200;
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out
+      
+      setParticles(prev => prev.map(p => ({
+        ...p,
+        x: 50 + (p.targetX - 50) * eased,
+        y: 50 + (p.targetY - 50) * eased,
+        opacity: (1 - progress) * p.opacity,
+      })));
+      
+      // Stagger insight reveals
+      setInsightOpacity(INSIGHTS.map((_, i) => {
+        const delay = i * 0.15;
+        const insightProgress = Math.max(0, Math.min(1, (progress - delay) / 0.4));
+        return insightProgress;
+      }));
+      
+      // Fade in lines
+      setLineOpacity(Math.max(0, (progress - 0.3) / 0.7));
+      
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        setPhase("complete");
+      }
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
   }, [phase]);
 
   const reset = () => {
     setPhase("typing");
     setTypedText("");
-    setVisibleInsights(0);
+    setParticles([]);
+    setProcessingPulse(0);
+    setInsightOpacity([0, 0, 0, 0, 0]);
+    setLineOpacity(0);
   };
 
+  // Calculate insight positions
+  const insightPositions = INSIGHTS.map((_, i) => {
+    const angle = (i / INSIGHTS.length) * Math.PI * 2 - Math.PI / 2;
+    const radius = 32;
+    return {
+      x: 50 + Math.cos(angle) * radius,
+      y: 50 + Math.sin(angle) * radius,
+    };
+  });
+
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center justify-center p-8">
-      {/* Subtle background gradient */}
+    <div ref={containerRef} className="min-h-screen bg-black relative overflow-hidden">
+      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-purple-900/5 via-transparent to-transparent" />
 
       {/* Stage label */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20">
         <span className="text-white/30 text-xs uppercase tracking-[0.2em]">
           {phase === "typing" && "Ask anything"}
-          {phase === "thinking" && "Analyzing on-chain data"}
-          {phase === "responding" && "Insights ready"}
+          {phase === "dissolving" && "Processing query"}
+          {phase === "processing" && "Analyzing on-chain data"}
+          {phase === "forming" && "Generating insights"}
+          {phase === "complete" && "Insights ready"}
         </span>
       </div>
 
-      {/* Main content */}
-      <div className="w-full max-w-lg space-y-6 relative z-10">
-        {/* Input area */}
-        <div className="bg-white/[0.06] border border-white/10 rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-              <Search className="w-4 h-4 text-purple-400" />
+      {/* Main visualization area */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-[500px] h-[500px]">
+          
+          {/* Query text - typing phase */}
+          {(phase === "typing" || phase === "dissolving") && (
+            <div 
+              className={`absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-500 ${
+                phase === "dissolving" ? "opacity-0 scale-95" : "opacity-100"
+              }`}
+            >
+              <div className="bg-white/[0.06] border border-white/10 rounded-xl px-5 py-3 whitespace-nowrap">
+                <span className="text-white/80 text-sm">
+                  {typedText}
+                  {phase === "typing" && (
+                    <span className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle ${cursorVisible ? 'opacity-100' : 'opacity-0'}`} />
+                  )}
+                </span>
+              </div>
             </div>
-            <div className="flex-1 min-h-[24px]">
-              <span className="text-white/80 text-sm">
-                {typedText}
-                {phase === "typing" && (
-                  <span 
-                    className={`inline-block w-0.5 h-4 bg-purple-400 ml-0.5 align-middle transition-opacity duration-100 ${
-                      cursorVisible ? 'opacity-100' : 'opacity-0'
-                    }`} 
-                  />
-                )}
-              </span>
-            </div>
-          </div>
-        </div>
+          )}
 
-        {/* Thinking indicator */}
-        {phase === "thinking" && (
-          <div className="flex items-center justify-center gap-3 animate-fade-in py-4">
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
-                <div 
-                  key={i}
-                  className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse" 
-                  style={{ animationDelay: `${i * 150}ms` }} 
+          {/* Particles */}
+          {particles.map(p => (
+            <div
+              key={p.id}
+              className="absolute rounded-full bg-purple-400 pointer-events-none"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: p.size,
+                height: p.size,
+                opacity: p.opacity,
+                transform: "translate(-50%, -50%)",
+                boxShadow: "0 0 6px rgba(168, 85, 247, 0.6)",
+              }}
+            />
+          ))}
+
+          {/* Central processing orb */}
+          {(phase === "processing" || phase === "forming" || phase === "complete") && (
+            <div 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
+              style={{
+                opacity: phase === "processing" ? 1 : phase === "forming" ? 1 - lineOpacity * 0.3 : 0.8,
+              }}
+            >
+              <div 
+                className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/30 to-purple-700/30 border border-purple-500/40 flex items-center justify-center backdrop-blur-sm"
+                style={{
+                  boxShadow: `0 0 ${20 + processingPulse * 20}px rgba(168, 85, 247, ${0.3 + processingPulse * 0.2})`,
+                  transform: `scale(${1 + processingPulse * 0.1})`,
+                }}
+              >
+                <Sparkles className="w-6 h-6 text-purple-400" />
+              </div>
+            </div>
+          )}
+
+          {/* Connection lines */}
+          {(phase === "forming" || phase === "complete") && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: lineOpacity }}>
+              {insightPositions.map((pos, i) => (
+                <line
+                  key={`line-${i}`}
+                  x1="50%"
+                  y1="50%"
+                  x2={`${pos.x}%`}
+                  y2={`${pos.y}%`}
+                  stroke="rgba(168, 85, 247, 0.25)"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
                 />
               ))}
-            </div>
-            <span className="text-white/40 text-sm">Searching billions of transactions...</span>
-          </div>
-        )}
+            </svg>
+          )}
 
-        {/* Response area */}
-        {phase === "responding" && (
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-white" />
+          {/* Insight nodes */}
+          {(phase === "forming" || phase === "complete") && insightPositions.map((pos, i) => (
+            <div
+              key={INSIGHTS[i].label}
+              className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                opacity: insightOpacity[i],
+                transform: `translate(-50%, -50%) scale(${0.8 + insightOpacity[i] * 0.2})`,
+              }}
+            >
+              <div className={`bg-white/[0.08] border rounded-xl px-4 py-2.5 text-center backdrop-blur-sm transition-all duration-500 ${
+                phase === "complete" ? "border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]" : "border-white/10"
+              }`}>
+                <div className="text-white font-medium text-sm">{INSIGHTS[i].label}</div>
+                <div className="text-purple-400 text-xs">{INSIGHTS[i].value}</div>
               </div>
-              <span className="text-white/50 text-xs uppercase tracking-wider">AudienceScan Signal</span>
             </div>
-
-            {INSIGHTS.map((insight, index) => (
-              <div
-                key={insight.label}
-                className={`flex items-center justify-between bg-white/[0.04] border border-white/5 rounded-lg px-4 py-3 transition-all duration-500 ${
-                  index < visibleInsights
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-2"
-                }`}
-              >
-                <span className="text-white/70 text-sm font-medium">{insight.label}</span>
-                <span className="text-purple-400 text-sm">{insight.value}</span>
-              </div>
-            ))}
-
-            {visibleInsights >= INSIGHTS.length && (
-              <p className="text-white/30 text-xs mt-4 animate-fade-in">
-                Based on 847,000 wallet transactions across 3 chains
-              </p>
-            )}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+
+      {/* Bottom caption */}
+      {phase === "complete" && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/30 text-sm animate-fade-in">
+          Analyzed 847,000 transactions across 3 chains
+        </div>
+      )}
 
       {/* Reset button */}
       <button
