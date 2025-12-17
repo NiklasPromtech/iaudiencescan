@@ -42,7 +42,10 @@ const VELOCITY = 600; // Speed through the tunnel
 
 const NoNicheV3: React.FC = () => {
   const [asteroids, setAsteroids] = useState<Asteroid[]>([]);
+  const [currentLayerType, setCurrentLayerType] = useState<LayerType>('categories');
+  const [isAnimating, setIsAnimating] = useState(true);
   const zOffsetRef = useRef(0);
+  const prevLayerTypeRef = useRef<LayerType>('categories');
   const animationRef = useRef<number | null>(null);
 
   // Generate asteroids for a field
@@ -77,6 +80,8 @@ const NoNicheV3: React.FC = () => {
     const walletsField = generateField('wallets', (FIELD_DEPTH + FIELD_GAP) * 2);
     
     setAsteroids([...categoriesField, ...tokensField, ...walletsField]);
+    // Trigger initial animation
+    setTimeout(() => setIsAnimating(false), 100);
   }, []);
 
   // Animation loop
@@ -89,7 +94,23 @@ const NoNicheV3: React.FC = () => {
 
       zOffsetRef.current += VELOCITY * deltaTime;
 
+      // Determine current layer type based on position
       const totalCycleLength = (FIELD_DEPTH + FIELD_GAP) * 3;
+      const cyclePosition = zOffsetRef.current % totalCycleLength;
+      
+      let newLayerType: LayerType = 'categories';
+      if (cyclePosition > (FIELD_DEPTH + FIELD_GAP) * 2) {
+        newLayerType = 'wallets';
+      } else if (cyclePosition > FIELD_DEPTH + FIELD_GAP) {
+        newLayerType = 'tokens';
+      }
+      
+      if (newLayerType !== prevLayerTypeRef.current) {
+        prevLayerTypeRef.current = newLayerType;
+        setCurrentLayerType(newLayerType);
+        setIsAnimating(true);
+        setTimeout(() => setIsAnimating(false), 600);
+      }
 
       // Recycle asteroids that have passed
       setAsteroids(prevAsteroids => {
@@ -207,17 +228,24 @@ const NoNicheV3: React.FC = () => {
         }}
       />
 
-      {/* Static label - top right */}
-      <div className="absolute top-8 right-8 z-50">
+      {/* Animated label - bottom right */}
+      <div className="absolute bottom-8 right-8 z-50">
         <div 
-          className="px-4 py-2 rounded-lg text-sm font-semibold tracking-wide"
+          className={`
+            px-4 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider
+            transition-all duration-500 ease-out
+            ${isAnimating 
+              ? 'scale-150 opacity-0' 
+              : 'scale-100 opacity-100'
+            }
+          `}
           style={{ 
             backgroundColor: 'rgba(255,255,255,0.1)',
             color: '#ffffff',
             border: '1px solid rgba(255,255,255,0.3)'
           }}
         >
-          Insights from any corner of web3
+          {currentLayerType}
         </div>
       </div>
 
