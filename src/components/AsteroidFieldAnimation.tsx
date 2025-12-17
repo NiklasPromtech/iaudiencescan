@@ -170,22 +170,6 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
         })}
       </div>
 
-      {/* Center focus gradient */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.3) 100%)',
-        }}
-      />
-
-      {/* Tunnel edge shadow */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          boxShadow: 'inset 0 0 100px 40px rgba(0,0,0,0.4)',
-        }}
-      />
-
       {/* Center dot */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <div className="w-2 h-2 rounded-full border border-white/20" />
