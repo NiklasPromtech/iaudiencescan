@@ -207,7 +207,7 @@ const WizardMobile = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setDefaultTokens(data);
+          setDefaultTokens(data.data?.token || []);
         }
       } catch (error) {
         console.error("Failed to fetch default token data:", error);
@@ -231,7 +231,7 @@ const WizardMobile = () => {
         );
         if (response.ok) {
           const data = await response.json();
-          setTokens(data);
+          setTokens(data.data?.token || []);
         }
       } catch (error) {
         console.error("Failed to fetch token data:", error);
