@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   role: "user" | "assistant";
@@ -67,13 +67,11 @@ const mockScanContext = {
   ]
 };
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/audiencescan-signal`;
+
 const AI = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Hi! I'm AudienceScan Signal. I can help you turn your scan data into a concrete marketing strategy using the AudienceScan Strategy Playbook.\n\nI can see you have scan data loaded with **120 tokens** from **4,800 unique wallets**. The overall confidence is **74%** which is solid.\n\nWhat would you like to know? For example:\n- Which playbook steps should I prioritize?\n- What channels look strongest for this audience?\n- Which tokens should I focus on for partnerships?"
-    }
-  ]);
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -84,42 +82,164 @@ const AI = () => {
     }
   }, [messages]);
 
+  const streamChat = useCallback(async (
+    messagesToSend: Message[],
+    onDelta: (deltaText: string) => void,
+    onDone: () => void
+  ) => {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ 
+        messages: messagesToSend,
+        scanContext: mockScanContext 
+      }),
+    });
+
+    if (!resp.ok) {
+      const errorData = await resp.json().catch(() => ({}));
+      if (resp.status === 429) {
+        throw new Error("Rate limits exceeded. Please try again later.");
+      }
+      if (resp.status === 402) {
+        throw new Error("Payment required. Please add funds to continue.");
+      }
+      throw new Error(errorData.error || "Failed to get response");
+    }
+
+    if (!resp.body) throw new Error("No response body");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let streamDone = false;
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") {
+          streamDone = true;
+          break;
+        }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch { /* ignore */ }
+      }
+    }
+
+    onDone();
+  }, []);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    const userMsg: Message = { role: "user", content: userMessage };
+    setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
-    // Simulate AI response (demo mode)
-    setTimeout(() => {
-      const response = generateDemoResponse(userMessage);
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+    let assistantSoFar = "";
+    const upsertAssistant = (nextChunk: string) => {
+      assistantSoFar += nextChunk;
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantSoFar }];
+      });
+    };
+
+    try {
+      await streamChat(
+        [...messages, userMsg],
+        (chunk) => upsertAssistant(chunk),
+        () => setIsLoading(false)
+      );
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to get response",
+      });
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const generateDemoResponse = (query: string): string => {
-    const q = query.toLowerCase();
-    
-    if (q.includes("prioritize") || q.includes("playbook") || q.includes("steps")) {
-      return `Based on your scan data, here's my prioritized recommendation:\n\n**High Priority (Strong signals)**\n1. **X Advertising** - 719 tokens have X presence, highest social signal\n2. **Telegram Campaigns** - 534 tokens with Telegram, second strongest channel\n3. **KOL Outreach** - DePIN and AI Agents categories are hot, good KOL ecosystem\n\n**Medium Priority**\n4. **Google/DV360** - Can target crypto-intent audiences broadly\n5. **Reddit Campaigns** - Some presence but not dominant\n\n**Skip for now**\n- YouTube campaigns (weak signal in this scan)\n- Discord-focused outreach (312 is relatively low)\n\nWant me to drill into any of these?`;
-    }
-    
-    if (q.includes("channel") || q.includes("strongest") || q.includes("platform")) {
-      return `**Channel Analysis from your scan:**\n\n| Channel | Signal Strength | Recommendation |\n|---------|-----------------|----------------|\n| X/Twitter | 🟢 719 tokens | Primary channel - run ads + DMs |\n| Telegram | 🟢 534 tokens | Strong - run ads + community outreach |\n| Discord | 🟡 312 tokens | Secondary - monitor, don't lead with |\n| Reddit | 🟡 Moderate | Worth testing with r/CryptoCurrency |\n| YouTube | 🔴 Weak | Skip unless budget allows |\n\nYour audience is clearly **X and Telegram heavy**. I'd allocate 60% of effort to X, 30% to Telegram, 10% to testing other channels.`;
-    }
-    
-    if (q.includes("token") || q.includes("partner") || q.includes("focus")) {
-      return `**Top tokens to focus on for partnerships:**\n\n1. **$IOTX** (IoTeX)\n   - Confidence: 67% ✓\n   - Strong X presence (@iotex_io)\n   - Tags: DePIN, AI Agents\n   - Why: High wallet overlap, active community\n\n2. **$FET** (Fetch.ai)\n   - Confidence: 72% ✓\n   - Active across X, Telegram, Discord\n   - Tags: AI Agents, DeFi\n   - Why: Higher confidence score, strong socials\n\n**Outreach approach:**\n- Start with community managers, not founders\n- Reference the wallet overlap data as conversation starter\n- Propose co-marketing, not token swaps initially`;
-    }
-    
-    if (q.includes("confidence") || q.includes("reliable") || q.includes("trust")) {
-      return `**Confidence breakdown for this scan:**\n\n**Overall: 74%** - This is solid, you can act on these signals.\n\n| Component | Score | Meaning |\n|-----------|-------|--------|\n| Data Integrity | 78% | Source data is clean |\n| Behavior Quality | 63% | Some noise in wallet patterns |\n| Context Strength | 71% | Good category/chain coherence |\n\n**Source coverage:**\n- 80% tokens found in both CoinGecko + CMC ✓\n- 20% only in CoinGecko\n- 15% only in CMC\n- 5% in neither (low-cap or new)\n\n**Bottom line:** Trust the top signals. Be cautious with tokens showing <60% individual confidence.`;
-    }
-    
-    return `I can help you with:\n\n1. **Playbook prioritization** - Which of the 10 steps to run based on your data\n2. **Channel analysis** - Where your audience is most active\n3. **Token partnerships** - Which projects to approach first\n4. **Confidence interpretation** - How much to trust each signal\n\nWhat would you like to explore?`;
+  const renderMessageContent = (content: string) => {
+    return content.split('\n').map((line, idx) => {
+      // Bold text
+      if (line.includes('**')) {
+        const parts = line.split(/\*\*(.*?)\*\*/g);
+        return (
+          <p key={idx}>
+            {parts.map((part, pIdx) => 
+              pIdx % 2 === 1 ? <strong key={pIdx} className="text-white">{part}</strong> : part
+            )}
+          </p>
+        );
+      }
+      // Table rows
+      if (line.startsWith('|')) {
+        return <p key={idx} className="font-mono text-xs text-white/70">{line}</p>;
+      }
+      // List items
+      if (line.startsWith('- ')) {
+        return <p key={idx} className="pl-2">• {line.slice(2)}</p>;
+      }
+      // Numbered lists
+      if (line.match(/^\d+\./)) {
+        return <p key={idx} className="pl-2">{line}</p>;
+      }
+      // Headers
+      if (line.startsWith('### ')) {
+        return <p key={idx} className="font-semibold text-white mt-2">{line.slice(4)}</p>;
+      }
+      if (line.startsWith('## ')) {
+        return <p key={idx} className="font-bold text-white mt-3">{line.slice(3)}</p>;
+      }
+      return <p key={idx}>{line || '\u00A0'}</p>;
+    });
   };
 
   return (
@@ -165,6 +285,13 @@ const AI = () => {
           <div className="flex-1 flex flex-col min-h-0 py-4">
             <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
               <div className="space-y-4">
+                {messages.length === 0 && (
+                  <div className="text-center py-12 text-white/40">
+                    <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg mb-2">Ask me about your scan data</p>
+                    <p className="text-sm">Try: "Which playbook steps should I prioritize?"</p>
+                  </div>
+                )}
                 {messages.map((message, i) => (
                   <div
                     key={i}
@@ -183,32 +310,7 @@ const AI = () => {
                       }`}
                     >
                       <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                        {message.content.split('\n').map((line, idx) => {
-                          // Simple markdown-like rendering
-                          if (line.startsWith('**') && line.endsWith('**')) {
-                            return <p key={idx} className="font-semibold text-white">{line.slice(2, -2)}</p>;
-                          }
-                          if (line.includes('**')) {
-                            const parts = line.split(/\*\*(.*?)\*\*/g);
-                            return (
-                              <p key={idx}>
-                                {parts.map((part, pIdx) => 
-                                  pIdx % 2 === 1 ? <strong key={pIdx} className="text-white">{part}</strong> : part
-                                )}
-                              </p>
-                            );
-                          }
-                          if (line.startsWith('|')) {
-                            return <p key={idx} className="font-mono text-xs text-white/70">{line}</p>;
-                          }
-                          if (line.startsWith('- ')) {
-                            return <p key={idx} className="pl-2">• {line.slice(2)}</p>;
-                          }
-                          if (line.match(/^\d+\./)) {
-                            return <p key={idx} className="pl-2">{line}</p>;
-                          }
-                          return <p key={idx}>{line || '\u00A0'}</p>;
-                        })}
+                        {renderMessageContent(message.content)}
                       </div>
                     </div>
                     {message.role === "user" && (
@@ -218,7 +320,7 @@ const AI = () => {
                     )}
                   </div>
                 ))}
-                {isLoading && (
+                {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="flex gap-3 justify-start">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                       <Bot className="w-4 h-4 text-white" />
@@ -256,7 +358,7 @@ const AI = () => {
               </Button>
             </div>
             <p className="text-center text-white/30 text-xs mt-3">
-              Demo mode • Responses are simulated
+              Powered by Lovable AI
             </p>
           </div>
         </div>
