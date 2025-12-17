@@ -153,10 +153,10 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
       <div 
         className="absolute bg-black rounded-lg"
         style={{
-          top: 10,
-          left: 10,
-          right: 10,
-          bottom: 10,
+          top: 20,
+          left: 60,
+          right: 60,
+          bottom: 20,
           borderRadius: 8,
         }}
       />
