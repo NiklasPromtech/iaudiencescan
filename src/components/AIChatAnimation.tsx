@@ -320,7 +320,7 @@ const AIChatAnimation = () => {
                 </div>
 
                 {(phase === "insights" || phase === "complete") && (
-                  <div className="grid grid-cols-4 gap-1">
+                  <div className="flex flex-wrap gap-1 justify-start">
                     {currentQuestion.insights.map((insight, i) => (
                       <div
                         key={insight.label}
