@@ -141,12 +141,12 @@ const Confidence = () => {
   const maxChainCount = Math.max(...topChains.map((c) => c.c));
   const maxCategoryCount = Math.max(...topCategories.map((c) => c.c));
 
-  // Extract copyable data
-  const xHandles = data.token?.filter(t => t.x).map(t => `@${t.x}`).slice(0, 20) || [];
-  const telegramChannels = data.token?.filter(t => t.telegram).map(t => t.telegram).slice(0, 20) || [];
-  const redditCommunities = data.token?.filter(t => t.reddit).map(t => `r/${t.reddit}`).slice(0, 20) || [];
-  const allTags = [...new Set(data.token?.flatMap(t => t.tags || []))].slice(0, 30);
-  const categoryKeywords = topCategories.map(c => c.n);
+  // Extract copyable data - ALL available data for wide targeting
+  const xHandles = data.token?.filter(t => t.x).map(t => `@${t.x}`) || [];
+  const telegramChannels = data.token?.filter(t => t.telegram).map(t => t.telegram) || [];
+  const redditCommunities = data.token?.filter(t => t.reddit).map(t => `r/${t.reddit}`) || [];
+  const allTags = [...new Set(data.token?.flatMap(t => t.tags || []))];
+  const categoryKeywords = data.categories.map(c => c.n);
 
   const confidenceLevel = data.confidence?.overall 
     ? data.confidence.overall >= 0.8 ? "high" 
