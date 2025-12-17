@@ -920,23 +920,23 @@ const WizardV2 = () => {
               </div>
 
               {/* Stats row */}
-              <div className="flex items-center justify-center gap-8 md:gap-12 pt-8">
+              <div className="flex items-center justify-center gap-4 md:gap-12 pt-8">
                 <div className="text-center">
-                  <span className="text-2xl md:text-3xl font-bold text-white">5</span>
-                  <span className="text-2xl md:text-3xl font-thin text-white">+</span>
-                  <span className="text-2xl md:text-3xl font-medium text-primary ml-1">years</span>
+                  <span className="text-lg md:text-3xl font-bold text-white">5</span>
+                  <span className="text-lg md:text-3xl font-thin text-white">+</span>
+                  <span className="text-sm md:text-3xl font-medium text-primary ml-1">years</span>
                 </div>
-                <div className="h-12 w-px bg-white/20" />
+                <div className="h-8 md:h-12 w-px bg-white/20" />
                 <div className="text-center">
-                  <span className="text-2xl md:text-3xl font-bold text-white">9</span>
-                  <span className="text-2xl md:text-3xl font-thin text-white">+</span>
-                  <span className="text-2xl md:text-3xl font-medium text-primary ml-1">chains</span>
+                  <span className="text-lg md:text-3xl font-bold text-white">9</span>
+                  <span className="text-lg md:text-3xl font-thin text-white">+</span>
+                  <span className="text-sm md:text-3xl font-medium text-primary ml-1">chains</span>
                 </div>
-                <div className="h-12 w-px bg-white/20" />
+                <div className="h-8 md:h-12 w-px bg-white/20" />
                 <div className="text-center">
-                  <span className="text-2xl md:text-3xl font-bold text-white">3B</span>
-                  <span className="text-2xl md:text-3xl font-thin text-white">+</span>
-                  <span className="text-2xl md:text-3xl font-medium text-primary ml-1">transactions</span>
+                  <span className="text-lg md:text-3xl font-bold text-white">3B</span>
+                  <span className="text-lg md:text-3xl font-thin text-white">+</span>
+                  <span className="text-sm md:text-3xl font-medium text-primary ml-1">txns</span>
                 </div>
               </div>
             </div>
