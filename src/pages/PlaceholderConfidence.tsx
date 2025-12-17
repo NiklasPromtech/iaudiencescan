@@ -20,6 +20,7 @@ const SOCIALS = ["X", "TG", "Reddit", "Discord"];
 const PlaceholderConfidence = () => {
   const [elements, setElements] = useState<FloatingElement[]>([]);
   const [confidenceScore, setConfidenceScore] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const [phase, setPhase] = useState<"chaos" | "filtering" | "locked">("chaos");
   const [filterProgress, setFilterProgress] = useState(0);
   const animationRef = useRef<number | null>(null);
@@ -154,27 +155,33 @@ const PlaceholderConfidence = () => {
       })
     );
 
-    // Animate confidence score from 0 to 100
-    // 0-99 is fast, 99-100 is very slow
+    // Animate confidence score from 0 to 99 with ease-out, then very slow 99-100
     let startTime: number | null = null;
-    const fastDuration = 1500; // 0-99 in 1.5s
-    const slowDuration = 3000; // 99-100 in 3s
+    const mainDuration = 2500; // 0-99 with easing
+    const finalDuration = 4000; // 99-100 very slow
+
+    // Ease-out cubic: starts fast, slows down dramatically
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const animateScore = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
 
-      if (elapsed < fastDuration) {
-        // Fast phase: 0 to 99
-        const progress = elapsed / fastDuration;
-        setConfidenceScore(Math.floor(progress * 99));
+      if (elapsed < mainDuration) {
+        // Main phase: 0 to 99 with ease-out curve
+        const progress = elapsed / mainDuration;
+        const easedProgress = easeOutCubic(progress);
+        setConfidenceScore(Math.floor(easedProgress * 99));
       } else {
-        // Slow phase: 99 to 100
-        const slowElapsed = elapsed - fastDuration;
-        const slowProgress = Math.min(slowElapsed / slowDuration, 1);
-        setConfidenceScore(99 + Math.floor(slowProgress));
+        // Final phase: 99 to 100 very slowly
+        const finalElapsed = elapsed - mainDuration;
+        const finalProgress = Math.min(finalElapsed / finalDuration, 1);
+        setConfidenceScore(99 + Math.floor(finalProgress));
         
-        if (slowProgress >= 1) return;
+        if (finalProgress >= 1) {
+          setIsComplete(true);
+          return;
+        }
       }
 
       animationRef.current = requestAnimationFrame(animateScore);
@@ -190,6 +197,7 @@ const PlaceholderConfidence = () => {
     setPhase("chaos");
     setFilterProgress(0);
     setConfidenceScore(0);
+    setIsComplete(false);
     const newElements: FloatingElement[] = [];
     for (let i = 0; i < 25; i++) {
       newElements.push(generateElement(i));
@@ -273,9 +281,21 @@ const PlaceholderConfidence = () => {
 
           {/* Confidence card */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
-            <div className="bg-white/[0.06] border border-white/10 rounded-2xl px-12 py-10 text-center backdrop-blur-sm">
-              <div className="text-6xl font-bold text-white mb-2 tabular-nums">{confidenceScore}%</div>
-              <div className="text-white/40 text-xs uppercase tracking-[0.15em]">
+            <div 
+              className={`bg-white/[0.06] border rounded-2xl px-12 py-10 text-center backdrop-blur-sm transition-all duration-700 ${
+                isComplete 
+                  ? "border-purple-500/40 shadow-[0_0_40px_rgba(168,85,247,0.15)]" 
+                  : "border-white/10"
+              }`}
+            >
+              <div className={`text-6xl font-bold mb-2 tabular-nums transition-colors duration-500 ${
+                isComplete ? "text-purple-300" : "text-white"
+              }`}>
+                {confidenceScore}%
+              </div>
+              <div className={`text-xs uppercase tracking-[0.15em] transition-colors duration-500 ${
+                isComplete ? "text-purple-400/60" : "text-white/40"
+              }`}>
                 Confidence
               </div>
             </div>
