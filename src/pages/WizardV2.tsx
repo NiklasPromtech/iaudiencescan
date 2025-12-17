@@ -819,26 +819,20 @@ const WizardV2 = () => {
                 </p>
               </div>
               {/* Sub-section 1: No audience is too niche */}
-              <div className="rounded-xl bg-white/[0.06] overflow-hidden relative">
-                {/* Full-bleed asteroid field animation */}
-                <div className="absolute inset-0">
-                  <AsteroidFieldAnimation className="bg-transparent" />
+              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6">
+                <h3 className="text-xl md:text-2xl font-bold text-white">
+                  No audience is too niche
+                </h3>
+                
+                {/* Asteroid field animation */}
+                <div className="w-full h-48 rounded-lg overflow-hidden">
+                  <AsteroidFieldAnimation />
                 </div>
                 
-                {/* Center container with border radius creating "flowing out" effect */}
-                <div className="relative z-10 m-6 md:m-8 rounded-xl border border-white/20 bg-black/80 backdrop-blur-sm p-6 md:p-8 space-y-6">
-                  <h3 className="text-xl md:text-2xl font-bold text-white">
-                    No audience is too niche
-                  </h3>
-                  
-                  <p className="text-white/50 text-base max-w-xl">
-                    Need to know about meme coin fans? Or the competitors in a specific token category?
-                    Get the granularity of insight you need to understand every web3 audience under the sun.
-                  </p>
-                </div>
-                
-                {/* Spacer to give the animation height */}
-                <div className="h-64 md:h-72" />
+                <p className="text-white/50 text-base max-w-xl">
+                  Need to know about meme coin fans? Or the competitors in a specific token category?
+                  Get the granularity of insight you need to understand every web3 audience under the sun.
+                </p>
               </div>
 
               {/* Sub-section 2: Confidence comes as standard */}
