@@ -36,8 +36,8 @@ const NoNicheV2 = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / ZOOM_DURATION, 1);
         
-        // Pure linear - 100% consistent pace
-        const newScale = 1 + (MAX_SCALE - 1) * progress;
+        // Exponential scale = constant perceived velocity (like traveling through space)
+        const newScale = Math.pow(MAX_SCALE, progress);
         setScale(newScale);
 
         if (progress < 1) {
