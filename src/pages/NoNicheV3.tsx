@@ -15,21 +15,30 @@ const CATEGORIES = [
 ];
 
 const TOKENS = [
-  'DOGE', 'SHIB', 'PEPE', 'BONK', 'WIF', 'FLOKI',
-  'RNDR', 'FET', 'AGIX', 'OCEAN', 'TAO', 'NEAR',
-  'ARB', 'OP', 'MATIC', 'SOL', 'AVAX', 'DOT'
+  '$DOGE', '$SHIB', '$PEPE', '$BONK', '$WIF', '$FLOKI',
+  '$RNDR', '$FET', '$AGIX', '$OCEAN', '$TAO', '$NEAR',
+  '$ARB', '$OP', '$MATIC', '$SOL', '$AVAX', '$DOT'
+];
+
+const WALLETS = [
+  '0x7a2...f3e', '0x8b1...c4d', '0x3e9...a2b', '0x5f4...d8c',
+  '0x1c6...e7f', '0x9d2...b5a', '0x4a8...c1e', '0x6e3...f9d',
+  '0x2b5...a4c', '0x8f1...d6e', '0x5c9...b3f', '0x7d4...e2a',
+  '0x3a7...c8b', '0x9e6...f1d', '0x4b2...a5e', '0x6f8...d3c',
+  '0x1d5...e9a', '0x8c3...b7f'
 ];
 
 const NoNicheV3: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [layers, setLayers] = useState<Layer[]>([]);
+  const [currentLayerType, setCurrentLayerType] = useState<LayerType>('categories');
   const zOffsetRef = useRef(0);
   const animationRef = useRef<number | null>(null);
 
   const LAYER_SPACING = 1200;
-  const VELOCITY = 400; // pixels per second
-  const RECYCLE_Z = -800; // when layer passes this, recycle it
-  const FAR_Z = 4800; // recycled layers go here
+  const VELOCITY = 400;
+  const RECYCLE_Z = -800;
+  const FAR_Z = 4800;
 
   // Initialize layers
   useEffect(() => {
@@ -59,10 +68,25 @@ const NoNicheV3: React.FC = () => {
 
       // Recycle layers that have passed the camera
       setLayers(prevLayers => {
+        // Find the closest layer to determine current type
+        let closestLayer: Layer | null = null;
+        let closestZ = Infinity;
+        
+        prevLayers.forEach(layer => {
+          const z = layer.baseZ - zOffsetRef.current;
+          if (z > -200 && z < closestZ) {
+            closestZ = z;
+            closestLayer = layer;
+          }
+        });
+        
+        if (closestLayer) {
+          setCurrentLayerType(closestLayer.type);
+        }
+
         return prevLayers.map(layer => {
           const currentZ = layer.baseZ - zOffsetRef.current;
           if (currentZ < RECYCLE_Z) {
-            // Find the furthest layer to position behind it
             const maxBaseZ = Math.max(...prevLayers.map(l => l.baseZ));
             return {
               ...layer,
@@ -86,7 +110,6 @@ const NoNicheV3: React.FC = () => {
   }, []);
 
   const getLayerOpacity = (z: number): number => {
-    // Fade in as approaching, fade out after passing
     if (z < -200) return 0;
     if (z < 200) return Math.max(0, (z + 200) / 400);
     if (z > 3000) return Math.max(0, 1 - (z - 3000) / 1000);
@@ -94,7 +117,6 @@ const NoNicheV3: React.FC = () => {
   };
 
   const getLayerScale = (z: number): number => {
-    // Perspective-like scaling
     const scale = 1000 / (1000 + Math.max(0, z));
     return Math.min(3, Math.max(0.1, scale));
   };
@@ -105,15 +127,24 @@ const NoNicheV3: React.FC = () => {
     return 0;
   };
 
-  const renderCategoriesLayer = (layer: Layer) => {
+  const getItems = (type: LayerType): string[] => {
+    switch (type) {
+      case 'categories': return CATEGORIES;
+      case 'tokens': return TOKENS;
+      case 'wallets': return WALLETS;
+    }
+  };
+
+  const renderLayer = (layer: Layer) => {
     const z = layer.baseZ - zOffsetRef.current;
     const opacity = getLayerOpacity(z);
     const scale = getLayerScale(z);
     const blur = getLayerBlur(z);
+    const items = getItems(layer.type);
 
     return (
       <div
-        key={`cat-${layer.id}`}
+        key={`layer-${layer.id}`}
         className="absolute inset-0 flex items-center justify-center"
         style={{
           transform: `translateZ(${-z}px) scale(${scale})`,
@@ -123,24 +154,21 @@ const NoNicheV3: React.FC = () => {
         }}
       >
         <div className="grid grid-cols-6 gap-4 max-w-4xl">
-          {CATEGORIES.map((cat, idx) => {
-            const isCenter = idx === 7; // AI Agents position
+          {items.map((item, idx) => {
+            const isCenter = idx === 7 || idx === 8;
             return (
               <div
-                key={cat}
+                key={item}
                 className={`
-                  px-4 py-3 rounded-xl text-sm font-medium text-center
-                  transition-all duration-300
+                  px-4 py-2 rounded-lg text-sm font-medium text-center whitespace-nowrap
+                  transition-all duration-300 border
                   ${isCenter 
-                    ? 'bg-white text-black shadow-[0_0_40px_rgba(255,255,255,0.4)] scale-110' 
-                    : 'bg-white/10 text-white/70 border border-white/20'
+                    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.4)]' 
+                    : 'bg-transparent text-white/70 border-white/20'
                   }
                 `}
               >
-                {cat}
-                {isCenter && (
-                  <div className="absolute inset-0 rounded-xl bg-white/20 animate-pulse" />
-                )}
+                {item}
               </div>
             );
           })}
@@ -149,105 +177,11 @@ const NoNicheV3: React.FC = () => {
     );
   };
 
-  const renderTokensLayer = (layer: Layer) => {
-    const z = layer.baseZ - zOffsetRef.current;
-    const opacity = getLayerOpacity(z);
-    const scale = getLayerScale(z);
-    const blur = getLayerBlur(z);
-
-    return (
-      <div
-        key={`tok-${layer.id}`}
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          transform: `translateZ(${-z}px) scale(${scale})`,
-          opacity,
-          filter: blur > 0 ? `blur(${blur}px)` : 'none',
-          willChange: 'transform, opacity',
-        }}
-      >
-        <div className="grid grid-cols-6 gap-6 max-w-4xl">
-          {TOKENS.map((token, idx) => {
-            const isCenter = idx === 8;
-            return (
-              <div
-                key={token}
-                className={`
-                  w-16 h-16 rounded-full flex items-center justify-center
-                  text-xs font-bold transition-all duration-300
-                  ${isCenter 
-                    ? 'bg-white text-black shadow-[0_0_50px_rgba(255,255,255,0.5)] scale-125' 
-                    : 'bg-white/5 text-white/60 border border-white/10'
-                  }
-                `}
-              >
-                ${token}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderWalletsLayer = (layer: Layer) => {
-    const z = layer.baseZ - zOffsetRef.current;
-    const opacity = getLayerOpacity(z);
-    const scale = getLayerScale(z);
-    const blur = getLayerBlur(z);
-
-    return (
-      <div
-        key={`wal-${layer.id}`}
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          transform: `translateZ(${-z}px) scale(${scale})`,
-          opacity,
-          filter: blur > 0 ? `blur(${blur}px)` : 'none',
-          willChange: 'transform, opacity',
-        }}
-      >
-        <div className="grid grid-cols-12 gap-3 max-w-5xl">
-          {Array.from({ length: 60 }).map((_, idx) => {
-            const isHighlighted = [14, 25, 31, 42, 48].includes(idx);
-            return (
-              <div
-                key={idx}
-                className={`
-                  w-8 h-8 rounded-lg flex items-center justify-center
-                  transition-all duration-300
-                  ${isHighlighted 
-                    ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]' 
-                    : 'bg-white/5 border border-white/10'
-                  }
-                `}
-              >
-                <span 
-                  className="material-icons text-sm"
-                  style={{ 
-                    color: isHighlighted ? 'black' : 'rgba(255,255,255,0.3)',
-                    fontSize: '14px'
-                  }}
-                >
-                  account_balance_wallet
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderLayer = (layer: Layer) => {
-    switch (layer.type) {
-      case 'categories':
-        return renderCategoriesLayer(layer);
-      case 'tokens':
-        return renderTokensLayer(layer);
-      case 'wallets':
-        return renderWalletsLayer(layer);
-    }
+  const getLabelStyle = (type: LayerType) => {
+    const isActive = currentLayerType === type;
+    return `text-xs font-medium transition-all duration-300 ${
+      isActive ? 'text-white' : 'text-white/30'
+    }`;
   };
 
   return (
@@ -262,11 +196,10 @@ const NoNicheV3: React.FC = () => {
           transformStyle: 'preserve-3d',
         }}
       >
-        {/* Render all layers */}
         {layers.map(layer => renderLayer(layer))}
       </div>
 
-      {/* Center focus indicator */}
+      {/* Center focus gradient */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -274,7 +207,7 @@ const NoNicheV3: React.FC = () => {
         }}
       />
 
-      {/* Tunnel edge glow */}
+      {/* Tunnel edge shadow */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -282,19 +215,31 @@ const NoNicheV3: React.FC = () => {
         }}
       />
 
-      {/* Info overlay */}
-      <div className="absolute bottom-6 left-6 z-10">
-        <div className="text-white/50 text-sm font-medium">
-          Infinite Tunnel v3
+      {/* Layer type indicator */}
+      <div className="absolute top-1/2 left-8 -translate-y-1/2 z-10 flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            currentLayerType === 'categories' ? 'bg-white' : 'bg-white/20'
+          }`} />
+          <span className={getLabelStyle('categories')}>Categories</span>
         </div>
-        <div className="text-white/30 text-xs mt-1">
-          Categories → Tokens → Wallets
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            currentLayerType === 'tokens' ? 'bg-white' : 'bg-white/20'
+          }`} />
+          <span className={getLabelStyle('tokens')}>Tokens</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            currentLayerType === 'wallets' ? 'bg-white' : 'bg-white/20'
+          }`} />
+          <span className={getLabelStyle('wallets')}>Wallets</span>
         </div>
       </div>
 
       {/* Center crosshair */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="w-4 h-4 border-2 border-white/30 rounded-full" />
+        <div className="w-4 h-4 border border-white/20 rounded-full" />
       </div>
     </div>
   );
