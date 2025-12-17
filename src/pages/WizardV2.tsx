@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X } from "lucide-react";
 import AgencyHowPanel from "@/components/AgencyHowPanel";
 import AsteroidFieldAnimation from "@/components/AsteroidFieldAnimation";
@@ -572,11 +572,34 @@ const WizardV2 = () => {
   const [isLaunching, setIsLaunching] = useState(false);
   const [shimmerIndex, setShimmerIndex] = useState<number | null>(null);
   
+  // Confidence animation visibility
+  const confidenceRef = useRef<HTMLDivElement>(null);
+  const [confidenceInView, setConfidenceInView] = useState(false);
+  
   // Agency-specific state
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
   const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
   const [expandedReassurance, setExpandedReassurance] = useState<string | null>(null);
   const [agencyHowPanelOpen, setAgencyHowPanelOpen] = useState(false);
+
+  // Intersection Observer for confidence animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setConfidenceInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (confidenceRef.current) {
+      observer.observe(confidenceRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleLaunchApp = () => {
     setIsLaunching(true);
@@ -848,7 +871,9 @@ const WizardV2 = () => {
                 </h3>
                 
                 {/* Confidence Animation */}
-                <ConfidenceAnimation className="w-full h-48 rounded-lg border border-white/10 bg-black/20" />
+                <div ref={confidenceRef}>
+                  <ConfidenceAnimation className="w-full h-48 rounded-lg border border-white/10 bg-black/20" isInView={confidenceInView} />
+                </div>
                 
                 <div className="space-y-4">
                   <p className="text-white/50 text-base max-w-xl">
