@@ -22,7 +22,7 @@ const NoNicheV2 = () => {
   const animationRef = useRef<number | null>(null);
 
   const ZOOM_DURATION = 3000; // 3 seconds
-  const MAX_SCALE = 500; // Much deeper zoom
+  const MAX_SCALE = 1000; // Even deeper zoom
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
