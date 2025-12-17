@@ -170,6 +170,18 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
           }
         }
       `}</style>
+      
+      {/* Edge fade overlays */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[rgba(255,255,255,0.06)] to-transparent" />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[rgba(255,255,255,0.06)] to-transparent" />
+        {/* Top fade */}
+        <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[rgba(255,255,255,0.06)] to-transparent" />
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[rgba(255,255,255,0.06)] to-transparent" />
+      </div>
       <div className="absolute inset-0">
         {asteroids.map(asteroid => {
           const style = getAsteroidStyle(asteroid);
