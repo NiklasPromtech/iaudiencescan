@@ -36,9 +36,8 @@ const NoNicheV2 = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / ZOOM_DURATION, 1);
         
-        // Constant pace (linear) with slight ease at very end
-        const eased = progress < 0.9 ? progress : 0.9 + (progress - 0.9) * 0.5 + Math.pow((progress - 0.9) * 10, 2) * 0.05;
-        const newScale = 1 + (MAX_SCALE - 1) * eased;
+        // Pure linear - 100% consistent pace
+        const newScale = 1 + (MAX_SCALE - 1) * progress;
         setScale(newScale);
 
         if (progress < 1) {
