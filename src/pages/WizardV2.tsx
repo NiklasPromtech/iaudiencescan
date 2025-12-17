@@ -213,17 +213,12 @@ const wizardOptions: WizardOption[] = [
 interface TokenData {
   logo: string;
   ticker: string;
-  score?: number;
-  confidence?: {
-    overall: number;
-    components?: Record<string, number>;
-    signals?: Record<string, unknown>;
-  };
-  x?: string;
-  telegram?: string;
-  reddit?: string;
-  youtube?: string;
-  tags?: string[];
+  score: number;
+  x: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
 }
 
 interface Node {
@@ -347,8 +342,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         );
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
-        const tokenArray = Array.isArray(data?.data?.token) ? data.data.token : Array.isArray(data?.token) ? data.token : Array.isArray(data) ? data : [];
-        setTokens(tokenArray);
+        setTokens(data);
       } catch {
         // Silently fail
       } finally {
@@ -383,8 +377,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
     const generatedNodes: Node[] = [];
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
-      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
-      const nodeSize = 16 + tokenScore * 24;
+      const nodeSize = 16 + token.score * 24;
       let x: number, y: number;
       let attempts = 0;
 
@@ -420,7 +413,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
         y,
         logo: token.logo,
         ticker: token.ticker || '',
-        score: tokenScore,
+        score: token.score,
         size: nodeSize,
         socialX: token.x || '',
         telegram: token.telegram || '',

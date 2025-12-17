@@ -4,10 +4,7 @@ import logoWhite from "@/assets/audiencescan-logo-white.png";
 
 interface TokenData {
   logo: string;
-  score?: number;
-  confidence?: {
-    overall: number;
-  };
+  score: number;
 }
 
 const Artifact = () => {
@@ -29,8 +26,7 @@ const Artifact = () => {
         }
         
         const data = await response.json();
-        const tokenArray = Array.isArray(data?.data?.token) ? data.data.token : Array.isArray(data?.token) ? data.token : Array.isArray(data) ? data : [];
-        setTokens(tokenArray);
+        setTokens(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -114,20 +110,19 @@ const TokenOverlapChart = ({ tokens }: TokenOverlapChartProps) => {
   const positionedTokens: { x: number; y: number; r: number; logo: string; opacity: number; score: number }[] = [];
   
   // Sort by score descending so higher scores are in inner rings
-  const sortedTokens = [...otherTokens].sort((a, b) => (b.score ?? b.confidence?.overall ?? 0.5) - (a.score ?? a.confidence?.overall ?? 0.5));
+  const sortedTokens = [...otherTokens].sort((a, b) => b.score - a.score);
   
   rings.forEach(([count, radius, tokenSize, baseOpacity]) => {
     for (let i = 0; i < count && tokenIndex < sortedTokens.length; i++) {
       const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
       const token = sortedTokens[tokenIndex];
-      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
       positionedTokens.push({
         x: center + Math.cos(angle) * radius,
         y: center + Math.sin(angle) * radius,
         r: tokenSize,
         logo: token.logo,
-        opacity: baseOpacity * Math.max(tokenScore, 0.3),
-        score: tokenScore,
+        opacity: baseOpacity * Math.max(token.score, 0.3),
+        score: token.score,
       });
       tokenIndex++;
     }

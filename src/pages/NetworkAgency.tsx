@@ -10,17 +10,12 @@ import iconGoogleAds from "@/assets/icon-googleads.jpg";
 interface TokenData {
   logo: string;
   ticker: string;
-  score?: number;
-  confidence?: {
-    overall: number;
-    components?: Record<string, number>;
-    signals?: Record<string, unknown>;
-  };
-  x?: string;
-  telegram?: string;
-  reddit?: string;
-  youtube?: string;
-  tags?: string[];
+  score: number;
+  x: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
 }
 
 interface Node {
@@ -228,8 +223,7 @@ const NetworkAgency = () => {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch data");
         const data = await response.json();
-        const tokenArray = Array.isArray(data?.data?.token) ? data.data.token : Array.isArray(data?.token) ? data.token : Array.isArray(data) ? data : [];
-        setTokens(tokenArray);
+        setTokens(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -256,10 +250,7 @@ const NetworkAgency = () => {
     const generatedNodes: Node[] = [];
 
     tokens.slice(0, maxTokens).forEach((token, index) => {
-      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
-      // Use index-based sizing to create more variety since confidence values are often uniform
-      const indexFactor = 1 - (index / maxTokens) * 0.6; // First tokens are larger
-      const nodeSize = 20 + indexFactor * 50 + seededRandom(index * 17) * 15;
+      const nodeSize = 24 + token.score * 36;
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
@@ -285,7 +276,7 @@ const NetworkAgency = () => {
           const dx = x - other.x;
           const dy = y - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = (nodeSize + other.size) / 2 + 25; // Increased spacing
+          const minDist = (nodeSize + other.size) / 2 + 15;
           return dist < minDist;
         });
 
@@ -299,7 +290,7 @@ const NetworkAgency = () => {
         y,
         logo: token.logo,
         ticker: token.ticker || '',
-        score: tokenScore,
+        score: token.score,
         size: nodeSize,
         socialX: token.x || '',
         telegram: token.telegram || '',
@@ -321,9 +312,7 @@ const NetworkAgency = () => {
           e => (e.from === from && e.to === to) || (e.from === to && e.to === from)
         );
         if (!exists) {
-          // Create varied strength based on node positions and random factor
-          const baseFactor = seededRandom(from * 7 + to * 11);
-          const strength = 0.2 + baseFactor * 0.8;
+          const strength = (generatedNodes[from].score + generatedNodes[to].score) / 2;
           generatedEdges.push({ from, to, strength });
         }
       }
@@ -571,8 +560,8 @@ const NetworkAgency = () => {
               const toNode = nodes[edge.to];
               if (!fromNode || !toNode) return null;
 
-              const opacity = 0.08 + edge.strength * 0.5;
-              const strokeWidth = 0.3 + edge.strength * 2;
+              const opacity = 0.15 + edge.strength * 0.4;
+              const strokeWidth = 0.5 + edge.strength * 1.5;
 
               return (
                 <line
