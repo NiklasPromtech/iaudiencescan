@@ -151,13 +151,14 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
     <div className={`w-full h-full overflow-hidden relative ${className}`}>
       {/* Black background container - 20px smaller */}
       <div 
-        className="absolute bg-black rounded-lg"
+        className="absolute bg-black border border-purple-500/30"
         style={{
           top: 20,
           left: 60,
           right: 60,
           bottom: 20,
           borderRadius: 8,
+          boxShadow: '0 0 30px rgba(168, 85, 247, 0.15), inset 0 0 20px rgba(168, 85, 247, 0.05)',
         }}
       />
       <div className="absolute inset-0">
