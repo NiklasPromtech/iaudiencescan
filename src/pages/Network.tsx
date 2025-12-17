@@ -53,12 +53,17 @@ const updateMetaTags = (ticker: string, tokenCount: number) => {
 interface TokenData {
   logo: string;
   ticker: string;
-  score: number;
-  x: string;
-  telegram: string;
-  reddit: string;
-  youtube: string;
-  tags: string[];
+  score?: number;
+  confidence?: {
+    overall: number;
+    components?: Record<string, number>;
+    signals?: Record<string, unknown>;
+  };
+  x?: string;
+  telegram?: string;
+  reddit?: string;
+  youtube?: string;
+  tags?: string[];
 }
 
 interface Node {
@@ -247,7 +252,8 @@ const Network = () => {
 
     // Place nodes with collision avoidance
     tokens.slice(0, maxTokens).forEach((token, index) => {
-      const nodeSize = 24 + token.score * 36;
+      const tokenScore = token.score ?? token.confidence?.overall ?? 0.5;
+      const nodeSize = 24 + tokenScore * 36;
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
@@ -292,7 +298,7 @@ const Network = () => {
         y,
         logo: token.logo,
         ticker: token.ticker || '',
-        score: token.score,
+        score: tokenScore,
         size: nodeSize,
         socialX: token.x || '',
         telegram: token.telegram || '',
