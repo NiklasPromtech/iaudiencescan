@@ -320,7 +320,7 @@ const AIChatAnimation = () => {
                 </div>
 
                 {(phase === "insights" || phase === "complete") && (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="grid grid-cols-4 gap-1">
                     {currentQuestion.insights.map((insight, i) => (
                       <div
                         key={insight.label}
@@ -332,13 +332,13 @@ const AIChatAnimation = () => {
                         style={{ transitionDelay: `${i * 50}ms` }}
                       >
                         <div 
-                          className="bg-gradient-to-br from-purple-500/20 to-purple-700/20 border border-purple-500/30 rounded-lg px-2 py-1 backdrop-blur-sm"
+                          className="bg-gradient-to-br from-purple-500/20 to-purple-700/20 border border-purple-500/30 rounded-md px-1.5 py-1 backdrop-blur-sm"
                           style={{
                             boxShadow: insightReveal.includes(i) ? "0 0 15px rgba(168, 85, 247, 0.2)" : "none",
                           }}
                         >
-                          <div className="text-white font-medium text-xs">{insight.label}</div>
-                          <div className="text-purple-400 text-[10px]">{insight.value}</div>
+                          <div className="text-white font-medium text-[9px] truncate">{insight.label}</div>
+                          <div className="text-purple-400 text-[8px]">{insight.value}</div>
                         </div>
                       </div>
                     ))}
