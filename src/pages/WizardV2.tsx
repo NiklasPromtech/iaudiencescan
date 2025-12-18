@@ -629,8 +629,10 @@ const WizardV2 = () => {
       const elementCenter = rect.top + rect.height / 2;
       const startPosition = windowHeight * 1.3; // Start below viewport
       const endPosition = windowHeight * 0.67; // End at 2/3 down from top
-      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - endPosition) / (startPosition - endPosition)));
-      return progress;
+      const linearProgress = 1 - Math.max(0, Math.min(1, (elementCenter - endPosition) / (startPosition - endPosition)));
+      // Apply ease-out cubic for smooth deceleration
+      const easedProgress = 1 - Math.pow(1 - linearProgress, 3);
+      return easedProgress;
     };
 
     const handleScroll = () => {
