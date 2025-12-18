@@ -790,35 +790,21 @@ const WizardV2 = () => {
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <p 
-                      className="text-purple-400 text-sm tracking-widest uppercase font-medium origin-left"
-                      style={{ 
-                        opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                        transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                      }}
+                      className="text-purple-400 text-sm tracking-widest uppercase font-medium"
+                      style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}
                     >
                       Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight overflow-visible">
                       <span 
-                        className="whitespace-nowrap inline-block origin-left"
-                        style={{ 
-                          opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                          transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                        }}
+                        className="whitespace-nowrap"
+                        style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}
                       >
                         Understand any web3
                       </span>
                       <br />
                       <span className="whitespace-nowrap">
-                        <span 
-                          className="inline-block origin-left"
-                          style={{ 
-                            opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                            transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                          }}
-                        >
-                          audience{" "}
-                        </span>
+                        <span style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}>audience </span>
                         <span 
                           className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline-block pb-2"
                           style={{
@@ -830,11 +816,8 @@ const WizardV2 = () => {
                       </span>
                     </h1>
                     <p 
-                      className="text-white/50 text-lg max-w-xl origin-left"
-                      style={{ 
-                        opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                        transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                      }}
+                      className="text-white/50 text-lg max-w-xl"
+                      style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}
                     >
                       Get the ultra-reliable research based on on-chain transaction data that brands and agencies need to stay ahead of changing consumer behavior.
                     </p>
@@ -844,11 +827,8 @@ const WizardV2 = () => {
                     href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
                     target="_blank"
                     rel="nofollow noopener noreferrer"
-                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8 origin-left"
-                    style={{ 
-                      opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                      transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                    }}
+                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8"
+                    style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}
                   >
                     <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
                       Book a demo
@@ -858,11 +838,8 @@ const WizardV2 = () => {
 
                 {/* Right: Network preview */}
                 <div 
-                  className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12 origin-center"
-                  style={{ 
-                    opacity: 1 - Math.min(heroScrollProgress * 4, 1),
-                    transform: `scale(${1 - Math.min(heroScrollProgress * 4, 1)})`,
-                  }}
+                  className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12"
+                  style={{ opacity: 1 - Math.min(heroScrollProgress * 4, 1) }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
                   <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime enableBreathing />
