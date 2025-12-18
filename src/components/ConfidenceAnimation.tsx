@@ -27,31 +27,31 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
 
   const generateElement = useCallback((id: number, forceNonSignal: boolean = false): FloatingElement => {
     const label = LABELS[id % LABELS.length];
-    // Distribute elements across the container with some randomness
-    const cols = 10;
-    const rows = 7;
+    // Distribute elements across the container with randomness for messy look
+    const cols = 18;
+    const rows = 15;
     const col = id % cols;
     const row = Math.floor(id / cols) % rows;
     
     return {
       id,
       label,
-      x: 5 + (col * 10) + (Math.random() - 0.5) * 8,
-      y: 8 + (row * 14) + (Math.random() - 0.5) * 10,
+      x: 2 + (col * 5.5) + (Math.random() - 0.5) * 4,
+      y: 3 + (row * 6.5) + (Math.random() - 0.5) * 5,
       opacity: 1,
-      isSignal: forceNonSignal ? false : Math.random() > 0.85, // ~15% are signals from first batch
+      isSignal: forceNonSignal ? false : Math.random() > 0.85,
     };
   }, []);
 
-  // Initialize elements - first 35 can be signals, next 35 are all noise
+  // Initialize elements - first 35 can be signals, rest are all noise
   useEffect(() => {
     const initialElements: FloatingElement[] = [];
     // First batch - some can be signals
     for (let i = 0; i < 35; i++) {
       initialElements.push(generateElement(i, false));
     }
-    // Second batch - all noise (will be filtered out)
-    for (let i = 35; i < 70; i++) {
+    // Remaining 235 cards - all noise (will be filtered out)
+    for (let i = 35; i < 270; i++) {
       initialElements.push(generateElement(i, true));
     }
     setElements(initialElements);
@@ -70,7 +70,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
   useEffect(() => {
     if (phase !== "filtering") return;
 
-    const duration = 4000; // Slow sweep for dramatic effect
+    const duration = 10000; // 10 seconds - slow dramatic sweep
     const startTime = Date.now();
 
     const animate = () => {
