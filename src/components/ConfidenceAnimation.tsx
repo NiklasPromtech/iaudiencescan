@@ -43,16 +43,19 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
     };
   }, []);
 
-  // Initialize elements - first 35 can be signals, rest are all noise
+  // Initialize elements - randomly select ~6-8 signals spread across all positions
   useEffect(() => {
-    const initialElements: FloatingElement[] = [];
-    // First batch - some can be signals
-    for (let i = 0; i < 35; i++) {
-      initialElements.push(generateElement(i, false));
+    const totalCards = 270;
+    // Pick random indices to be signals (spread across the whole grid)
+    const signalCount = 6 + Math.floor(Math.random() * 3); // 6-8 signals
+    const signalIndices = new Set<number>();
+    while (signalIndices.size < signalCount) {
+      signalIndices.add(Math.floor(Math.random() * totalCards));
     }
-    // Remaining 235 cards - all noise (will be filtered out)
-    for (let i = 35; i < 270; i++) {
-      initialElements.push(generateElement(i, true));
+    
+    const initialElements: FloatingElement[] = [];
+    for (let i = 0; i < totalCards; i++) {
+      initialElements.push(generateElement(i, !signalIndices.has(i)));
     }
     setElements(initialElements);
   }, [generateElement]);
