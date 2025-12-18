@@ -579,6 +579,14 @@ const WizardV2 = () => {
   // Hero scroll parallax
   const [heroScrollProgress, setHeroScrollProgress] = useState(0);
   
+  // Subsection slide-in refs and visibility
+  const noNicheRef = useRef<HTMLDivElement>(null);
+  const confidenceSectionRef = useRef<HTMLDivElement>(null);
+  const insightsRef = useRef<HTMLDivElement>(null);
+  const [noNicheInView, setNoNicheInView] = useState(false);
+  const [confidenceSectionInView, setConfidenceSectionInView] = useState(false);
+  const [insightsInView, setInsightsInView] = useState(false);
+  
   // Agency-specific state
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
   const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
@@ -602,6 +610,33 @@ const WizardV2 = () => {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  // Intersection observers for subsection slide-in animations
+  useEffect(() => {
+    const createObserver = (ref: React.RefObject<HTMLDivElement>, setter: (v: boolean) => void) => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setter(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.2 }
+      );
+      if (ref.current) observer.observe(ref.current);
+      return observer;
+    };
+
+    const obs1 = createObserver(noNicheRef, setNoNicheInView);
+    const obs2 = createObserver(confidenceSectionRef, setConfidenceSectionInView);
+    const obs3 = createObserver(insightsRef, setInsightsInView);
+
+    return () => {
+      obs1.disconnect();
+      obs2.disconnect();
+      obs3.disconnect();
+    };
   }, []);
 
   // Hero scroll parallax effect
@@ -748,8 +783,8 @@ const WizardV2 = () => {
             <div 
               className="flex-1 flex items-center justify-center pt-20 pb-8 px-6"
               style={{
-                transform: `scale(${1 - heroScrollProgress * 0.15}) translateY(${heroScrollProgress * -50}px)`,
-                opacity: 1 - heroScrollProgress * 0.7,
+                transform: `scale(${1 - heroScrollProgress * 0.5}) translateY(${heroScrollProgress * -50}px)`,
+                opacity: 1 - heroScrollProgress * 0.5,
                 transformOrigin: 'center center',
               }}
             >
@@ -867,8 +902,13 @@ const WizardV2 = () => {
                   on-chain data helps you go further, faster...
                 </p>
               </div>
-              {/* Sub-section 1: No audience is too niche */}
-              <div className="rounded-xl bg-white/[0.06] overflow-hidden">
+              {/* Sub-section 1: No audience is too niche - slides in from right */}
+              <div 
+                ref={noNicheRef}
+                className={`rounded-xl bg-white/[0.06] overflow-hidden transition-all duration-700 ease-out ${
+                  noNicheInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-24'
+                }`}
+              >
                 <div className="p-6 md:p-8">
                   <h3 className="text-xl md:text-2xl font-bold text-white">
                     No audience is too niche
@@ -888,8 +928,13 @@ const WizardV2 = () => {
                 </div>
               </div>
 
-              {/* Sub-section 2: Confidence when you remove the clutter */}
-              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
+              {/* Sub-section 2: Confidence when you remove the clutter - slides in from left */}
+              <div 
+                ref={confidenceSectionRef}
+                className={`rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6 transition-all duration-700 ease-out ${
+                  confidenceSectionInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-24'
+                }`}
+              >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
                   Confidence when you remove the clutter
                 </h3>
@@ -908,8 +953,13 @@ const WizardV2 = () => {
                   </p>
                 </div>
               </div>
-              {/* Sub-section 3: Insights have never been easier */}
-              <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
+              {/* Sub-section 3: Insights have never been easier - slides in from right */}
+              <div 
+                ref={insightsRef}
+                className={`rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6 transition-all duration-700 ease-out ${
+                  insightsInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-24'
+                }`}
+              >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
                   Insights have never been easier
                 </h3>
