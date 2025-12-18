@@ -579,13 +579,13 @@ const WizardV2 = () => {
   // Hero scroll parallax
   const [heroScrollProgress, setHeroScrollProgress] = useState(0);
   
-  // Subsection slide-in refs and visibility
+  // Subsection slide-in refs and scroll positions
   const noNicheRef = useRef<HTMLDivElement>(null);
   const confidenceSectionRef = useRef<HTMLDivElement>(null);
   const insightsRef = useRef<HTMLDivElement>(null);
-  const [noNicheInView, setNoNicheInView] = useState(false);
-  const [confidenceSectionInView, setConfidenceSectionInView] = useState(false);
-  const [insightsInView, setInsightsInView] = useState(false);
+  const [noNicheProgress, setNoNicheProgress] = useState(0);
+  const [confidenceSectionProgress, setConfidenceSectionProgress] = useState(0);
+  const [insightsProgress, setInsightsProgress] = useState(0);
   
   // Agency-specific state
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
@@ -612,44 +612,33 @@ const WizardV2 = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Intersection observers for subsection slide-in animations
+  // Scroll-based animations for hero and subsections
   useEffect(() => {
-    const createObserver = (ref: React.RefObject<HTMLDivElement>, setter: (v: boolean) => void) => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setter(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.2 }
-      );
-      if (ref.current) observer.observe(ref.current);
-      return observer;
+    const calculateProgress = (ref: React.RefObject<HTMLDivElement>) => {
+      if (!ref.current) return 0;
+      const rect = ref.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      // Element enters from bottom, progress 0->1 as it reaches center
+      const elementCenter = rect.top + rect.height / 2;
+      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - windowHeight * 0.5) / (windowHeight * 0.5)));
+      return progress;
     };
 
-    const obs1 = createObserver(noNicheRef, setNoNicheInView);
-    const obs2 = createObserver(confidenceSectionRef, setConfidenceSectionInView);
-    const obs3 = createObserver(insightsRef, setInsightsInView);
-
-    return () => {
-      obs1.disconnect();
-      obs2.disconnect();
-      obs3.disconnect();
-    };
-  }, []);
-
-  // Hero scroll parallax effect
-  useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
-      // Progress from 0 to 1 over the first screen height
-      const progress = Math.min(scrollY / windowHeight, 1);
-      setHeroScrollProgress(progress);
+      // Hero progress
+      const heroProgress = Math.min(scrollY / windowHeight, 1);
+      setHeroScrollProgress(heroProgress);
+      
+      // Subsection progress
+      setNoNicheProgress(calculateProgress(noNicheRef));
+      setConfidenceSectionProgress(calculateProgress(confidenceSectionRef));
+      setInsightsProgress(calculateProgress(insightsRef));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial calculation
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -905,9 +894,10 @@ const WizardV2 = () => {
               {/* Sub-section 1: No audience is too niche - slides in from right */}
               <div 
                 ref={noNicheRef}
-                className={`rounded-xl bg-white/[0.06] overflow-hidden transition-all duration-700 ease-out ${
-                  noNicheInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-24'
-                }`}
+                className="rounded-xl bg-white/[0.06] overflow-hidden"
+                style={{
+                  transform: `translateX(${(1 - noNicheProgress) * 150}px)`,
+                }}
               >
                 <div className="p-6 md:p-8">
                   <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -931,9 +921,10 @@ const WizardV2 = () => {
               {/* Sub-section 2: Confidence when you remove the clutter - slides in from left */}
               <div 
                 ref={confidenceSectionRef}
-                className={`rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6 transition-all duration-700 ease-out ${
-                  confidenceSectionInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-24'
-                }`}
+                className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
+                style={{
+                  transform: `translateX(${(1 - confidenceSectionProgress) * -150}px)`,
+                }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
                   Confidence when you remove the clutter
@@ -956,9 +947,10 @@ const WizardV2 = () => {
               {/* Sub-section 3: Insights have never been easier - slides in from right */}
               <div 
                 ref={insightsRef}
-                className={`rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6 transition-all duration-700 ease-out ${
-                  insightsInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-24'
-                }`}
+                className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
+                style={{
+                  transform: `translateX(${(1 - insightsProgress) * 150}px)`,
+                }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
                   Insights have never been easier
