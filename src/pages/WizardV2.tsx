@@ -907,7 +907,7 @@ const WizardV2 = () => {
                 ref={noNicheRef}
                 className="rounded-xl bg-white/[0.06] overflow-hidden"
                 style={{
-                  transform: `translateX(${(1 - noNicheProgress) * 2000}px)`,
+                  transform: `translateX(${(1 - noNicheProgress) * 500}px)`,
                 }}
               >
                 <div className="p-6 md:p-8">
@@ -934,7 +934,7 @@ const WizardV2 = () => {
                 ref={confidenceSectionRef}
                 className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
                 style={{
-                  transform: `translateX(${(1 - confidenceSectionProgress) * -2000}px)`,
+                  transform: `translateX(${(1 - confidenceSectionProgress) * -500}px)`,
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -960,7 +960,7 @@ const WizardV2 = () => {
                 ref={insightsRef}
                 className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
                 style={{
-                  transform: `translateX(${(1 - insightsProgress) * 2000}px)`,
+                  transform: `translateX(${(1 - insightsProgress) * 500}px)`,
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -1002,7 +1002,7 @@ const WizardV2 = () => {
                   ref={yearsRef}
                   className="text-center"
                   style={{
-                    transform: `translateX(${(1 - yearsProgress) * -2000}px)`,
+                    transform: `translateX(${(1 - yearsProgress) * -500}px)`,
                   }}
                 >
                   <span className="text-lg md:text-3xl font-bold text-white">5</span>
@@ -1020,7 +1020,7 @@ const WizardV2 = () => {
                   ref={txnsRef}
                   className="text-center"
                   style={{
-                    transform: `translateX(${(1 - txnsProgress) * -2000}px)`,
+                    transform: `translateX(${(1 - txnsProgress) * -500}px)`,
                   }}
                 >
                   <span className="text-lg md:text-3xl font-bold text-white">3B</span>
@@ -1030,6 +1030,9 @@ const WizardV2 = () => {
               </div>
             </div>
           </div>
+
+          {/* Extra scroll space for stats animation */}
+          <div className="h-[30vh]" />
 
           {/* Minimal Footer */}
           <footer className="py-6 px-6 border-t border-white/[0.06]">
