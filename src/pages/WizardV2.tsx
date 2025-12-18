@@ -576,6 +576,9 @@ const WizardV2 = () => {
   const confidenceRef = useRef<HTMLDivElement>(null);
   const [confidenceInView, setConfidenceInView] = useState(false);
   
+  // Hero scroll parallax
+  const [heroScrollProgress, setHeroScrollProgress] = useState(0);
+  
   // Agency-specific state
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
   const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
@@ -599,6 +602,20 @@ const WizardV2 = () => {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  // Hero scroll parallax effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      // Progress from 0 to 1 over the first screen height
+      const progress = Math.min(scrollY / windowHeight, 1);
+      setHeroScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLaunchApp = () => {
@@ -727,8 +744,15 @@ const WizardV2 = () => {
           <>
           {/* Agency-Focused Landing Page */}
           <div className="min-h-screen flex flex-col">
-            {/* Hero area with network preview */}
-            <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
+            {/* Hero area with network preview - parallax effect */}
+            <div 
+              className="flex-1 flex items-center justify-center pt-20 pb-8 px-6"
+              style={{
+                transform: `scale(${1 - heroScrollProgress * 0.15}) translateY(${heroScrollProgress * -50}px)`,
+                opacity: 1 - heroScrollProgress * 0.7,
+                transformOrigin: 'center center',
+              }}
+            >
               <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left: Text */}
                 <div className="space-y-8">
