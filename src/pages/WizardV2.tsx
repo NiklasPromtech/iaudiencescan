@@ -784,35 +784,41 @@ const WizardV2 = () => {
           {/* Agency-Focused Landing Page */}
           <div className="min-h-screen flex flex-col">
             {/* Hero area with network preview - parallax effect */}
-            <div 
-              className="flex-1 flex items-center justify-center pt-20 pb-8 px-6"
-              style={{
-                opacity: 1 - heroScrollProgress * 1,
-              }}
-            >
+            <div className="flex-1 flex items-center justify-center pt-20 pb-8 px-6">
               <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left: Text */}
                 <div className="space-y-8">
                   <div className="space-y-4">
-                    <p className="text-purple-400 text-sm tracking-widest uppercase font-medium">
+                    <p 
+                      className="text-purple-400 text-sm tracking-widest uppercase font-medium"
+                      style={{ opacity: 1 - heroScrollProgress }}
+                    >
                       Web3 audience research at your fingertips
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                      <span className="whitespace-nowrap">Understand any web3</span>
+                      <span 
+                        className="whitespace-nowrap"
+                        style={{ opacity: 1 - heroScrollProgress }}
+                      >
+                        Understand any web3
+                      </span>
                       <br />
                       <span className="whitespace-nowrap">
-                        audience{" "}
+                        <span style={{ opacity: 1 - heroScrollProgress }}>audience </span>
                         <span 
-                          className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                          className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline-block"
                           style={{
-                            opacity: 1 / Math.max(1 - heroScrollProgress, 0.01),
+                            filter: `drop-shadow(0 0 ${heroScrollProgress * 30}px rgba(168, 85, 247, ${heroScrollProgress})) drop-shadow(0 0 ${heroScrollProgress * 60}px rgba(236, 72, 153, ${heroScrollProgress * 0.7}))`,
                           }}
                         >
                           instantly
                         </span>
                       </span>
                     </h1>
-                    <p className="text-white/50 text-lg max-w-xl">
+                    <p 
+                      className="text-white/50 text-lg max-w-xl"
+                      style={{ opacity: 1 - heroScrollProgress }}
+                    >
                       Get the ultra-reliable research based on on-chain transaction data that brands and agencies need to stay ahead of changing consumer behavior.
                     </p>
                   </div>
@@ -822,6 +828,7 @@ const WizardV2 = () => {
                     target="_blank"
                     rel="nofollow noopener noreferrer"
                     className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8"
+                    style={{ opacity: 1 - heroScrollProgress }}
                   >
                     <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
                       Book a demo
@@ -830,7 +837,10 @@ const WizardV2 = () => {
                 </div>
 
                 {/* Right: Network preview */}
-                <div className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12">
+                <div 
+                  className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12"
+                  style={{ opacity: 1 - heroScrollProgress }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
                   <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime enableBreathing />
                 </div>
