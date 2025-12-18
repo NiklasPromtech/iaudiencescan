@@ -5,13 +5,11 @@ interface FloatingElement {
   label: string;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
   opacity: number;
   isSignal: boolean;
 }
 
-const LABELS = ["$ETH", "$SOL", "$DOGE", "Ethereum", "DeFi", "Meme", "X", "TG", "$ARB", "Base", "Gaming", "AI"];
+const LABELS = ["$ETH", "$SOL", "$DOGE", "Ethereum", "DeFi", "Meme", "X", "TG", "$ARB", "Base", "Gaming", "AI", "$PEPE", "$SHIB", "NFT", "Layer2", "$BTC", "$LINK", "$UNI", "$AVAX"];
 
 interface ConfidenceAnimationProps {
   className?: string;
@@ -22,84 +20,52 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
   const [elements, setElements] = useState<FloatingElement[]>([]);
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const [phase, setPhase] = useState<"idle" | "chaos" | "filtering" | "locked">("idle");
+  const [phase, setPhase] = useState<"idle" | "filtering" | "locked">("idle");
   const [filterProgress, setFilterProgress] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
   const animationRef = useRef<number | null>(null);
 
   const generateElement = useCallback((id: number): FloatingElement => {
     const label = LABELS[id % LABELS.length];
+    // Distribute elements more evenly across the container
+    const cols = 8;
+    const rows = 5;
+    const col = id % cols;
+    const row = Math.floor(id / cols) % rows;
+    
     return {
       id,
       label,
-      x: 10 + Math.random() * 80,
-      y: 10 + Math.random() * 80,
-      vx: (Math.random() - 0.5) * 0.1,
-      vy: (Math.random() - 0.5) * 0.1,
+      x: 8 + (col * 12) + (Math.random() - 0.5) * 6,
+      y: 12 + (row * 18) + (Math.random() - 0.5) * 8,
       opacity: 1,
-      isSignal: Math.random() > 0.65,
+      isSignal: Math.random() > 0.8, // ~20% are signals (fewer signals = more filtering)
     };
   }, []);
 
-  // Initialize elements
+  // Initialize elements with more cards
   useEffect(() => {
     const initialElements: FloatingElement[] = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 35; i++) {
       initialElements.push(generateElement(i));
     }
     setElements(initialElements);
   }, [generateElement]);
 
-  // Start animation when in view
+  // Start animation when in view - go directly to filtering
   useEffect(() => {
     if (isInView && !hasStarted) {
       setHasStarted(true);
-      setPhase("chaos");
+      // Small delay before filtering starts so user can see all the cards
+      setTimeout(() => setPhase("filtering"), 300);
     }
   }, [isInView, hasStarted]);
-
-  // Animation loop for chaos phase
-  useEffect(() => {
-    if (phase !== "chaos") return;
-
-    const animate = () => {
-      setElements((prev) =>
-        prev.map((el) => {
-          let newX = el.x + el.vx;
-          let newY = el.y + el.vy;
-          let newVx = el.vx;
-          let newVy = el.vy;
-
-          if (newX < 10 || newX > 90) newVx *= -1;
-          if (newY < 10 || newY > 90) newVy *= -1;
-
-          newX = Math.max(10, Math.min(90, newX));
-          newY = Math.max(10, Math.min(90, newY));
-
-          return { ...el, x: newX, y: newY, vx: newVx, vy: newVy };
-        })
-      );
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
-  }, [phase]);
-
-  // Trigger filter after delay (only after chaos starts)
-  useEffect(() => {
-    if (phase !== "chaos") return;
-    const timer = setTimeout(() => setPhase("filtering"), 2000);
-    return () => clearTimeout(timer);
-  }, [phase]);
 
   // Filter animation
   useEffect(() => {
     if (phase !== "filtering") return;
 
-    const duration = 1500;
+    const duration = 1800;
     const startTime = Date.now();
 
     const animate = () => {
@@ -111,7 +77,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
         prev.map((el) => {
           const elementProgress = el.x;
           if (progress * 100 > elementProgress && !el.isSignal) {
-            return { ...el, opacity: Math.max(0, 1 - (progress * 100 - elementProgress) * 0.05) };
+            return { ...el, opacity: Math.max(0, 1 - (progress * 100 - elementProgress) * 0.08) };
           }
           return el;
         })
@@ -200,7 +166,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
           <div
             key={el.id}
             className={`absolute transition-all ${
-              phase === "locked" ? "duration-700 ease-out" : "duration-75"
+              phase === "locked" ? "duration-700 ease-out" : "duration-100"
             }`}
             style={{
               left: `${el.x}%`,
