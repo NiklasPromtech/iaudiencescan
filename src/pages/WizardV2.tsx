@@ -876,10 +876,10 @@ const WizardV2 = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  <p className="text-white/50 text-base max-w-xl">
+                  <p className="text-white/50 text-base">
                     Whatever you need, our platform puts you in the know by removing guesswork and wasted effort.
                   </p>
-                  <p className="text-white/50 text-base max-w-xl">
+                  <p className="text-white/50 text-base">
                     Built with practical tools to surface what actually matters. Clear charts, exportable tables, and data you can easily white-label and reuse across campaigns.
                   </p>
                 </div>
