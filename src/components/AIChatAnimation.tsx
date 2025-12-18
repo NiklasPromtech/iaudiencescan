@@ -213,7 +213,7 @@ const AIChatAnimation = () => {
   }, [phase, currentQuestion.question]);
 
   return (
-    <div className="relative w-full h-full min-h-[320px] overflow-hidden rounded-lg">
+    <div className="relative w-full h-full min-h-[320px] overflow-hidden rounded-lg p-4">
       {/* Ambient background glow */}
       <div 
         className="absolute w-[400px] h-[400px] rounded-full blur-[100px] transition-opacity duration-1000 pointer-events-none"
