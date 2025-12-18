@@ -772,8 +772,8 @@ const WizardV2 = () => {
             <div 
               className="flex-1 flex items-center justify-center pt-20 pb-8 px-6"
               style={{
-                transform: `scale(${1 - heroScrollProgress * 0.5}) translateY(${heroScrollProgress * -50}px)`,
-                opacity: 1 - heroScrollProgress * 0.5,
+                transform: `scale(${1 - heroScrollProgress * 1}) translateY(${heroScrollProgress * -50}px)`,
+                opacity: 1 - heroScrollProgress * 1,
                 transformOrigin: 'center center',
               }}
             >
@@ -896,7 +896,7 @@ const WizardV2 = () => {
                 ref={noNicheRef}
                 className="rounded-xl bg-white/[0.06] overflow-hidden"
                 style={{
-                  transform: `translateX(${(1 - noNicheProgress) * 150}px)`,
+                  transform: `translateX(${(1 - noNicheProgress) * 2000}px)`,
                 }}
               >
                 <div className="p-6 md:p-8">
@@ -923,7 +923,7 @@ const WizardV2 = () => {
                 ref={confidenceSectionRef}
                 className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
                 style={{
-                  transform: `translateX(${(1 - confidenceSectionProgress) * -150}px)`,
+                  transform: `translateX(${(1 - confidenceSectionProgress) * -2000}px)`,
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -949,7 +949,7 @@ const WizardV2 = () => {
                 ref={insightsRef}
                 className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6"
                 style={{
-                  transform: `translateX(${(1 - insightsProgress) * 150}px)`,
+                  transform: `translateX(${(1 - insightsProgress) * 2000}px)`,
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
