@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-type ItemType = 'category' | 'token' | 'wallet';
+type ItemType = 'category' | 'token';
 
 interface Asteroid {
   id: string;
@@ -25,11 +25,6 @@ const TOKENS = [
   '$ARB', '$OP', '$MATIC', '$SOL', '$AVAX', '$DOT'
 ];
 
-const WALLETS = [
-  '0x7a2...f3e', '0x8b1...c4d', '0x3e9...a2b', '0x5f4...d8c',
-  '0x1c6...e7f', '0x9d2...b5a', '0x4a8...c1e', '0x6e3...f9d',
-  '0x2b5...a4c', '0x8f1...d6e', '0x5c9...b3f', '0x7d4...e2a'
-];
 
 interface AsteroidFieldAnimationProps {
   className?: string;
@@ -41,12 +36,12 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
   const animationRef = useRef<number | null>(null);
 
   const FIELD_DEPTH = 4000;
-  const VELOCITY = 500;
+  const VELOCITY = 80;
 
   const generateAsteroid = (id: number, zOffset = 0): Asteroid => {
-    const types: ItemType[] = ['category', 'token', 'wallet'];
+    const types: ItemType[] = ['category', 'token'];
     const type = types[Math.floor(Math.random() * types.length)];
-    const items = type === 'category' ? CATEGORIES : type === 'token' ? TOKENS : WALLETS;
+    const items = type === 'category' ? CATEGORIES : TOKENS;
     const label = items[Math.floor(Math.random() * items.length)];
     
     const angle = Math.random() * Math.PI * 2;
@@ -87,9 +82,9 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
           if (effectiveZ < -300) {
             const angle = Math.random() * Math.PI * 2;
             const distance = 15 + Math.random() * 65;
-            const types: ItemType[] = ['category', 'token', 'wallet'];
+            const types: ItemType[] = ['category', 'token'];
             const type = types[Math.floor(Math.random() * types.length)];
-            const items = type === 'category' ? CATEGORIES : type === 'token' ? TOKENS : WALLETS;
+            const items = type === 'category' ? CATEGORIES : TOKENS;
             
             return {
               ...asteroid,
@@ -160,7 +155,6 @@ const AsteroidFieldAnimation: React.FC<AsteroidFieldAnimationProps> = ({ classNa
                 className={`
                   px-2.5 py-1 rounded-md text-xs font-semibold text-center whitespace-nowrap 
                   border border-white/40 text-white bg-white/20
-                  ${asteroid.type === 'wallet' ? 'font-mono text-[10px]' : ''}
                 `}
               >
                 {asteroid.label}
