@@ -624,10 +624,12 @@ const WizardV2 = () => {
       if (!ref.current) return 0;
       const rect = ref.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      // Element enters from bottom, progress 0->1 as it reaches 2/3 from top (1/3 from bottom)
+      // Start animating when element is still below viewport (at 1.3x window height)
+      // Finish when element reaches 2/3 from top
       const elementCenter = rect.top + rect.height / 2;
-      const targetPosition = windowHeight * 0.67; // 2/3 down from top
-      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - targetPosition) / (windowHeight * 0.33)));
+      const startPosition = windowHeight * 1.3; // Start below viewport
+      const endPosition = windowHeight * 0.67; // End at 2/3 down from top
+      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - endPosition) / (startPosition - endPosition)));
       return progress;
     };
 
@@ -1020,7 +1022,7 @@ const WizardV2 = () => {
                   ref={txnsRef}
                   className="text-center"
                   style={{
-                    transform: `translateX(${(1 - txnsProgress) * -500}px)`,
+                    transform: `translateX(${(1 - txnsProgress) * 500}px)`,
                   }}
                 >
                   <span className="text-lg md:text-3xl font-bold text-white">3B</span>
