@@ -787,9 +787,7 @@ const WizardV2 = () => {
             <div 
               className="flex-1 flex items-center justify-center pt-20 pb-8 px-6"
               style={{
-                transform: `scale(${1 - heroScrollProgress * 1}) translateY(${heroScrollProgress * -50}px)`,
                 opacity: 1 - heroScrollProgress * 1,
-                transformOrigin: 'center center',
               }}
             >
               <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
@@ -804,7 +802,12 @@ const WizardV2 = () => {
                       <br />
                       <span className="whitespace-nowrap">
                         audience{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                        <span 
+                          className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                          style={{
+                            opacity: 1 / Math.max(1 - heroScrollProgress, 0.01),
+                          }}
+                        >
                           instantly
                         </span>
                       </span>
