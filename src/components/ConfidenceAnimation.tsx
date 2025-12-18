@@ -25,7 +25,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
   const [hasStarted, setHasStarted] = useState(false);
   const animationRef = useRef<number | null>(null);
 
-  const generateElement = useCallback((id: number, forceNonSignal: boolean = false): FloatingElement => {
+  const generateElement = useCallback((id: number, isSignal: boolean): FloatingElement => {
     const label = LABELS[id % LABELS.length];
     // Distribute elements across the container with randomness for messy look
     const cols = 18;
@@ -39,11 +39,11 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
       x: 2 + (col * 5.5) + (Math.random() - 0.5) * 4,
       y: 3 + (row * 6.5) + (Math.random() - 0.5) * 5,
       opacity: 1,
-      isSignal: forceNonSignal ? false : Math.random() > 0.85,
+      isSignal,
     };
   }, []);
 
-  // Initialize elements - randomly select ~6-8 signals spread across all positions
+  // Initialize elements - randomly select 6-8 signals spread across all positions
   useEffect(() => {
     const totalCards = 270;
     // Pick random indices to be signals (spread across the whole grid)
@@ -55,7 +55,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
     
     const initialElements: FloatingElement[] = [];
     for (let i = 0; i < totalCards; i++) {
-      initialElements.push(generateElement(i, !signalIndices.has(i)));
+      initialElements.push(generateElement(i, signalIndices.has(i)));
     }
     setElements(initialElements);
   }, [generateElement]);
