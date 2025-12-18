@@ -109,15 +109,16 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
     if (phase !== "locked") return;
 
     const signalElements = elements.filter((el) => el.isSignal);
-    const angleStep = (2 * Math.PI) / Math.max(signalElements.length, 1);
+    const signalCount = signalElements.length;
 
     setElements((prev) =>
       prev.map((el) => {
         if (!el.isSignal) return { ...el, opacity: 0 };
         
         const signalIndex = signalElements.findIndex((s) => s.id === el.id);
-        const angle = signalIndex * angleStep - Math.PI / 2;
-        const radius = 28;
+        // Distribute evenly around center, starting from top
+        const angle = (signalIndex / signalCount) * 2 * Math.PI - Math.PI / 2;
+        const radius = 32; // Distance from center
 
         return {
           ...el,
