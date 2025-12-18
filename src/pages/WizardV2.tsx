@@ -955,7 +955,7 @@ const WizardV2 = () => {
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Confidence when you remove the clutter
+                  Confidence comes as a standard when you remove the clutter
                 </h3>
                 
                 {/* Confidence Animation */}
