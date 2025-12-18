@@ -587,6 +587,12 @@ const WizardV2 = () => {
   const [confidenceSectionProgress, setConfidenceSectionProgress] = useState(0);
   const [insightsProgress, setInsightsProgress] = useState(0);
   
+  // Stats slide-in refs and scroll positions
+  const yearsRef = useRef<HTMLDivElement>(null);
+  const txnsRef = useRef<HTMLDivElement>(null);
+  const [yearsProgress, setYearsProgress] = useState(0);
+  const [txnsProgress, setTxnsProgress] = useState(0);
+  
   // Agency-specific state
   const [agencyHasToken, setAgencyHasToken] = useState<boolean | null>(null);
   const [agencySelectedOption, setAgencySelectedOption] = useState<string | null>(null);
@@ -618,9 +624,10 @@ const WizardV2 = () => {
       if (!ref.current) return 0;
       const rect = ref.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      // Element enters from bottom, progress 0->1 as it reaches center
+      // Element enters from bottom, progress 0->1 as it reaches 2/3 from top (1/3 from bottom)
       const elementCenter = rect.top + rect.height / 2;
-      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - windowHeight * 0.5) / (windowHeight * 0.5)));
+      const targetPosition = windowHeight * 0.67; // 2/3 down from top
+      const progress = 1 - Math.max(0, Math.min(1, (elementCenter - targetPosition) / (windowHeight * 0.33)));
       return progress;
     };
 
@@ -635,6 +642,10 @@ const WizardV2 = () => {
       setNoNicheProgress(calculateProgress(noNicheRef));
       setConfidenceSectionProgress(calculateProgress(confidenceSectionRef));
       setInsightsProgress(calculateProgress(insightsRef));
+      
+      // Stats progress
+      setYearsProgress(calculateProgress(yearsRef));
+      setTxnsProgress(calculateProgress(txnsRef));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -987,7 +998,13 @@ const WizardV2 = () => {
 
               {/* Stats row */}
               <div className="flex items-center justify-center gap-4 md:gap-12 pt-8">
-                <div className="text-center">
+                <div 
+                  ref={yearsRef}
+                  className="text-center"
+                  style={{
+                    transform: `translateX(${(1 - yearsProgress) * -2000}px)`,
+                  }}
+                >
                   <span className="text-lg md:text-3xl font-bold text-white">5</span>
                   <span className="text-lg md:text-3xl font-thin text-white">+</span>
                   <span className="text-sm md:text-3xl font-medium text-primary ml-1">years</span>
@@ -999,7 +1016,13 @@ const WizardV2 = () => {
                   <span className="text-sm md:text-3xl font-medium text-primary ml-1">chains</span>
                 </div>
                 <div className="h-8 md:h-12 w-px bg-white/20" />
-                <div className="text-center">
+                <div 
+                  ref={txnsRef}
+                  className="text-center"
+                  style={{
+                    transform: `translateX(${(1 - txnsProgress) * -2000}px)`,
+                  }}
+                >
                   <span className="text-lg md:text-3xl font-bold text-white">3B</span>
                   <span className="text-lg md:text-3xl font-thin text-white">+</span>
                   <span className="text-sm md:text-3xl font-medium text-primary ml-1">txns</span>
