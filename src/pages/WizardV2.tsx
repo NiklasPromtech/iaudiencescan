@@ -857,7 +857,7 @@ const WizardV2 = () => {
                 </div>
                 
                 <div className="p-6 md:p-8 pt-0">
-                  <p className="text-white/50 text-base max-w-xl">
+                  <p className="text-white/50 text-base">
                     Need to know about meme coin fans? Or the competitors in a specific token category?
                     Get the granularity of insight you need to understand every web3 audience under the sun.
                   </p>
@@ -895,7 +895,7 @@ const WizardV2 = () => {
                   <AIChatAnimation />
                 </div>
                 
-                <p className="text-white/50 text-base max-w-xl">
+                <p className="text-white/50 text-base">
                   The future of on-chain research is here. AudienceScan Signal, our AI assistant, is fast and easy to use, opening up the power of insights to absolutely everyone. Just ask AudienceScan Signal a question using natural language, and you'll get instant insights based on a world of on-chain data from billions of enriched on-chain transaction events. Ignite your creativity, win more business, and drive ROI sky high.
                 </p>
               </div>
