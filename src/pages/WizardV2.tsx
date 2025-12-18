@@ -864,23 +864,23 @@ const WizardV2 = () => {
                 </div>
               </div>
 
-              {/* Sub-section 2: Confidence comes as standard */}
+              {/* Sub-section 2: Confidence when you remove the clutter */}
               <div className="rounded-xl bg-white/[0.06] p-6 md:p-8 space-y-6 mt-6">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Confidence comes as standard
+                  Confidence when you remove the clutter
                 </h3>
                 
                 {/* Confidence Animation */}
                 <div ref={confidenceRef}>
-                  <ConfidenceAnimation className="w-full h-48 rounded-lg border border-white/10 bg-black/20" isInView={confidenceInView} />
+                  <ConfidenceAnimation className="w-full h-72 rounded-lg border border-white/10 bg-black/20" isInView={confidenceInView} />
                 </div>
                 
                 <div className="space-y-4">
                   <p className="text-white/50 text-base max-w-xl">
-                    Whatever you need, our powerful platform puts you in the know.
+                    Whatever you need, our platform puts you in the know by removing guesswork and wasted effort.
                   </p>
                   <p className="text-white/50 text-base max-w-xl">
-                    Packed with practical tools to help you create charts, audiences, dashboards, and crosstabs, on-chain data access means understanding audiences has never been easier.
+                    Built with practical tools to surface what actually matters. Clear charts, exportable tables, and data you can easily white-label and reuse across campaigns.
                   </p>
                 </div>
               </div>
