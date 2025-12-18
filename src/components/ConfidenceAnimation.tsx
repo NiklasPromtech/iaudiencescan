@@ -25,29 +25,34 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
   const [hasStarted, setHasStarted] = useState(false);
   const animationRef = useRef<number | null>(null);
 
-  const generateElement = useCallback((id: number): FloatingElement => {
+  const generateElement = useCallback((id: number, forceNonSignal: boolean = false): FloatingElement => {
     const label = LABELS[id % LABELS.length];
-    // Distribute elements more evenly across the container
-    const cols = 8;
-    const rows = 5;
+    // Distribute elements across the container with some randomness
+    const cols = 10;
+    const rows = 7;
     const col = id % cols;
     const row = Math.floor(id / cols) % rows;
     
     return {
       id,
       label,
-      x: 8 + (col * 12) + (Math.random() - 0.5) * 6,
-      y: 12 + (row * 18) + (Math.random() - 0.5) * 8,
+      x: 5 + (col * 10) + (Math.random() - 0.5) * 8,
+      y: 8 + (row * 14) + (Math.random() - 0.5) * 10,
       opacity: 1,
-      isSignal: Math.random() > 0.8, // ~20% are signals (fewer signals = more filtering)
+      isSignal: forceNonSignal ? false : Math.random() > 0.85, // ~15% are signals from first batch
     };
   }, []);
 
-  // Initialize elements with more cards
+  // Initialize elements - first 35 can be signals, next 35 are all noise
   useEffect(() => {
     const initialElements: FloatingElement[] = [];
+    // First batch - some can be signals
     for (let i = 0; i < 35; i++) {
-      initialElements.push(generateElement(i));
+      initialElements.push(generateElement(i, false));
+    }
+    // Second batch - all noise (will be filtered out)
+    for (let i = 35; i < 70; i++) {
+      initialElements.push(generateElement(i, true));
     }
     setElements(initialElements);
   }, [generateElement]);
@@ -65,7 +70,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
   useEffect(() => {
     if (phase !== "filtering") return;
 
-    const duration = 1800;
+    const duration = 4000; // Slow sweep for dramatic effect
     const startTime = Date.now();
 
     const animate = () => {
