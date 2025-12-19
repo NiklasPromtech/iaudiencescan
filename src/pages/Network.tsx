@@ -334,14 +334,17 @@ const Network = () => {
   }, [tokens, studyId]);
 
   const handleNodeHover = (node: Node, event: React.MouseEvent) => {
-    const rect = event.currentTarget.closest('svg')?.getBoundingClientRect();
+    const svgEl = event.currentTarget.closest('svg');
+    const rect = svgEl?.getBoundingClientRect();
     if (rect) {
       const svgSize = 1000;
-      const scaleX = rect.width / svgSize;
-      const scaleY = rect.height / svgSize;
+      // Account for preserveAspectRatio="xMidYMid meet" letterboxing
+      const scale = Math.min(rect.width / svgSize, rect.height / svgSize);
+      const offsetX = (rect.width - svgSize * scale) / 2;
+      const offsetY = (rect.height - svgSize * scale) / 2;
       setHoverPosition({
-        x: rect.left + node.x * scaleX,
-        y: rect.top + node.y * scaleY,
+        x: rect.left + offsetX + node.x * scale,
+        y: rect.top + offsetY + node.y * scale,
       });
     }
     setHoveredNode(node);
@@ -387,7 +390,8 @@ const Network = () => {
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
-          className="max-w-full max-h-[95vh]"
+          preserveAspectRatio="xMidYMid meet"
+          className="max-w-full max-h-[95vh] mx-auto block"
         >
           <defs>
             {/* Clip paths */}
