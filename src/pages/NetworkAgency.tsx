@@ -541,11 +541,11 @@ const NetworkAgency = () => {
         </div>
       </div>
 
-      <div className="relative w-full h-screen flex items-center justify-center">
+      <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
         <svg
           viewBox={`0 0 ${size} ${size}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="w-full h-[95vh] mx-auto block"
+          className="w-auto h-[95vh] max-w-full"
+          style={{ aspectRatio: '1 / 1' }}
         >
           <defs>
             {nodes.map((node) => (
