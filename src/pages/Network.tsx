@@ -387,11 +387,9 @@ const Network = () => {
 
       <div className="relative w-full h-screen flex items-center justify-center">
         <svg
-          width={size}
-          height={size}
           viewBox={`0 0 ${size} ${size}`}
           preserveAspectRatio="xMidYMid meet"
-          className="max-w-full max-h-[95vh] mx-auto block"
+          className="w-full h-[95vh] mx-auto block"
         >
           <defs>
             {/* Clip paths */}
