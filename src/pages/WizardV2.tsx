@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X } from "lucide-react";
+import { Building2, Rocket, Coins, Wallet, Building, ArrowRight, Search, Target, X, CheckCircle2 } from "lucide-react";
 import AgencyHowPanel from "@/components/AgencyHowPanel";
 import AsteroidFieldAnimation from "@/components/AsteroidFieldAnimation";
 import ConfidenceAnimation from "@/components/ConfidenceAnimation";
 import AIChatAnimation from "@/components/AIChatAnimation";
+import TestimonialBar from "@/components/TestimonialBar";
+import Testimonials from "@/components/Testimonials";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
 import logoSquareWhite from "@/assets/logo-square-white.png";
 import iconX from "@/assets/icon-x.jpg";
@@ -795,47 +797,76 @@ const WizardV2 = () => {
                       className="text-purple-400 text-sm tracking-widest uppercase font-medium"
                       style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                     >
-                      Web3 audience research at your fingertips
+                      Web3 Audience Intelligence
                     </p>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight overflow-visible">
                       <span 
                         className="whitespace-nowrap"
                         style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                       >
-                        Understand any web3
+                        Know where your next
                       </span>
                       <br />
                       <span className="whitespace-nowrap">
-                        <span style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}>audience </span>
                         <span 
                           className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline-block pb-2"
                           style={{
                             filter: isMobile ? 'none' : `drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 30}px rgba(168, 85, 247, ${Math.min(heroScrollProgress * 4, 1)})) drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 60}px rgba(236, 72, 153, ${Math.min(heroScrollProgress * 4, 1) * 0.7}))`,
                           }}
                         >
-                          instantly
+                          1,000 users
                         </span>
+                        <span style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}> are</span>
                       </span>
                     </h1>
                     <p 
-                      className="text-white/50 text-lg max-w-xl"
+                      className="text-white/60 text-lg max-w-xl"
                       style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                     >
-                      Get the ultra-reliable research based on on-chain transaction data that brands and agencies need to stay ahead of changing consumer behavior.
+                      See exactly which communities your competitors' holders belong to. Then target them. <span className="text-white font-medium">Results in 2 minutes.</span>
                     </p>
                   </div>
                   
-                  <a
-                    href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
-                    target="_blank"
-                    rel="nofollow noopener noreferrer"
-                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8"
+                  {/* CTA Buttons */}
+                  <div 
+                    className="flex flex-col sm:flex-row gap-3 mt-8"
                     style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                   >
-                    <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
-                      Book a demo
+                    <a
+                      href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)]"
+                    >
+                      <span className="block px-6 py-2.5 bg-black rounded-[6px] text-sm font-medium">
+                        See Your Audience Live
+                      </span>
+                    </a>
+                    <a
+                      href="https://app.audiencescan.io"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-6 py-2.5 rounded-lg border border-white/20 text-sm font-medium text-white/80 hover:bg-white/5 hover:border-white/30 transition-all"
+                    >
+                      Run a Free Scan
+                    </a>
+                  </div>
+                  
+                  {/* Social proof micro-stats */}
+                  <div 
+                    className="flex flex-wrap items-center gap-4 mt-6 text-sm text-white/40"
+                    style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                      $8M+ campaigns optimized
                     </span>
-                  </a>
+                    <span className="hidden sm:inline text-white/20">•</span>
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                      50% lower CPA average
+                    </span>
+                  </div>
                 </div>
 
                 {/* Right: Network preview */}
@@ -853,7 +884,7 @@ const WizardV2 = () => {
           {/* Section 2: Client Logos */}
           <div className="pt-4 pb-12 overflow-hidden">
             <p className="text-white/40 text-sm uppercase tracking-wider mb-8 text-center px-6">
-              Used by agencies running activity for
+              Trusted by teams at
             </p>
             <div className="relative w-full">
               {/* Gradient masks for smooth fade */}
@@ -909,16 +940,18 @@ const WizardV2 = () => {
             </div>
           </div>
 
+          {/* Featured Testimonial */}
+          <TestimonialBar />
+
           {/* Section 3: Why you need AudienceScan */}
           <div className="py-16 px-6 border-t border-white/[0.06]">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                  Why you need AudienceScan
+                  Stop wasting budget on the wrong audiences
                 </h2>
                 <p className="text-white/50 text-base">
-                  Just a few of the many ways<br />
-                  on-chain data helps you go further, faster...
+                  On-chain data reveals what traditional analytics can't see
                 </p>
               </div>
               {/* Sub-section 1: No audience is too niche - slides in from right */}
@@ -931,7 +964,7 @@ const WizardV2 = () => {
               >
                 <div className="p-6 md:p-8">
                   <h3 className="text-xl md:text-2xl font-bold text-white">
-                    No audience is too niche
+                    No niche? We find your audience across 50,000+ tokens
                   </h3>
                 </div>
                 
@@ -942,8 +975,7 @@ const WizardV2 = () => {
                 
                 <div className="p-6 md:p-8 pt-0">
                   <p className="text-white/50 text-base">
-                    Need to know about meme coin fans? Or the competitors in a specific token category?
-                    Get the granularity of insight you need to understand every web3 audience under the sun.
+                    Whether you're targeting meme coin enthusiasts or DeFi power users, we map every community so you never miss an opportunity.
                   </p>
                 </div>
               </div>
@@ -957,7 +989,7 @@ const WizardV2 = () => {
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Confidence comes as a standard when you remove the clutter
+                  Guessing? We show you where proven buyers already are
                 </h3>
                 
                 {/* Confidence Animation */}
@@ -967,10 +999,10 @@ const WizardV2 = () => {
                 
                 <div className="space-y-4">
                   <p className="text-white/50 text-base">
-                    Whatever you need, our platform puts you in the know by removing guesswork and wasted effort.
+                    Stop relying on intuition. See exactly which wallets overlap with your competitors and which communities drive real conversions.
                   </p>
                   <p className="text-white/50 text-base">
-                    Built with practical tools to surface what actually matters. Clear charts, exportable tables, and data you can easily white-label and reuse across campaigns.
+                    Clear visualizations, exportable data, and insights you can white-label for client presentations.
                   </p>
                 </div>
               </div>
@@ -983,7 +1015,7 @@ const WizardV2 = () => {
                 }}
               >
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Insights have never been easier
+                  Complex analysis? Get results in 2 minutes, not 2 weeks
                 </h3>
                 
                 {/* AI Chat Animation */}
@@ -992,11 +1024,14 @@ const WizardV2 = () => {
                 </div>
                 
                 <p className="text-white/50 text-base">
-                  The future of on-chain research is here. AudienceScan Signal, our AI assistant, is fast and easy to use, opening up the power of insights to absolutely everyone. Just ask AudienceScan Signal a question using natural language, and you'll get instant insights based on a world of on-chain data from billions of enriched on-chain transaction events. Ignite your creativity, win more business, and drive ROI sky high.
+                  Ask AudienceScan Signal anything in plain English. Get instant insights from billions of on-chain transactions — no data science degree required.
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Full Testimonials Section */}
+          <Testimonials className="border-t border-white/[0.06]" />
 
           {/* Section: We've got the data you need to succeed */}
           <div className="py-20 px-6">
@@ -1008,10 +1043,10 @@ const WizardV2 = () => {
               {/* Sub-section */}
               <div className="space-y-6">
                 <p className="text-white/70 text-base leading-relaxed">
-                  For over 5 years we've optimised how we gather and process data from the chain in order to analyzing and aggregating accurately represent the views of billions of web3 users.
+                  For over 5 years we've optimised how we gather and process data from the chain to accurately represent the behavior of billions of web3 users.
                 </p>
                 <p className="text-white/70 text-base leading-relaxed">
-                  And if we haven't got what you need at our fingertips, book a quick meeting and we will help your find the wallets relevant to your research to clue you in on any topic imaginable.
+                  And if we haven't got what you need at our fingertips, book a quick meeting and we'll help you find the wallets relevant to your research.
                 </p>
               </div>
 
@@ -1050,15 +1085,70 @@ const WizardV2 = () => {
             </div>
           </div>
 
-          {/* Extra scroll space for stats animation */}
-          <div className="h-[30vh]" />
+          {/* Final CTA Section */}
+          <div className="py-20 px-6 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
+            <div className="max-w-2xl mx-auto text-center space-y-8">
+              <div className="space-y-4">
+                <p className="text-purple-400 text-sm font-medium uppercase tracking-wider">
+                  Limited availability
+                </p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white">
+                  Ready to find your next 1,000 users?
+                </h2>
+                <p className="text-white/50 text-lg">
+                  Only <span className="text-white font-medium">5 onboarding slots</span> left this month
+                </p>
+              </div>
+              
+              {/* Dual CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="https://app.audiencescan.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_30px_rgba(168,85,247,0.6),0_0_60px_rgba(236,72,153,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(168,85,247,0.7),0_0_80px_rgba(236,72,153,0.5)]"
+                >
+                  <span className="block px-8 py-3 bg-black rounded-[6px] text-base font-medium">
+                    Get Your Free Scan
+                  </span>
+                </a>
+                <a
+                  href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  className="inline-block px-8 py-3 rounded-lg border border-white/20 text-base font-medium text-white/80 hover:bg-white/5 hover:border-white/30 transition-all"
+                >
+                  Talk to Sales
+                </a>
+              </div>
+              
+              {/* Risk reversal */}
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white/40">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  2-minute setup
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  No credit card required
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  See results before you pay
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Extra scroll space */}
+          <div className="h-[10vh]" />
 
           {/* Minimal Footer */}
           <footer className="py-6 px-6 border-t border-white/[0.06]">
             <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-white/30">
               <div className="flex items-center gap-2">
                 <img src={logoSquareWhite} alt="AudienceScan" className="h-4 w-4 opacity-50" />
-                <span>© 2024 AudienceScan</span>
+                <span>© 2025 AudienceScan</span>
               </div>
               <div className="flex gap-4">
                 <span>Privacy</span>
