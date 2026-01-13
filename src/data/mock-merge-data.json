@@ -1,0 +1,293 @@
+{
+  "id": "69664d7337edce82fb611cac",
+  "title": "Top 20 Naoris",
+  "createdAt": "2026-01-13T13:49:39.646Z",
+  "audienceNetwork": "x",
+  "clusters": [
+    {
+      "id": "6966525baead8834751900ea",
+      "color": "",
+      "isRoot": true,
+      "title": "Full Audience",
+      "size": 250000,
+      "contentProcessed": true,
+      "sizePct": 100,
+      "status": "GENERATED",
+      "hidden": false,
+      "isMerge": false,
+      "summary": {
+        "bio": [
+          ["💎", 0.55],
+          ["🔥", 0.48],
+          ["💯", 0.29]
+        ],
+        "isBioByPct": true,
+        "affinity": [
+          {
+            "screen_name": "fusionistio",
+            "name": "Fusionist 🛸👾 | Endurance ♠️⛓",
+            "avatar": "https://pbs.twimg.com/profile_images/1584477941680852992/4joHUlAu_normal.jpg",
+            "percentage": 5
+          },
+          {
+            "screen_name": "XamanWallet",
+            "name": "Xaman® Wallet 🪝",
+            "avatar": "https://pbs.twimg.com/profile_images/1620905062007554050/EyxZn4XF_normal.jpg",
+            "percentage": 5
+          },
+          {
+            "screen_name": "OlimpioCrypto",
+            "name": "olimpio",
+            "avatar": "https://pbs.twimg.com/profile_images/1558854215937585153/dPiYrza7_normal.png",
+            "percentage": 5.01
+          }
+        ],
+        "hashtags": [
+          { "hashtag": "parasakthi", "value": 8029 },
+          { "hashtag": "sk", "value": 8022 },
+          { "hashtag": "tharakkutharakku", "value": 8022 }
+        ],
+        "other": [
+          { "key": "age", "label": "25-34", "diff": -51.94519451945195, "pct": 51.94519451945195, "value": 51.95 },
+          { "key": "gender", "label": "Male", "diff": -82.8080229226361, "count": "69904", "pct": 82.8080229226361, "value": 82.81 },
+          { "key": "countries", "label": "United States of America", "diff": -20.22, "count": "6670", "pct": "20.22", "value": 20.22 },
+          { "key": "interests", "label": "sports", "diff": -45.9, "count": "12637", "pct": "45.90", "value": 45.9 }
+        ]
+      }
+    },
+    {
+      "id": "6966525baead8834751900d9",
+      "color": "#EC672C",
+      "isRoot": false,
+      "title": "Blockchain Fans 🚀",
+      "size": 66155,
+      "contentProcessed": true,
+      "sizePct": 26.46,
+      "status": "GENERATED",
+      "hidden": false,
+      "isMerge": false,
+      "summary": {
+        "bio": [
+          ["airdrop", 1.5],
+          ["sahara", 1.3],
+          ["💙", 1.08]
+        ],
+        "isBioByPct": true,
+        "affinity": [
+          {
+            "screen_name": "elonmusk",
+            "name": "Elon Musk",
+            "avatar": "https://pbs.twimg.com/profile_images/2008546467615580160/57KcqsTA_normal.jpg",
+            "percentage": 70.28
+          },
+          {
+            "screen_name": "binance",
+            "name": "Binance",
+            "avatar": "https://pbs.twimg.com/profile_images/1940131561103347712/f5y2qENu_normal.jpg",
+            "percentage": 70.12
+          },
+          {
+            "screen_name": "cz_binance",
+            "name": "CZ 🔶 BNB",
+            "avatar": "https://pbs.twimg.com/profile_images/1961440580279336960/PiiIs8Lh_normal.jpg",
+            "percentage": 57.76
+          }
+        ],
+        "hashtags": [
+          { "hashtag": "bondibeach", "value": 382 },
+          { "hashtag": "ipl2026auction", "value": 325 },
+          { "hashtag": "iplauction", "value": 314 }
+        ],
+        "other": [
+          { "key": "age", "label": "25-34", "diff": -50.2950295029503, "pct": 53.595359535953605, "value": 53.6 },
+          { "key": "gender", "label": "Male", "diff": -85.70950378919744, "count": "16900", "pct": 79.90654205607476, "value": 79.91 },
+          { "key": "countries", "label": "Indonesia", "diff": 1.33, "count": "667", "pct": "8.81", "value": 8.81 },
+          { "key": "interests", "label": "sports", "diff": -55, "count": "1139", "pct": "36.80", "value": 36.8 }
+        ]
+      }
+    },
+    {
+      "id": "6966525baead8834751900da",
+      "color": "#902CF5",
+      "isRoot": false,
+      "title": "Tech Traders 📊",
+      "size": 46801,
+      "contentProcessed": true,
+      "sizePct": 18.72,
+      "status": "GENERATED",
+      "hidden": false,
+      "isMerge": false,
+      "summary": {
+        "bio": [
+          ["financial advice", 0.84],
+          ["money", 0.68],
+          ["things", 0.66]
+        ],
+        "isBioByPct": true,
+        "affinity": [
+          {
+            "screen_name": "TheCryptoDog",
+            "name": "The Crypto Dog 📈",
+            "avatar": "https://pbs.twimg.com/profile_images/1745355827761025024/09OxXngw_normal.jpg",
+            "percentage": 36.37
+          },
+          {
+            "screen_name": "AltcoinPsycho",
+            "name": "Psycho",
+            "avatar": "https://pbs.twimg.com/profile_images/1856762941447507968/vnmc8lkK_normal.jpg",
+            "percentage": 30.27
+          },
+          {
+            "screen_name": "VentureCoinist",
+            "name": "Luke Martin",
+            "avatar": "https://pbs.twimg.com/profile_images/1824892201551183872/UV1Ajdqn_normal.jpg",
+            "percentage": 21.29
+          }
+        ],
+        "hashtags": [
+          { "hashtag": "bitcoin", "value": 964 },
+          { "hashtag": "crypto", "value": 759 },
+          { "hashtag": "btc", "value": 166 }
+        ],
+        "other": [
+          { "key": "age", "label": "25-34", "diff": -52.520389038903915, "pct": 51.36999999999999, "value": 51.37 },
+          { "key": "gender", "label": "Male", "diff": -80.0180187182685, "count": "16241", "pct": 85.5980271270037, "value": 85.6 },
+          { "key": "countries", "label": "United States of America", "diff": -19.81, "count": "1665", "pct": "20.63", "value": 20.63 },
+          { "key": "interests", "label": "finance", "diff": -15.61, "count": "4451", "pct": "46.29", "value": 46.29 }
+        ]
+      }
+    },
+    {
+      "id": "6966525baead8834751900dc",
+      "color": "#3981F7",
+      "isRoot": false,
+      "title": "Crypto Investors 💼",
+      "size": 27877,
+      "contentProcessed": true,
+      "sizePct": 11.15,
+      "status": "GENERATED",
+      "hidden": false,
+      "isMerge": false,
+      "summary": {
+        "bio": [
+          ["shib", 3.24],
+          ["shiba", 1.69],
+          ["shibarmy", 1.68]
+        ],
+        "isBioByPct": true,
+        "affinity": [
+          {
+            "screen_name": "shibarium_",
+            "name": "Nobody",
+            "avatar": "https://pbs.twimg.com/profile_images/1928179618827358210/lsv-19wb_normal.jpg",
+            "percentage": 84.12
+          },
+          {
+            "screen_name": "ShytoshiKusama",
+            "name": "Shytoshi Kusama™",
+            "avatar": "https://pbs.twimg.com/profile_images/1586380562352279553/y9LWS8P3_normal.jpg",
+            "percentage": 81.12
+          },
+          {
+            "screen_name": "ShibInformer",
+            "name": "SHIB INFORMER",
+            "avatar": "https://pbs.twimg.com/profile_images/1566992961283526658/2ReP45wn_normal.jpg",
+            "percentage": 64.43
+          }
+        ],
+        "hashtags": [
+          { "hashtag": "parasakthi", "value": 8025 },
+          { "hashtag": "sk", "value": 8022 },
+          { "hashtag": "tharakkutharakku", "value": 8022 }
+        ],
+        "other": [
+          { "key": "age", "label": "25-34", "diff": -51.67038903890391, "pct": 52.21999999999999, "value": 52.22 },
+          { "key": "gender", "label": "Male", "diff": -81.11279399508157, "count": "10501", "pct": 84.50325185019062, "value": 84.5 },
+          { "key": "countries", "label": "United States of America", "diff": -15.869999999999997, "count": "851", "pct": "24.57", "value": 24.57 },
+          { "key": "interests", "label": "sports", "diff": -42.839999999999996, "count": "1058", "pct": "48.96", "value": 48.96 }
+        ]
+      }
+    },
+    { "id": "6966525baead8834751900d7", "title": "Cluster 4", "size": 24553, "sizePct": 9.82, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900d6", "title": "Cluster 5", "size": 19512, "sizePct": 7.8, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900db", "title": "Cluster 6", "size": 18832, "sizePct": 7.53, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900de", "title": "Cluster 7", "size": 8191, "sizePct": 3.28, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900dd", "title": "Cluster 8", "size": 7297, "sizePct": 2.92, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900d8", "title": "Cluster 9", "size": 3340, "sizePct": 1.34, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e1", "title": "Cluster 10", "size": 2218, "sizePct": 0.89, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e2", "title": "Cluster 11", "size": 1438, "sizePct": 0.58, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900df", "title": "Cluster 12", "size": 1013, "sizePct": 0.41, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e0", "title": "Cluster 13", "size": 932, "sizePct": 0.37, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e4", "title": "Cluster 14", "size": 464, "sizePct": 0.19, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e6", "title": "Cluster 15", "size": 192, "sizePct": 0.08, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e8", "title": "Cluster 16", "size": 162, "sizePct": 0.06, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e5", "title": "Cluster 17", "size": 117, "sizePct": 0.05, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e9", "title": "Cluster 18", "size": 92, "sizePct": 0.04, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e7", "title": "Cluster 19", "size": 84, "sizePct": 0.03, "status": "AVAILABLE", "summary": {} },
+    { "id": "6966525baead8834751900e3", "title": "Cluster 20", "size": 64, "sizePct": 0.03, "status": "AVAILABLE", "summary": {} }
+  ],
+  "affinity": [
+    { "screen_name": "binance", "name": "Binance", "avatar": "https://pbs.twimg.com/profile_images/1940131561103347712/f5y2qENu_normal.jpg", "percentage": 58.32 },
+    { "screen_name": "elonmusk", "name": "Elon Musk", "avatar": "https://pbs.twimg.com/profile_images/2008546467615580160/57KcqsTA_normal.jpg", "percentage": 71.33 },
+    { "screen_name": "cz_binance", "name": "CZ 🔶 BNB", "avatar": "https://pbs.twimg.com/profile_images/1961440580279336960/PiiIs8Lh_normal.jpg", "percentage": 54.81 },
+    { "screen_name": "coinbase", "name": "Coinbase 🛡️", "avatar": "https://pbs.twimg.com/profile_images/2001689632770265091/WCLcJRFh_normal.jpg", "percentage": 46.36 },
+    { "screen_name": "VitalikButerin", "name": "vitalik.eth", "avatar": "https://pbs.twimg.com/profile_images/2006515705223516160/wGIa8vCp_normal.png", "percentage": 45.37 }
+  ],
+  "hashtags": [
+    { "hashtag": "parasakthi", "value": 8029 },
+    { "hashtag": "sk", "value": 8022 },
+    { "hashtag": "tharakkutharakku", "value": 8022 },
+    { "hashtag": "crypto", "value": 2058 },
+    { "hashtag": "bitcoin", "value": 1995 },
+    { "hashtag": "xrp", "value": 1630 },
+    { "hashtag": "jujutsukaisen", "value": 1534 },
+    { "hashtag": "passiveincome", "value": 1316 }
+  ],
+  "bio": [
+    ["crypto", 8.18], ["web", 2.46], ["enthusiast", 2.05], ["nft", 1.86], ["bitcoin", 1.83],
+    ["btc", 1.65], ["blockchain", 1.64], ["life", 1.57], ["investor", 1.54], ["trader", 1.44],
+    ["love", 1.38], ["🚀", 1.25], ["eth", 1.15], ["world", 1.12], ["financial", 1.04],
+    ["xrp", 1.02], ["defi", 0.96], ["crypto enthusiast", 0.93], ["digital", 0.86], ["future", 0.86],
+    ["founder", 0.84], ["lover", 0.82], ["time", 0.79], ["fan", 0.75], ["follow", 0.73],
+    ["link", 0.71], ["building", 0.7], ["one", 0.67], ["like", 0.66], ["nfts", 0.66],
+    ["new", 0.64], ["make", 0.64], ["community", 0.64], ["artist", 0.63], ["engineer", 0.63],
+    ["❤️", 0.62], ["tech", 0.62], ["since", 0.61], ["advice", 0.61], ["entrepreneur", 0.61],
+    ["t.me", 0.6], ["god", 0.6], ["business", 0.6], ["creator", 0.6], ["cryptocurrency", 0.59],
+    ["trading", 0.58], ["real", 0.56], ["💎", 0.55], ["🔥", 0.48], ["💯", 0.29]
+  ],
+  "isBioByPct": true,
+  "rootClusterId": "6966525baead8834751900ea",
+  "globalBaselineId": "68779324726bc4d59dccb921",
+  "demo": false,
+  "lastExports": {},
+  "lite": true,
+  "type": "INTELLIGENCE",
+  "shared": false,
+  "segmentationConfiguration": "INTERCONNECTIONS",
+  "brands": [
+    { "screen_name": "binance", "name": "Binance", "avatar": "https://pbs.twimg.com/profile_images/1940131561103347712/f5y2qENu_normal.jpg", "percentage": 5832 },
+    { "screen_name": "coinbase", "name": "Coinbase 🛡️", "avatar": "https://pbs.twimg.com/profile_images/2001689632770265091/WCLcJRFh_normal.jpg", "percentage": 4636 },
+    { "screen_name": "CoinMarketCap", "name": "CoinMarketCap", "avatar": "https://pbs.twimg.com/profile_images/2004505315866443776/QWE_EXv9_normal.jpg", "percentage": 4450 },
+    { "screen_name": "solana", "name": "Solana", "avatar": "https://pbs.twimg.com/profile_images/2000347781513261056/hqWJS5Ri_normal.jpg", "percentage": 3513 }
+  ],
+  "people": [
+    { "screen_name": "elonmusk", "name": "Elon Musk", "avatar": "https://pbs.twimg.com/profile_images/2008546467615580160/57KcqsTA_normal.jpg", "percentage": 7133 },
+    { "screen_name": "cz_binance", "name": "CZ 🔶 BNB", "avatar": "https://pbs.twimg.com/profile_images/1961440580279336960/PiiIs8Lh_normal.jpg", "percentage": 5481 },
+    { "screen_name": "VitalikButerin", "name": "vitalik.eth", "avatar": "https://pbs.twimg.com/profile_images/2006515705223516160/wGIa8vCp_normal.png", "percentage": 4537 },
+    { "screen_name": "saylor", "name": "Michael Saylor", "avatar": "https://pbs.twimg.com/profile_images/1485632175932383235/8t0DGo6V_normal.jpg", "percentage": 3755 }
+  ],
+  "consume": [
+    { "screen_name": "Cointelegraph", "name": "Cointelegraph", "avatar": "https://pbs.twimg.com/profile_images/1755983593925378048/kYutau0B_normal.jpg", "percentage": 2994 },
+    { "screen_name": "BitcoinMagazine", "name": "Bitcoin Magazine", "avatar": "https://pbs.twimg.com/profile_images/1444022922377576453/AzvXYXGr_normal.jpg", "percentage": 2674 },
+    { "screen_name": "crypto", "name": "Bloomberg Crypto", "avatar": "https://pbs.twimg.com/profile_images/1631743942596149250/Epvll0tq_normal.jpg", "percentage": 1463 },
+    { "screen_name": "Google", "name": "Google", "avatar": "https://pbs.twimg.com/profile_images/1972718204565811200/adTFhODz_normal.jpg", "percentage": 1000 }
+  ],
+  "demographic": {
+    "age": { "key": "age", "label": "25-34", "value": "51.95" },
+    "city": { "label": "London", "key": "country", "value": 4.96 },
+    "language": { "key": "language", "label": "English", "value": 47.21 },
+    "interests": { "key": "interests", "label": "Sports", "value": 45.9 },
+    "country": { "key": "country", "label": "United States of America", "value": 20.22 },
+    "gender": { "key": "gender", "label": "Male", "value": 82.81 }
+  }
+}
