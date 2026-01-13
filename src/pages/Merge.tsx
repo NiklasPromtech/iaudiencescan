@@ -6,7 +6,7 @@ import iconTelegram from "@/assets/icon-telegram.jpg";
 import iconReddit from "@/assets/icon-reddit.jpg";
 import iconYoutube from "@/assets/icon-youtube.jpg";
 import iconGoogleAds from "@/assets/icon-googleads.jpg";
-
+import mockMergeData from "@/data/mock-merge-data.json";
 // Network token data interfaces
 interface TokenData {
   logo: string;
@@ -452,7 +452,7 @@ const Merge = () => {
     if (studyId) fetchNetworkData();
   }, [studyId, searchParams]);
 
-  // Fetch merge/cluster data
+  // Fetch merge/cluster data - use mock data for now
   useEffect(() => {
     const fetchMergeData = async () => {
       try {
@@ -461,11 +461,18 @@ const Merge = () => {
           ? `https://token-analysis-final.nw.r.appspot.com/merge/${studyId}?uid=${uid}`
           : `https://token-analysis-final.nw.r.appspot.com/merge/${studyId}`;
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Failed to fetch merge data");
+        if (!response.ok) {
+          // Use mock data as fallback
+          console.log('Using mock merge data');
+          setMergeData(mockMergeData as unknown as MergeData);
+          return;
+        }
         const data = await response.json();
         setMergeData(data);
       } catch (err) {
-        setMergeError(err instanceof Error ? err.message : "Unknown error");
+        // Use mock data as fallback on error
+        console.log('Using mock merge data due to error:', err);
+        setMergeData(mockMergeData as unknown as MergeData);
       } finally {
         setMergeLoading(false);
       }
