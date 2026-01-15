@@ -434,27 +434,35 @@ const XData = () => {
   }, [studyId, searchParams]);
 
   // Fetch X Ads data
+  const fetchXAdsData = async () => {
+    if (!acId || !adId) {
+      setXAdsError("Missing account ID or ad group ID");
+      setXAdsLoading(false);
+      return;
+    }
+
+    setXAdsLoading(true);
+    setXAdsError(null);
+
+    try {
+      const apiUrl = `https://token-analysis-final.nw.r.appspot.com/x/data?acId=${acId}&adId=${adId}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      // Check if API returned an error
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Failed to fetch X Ads data");
+      }
+      
+      setXAdsData(data);
+    } catch (err) {
+      setXAdsError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setXAdsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchXAdsData = async () => {
-      if (!acId || !adId) {
-        setXAdsError("Missing account ID or ad group ID");
-        setXAdsLoading(false);
-        return;
-      }
-
-      try {
-        const apiUrl = `https://token-analysis-final.nw.r.appspot.com/x/data?acId=${acId}&adId=${adId}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Failed to fetch X Ads data");
-        const data = await response.json();
-        setXAdsData(data);
-      } catch (err) {
-        setXAdsError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setXAdsLoading(false);
-      }
-    };
-
     fetchXAdsData();
   }, [acId, adId]);
 
@@ -595,13 +603,13 @@ const XData = () => {
   // Count nodes with X Ads data
   const nodesWithXAdsData = nodes.filter(n => n.xAdsData).length;
 
-  const isLoading = networkLoading || xAdsLoading;
+  // Only wait for network data - X Ads can load independently
   const size = 1000;
 
-  if (isLoading) {
+  if (networkLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-        <div className="animate-pulse" style={{ color: colors.textSecondary }}>Loading data...</div>
+        <div className="animate-pulse" style={{ color: colors.textSecondary }}>Loading network data...</div>
       </div>
     );
   }
@@ -783,15 +791,35 @@ const XData = () => {
               </p>
             </div>
 
-            {xAdsError ? (
+            {xAdsLoading ? (
+              <div 
+                className="rounded-xl p-6 text-center"
+                style={{ backgroundColor: `${colors.background}cc`, border: `1px solid ${colors.accentPrimary}33` }}
+              >
+                <div className="animate-spin w-8 h-8 border-2 border-t-transparent rounded-full mx-auto mb-3" 
+                  style={{ borderColor: `${colors.accentPrimary}`, borderTopColor: 'transparent' }} 
+                />
+                <p style={{ color: colors.textPrimary }}>Loading X Ads data...</p>
+                <p className="text-xs mt-2" style={{ color: colors.textSecondary }}>
+                  This may take up to 30 seconds for large datasets
+                </p>
+              </div>
+            ) : xAdsError ? (
               <div 
                 className="rounded-xl p-4 text-center"
                 style={{ backgroundColor: `${colors.background}cc`, border: `1px solid #ef444433` }}
               >
-                <p style={{ color: '#ef4444' }}>{xAdsError}</p>
-                <p className="text-xs mt-2" style={{ color: colors.textSecondary }}>
-                  Make sure to provide acId and adId query parameters
+                <p className="font-medium mb-2" style={{ color: '#ef4444' }}>Error loading X Ads data</p>
+                <p className="text-xs mb-4" style={{ color: colors.textSecondary }}>
+                  {xAdsError}
                 </p>
+                <button
+                  onClick={() => fetchXAdsData()}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-90"
+                  style={{ backgroundColor: colors.accentPrimary, color: '#fff' }}
+                >
+                  Retry
+                </button>
               </div>
             ) : xAdsData ? (
               <>
