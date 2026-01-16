@@ -671,7 +671,7 @@ export default function XAdsAgency() {
                         Draft Campaign Created!
                       </p>
                       <p className="text-xs" style={{ color: colors.textSecondary }}>
-                        Campaign ID: {createSuccess.campaign_id || createSuccess.id || "N/A"}
+                        Campaign: {createSuccess.campaign?.name || createSuccess.campaign?.id || "N/A"}
                       </p>
                     </div>
                   </div>
@@ -681,7 +681,7 @@ export default function XAdsAgency() {
                   </p>
                   
                   <a
-                    href="https://ads.x.com/campaign_management"
+                    href={`https://ads.x.com/campaign_form/${account}/campaign/${createSuccess.campaign?.id}/adgroup/${createSuccess.line_item?.id}/creative_form/0/edit`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold transition-all hover:opacity-90"
@@ -691,7 +691,7 @@ export default function XAdsAgency() {
                     }}
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Open X Ads Manager
+                    Add Tweets in X Ads Manager
                   </a>
                 </div>
               )}
