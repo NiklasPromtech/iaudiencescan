@@ -1,21 +1,82 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowLeft, Twitter, Calendar, DollarSign, Target, FileText, Loader2, CheckCircle2, AlertCircle, Heart, Repeat, MessageCircle } from "lucide-react";
+import { 
+  ArrowLeft, Twitter, Calendar, DollarSign, Target, FileText, Loader2, 
+  CheckCircle2, AlertCircle, Heart, Repeat, MessageCircle, Eye, 
+  Bookmark, Quote, Image as ImageIcon, Users, Zap
+} from "lucide-react";
 
+// Tweet interface matching the actual API response
 interface Tweet {
   id: string;
   text: string;
   created_at: string;
-  user: {
+  author: {
     id: string;
     name: string;
-    screen_name: string;
-  } | null;
+    username: string;
+    profile_image_url?: string;
+  };
   metrics: {
     retweets: number;
     likes: number;
     replies: number;
+    quotes: number;
+    impressions: number;
+    bookmarks: number;
   };
+  media?: {
+    type: string;
+    url: string;
+    width: number;
+    height: number;
+  }[];
+  urls?: {
+    url: string;
+    expanded_url: string;
+    display_url: string;
+  }[];
+}
+
+interface TweetsResponse {
+  success: boolean;
+  account_id: string;
+  promotable_user: {
+    id: string;
+    promotable_user_type: string;
+  };
+  tweets: Tweet[];
+  count: number;
+  already_promoted_count: number;
+}
+
+// Network token data interfaces
+interface TokenData {
+  logo: string;
+  ticker: string;
+  score: number;
+  x: string;
+  telegram: string;
+  reddit: string;
+  youtube: string;
+  tags: string[];
+}
+
+interface Node {
+  id: number;
+  x: number;
+  y: number;
+  logo: string;
+  ticker: string;
+  score: number;
+  size: number;
+  socialX: string;
+}
+
+interface Edge {
+  from: number;
+  to: number;
+  strength: number;
 }
 
 interface Objective {
@@ -39,12 +100,187 @@ const colors = {
   cardBg: "#12121a",
   accentPrimary: "#6366f1",
   accentSecondary: "#8b5cf6",
+  accentGlow: "#9333ea",
   textPrimary: "#ffffff",
   textSecondary: "#94a3b8",
   border: "#1e1e2e",
   success: "#22c55e",
   error: "#ef4444",
   warning: "#f59e0b",
+  nodeBg: "#1a1a2e",
+};
+
+// Network Chart Component
+const NetworkChart = ({ tokens, studyId }: { tokens: TokenData[]; studyId: string }) => {
+  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
+
+  const { nodes, edges } = useMemo(() => {
+    if (tokens.length === 0) return { nodes: [], edges: [] };
+
+    const size = 400;
+    const padding = 40;
+    const maxTokens = Math.min(tokens.length, 50);
+
+    const seed = studyId?.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+    const seededRandom = (i: number) => {
+      const x = Math.sin(seed * i) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const generatedNodes: Node[] = [];
+
+    tokens.slice(0, maxTokens).forEach((token, index) => {
+      const nodeSize = 16 + token.score * 20;
+      let x: number, y: number;
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      do {
+        if (index === 0) {
+          x = size / 2;
+          y = size / 2;
+        } else {
+          const golden = 0.618033988749895;
+          const angle = index * golden * Math.PI * 2 + seededRandom(index * 7) * 0.5;
+          const baseRadius = 40 + Math.sqrt(index / maxTokens) * (size / 2 - padding - 40);
+          const jitter = (seededRandom(index * 13 + attempts) - 0.5) * 50;
+          
+          x = size / 2 + Math.cos(angle) * (baseRadius + jitter);
+          y = size / 2 + Math.sin(angle) * (baseRadius + jitter);
+        }
+
+        x = Math.max(padding, Math.min(size - padding, x));
+        y = Math.max(padding, Math.min(size - padding, y));
+
+        const hasOverlap = generatedNodes.some((other) => {
+          const dx = x - other.x;
+          const dy = y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = (nodeSize + other.size) / 2 + 8;
+          return dist < minDist;
+        });
+
+        if (!hasOverlap || attempts >= maxAttempts) break;
+        attempts++;
+      } while (true);
+
+      generatedNodes.push({
+        id: index,
+        x,
+        y,
+        logo: token.logo,
+        ticker: token.ticker || '',
+        score: token.score,
+        size: nodeSize,
+        socialX: token.x || '',
+      });
+    });
+
+    const generatedEdges: Edge[] = [];
+    const edgeCount = Math.floor(maxTokens * 1.5);
+
+    for (let i = 0; i < edgeCount; i++) {
+      const from = Math.floor(seededRandom(i * 3) * maxTokens);
+      const to = Math.floor(seededRandom(i * 3 + 1) * maxTokens);
+      
+      if (from !== to) {
+        const exists = generatedEdges.some(
+          e => (e.from === from && e.to === to) || (e.from === to && e.to === from)
+        );
+        if (!exists) {
+          const strength = (generatedNodes[from].score + generatedNodes[to].score) / 2;
+          generatedEdges.push({ from, to, strength });
+        }
+      }
+    }
+
+    return { nodes: generatedNodes, edges: generatedEdges };
+  }, [tokens, studyId]);
+
+  return (
+    <div className="relative w-full aspect-square">
+      <svg
+        viewBox="0 0 400 400"
+        className="w-full h-full"
+        style={{ background: 'transparent' }}
+      >
+        {/* Edges */}
+        {edges.map((edge, i) => {
+          const fromNode = nodes[edge.from];
+          const toNode = nodes[edge.to];
+          if (!fromNode || !toNode) return null;
+          return (
+            <line
+              key={i}
+              x1={fromNode.x}
+              y1={fromNode.y}
+              x2={toNode.x}
+              y2={toNode.y}
+              stroke={colors.accentPrimary}
+              strokeOpacity={0.15 + edge.strength * 0.2}
+              strokeWidth={0.5 + edge.strength}
+            />
+          );
+        })}
+
+        {/* Nodes */}
+        {nodes.map((node) => (
+          <g
+            key={node.id}
+            onMouseEnter={() => setHoveredNode(node)}
+            onMouseLeave={() => setHoveredNode(null)}
+            className="cursor-pointer"
+          >
+            <circle
+              cx={node.x}
+              cy={node.y}
+              r={node.size / 2 + 2}
+              fill={colors.accentPrimary}
+              opacity={hoveredNode?.id === node.id ? 0.5 : 0.1}
+            />
+            <clipPath id={`clip-agency-${node.id}`}>
+              <circle cx={node.x} cy={node.y} r={node.size / 2} />
+            </clipPath>
+            <circle
+              cx={node.x}
+              cy={node.y}
+              r={node.size / 2}
+              fill={colors.nodeBg}
+            />
+            <image
+              href={node.logo}
+              x={node.x - node.size / 2}
+              y={node.y - node.size / 2}
+              width={node.size}
+              height={node.size}
+              clipPath={`url(#clip-agency-${node.id})`}
+              style={{ pointerEvents: 'none' }}
+            />
+          </g>
+        ))}
+      </svg>
+
+      {/* Hover tooltip */}
+      {hoveredNode && (
+        <div
+          className="absolute z-10 px-2 py-1 rounded text-xs pointer-events-none"
+          style={{
+            left: hoveredNode.x,
+            top: hoveredNode.y - 20,
+            transform: 'translate(-50%, -100%)',
+            backgroundColor: colors.cardBg,
+            border: `1px solid ${colors.accentPrimary}`,
+            color: colors.textPrimary,
+          }}
+        >
+          <span className="font-semibold">{hoveredNode.ticker}</span>
+          {hoveredNode.socialX && (
+            <span className="ml-1 opacity-70">@{hoveredNode.socialX}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default function XAdsAgency() {
@@ -52,11 +288,17 @@ export default function XAdsAgency() {
   const uid = searchParams.get("uid") || "";
   const title = searchParams.get("title") || "Campaign";
   const account = searchParams.get("account") || "";
+  const studyId = searchParams.get("studyId") || "";
 
   // Tweet state
-  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [tweetsResponse, setTweetsResponse] = useState<TweetsResponse | null>(null);
   const [tweetsLoading, setTweetsLoading] = useState(true);
   const [tweetsError, setTweetsError] = useState<string | null>(null);
+
+  // Network data state
+  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [networkLoading, setNetworkLoading] = useState(false);
+  const [networkError, setNetworkError] = useState<string | null>(null);
 
   // Selected tweets for campaign
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
@@ -98,7 +340,7 @@ export default function XAdsAgency() {
           throw new Error(data.error || "Failed to fetch tweets");
         }
 
-        setTweets(data.tweets || []);
+        setTweetsResponse(data);
       } catch (err) {
         setTweetsError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -108,6 +350,32 @@ export default function XAdsAgency() {
 
     fetchTweets();
   }, [account]);
+
+  // Fetch network data if studyId is provided
+  useEffect(() => {
+    const fetchNetworkData = async () => {
+      if (!studyId) return;
+      
+      setNetworkLoading(true);
+      try {
+        const apiUrl = uid 
+          ? `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}?uid=${uid}`
+          : `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch network data");
+        const data = await response.json();
+        setTokens(data.data?.token || []);
+      } catch (err) {
+        setNetworkError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setNetworkLoading(false);
+      }
+    };
+
+    fetchNetworkData();
+  }, [studyId, uid]);
+
+  const tweets = tweetsResponse?.tweets || [];
 
   // Check if objective requires tweets
   const requiresTweets = objective !== "FOLLOWERS";
@@ -240,146 +508,279 @@ export default function XAdsAgency() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: Tweets List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2
-                className="text-xl font-semibold"
-                style={{ color: colors.textPrimary }}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Network Chart Section */}
+            {studyId && (
+              <div
+                className="rounded-xl p-4"
+                style={{ backgroundColor: colors.cardBg, border: `1px solid ${colors.border}` }}
               >
-                Available Tweets
-              </h2>
-              {selectedTweetIds.length > 0 && (
-                <span
-                  className="text-sm px-3 py-1 rounded-full"
-                  style={{
-                    backgroundColor: `${colors.accentPrimary}22`,
-                    color: colors.accentPrimary,
-                  }}
-                >
-                  {selectedTweetIds.length} selected
-                </span>
-              )}
-            </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${colors.accentSecondary}22` }}
+                  >
+                    <Zap className="w-4 h-4" style={{ color: colors.accentSecondary }} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold" style={{ color: colors.textPrimary }}>
+                      Blockchain Audience Network
+                    </h3>
+                    <p className="text-xs" style={{ color: colors.textSecondary }}>
+                      On-chain wallet overlap powering your targeting
+                    </p>
+                  </div>
+                </div>
+                
+                {networkLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin" style={{ color: colors.accentPrimary }} />
+                  </div>
+                ) : networkError ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm" style={{ color: colors.error }}>{networkError}</p>
+                  </div>
+                ) : tokens.length > 0 ? (
+                  <div className="max-w-md mx-auto">
+                    <NetworkChart tokens={tokens} studyId={studyId} />
+                    <div className="flex items-center justify-center gap-4 mt-3">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" style={{ color: colors.accentPrimary }} />
+                        <span className="text-xs" style={{ color: colors.textSecondary }}>
+                          {tokens.length} tokens analyzed
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
 
-            {tweetsLoading ? (
-              <div
-                className="rounded-xl p-12 text-center"
-                style={{ backgroundColor: colors.cardBg }}
-              >
-                <Loader2
-                  className="w-8 h-8 animate-spin mx-auto mb-3"
-                  style={{ color: colors.accentPrimary }}
-                />
-                <p style={{ color: colors.textSecondary }}>Loading tweets...</p>
+            {/* Tweets Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2
+                    className="text-xl font-semibold"
+                    style={{ color: colors.textPrimary }}
+                  >
+                    Available Tweets
+                  </h2>
+                  {tweetsResponse && (
+                    <p className="text-xs mt-1" style={{ color: colors.textSecondary }}>
+                      {tweetsResponse.count} tweets • {tweetsResponse.already_promoted_count} already promoted
+                    </p>
+                  )}
+                </div>
+                {selectedTweetIds.length > 0 && (
+                  <span
+                    className="text-sm px-3 py-1 rounded-full"
+                    style={{
+                      backgroundColor: `${colors.accentPrimary}22`,
+                      color: colors.accentPrimary,
+                    }}
+                  >
+                    {selectedTweetIds.length} selected
+                  </span>
+                )}
               </div>
-            ) : tweetsError ? (
-              <div
-                className="rounded-xl p-8 text-center"
-                style={{ backgroundColor: colors.cardBg }}
-              >
-                <AlertCircle
-                  className="w-8 h-8 mx-auto mb-3"
-                  style={{ color: colors.error }}
-                />
-                <p style={{ color: colors.error }}>{tweetsError}</p>
-              </div>
-            ) : tweets.length === 0 ? (
-              <div
-                className="rounded-xl p-8 text-center"
-                style={{ backgroundColor: colors.cardBg }}
-              >
-                <Twitter
-                  className="w-8 h-8 mx-auto mb-3"
-                  style={{ color: colors.textSecondary }}
-                />
-                <p style={{ color: colors.textSecondary }}>No tweets found</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {tweets.map((tweet) => {
-                  const isSelected = selectedTweetIds.includes(tweet.id);
-                  return (
-                    <div
-                      key={tweet.id}
-                      onClick={() => toggleTweetSelection(tweet.id)}
-                      className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.01]"
-                      style={{
-                        backgroundColor: colors.cardBg,
-                        border: `2px solid ${isSelected ? colors.accentPrimary : colors.border}`,
-                      }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-1 transition-colors ${
-                            isSelected ? "" : "border"
-                          }`}
-                          style={{
-                            backgroundColor: isSelected
-                              ? colors.accentPrimary
-                              : "transparent",
-                            borderColor: isSelected ? colors.accentPrimary : colors.border,
-                          }}
-                        >
-                          {isSelected && (
-                            <CheckCircle2 className="w-4 h-4 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {tweet.user && (
+
+              {tweetsLoading ? (
+                <div
+                  className="rounded-xl p-12 text-center"
+                  style={{ backgroundColor: colors.cardBg }}
+                >
+                  <Loader2
+                    className="w-8 h-8 animate-spin mx-auto mb-3"
+                    style={{ color: colors.accentPrimary }}
+                  />
+                  <p style={{ color: colors.textSecondary }}>Loading tweets...</p>
+                </div>
+              ) : tweetsError ? (
+                <div
+                  className="rounded-xl p-8 text-center"
+                  style={{ backgroundColor: colors.cardBg }}
+                >
+                  <AlertCircle
+                    className="w-8 h-8 mx-auto mb-3"
+                    style={{ color: colors.error }}
+                  />
+                  <p style={{ color: colors.error }}>{tweetsError}</p>
+                </div>
+              ) : tweets.length === 0 ? (
+                <div
+                  className="rounded-xl p-8 text-center"
+                  style={{ backgroundColor: colors.cardBg }}
+                >
+                  <Twitter
+                    className="w-8 h-8 mx-auto mb-3"
+                    style={{ color: colors.textSecondary }}
+                  />
+                  <p style={{ color: colors.textSecondary }}>No tweets found</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {tweets.map((tweet) => {
+                    const isSelected = selectedTweetIds.includes(tweet.id);
+                    return (
+                      <div
+                        key={tweet.id}
+                        onClick={() => toggleTweetSelection(tweet.id)}
+                        className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.01]"
+                        style={{
+                          backgroundColor: colors.cardBg,
+                          border: `2px solid ${isSelected ? colors.accentPrimary : colors.border}`,
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-1 transition-colors ${
+                              isSelected ? "" : "border"
+                            }`}
+                            style={{
+                              backgroundColor: isSelected
+                                ? colors.accentPrimary
+                                : "transparent",
+                              borderColor: isSelected ? colors.accentPrimary : colors.border,
+                            }}
+                          >
+                            {isSelected && (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {/* Author info */}
                             <div className="flex items-center gap-2 mb-2">
+                              {tweet.author.profile_image_url && (
+                                <img
+                                  src={tweet.author.profile_image_url}
+                                  alt={tweet.author.name}
+                                  className="w-6 h-6 rounded-full"
+                                />
+                              )}
                               <span
                                 className="font-medium"
                                 style={{ color: colors.textPrimary }}
                               >
-                                {tweet.user.name}
+                                {tweet.author.name}
                               </span>
                               <span
                                 className="text-sm"
                                 style={{ color: colors.textSecondary }}
                               >
-                                @{tweet.user.screen_name}
+                                @{tweet.author.username}
                               </span>
                             </div>
-                          )}
-                          <p
-                            className="text-sm mb-3 whitespace-pre-wrap"
-                            style={{ color: colors.textSecondary }}
-                          >
-                            {tweet.text}
-                          </p>
-                          <div className="flex items-center gap-6 text-xs">
-                            <span
-                              className="flex items-center gap-1"
+
+                            {/* Tweet text */}
+                            <p
+                              className="text-sm mb-3 whitespace-pre-wrap"
                               style={{ color: colors.textSecondary }}
                             >
-                              <Heart className="w-3.5 h-3.5" />
-                              {tweet.metrics?.likes?.toLocaleString() || 0}
-                            </span>
-                            <span
-                              className="flex items-center gap-1"
-                              style={{ color: colors.textSecondary }}
-                            >
-                              <Repeat className="w-3.5 h-3.5" />
-                              {tweet.metrics?.retweets?.toLocaleString() || 0}
-                            </span>
-                            <span
-                              className="flex items-center gap-1"
-                              style={{ color: colors.textSecondary }}
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              {tweet.metrics?.replies?.toLocaleString() || 0}
-                            </span>
-                            <span style={{ color: colors.textSecondary }}>
-                              {formatDate(tweet.created_at)}
-                            </span>
+                              {tweet.text}
+                            </p>
+
+                            {/* Media preview */}
+                            {tweet.media && tweet.media.length > 0 && (
+                              <div className="mb-3 flex gap-2 flex-wrap">
+                                {tweet.media.slice(0, 2).map((m, i) => (
+                                  <div
+                                    key={i}
+                                    className="relative rounded-lg overflow-hidden"
+                                    style={{ 
+                                      width: tweet.media!.length === 1 ? '100%' : '48%',
+                                      maxHeight: 150 
+                                    }}
+                                  >
+                                    <img
+                                      src={m.url}
+                                      alt="Tweet media"
+                                      className="w-full h-full object-cover"
+                                      style={{ maxHeight: 150 }}
+                                    />
+                                    {m.type !== 'photo' && (
+                                      <div
+                                        className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[10px]"
+                                        style={{ backgroundColor: colors.cardBg, color: colors.textPrimary }}
+                                      >
+                                        {m.type}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                                {tweet.media.length > 2 && (
+                                  <div
+                                    className="flex items-center justify-center rounded-lg"
+                                    style={{ 
+                                      backgroundColor: `${colors.accentPrimary}22`,
+                                      width: '48%',
+                                      height: 80
+                                    }}
+                                  >
+                                    <span style={{ color: colors.accentPrimary }}>
+                                      +{tweet.media.length - 2} more
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Metrics */}
+                            <div className="flex items-center gap-4 text-xs flex-wrap">
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <Heart className="w-3.5 h-3.5" />
+                                {tweet.metrics?.likes?.toLocaleString() || 0}
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <Repeat className="w-3.5 h-3.5" />
+                                {tweet.metrics?.retweets?.toLocaleString() || 0}
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                {tweet.metrics?.replies?.toLocaleString() || 0}
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <Quote className="w-3.5 h-3.5" />
+                                {tweet.metrics?.quotes?.toLocaleString() || 0}
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                {tweet.metrics?.impressions?.toLocaleString() || 0}
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: colors.textSecondary }}
+                              >
+                                <Bookmark className="w-3.5 h-3.5" />
+                                {tweet.metrics?.bookmarks?.toLocaleString() || 0}
+                              </span>
+                              <span style={{ color: colors.textSecondary }}>
+                                {formatDate(tweet.created_at)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: Campaign Creation Panel */}
