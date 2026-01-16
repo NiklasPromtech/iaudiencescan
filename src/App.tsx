@@ -36,6 +36,7 @@ import Network from "./pages/Network";
 import NetworkAgency from "./pages/NetworkAgency";
 import Merge from "./pages/Merge";
 import XData from "./pages/XData";
+import XAdsAgency from "./pages/XAdsAgency";
 import Wizard from "./pages/Wizard";
 import WizardMobile from "./pages/WizardMobile";
 import WizardV2 from "./pages/WizardV2";
@@ -88,6 +89,7 @@ const App = () => (
           <Route path="/network/agency/:studyId" element={<NetworkAgency />} />
           <Route path="/merge/:studyId" element={<Merge />} />
           <Route path="/x-data/:studyId" element={<XData />} />
+          <Route path="/xads/agency" element={<XAdsAgency />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           <Route path="/wizard/v2" element={<WizardV2 />} />
