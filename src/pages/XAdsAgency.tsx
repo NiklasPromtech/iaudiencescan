@@ -332,7 +332,7 @@ export default function XAdsAgency() {
 
       try {
         const response = await fetch(
-          `https://token-analysis-final.nw.r.appspot.com/x/tweet/${account}`
+          `https://token-analysis-final.nw.r.appspot.com/x/tweets?account_id=${account}`
         );
         const data = await response.json();
 
