@@ -1,54 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { 
-  ArrowLeft, Twitter, Calendar, DollarSign, Target, FileText, Loader2, 
-  CheckCircle2, AlertCircle, Heart, Repeat, MessageCircle, Eye, 
-  Bookmark, Quote, Image as ImageIcon, Users, Zap
+  ArrowLeft, Twitter, Calendar, DollarSign, Target, Loader2, 
+  AlertCircle, Users, Zap, ExternalLink
 } from "lucide-react";
 
-// Tweet interface matching the actual API response
-interface Tweet {
-  id: string;
-  text: string;
-  created_at: string;
-  author: {
-    id: string;
-    name: string;
-    username: string;
-    profile_image_url?: string;
-  };
-  metrics: {
-    retweets: number;
-    likes: number;
-    replies: number;
-    quotes: number;
-    impressions: number;
-    bookmarks: number;
-  };
-  media?: {
-    type: string;
-    url: string;
-    width: number;
-    height: number;
-  }[];
-  urls?: {
-    url: string;
-    expanded_url: string;
-    display_url: string;
-  }[];
-}
-
-interface TweetsResponse {
-  success: boolean;
-  account_id: string;
-  promotable_user: {
-    id: string;
-    promotable_user_type: string;
-  };
-  tweets: Tweet[];
-  count: number;
-  already_promoted_count: number;
-}
+// Network token data interfaces
 
 // Network token data interfaces
 interface TokenData {
@@ -290,18 +247,10 @@ export default function XAdsAgency() {
   const account = searchParams.get("account") || "";
   const studyId = searchParams.get("studyId") || "";
 
-  // Tweet state
-  const [tweetsResponse, setTweetsResponse] = useState<TweetsResponse | null>(null);
-  const [tweetsLoading, setTweetsLoading] = useState(true);
-  const [tweetsError, setTweetsError] = useState<string | null>(null);
-
   // Network data state
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [networkLoading, setNetworkLoading] = useState(false);
   const [networkError, setNetworkError] = useState<string | null>(null);
-
-  // Selected tweets for campaign
-  const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
 
   // Campaign form state
   const [objective, setObjective] = useState<string>("FOLLOWERS");
@@ -314,42 +263,11 @@ export default function XAdsAgency() {
     return tomorrow.toISOString().split("T")[0];
   });
   const [endDate, setEndDate] = useState<string>("");
-  const [status, setStatus] = useState<"DRAFT" | "ACTIVE">("DRAFT");
 
   // Campaign creation state
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<any>(null);
-
-  // Fetch tweets
-  useEffect(() => {
-    const fetchTweets = async () => {
-      if (!account) {
-        setTweetsError("No account ID provided");
-        setTweetsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `https://token-analysis-final.nw.r.appspot.com/x/tweets?account_id=${account}`
-        );
-        const data = await response.json();
-
-        if (!response.ok || data.error) {
-          throw new Error(data.error || "Failed to fetch tweets");
-        }
-
-        setTweetsResponse(data);
-      } catch (err) {
-        setTweetsError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setTweetsLoading(false);
-      }
-    };
-
-    fetchTweets();
-  }, [account]);
 
   // Fetch network data if studyId is provided
   useEffect(() => {
@@ -375,27 +293,8 @@ export default function XAdsAgency() {
     fetchNetworkData();
   }, [studyId, uid]);
 
-  const tweets = tweetsResponse?.tweets || [];
-
-  // Check if objective requires tweets
-  const requiresTweets = objective !== "FOLLOWERS";
-
-  // Toggle tweet selection
-  const toggleTweetSelection = (tweetId: string) => {
-    setSelectedTweetIds((prev) =>
-      prev.includes(tweetId)
-        ? prev.filter((id) => id !== tweetId)
-        : [...prev, tweetId]
-    );
-  };
-
-  // Create campaign
+  // Create campaign (always as DRAFT)
   const handleCreateCampaign = async () => {
-    if (requiresTweets && selectedTweetIds.length === 0) {
-      setCreateError("Please select at least one tweet for this objective");
-      return;
-    }
-
     setCreating(true);
     setCreateError(null);
     setCreateSuccess(null);
@@ -407,7 +306,7 @@ export default function XAdsAgency() {
         daily_budget: dailyBudget,
         bid_amount: bidAmount,
         start_date: new Date(startDate).toISOString(),
-        status,
+        status: "DRAFT", // Always create as draft
       };
 
       if (totalBudget) {
@@ -416,10 +315,6 @@ export default function XAdsAgency() {
 
       if (endDate) {
         payload.end_date = new Date(endDate).toISOString();
-      }
-
-      if (requiresTweets) {
-        payload.tweet_ids = selectedTweetIds;
       }
 
       const response = await fetch(
@@ -444,19 +339,6 @@ export default function XAdsAgency() {
       setCreateError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setCreating(false);
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
     }
   };
 
@@ -506,285 +388,94 @@ export default function XAdsAgency() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Tweets List */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left: Network Chart */}
+          <div className="space-y-6">
             {/* Network Chart Section */}
             {studyId && (
               <div
-                className="rounded-xl p-4"
+                className="rounded-xl p-6"
                 style={{ backgroundColor: colors.cardBg, border: `1px solid ${colors.border}` }}
               >
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-4">
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
                     style={{ backgroundColor: `${colors.accentSecondary}22` }}
                   >
-                    <Zap className="w-4 h-4" style={{ color: colors.accentSecondary }} />
+                    <Zap className="w-5 h-5" style={{ color: colors.accentSecondary }} />
                   </div>
                   <div>
-                    <h3 className="font-semibold" style={{ color: colors.textPrimary }}>
+                    <h3 className="font-semibold text-lg" style={{ color: colors.textPrimary }}>
                       Blockchain Audience Network
                     </h3>
-                    <p className="text-xs" style={{ color: colors.textSecondary }}>
+                    <p className="text-sm" style={{ color: colors.textSecondary }}>
                       On-chain wallet overlap powering your targeting
                     </p>
                   </div>
                 </div>
                 
                 {networkLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin" style={{ color: colors.accentPrimary }} />
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin" style={{ color: colors.accentPrimary }} />
                   </div>
                 ) : networkError ? (
-                  <div className="text-center py-4">
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-8 h-8 mx-auto mb-2" style={{ color: colors.error }} />
                     <p className="text-sm" style={{ color: colors.error }}>{networkError}</p>
                   </div>
                 ) : tokens.length > 0 ? (
-                  <div className="max-w-md mx-auto">
+                  <div>
                     <NetworkChart tokens={tokens} studyId={studyId} />
-                    <div className="flex items-center justify-center gap-4 mt-3">
+                    <div className="flex items-center justify-center gap-4 mt-4">
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" style={{ color: colors.accentPrimary }} />
-                        <span className="text-xs" style={{ color: colors.textSecondary }}>
+                        <span className="text-sm" style={{ color: colors.textSecondary }}>
                           {tokens.length} tokens analyzed
                         </span>
                       </div>
                     </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="text-center py-8">
+                    <Zap className="w-8 h-8 mx-auto mb-2" style={{ color: colors.textSecondary }} />
+                    <p className="text-sm" style={{ color: colors.textSecondary }}>No network data available</p>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Tweets Section */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2
-                    className="text-xl font-semibold"
-                    style={{ color: colors.textPrimary }}
+            {/* Info Card when no studyId */}
+            {!studyId && (
+              <div
+                className="rounded-xl p-6"
+                style={{ backgroundColor: colors.cardBg, border: `1px solid ${colors.border}` }}
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${colors.accentPrimary}22` }}
                   >
-                    Available Tweets
-                  </h2>
-                  {tweetsResponse && (
-                    <p className="text-xs mt-1" style={{ color: colors.textSecondary }}>
-                      {tweetsResponse.count} tweets • {tweetsResponse.already_promoted_count} already promoted
+                    <Twitter className="w-5 h-5" style={{ color: colors.accentPrimary }} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg" style={{ color: colors.textPrimary }}>
+                      Create X Ads Campaign
+                    </h3>
+                    <p className="text-sm" style={{ color: colors.textSecondary }}>
+                      Set up a draft campaign for your account
                     </p>
-                  )}
+                  </div>
                 </div>
-                {selectedTweetIds.length > 0 && (
-                  <span
-                    className="text-sm px-3 py-1 rounded-full"
-                    style={{
-                      backgroundColor: `${colors.accentPrimary}22`,
-                      color: colors.accentPrimary,
-                    }}
-                  >
-                    {selectedTweetIds.length} selected
-                  </span>
-                )}
+                <p className="text-sm" style={{ color: colors.textSecondary }}>
+                  Configure your campaign settings on the right. Once created as a draft, 
+                  you'll be able to add tweets and activate it directly in X Ads Manager.
+                </p>
               </div>
-
-              {tweetsLoading ? (
-                <div
-                  className="rounded-xl p-12 text-center"
-                  style={{ backgroundColor: colors.cardBg }}
-                >
-                  <Loader2
-                    className="w-8 h-8 animate-spin mx-auto mb-3"
-                    style={{ color: colors.accentPrimary }}
-                  />
-                  <p style={{ color: colors.textSecondary }}>Loading tweets...</p>
-                </div>
-              ) : tweetsError ? (
-                <div
-                  className="rounded-xl p-8 text-center"
-                  style={{ backgroundColor: colors.cardBg }}
-                >
-                  <AlertCircle
-                    className="w-8 h-8 mx-auto mb-3"
-                    style={{ color: colors.error }}
-                  />
-                  <p style={{ color: colors.error }}>{tweetsError}</p>
-                </div>
-              ) : tweets.length === 0 ? (
-                <div
-                  className="rounded-xl p-8 text-center"
-                  style={{ backgroundColor: colors.cardBg }}
-                >
-                  <Twitter
-                    className="w-8 h-8 mx-auto mb-3"
-                    style={{ color: colors.textSecondary }}
-                  />
-                  <p style={{ color: colors.textSecondary }}>No tweets found</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {tweets.map((tweet) => {
-                    const isSelected = selectedTweetIds.includes(tweet.id);
-                    return (
-                      <div
-                        key={tweet.id}
-                        onClick={() => toggleTweetSelection(tweet.id)}
-                        className="rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.01]"
-                        style={{
-                          backgroundColor: colors.cardBg,
-                          border: `2px solid ${isSelected ? colors.accentPrimary : colors.border}`,
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-1 transition-colors ${
-                              isSelected ? "" : "border"
-                            }`}
-                            style={{
-                              backgroundColor: isSelected
-                                ? colors.accentPrimary
-                                : "transparent",
-                              borderColor: isSelected ? colors.accentPrimary : colors.border,
-                            }}
-                          >
-                            {isSelected && (
-                              <CheckCircle2 className="w-4 h-4 text-white" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            {/* Author info */}
-                            <div className="flex items-center gap-2 mb-2">
-                              {tweet.author.profile_image_url && (
-                                <img
-                                  src={tweet.author.profile_image_url}
-                                  alt={tweet.author.name}
-                                  className="w-6 h-6 rounded-full"
-                                />
-                              )}
-                              <span
-                                className="font-medium"
-                                style={{ color: colors.textPrimary }}
-                              >
-                                {tweet.author.name}
-                              </span>
-                              <span
-                                className="text-sm"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                @{tweet.author.username}
-                              </span>
-                            </div>
-
-                            {/* Tweet text */}
-                            <p
-                              className="text-sm mb-3 whitespace-pre-wrap"
-                              style={{ color: colors.textSecondary }}
-                            >
-                              {tweet.text}
-                            </p>
-
-                            {/* Media preview */}
-                            {tweet.media && tweet.media.length > 0 && (
-                              <div className="mb-3 flex gap-2 flex-wrap">
-                                {tweet.media.slice(0, 2).map((m, i) => (
-                                  <div
-                                    key={i}
-                                    className="relative rounded-lg overflow-hidden"
-                                    style={{ 
-                                      width: tweet.media!.length === 1 ? '100%' : '48%',
-                                      maxHeight: 150 
-                                    }}
-                                  >
-                                    <img
-                                      src={m.url}
-                                      alt="Tweet media"
-                                      className="w-full h-full object-cover"
-                                      style={{ maxHeight: 150 }}
-                                    />
-                                    {m.type !== 'photo' && (
-                                      <div
-                                        className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[10px]"
-                                        style={{ backgroundColor: colors.cardBg, color: colors.textPrimary }}
-                                      >
-                                        {m.type}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                                {tweet.media.length > 2 && (
-                                  <div
-                                    className="flex items-center justify-center rounded-lg"
-                                    style={{ 
-                                      backgroundColor: `${colors.accentPrimary}22`,
-                                      width: '48%',
-                                      height: 80
-                                    }}
-                                  >
-                                    <span style={{ color: colors.accentPrimary }}>
-                                      +{tweet.media.length - 2} more
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Metrics */}
-                            <div className="flex items-center gap-4 text-xs flex-wrap">
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <Heart className="w-3.5 h-3.5" />
-                                {tweet.metrics?.likes?.toLocaleString() || 0}
-                              </span>
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <Repeat className="w-3.5 h-3.5" />
-                                {tweet.metrics?.retweets?.toLocaleString() || 0}
-                              </span>
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                {tweet.metrics?.replies?.toLocaleString() || 0}
-                              </span>
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <Quote className="w-3.5 h-3.5" />
-                                {tweet.metrics?.quotes?.toLocaleString() || 0}
-                              </span>
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                {tweet.metrics?.impressions?.toLocaleString() || 0}
-                              </span>
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: colors.textSecondary }}
-                              >
-                                <Bookmark className="w-3.5 h-3.5" />
-                                {tweet.metrics?.bookmarks?.toLocaleString() || 0}
-                              </span>
-                              <span style={{ color: colors.textSecondary }}>
-                                {formatDate(tweet.created_at)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Right: Campaign Creation Panel */}
-          <div className="lg:col-span-1">
+          <div>
             <div
               className="sticky top-24 rounded-xl p-6 space-y-6"
               style={{ backgroundColor: colors.cardBg, border: `1px solid ${colors.border}` }}
@@ -797,7 +488,7 @@ export default function XAdsAgency() {
                   Create Campaign
                 </h2>
                 <p className="text-sm" style={{ color: colors.textSecondary }}>
-                  Configure and launch your X Ads campaign
+                  Create a draft campaign, then add tweets in X Ads Manager
                 </p>
               </div>
 
@@ -826,11 +517,6 @@ export default function XAdsAgency() {
                     </option>
                   ))}
                 </select>
-                {requiresTweets && (
-                  <p className="text-xs" style={{ color: colors.warning }}>
-                    ⚠️ This objective requires tweet selection
-                  </p>
-                )}
               </div>
 
               {/* Daily Budget */}
@@ -957,43 +643,6 @@ export default function XAdsAgency() {
                 />
               </div>
 
-              {/* Status */}
-              <div className="space-y-2">
-                <label
-                  className="text-sm font-medium flex items-center gap-2"
-                  style={{ color: colors.textPrimary }}
-                >
-                  <FileText className="w-4 h-4" style={{ color: colors.accentPrimary }} />
-                  Status
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setStatus("DRAFT")}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                    style={{
-                      backgroundColor:
-                        status === "DRAFT" ? colors.accentPrimary : colors.background,
-                      border: `1px solid ${status === "DRAFT" ? colors.accentPrimary : colors.border}`,
-                      color: status === "DRAFT" ? "#fff" : colors.textSecondary,
-                    }}
-                  >
-                    Draft
-                  </button>
-                  <button
-                    onClick={() => setStatus("ACTIVE")}
-                    className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                    style={{
-                      backgroundColor:
-                        status === "ACTIVE" ? colors.success : colors.background,
-                      border: `1px solid ${status === "ACTIVE" ? colors.success : colors.border}`,
-                      color: status === "ACTIVE" ? "#fff" : colors.textSecondary,
-                    }}
-                  >
-                    Active
-                  </button>
-                </div>
-              </div>
-
               {/* Error Message */}
               {createError && (
                 <div
@@ -1004,45 +653,77 @@ export default function XAdsAgency() {
                 </div>
               )}
 
-              {/* Success Message */}
+              {/* Success Message with X Ads Link */}
               {createSuccess && (
                 <div
-                  className="p-3 rounded-lg text-sm"
-                  style={{ backgroundColor: `${colors.success}22`, color: colors.success }}
+                  className="p-4 rounded-lg space-y-3"
+                  style={{ backgroundColor: `${colors.success}22`, border: `1px solid ${colors.success}` }}
                 >
-                  <p className="font-medium mb-1">Campaign created successfully!</p>
-                  <p className="text-xs opacity-80">
-                    Campaign ID: {createSuccess.campaign_id || createSuccess.id || "N/A"}
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: colors.success }}
+                    >
+                      <Twitter className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold" style={{ color: colors.success }}>
+                        Draft Campaign Created!
+                      </p>
+                      <p className="text-xs" style={{ color: colors.textSecondary }}>
+                        Campaign ID: {createSuccess.campaign_id || createSuccess.id || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm" style={{ color: colors.textSecondary }}>
+                    Your campaign has been created as a draft. Add tweets and activate it in X Ads Manager.
                   </p>
+                  
+                  <a
+                    href="https://ads.x.com/campaign_management"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold transition-all hover:opacity-90"
+                    style={{
+                      backgroundColor: colors.textPrimary,
+                      color: colors.background,
+                    }}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open X Ads Manager
+                  </a>
                 </div>
               )}
 
               {/* Create Button */}
-              <button
-                onClick={handleCreateCampaign}
-                disabled={creating || (requiresTweets && selectedTweetIds.length === 0)}
-                className="w-full py-3 rounded-xl font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{
-                  background: `linear-gradient(135deg, ${colors.accentPrimary}, ${colors.accentSecondary})`,
-                  color: "#fff",
-                }}
-              >
-                {creating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Twitter className="w-4 h-4" />
-                    Create Campaign
-                  </>
-                )}
-              </button>
+              {!createSuccess && (
+                <button
+                  onClick={handleCreateCampaign}
+                  disabled={creating}
+                  className="w-full py-3 rounded-xl font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.accentPrimary}, ${colors.accentSecondary})`,
+                    color: "#fff",
+                  }}
+                >
+                  {creating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating Draft...
+                    </>
+                  ) : (
+                    <>
+                      <Twitter className="w-4 h-4" />
+                      Create Draft Campaign
+                    </>
+                  )}
+                </button>
+              )}
 
-              {requiresTweets && selectedTweetIds.length === 0 && !creating && (
+              {!createSuccess && (
                 <p className="text-xs text-center" style={{ color: colors.textSecondary }}>
-                  Select tweets from the left to enable campaign creation
+                  Campaign will be created as a draft. Add tweets and activate in X Ads Manager.
                 </p>
               )}
             </div>
