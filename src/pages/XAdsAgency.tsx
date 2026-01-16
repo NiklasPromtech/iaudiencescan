@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { 
   ArrowLeft, Twitter, Calendar, DollarSign, Target, Loader2, 
-  AlertCircle, Users, Zap, ExternalLink
+  AlertCircle, Users, Zap, ExternalLink, FileText
 } from "lucide-react";
 
 // Network token data interfaces
@@ -253,6 +253,7 @@ export default function XAdsAgency() {
   const [networkError, setNetworkError] = useState<string | null>(null);
 
   // Campaign form state
+  const [campaignName, setCampaignName] = useState<string>(title || "Campaign");
   const [objective, setObjective] = useState<string>("FOLLOWERS");
   const [dailyBudget, setDailyBudget] = useState<number>(10);
   const [totalBudget, setTotalBudget] = useState<number | undefined>(undefined);
@@ -295,6 +296,21 @@ export default function XAdsAgency() {
 
   // Create campaign (always as DRAFT)
   const handleCreateCampaign = async () => {
+    // Extract handles from tokens (the X handles from the scan)
+    const handles = tokens
+      .map((token) => token.x)
+      .filter((handle) => handle && handle.trim() !== "");
+
+    if (handles.length === 0) {
+      setCreateError("No X handles found in the scan data. Please ensure the scan has token data with X handles.");
+      return;
+    }
+
+    if (!campaignName.trim()) {
+      setCreateError("Please enter a campaign name");
+      return;
+    }
+
     setCreating(true);
     setCreateError(null);
     setCreateSuccess(null);
@@ -302,6 +318,8 @@ export default function XAdsAgency() {
     try {
       const payload: any = {
         account_id: account,
+        name: campaignName.trim(),
+        handles: handles,
         objective,
         daily_budget: dailyBudget,
         bid_amount: bidAmount,
@@ -491,6 +509,45 @@ export default function XAdsAgency() {
                   Create a draft campaign, then add tweets in X Ads Manager
                 </p>
               </div>
+
+              {/* Campaign Name */}
+              <div className="space-y-2">
+                <label
+                  className="text-sm font-medium flex items-center gap-2"
+                  style={{ color: colors.textPrimary }}
+                >
+                  <FileText className="w-4 h-4" style={{ color: colors.accentPrimary }} />
+                  Campaign Name
+                </label>
+                <input
+                  type="text"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  placeholder="Enter campaign name"
+                  className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: colors.background,
+                    border: `1px solid ${colors.border}`,
+                    color: colors.textPrimary,
+                  }}
+                />
+              </div>
+
+              {/* Handles Count Info */}
+              {tokens.length > 0 && (
+                <div
+                  className="p-3 rounded-lg text-sm flex items-center gap-2"
+                  style={{ backgroundColor: `${colors.accentPrimary}11`, border: `1px solid ${colors.accentPrimary}33` }}
+                >
+                  <Users className="w-4 h-4" style={{ color: colors.accentPrimary }} />
+                  <span style={{ color: colors.textSecondary }}>
+                    <span style={{ color: colors.accentPrimary, fontWeight: 600 }}>
+                      {tokens.filter(t => t.x && t.x.trim() !== "").length}
+                    </span>
+                    {" "}X handles from scan will be targeted
+                  </span>
+                </div>
+              )}
 
               {/* Objective */}
               <div className="space-y-2">
