@@ -47,6 +47,7 @@ import AI from "./pages/AI";
 import Confidence from "./pages/Confidence";
 import PlaceholderConfidence from "./pages/PlaceholderConfidence";
 import PlaceholderAI from "./pages/PlaceholderAI";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,7 @@ const App = () => (
           <Route path="/confidence/:studyId" element={<Confidence />} />
           <Route path="/placeholder/confidence" element={<PlaceholderConfidence />} />
           <Route path="/placeholder/ai" element={<PlaceholderAI />} />
+          <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
