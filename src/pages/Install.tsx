@@ -9,65 +9,55 @@ import { Label } from "@/components/ui/label";
 import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { listWebsites, createWebsite, verifyWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
 
-type InstallStatus = "not_installed" | "receiving" | "active";
-
-interface Site {
-  id: string;
-  site_id: string;
-  name: string;
-  domain: string | null;
-  status: InstallStatus;
-}
+type InstallStatus = "pending" | "verified" | "failed";
 
 const Install = () => {
-  const [status, setStatus] = useState<InstallStatus>("not_installed");
+  const [status, setStatus] = useState<InstallStatus>("pending");
   const [copied, setCopied] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sites, setSites] = useState<Site[]>([]);
-  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+  const [websites, setWebsites] = useState<Website[]>([]);
+  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const [trackingSnippet, setTrackingSnippet] = useState<string>("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newSiteName, setNewSiteName] = useState("");
-  const [newSiteDomain, setNewSiteDomain] = useState("");
+  const [newSiteUrl, setNewSiteUrl] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch user's sites on mount
+  // Fetch user's websites on mount
   useEffect(() => {
-    const fetchSites = async () => {
+    const fetchWebsites = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         navigate("/auth");
         return;
       }
 
-      const { data, error } = await supabase
-        .from("sites")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Error loading sites",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else if (data && data.length > 0) {
-        setSites(data as Site[]);
-        setSelectedSite(data[0] as Site);
-        setStatus(data[0].status as InstallStatus);
+      try {
+        const response = await listWebsites();
+        if (response.websites && response.websites.length > 0) {
+          setWebsites(response.websites);
+          const firstSite = response.websites[0];
+          setSelectedWebsite(firstSite);
+          setStatus(firstSite.status);
+          // Generate tracking snippet for existing site
+          setTrackingSnippet(
+            `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${firstSite.id}" defer></script>`
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching websites:", error);
+        // If API fails, show create form
       }
       setLoading(false);
     };
 
-    fetchSites();
-  }, [navigate, toast]);
-
-  const generateSiteId = () => {
-    return "as_" + Math.random().toString(36).substring(2, 10);
-  };
+    fetchWebsites();
+  }, [navigate]);
 
   const handleCreateSite = async () => {
     if (!newSiteName.trim()) {
@@ -79,63 +69,56 @@ const Install = () => {
       return;
     }
 
-    setCreating(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/auth");
+    if (!newSiteUrl.trim()) {
+      toast({
+        title: "URL required",
+        description: "Please enter the base URL for your webpage.",
+        variant: "destructive",
+      });
       return;
     }
 
-    const siteId = generateSiteId();
-    const { data, error } = await supabase
-      .from("sites")
-      .insert({
-        user_id: user.id,
-        site_id: siteId,
-        name: newSiteName.trim(),
-        domain: newSiteDomain.trim() || null,
-        status: "not_installed",
-      })
-      .select()
-      .single();
+    // Validate URL format
+    let formattedUrl = newSiteUrl.trim();
+    if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
 
-    if (error) {
-      toast({
-        title: "Error creating site",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else if (data) {
-      const newSite = data as Site;
-      setSites([newSite, ...sites]);
-      setSelectedSite(newSite);
-      setStatus("not_installed");
+    setCreating(true);
+    try {
+      const response: CreateWebsiteResponse = await createWebsite(newSiteName.trim(), formattedUrl);
+      
+      const newWebsite = response.website;
+      setWebsites([newWebsite, ...websites]);
+      setSelectedWebsite(newWebsite);
+      setStatus("pending");
+      setTrackingSnippet(response.tracking.snippet);
       setShowCreateForm(false);
       setNewSiteName("");
-      setNewSiteDomain("");
+      setNewSiteUrl("");
+      
       toast({
         title: "Webpage created",
         description: "Your tracking tag has been generated.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error creating site",
+        description: error.message || "Failed to create website",
+        variant: "destructive",
       });
     }
     setCreating(false);
   };
 
-  const siteId = selectedSite?.site_id || "";
+  const tagId = selectedWebsite?.tag_id || "";
 
-  const trackingScript = `<!-- AudienceScan Tracking -->
-<script>
-  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'as.start':
-  new Date().getTime(),event:'as.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='asLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://cdn.audiencescan.io/as.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','asLayer','${siteId}');
-</script>`;
-
+  // GTM snippet using the tag_id
   const gtmSnippet = `<script>
   window.asLayer = window.asLayer || [];
   window.asLayer.push({
-    'as.siteId': '${siteId}',
+    'as.siteId': '${selectedWebsite?.id || ""}',
+    'as.tagId': '${tagId}',
     'as.start': new Date().getTime()
   });
 </script>`;
@@ -151,18 +134,48 @@ const Install = () => {
   };
 
   const handleVerify = async () => {
-    setVerifying(true);
-    // Simulate verification - in production this would ping your /collect endpoint
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setVerifying(false);
+    if (!selectedWebsite) return;
     
-    if (status === "not_installed") {
+    setVerifying(true);
+    try {
+      const response = await verifyWebsite(selectedWebsite.id);
+      
+      if (response.verification_result.found) {
+        setStatus("verified");
+        // Update the website in our local state
+        setWebsites(websites.map(w => 
+          w.id === selectedWebsite.id 
+            ? { ...w, status: "verified" as const, verified_at: response.website.verified_at }
+            : w
+        ));
+        setSelectedWebsite({ 
+          ...selectedWebsite, 
+          status: "verified", 
+          verified_at: response.website.verified_at 
+        });
+        toast({
+          title: "Verification successful!",
+          description: "Your tracking script is installed correctly.",
+        });
+        // Auto-redirect to overview after successful verification
+        setTimeout(() => navigate("/overview"), 1500);
+      } else {
+        toast({
+          title: "Not verified yet",
+          description: response.verification_result.reason === "meta_tag_not_found" 
+            ? "The tracking script was not found on your page."
+            : "Make sure the script is installed and try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "No events detected yet",
-        description: "Make sure the script is installed and visit your site.",
+        title: "Verification failed",
+        description: error.message || "Could not verify installation",
         variant: "destructive",
       });
     }
+    setVerifying(false);
   };
 
   const handleDoLater = () => {
@@ -171,25 +184,25 @@ const Install = () => {
 
   const getStatusBadge = () => {
     switch (status) {
-      case "not_installed":
+      case "pending":
         return (
           <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
             <span className="mr-1.5 h-2 w-2 rounded-full bg-muted-foreground/60" />
-            Not installed
+            Pending verification
           </Badge>
         );
-      case "receiving":
-        return (
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            <span className="mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
-            Receiving events
-          </Badge>
-        );
-      case "active":
+      case "verified":
         return (
           <Badge variant="outline" className="border-primary/50 text-primary">
             <span className="mr-1.5 h-2 w-2 rounded-full bg-primary" />
-            Active
+            Verified
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="outline" className="border-destructive/50 text-destructive">
+            <span className="mr-1.5 h-2 w-2 rounded-full bg-destructive" />
+            Verification failed
           </Badge>
         );
     }
@@ -203,8 +216,8 @@ const Install = () => {
     );
   }
 
-  // No sites yet - show create form
-  if (sites.length === 0 || showCreateForm) {
+  // No websites yet - show create form
+  if (websites.length === 0 || showCreateForm) {
     return (
       <div className="min-h-screen bg-gradient-subtle">
         <div className="container max-w-lg py-12 px-4">
@@ -215,17 +228,17 @@ const Install = () => {
               </div>
             </div>
             <h1 className="text-h2 text-foreground mb-3">
-              Create your first webpage
+              Add your website
             </h1>
             <p className="text-p1 text-muted-foreground">
-              Add a webpage to start tracking visitor wallets and cohort intel.
+              Enter your website details to start tracking visitor wallets and cohort intel.
             </p>
           </div>
 
           <Card className="border border-border shadow-elegant p-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Webpage name *</Label>
+                <Label htmlFor="name">Website name *</Label>
                 <Input
                   id="name"
                   placeholder="e.g. My DeFi App"
@@ -234,13 +247,16 @@ const Install = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="domain">Domain (optional)</Label>
+                <Label htmlFor="url">Website URL *</Label>
                 <Input
-                  id="domain"
-                  placeholder="e.g. mydefiapp.com"
-                  value={newSiteDomain}
-                  onChange={(e) => setNewSiteDomain(e.target.value)}
+                  id="url"
+                  placeholder="e.g. https://mydefiapp.com"
+                  value={newSiteUrl}
+                  onChange={(e) => setNewSiteUrl(e.target.value)}
                 />
+                <p className="text-p4 text-muted-foreground">
+                  We'll check this URL to verify your installation
+                </p>
               </div>
               <div className="flex gap-3 pt-2">
                 <Button
@@ -253,9 +269,9 @@ const Install = () => {
                   ) : (
                     <Plus className="mr-2 h-4 w-4" />
                   )}
-                  Create webpage
+                  Create website
                 </Button>
-                {sites.length > 0 && (
+                {websites.length > 0 && (
                   <Button
                     variant="outline"
                     onClick={() => setShowCreateForm(false)}
@@ -264,7 +280,7 @@ const Install = () => {
                   </Button>
                 )}
               </div>
-              {sites.length === 0 && (
+              {websites.length === 0 && (
                 <Button
                   variant="ghost"
                   className="w-full text-muted-foreground"
@@ -294,9 +310,9 @@ const Install = () => {
           <p className="text-p1 text-muted-foreground">
             Install the script to start capturing visitor wallets and cohort intel.
           </p>
-          {sites.length > 1 && (
+          {websites.length > 1 && (
             <p className="text-p3 text-muted-foreground mt-2">
-              Tracking: <strong>{selectedSite?.name}</strong>
+              Tracking: <strong>{selectedWebsite?.name}</strong>
             </p>
           )}
         </div>
@@ -321,13 +337,13 @@ const Install = () => {
                   </p>
                   <div className="relative">
                     <pre className="bg-foreground text-primary-foreground p-4 rounded-lg text-p3 overflow-x-auto">
-                      <code>{trackingScript}</code>
+                      <code>{trackingSnippet}</code>
                     </pre>
                     <Button
                       size="sm"
                       variant="secondary"
                       className="absolute top-2 right-2"
-                      onClick={() => handleCopy(trackingScript)}
+                      onClick={() => handleCopy(trackingSnippet)}
                     >
                       {copied ? (
                         <Check className="h-4 w-4" />
@@ -402,7 +418,7 @@ const Install = () => {
           <div className="p-6 pt-0 flex gap-3">
             <Button
               className="flex-1 bg-primary hover:bg-primary/90"
-              onClick={() => handleCopy(trackingScript)}
+              onClick={() => handleCopy(trackingSnippet)}
             >
               {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
               Copy snippet
