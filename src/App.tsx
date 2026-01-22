@@ -48,6 +48,8 @@ import Confidence from "./pages/Confidence";
 import PlaceholderConfidence from "./pages/PlaceholderConfidence";
 import PlaceholderAI from "./pages/PlaceholderAI";
 import Auth from "./pages/Auth";
+import Install from "./pages/Install";
+import Overview from "./pages/Overview";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +104,8 @@ const App = () => (
           <Route path="/placeholder/confidence" element={<PlaceholderConfidence />} />
           <Route path="/placeholder/ai" element={<PlaceholderAI />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/install" element={<Install />} />
+          <Route path="/overview" element={<Overview />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
