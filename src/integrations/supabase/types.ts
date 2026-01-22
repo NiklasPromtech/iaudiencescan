@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      _prisma_migrations: {
+        Row: {
+          applied_steps_count: number
+          checksum: string
+          finished_at: string | null
+          id: string
+          logs: string | null
+          migration_name: string
+          rolled_back_at: string | null
+          started_at: string
+        }
+        Insert: {
+          applied_steps_count?: number
+          checksum: string
+          finished_at?: string | null
+          id: string
+          logs?: string | null
+          migration_name: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Update: {
+          applied_steps_count?: number
+          checksum?: string
+          finished_at?: string | null
+          id?: string
+          logs?: string | null
+          migration_name?: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
       email_submissions: {
         Row: {
           created_at: string
@@ -31,6 +64,47 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      entitlements: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          period_start: string
+          plan: Database["public"]["Enums"]["Plan"]
+          scans_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id: string
+          period_start?: string
+          plan?: Database["public"]["Enums"]["Plan"]
+          scans_used?: number
+          updated_at: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          period_start?: string
+          plan?: Database["public"]["Enums"]["Plan"]
+          scans_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -92,6 +166,82 @@ export type Database = {
         }
         Relationships: []
       }
+      studies: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_limited: boolean
+          name: string
+          result_url: string | null
+          status: Database["public"]["Enums"]["StudyStatus"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          id: string
+          is_limited?: boolean
+          name: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["StudyStatus"]
+          updated_at: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_limited?: boolean
+          name?: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["StudyStatus"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_shares: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          share_token: string
+          study_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id: string
+          share_token: string
+          study_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          share_token?: string
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_shares_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       telegram_submissions: {
         Row: {
           created_at: string
@@ -110,6 +260,104 @@ export type Database = {
         }
         Relationships: []
       }
+      tokens: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          metadata: Json
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          supabase_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          supabase_id: string
+          updated_at: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          supabase_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      websites: {
+        Row: {
+          base_url: string
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          base_url: string
+          created_at?: string
+          id: string
+          name: string
+          status?: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id: string
+          updated_at: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          base_url?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "websites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -118,7 +366,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      Plan: "FREE" | "PRO" | "ENTERPRISE"
+      StudyStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED"
+      WebsiteStatus: "PENDING" | "VERIFIED" | "FAILED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -245,6 +495,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      Plan: ["FREE", "PRO", "ENTERPRISE"],
+      StudyStatus: ["PENDING", "RUNNING", "COMPLETED", "FAILED"],
+      WebsiteStatus: ["PENDING", "VERIFIED", "FAILED"],
+    },
   },
 } as const
