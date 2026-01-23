@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,9 @@ import {
   Clock,
   Zap,
 } from "lucide-react";
-import { fetchScorecard, ScorecardResponse, Website } from "@/lib/api";
+import { fetchScorecard, ScorecardResponse, Website, FilterOptions } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Overview = () => {
   const [scorecard, setScorecard] = useState<ScorecardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -40,53 +42,68 @@ const Overview = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
+  const loadScorecard = useCallback(async (filters: ActiveFilters) => {
     if (!selectedWebsite) return;
-
-    const loadScorecard = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchScorecard({
-          tag_id: selectedWebsite.id,
-          range: {
-            type: "last_full_days",
-            days: 7,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-          cost: { mode: "none" },
-        });
-        setScorecard(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load analytics");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadScorecard();
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchScorecard({
+        tag_id: selectedWebsite.id,
+        range: {
+          type: "last_full_days",
+          days: 7,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+        filters: Object.keys(filters).length > 0 
+          ? Object.fromEntries(
+              Object.entries(filters).filter(([_, v]) => v && v.length > 0)
+            ) as Record<string, string[]>
+          : undefined,
+        cost: { mode: "none" },
+      });
+      setScorecard(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
   }, [selectedWebsite]);
+
+  useEffect(() => {
+    if (selectedWebsite) {
+      loadScorecard(activeFilters);
+    }
+  }, [selectedWebsite, loadScorecard]);
+
+  const handleFiltersChange = (newFilters: ActiveFilters) => {
+    setActiveFilters(newFilters);
+    loadScorecard(newFilters);
+  };
+
+  const data = scorecard?.data;
+  const filterOptions = scorecard?.filter_options ?? null;
 
   const suggestedCohorts = [
     {
       id: 1,
       name: "High-intent visitors",
       description: "Stayed 60s+",
-      size: scorecard?.stayed_60s ?? 0,
+      size: data?.stayed_60s ?? 0,
       icon: <TrendingUp className="h-4 w-4" />,
     },
     {
       id: 2,
       name: "Engaged visitors",
       description: "Stayed 30s+",
-      size: scorecard?.stayed_30s ?? 0,
+      size: data?.stayed_30s ?? 0,
       icon: <Clock className="h-4 w-4" />,
     },
     {
       id: 3,
       name: "Wallet connected",
       description: "Connected a wallet",
-      size: scorecard?.wallet_users ?? 0,
+      size: data?.wallet_users ?? 0,
       icon: <Zap className="h-4 w-4" />,
     },
   ];
@@ -112,25 +129,35 @@ const Overview = () => {
           </Card>
         )}
 
+        {/* Filters */}
+        <div className="mb-6">
+          <ScorecardFilters
+            filterOptions={filterOptions}
+            activeFilters={activeFilters}
+            onFiltersChange={handleFiltersChange}
+            loading={loading}
+          />
+        </div>
+
         {/* Stats Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <StatCard
             label="Unique Visitors"
-            value={loading ? null : (scorecard?.unique_visitors?.toLocaleString() ?? "0")}
+            value={loading ? null : (data?.unique_visitors?.toLocaleString() ?? "0")}
             sublabel="last 7 days"
             icon={<Users className="h-5 w-5" />}
             loading={loading}
           />
           <StatCard
             label="Page Views"
-            value={loading ? null : (scorecard?.pageviews?.toLocaleString() ?? "0")}
+            value={loading ? null : (data?.pageviews?.toLocaleString() ?? "0")}
             sublabel="last 7 days"
             icon={<FileText className="h-5 w-5" />}
             loading={loading}
           />
           <StatCard
             label="Wallets Connected"
-            value={loading ? null : (scorecard?.wallet_users?.toLocaleString() ?? "—")}
+            value={loading ? null : (data?.wallet_users?.toLocaleString() ?? "—")}
             sublabel="last 7 days"
             icon={<Wallet className="h-5 w-5" />}
             loading={loading}
@@ -155,25 +182,25 @@ const Overview = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-p2 text-foreground">Stayed 10s+</span>
                   <span className="text-p2 text-muted-foreground font-medium">
-                    {scorecard?.stayed_10s?.toLocaleString() ?? "—"}
+                    {data?.stayed_10s?.toLocaleString() ?? "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-p2 text-foreground">Stayed 30s+</span>
                   <span className="text-p2 text-muted-foreground font-medium">
-                    {scorecard?.stayed_30s?.toLocaleString() ?? "—"}
+                    {data?.stayed_30s?.toLocaleString() ?? "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-p2 text-foreground">Stayed 60s+</span>
                   <span className="text-p2 text-muted-foreground font-medium">
-                    {scorecard?.stayed_60s?.toLocaleString() ?? "—"}
+                    {data?.stayed_60s?.toLocaleString() ?? "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-p2 text-foreground">Stayed 5m+</span>
                   <span className="text-p2 text-muted-foreground font-medium">
-                    {scorecard?.stayed_5m?.toLocaleString() ?? "—"}
+                    {data?.stayed_5m?.toLocaleString() ?? "—"}
                   </span>
                 </div>
               </div>
@@ -185,8 +212,8 @@ const Overview = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-h3 text-foreground">Bounce Rate</h3>
               <Badge variant="secondary" className="text-p4">
-                {loading ? "..." : scorecard?.unique_visitors 
-                  ? `${Math.round((scorecard.bounce_count / scorecard.unique_visitors) * 100)}%`
+                {loading ? "..." : data?.unique_visitors 
+                  ? `${Math.round((data.bounce_count / data.unique_visitors) * 100)}%`
                   : "—"}
               </Badge>
             </div>
@@ -194,8 +221,8 @@ const Overview = () => {
               <Skeleton className="h-2 mb-4" />
             ) : (
               <Progress 
-                value={scorecard?.unique_visitors 
-                  ? (scorecard.bounce_count / scorecard.unique_visitors) * 100 
+                value={data?.unique_visitors 
+                  ? (data.bounce_count / data.unique_visitors) * 100 
                   : 0} 
                 className="h-2 mb-4" 
               />
@@ -203,13 +230,13 @@ const Overview = () => {
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <p className="text-h3 text-foreground">
-                  {loading ? <Skeleton className="h-8 w-16 mx-auto" /> : scorecard?.bounce_count?.toLocaleString() ?? "—"}
+                  {loading ? <Skeleton className="h-8 w-16 mx-auto" /> : data?.bounce_count?.toLocaleString() ?? "—"}
                 </p>
                 <p className="text-p4 text-muted-foreground">Bounced</p>
               </div>
               <div>
                 <p className="text-h3 text-primary">
-                  {loading ? <Skeleton className="h-8 w-16 mx-auto" /> : scorecard?.unique_visitors?.toLocaleString() ?? "—"}
+                  {loading ? <Skeleton className="h-8 w-16 mx-auto" /> : data?.unique_visitors?.toLocaleString() ?? "—"}
                 </p>
                 <p className="text-p4 text-muted-foreground">Total Visitors</p>
               </div>
