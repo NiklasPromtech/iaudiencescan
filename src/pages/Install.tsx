@@ -125,6 +125,16 @@ const Install = () => {
 </script>`;
 
   const handleSelectWebsite = (website: Website) => {
+    // Store selected website in localStorage for overview page
+    localStorage.setItem("selectedWebsiteId", website.id);
+    localStorage.setItem("selectedWebsite", JSON.stringify(website));
+    
+    // If verified, navigate to overview
+    if (website.status === "verified") {
+      navigate("/overview");
+      return;
+    }
+    
     setSelectedWebsite(website);
     setStatus(website.status);
     setTrackingSnippet(
