@@ -1,123 +1,217 @@
 
-# Display Existing Tags on Install Page
+
+# Conversion & Wallet Tracking Setup UX
 
 ## Overview
-Add a "Your Websites" section to the Install page that shows all previously created tags with their verification status. This prevents users from accidentally creating duplicate tags when they return to the page and see their unverified sites aren't visible.
+When `wallet_users` or `converted_users` is `null` (meaning no data has been tracked yet), we need to surface clear setup prompts that guide users to implement tracking without being overwhelming or confusing.
 
-## Current Behavior
-- Page fetches all websites via `GET /websites` API
-- If websites exist, it auto-selects the first one and shows installation instructions
-- Users only see a small note saying "Tracking: {name}" when multiple sites exist
-- No visibility into other created tags or their status
+## UX Approach: Progressive Disclosure with Contextual Prompts
 
-## Proposed Changes
+Rather than cluttering the main dashboard, we'll use **contextual empty states** - showing setup prompts exactly where the data would appear, making it crystal clear what's missing and how to fix it.
 
-### 1. Add "Your Websites" Section (above installation card)
-When the user has existing websites, display them in a list/card format:
+### Design Principles
+1. **Show prompts where data would be** - Users immediately understand what they're missing
+2. **One action per prompt** - No confusion about what to click
+3. **Copy-paste ready** - The setup code is immediately visible
+4. **Dismissible once understood** - Won't nag forever
+
+---
+
+## Implementation: Setup Prompt Cards
+
+### Location 1: Wallets Connected Stat Card
+When `wallet_users === null`, replace the stat card value with a setup prompt:
 
 ```text
-+--------------------------------------------------+
-|  Your Websites                    [+ Add new]    |
-+--------------------------------------------------+
-|  [Selected] My DeFi App                          |
-|  https://mydefiapp.com                           |
-|  Status: [Pending verification]    [Select]      |
-+--------------------------------------------------+
-|  Token Site                                      |
-|  https://tokensite.io                            |
-|  Status: [Verified]                [Select]      |
-+--------------------------------------------------+
++------------------------------------------+
+|  [Wallet icon]                           |
+|                                          |
+|  Track wallet connections                |
+|  See which visitors connect wallets      |
+|                                          |
+|  [Set up tracking →]                     |
++------------------------------------------+
 ```
 
-Each website card shows:
-- Website name
-- Base URL (truncated if long)
-- Status badge (Pending / Verified / Failed)
-- "Select" button (or visual indicator if currently selected)
+Clicking opens a dialog/sheet with the code snippet.
 
-### 2. UI Components to Add
-- `WebsiteListCard` component for each website entry
-- Status badge helper (reuse existing `getStatusBadge` logic)
-- "Add new website" button in the header
+### Location 2: New "Conversions" Stat Card (4th card)
+Add a 4th stat card for conversions. When `converted_users === null`:
 
-### 3. Selection Behavior
-- Clicking a website card selects it
-- Updates `selectedWebsite` state
-- Updates `trackingSnippet` for the selected site
-- Updates `status` badge at top of page
-- Highlights the selected card visually
+```text
++------------------------------------------+
+|  [Target icon]                           |
+|                                          |
+|  Track conversions                       |
+|  Measure signups, purchases & more       |
+|                                          |
+|  [Set up tracking →]                     |
++------------------------------------------+
+```
 
-### 4. "Add New" Button Flow
-- Clicking "+ Add new" sets `showCreateForm = true`
-- Shows the existing create form
-- Cancel button returns to list view
+When data exists, shows: "X Conversions" with the count.
+
+---
+
+## Setup Dialog/Sheet Content
+
+### Wallet Tracking Dialog
+```text
+┌─────────────────────────────────────────────────┐
+│  Track Wallet Connections                    [X]│
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  Call this when a user connects their wallet:   │
+│                                                 │
+│  ┌─────────────────────────────────────┐ [Copy] │
+│  │ AudienceScan.trackWallet(           │        │
+│  │   '0x1234...',  // wallet address   │        │
+│  │   'connected'   // event type       │        │
+│  │ );                                  │        │
+│  └─────────────────────────────────────┘        │
+│                                                 │
+│  Other event types you can use:                 │
+│  • 'staked' - User staked tokens                │
+│  • 'purchased' - User made a purchase           │
+│  • 'signed' - User signed a transaction         │
+│                                                 │
+│  ───────────────────────────────────────────    │
+│                                                 │
+│  Need help? support@audiencescan.io             │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+### Conversion Events Dialog
+```text
+┌─────────────────────────────────────────────────┐
+│  Track Conversion Events                     [X]│
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  Call this when a conversion happens:           │
+│                                                 │
+│  ┌─────────────────────────────────────┐ [Copy] │
+│  │ AudienceScan.trackEvent(            │        │
+│  │   'Signed up',        // event name │        │
+│  │   'user@email.com'    // details    │        │
+│  │ );                                  │        │
+│  └─────────────────────────────────────┘        │
+│                                                 │
+│  Example: Track a purchase                      │
+│  ┌─────────────────────────────────────┐ [Copy] │
+│  │ AudienceScan.trackEvent('Purchase', │        │
+│  │   { amount: 99.99, currency: 'USD' }│        │
+│  │ );                                  │        │
+│  └─────────────────────────────────────┘        │
+│                                                 │
+│  ───────────────────────────────────────────    │
+│                                                 │
+│  Need help? support@audiencescan.io             │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Visual States Summary
+
+| Scenario | What User Sees |
+|----------|----------------|
+| `wallet_users === null` | Setup prompt card with "Set up tracking" button |
+| `wallet_users === 0` | Normal stat card showing "0" (tracking works, just no data) |
+| `wallet_users > 0` | Normal stat card showing count |
+| `converted_users === null` | Setup prompt card with "Set up tracking" button |
+| `converted_users === 0` | Normal stat card showing "0" |
+| `converted_users > 0` | Normal stat card showing count |
+
+The key distinction: `null` means "not configured", `0` means "configured but no events yet".
 
 ---
 
 ## Technical Details
 
-### File Changes: `src/pages/Install.tsx`
+### File Changes
 
-**New helper component:**
+| File | Change |
+|------|--------|
+| `src/pages/Overview.tsx` | Update stats grid to 4 cards, add conditional rendering for setup prompts, add dialog states |
+| `src/components/overview/TrackingSetupDialog.tsx` | New component - reusable dialog for wallet/conversion setup with code snippets |
+
+### New Component: TrackingSetupDialog
+
 ```tsx
-interface WebsiteListItemProps {
-  website: Website;
-  isSelected: boolean;
-  onSelect: (website: Website) => void;
+interface TrackingSetupDialogProps {
+  type: 'wallet' | 'conversion';
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
-
-const WebsiteListItem = ({ website, isSelected, onSelect }: WebsiteListItemProps) => {
-  // Render card with name, url, status badge, select button
-};
 ```
 
-**New section in main return (before Installation Card):**
+### Updated StatCard Component
+
+Extend to support an "empty/setup" state:
+
 ```tsx
-{/* Your Websites Section */}
-{websites.length > 0 && (
-  <Card className="mb-6">
-    <div className="p-4 border-b flex justify-between items-center">
-      <h2>Your Websites</h2>
-      <Button size="sm" onClick={() => setShowCreateForm(true)}>
-        <Plus /> Add new
-      </Button>
-    </div>
-    <div className="divide-y">
-      {websites.map(website => (
-        <WebsiteListItem
-          key={website.id}
-          website={website}
-          isSelected={selectedWebsite?.id === website.id}
-          onSelect={handleSelectWebsite}
-        />
-      ))}
-    </div>
-  </Card>
-)}
+interface StatCardProps {
+  label: string;
+  value: string | null;
+  sublabel: string;
+  icon: React.ReactNode;
+  loading?: boolean;
+  // New props for setup state
+  showSetup?: boolean;
+  setupTitle?: string;
+  setupDescription?: string;
+  onSetupClick?: () => void;
+}
 ```
 
-**New handler:**
+### Overview.tsx State Additions
+
 ```tsx
-const handleSelectWebsite = (website: Website) => {
-  setSelectedWebsite(website);
-  setStatus(website.status);
-  setTrackingSnippet(
-    `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${website.id}" defer></script>`
-  );
-};
+const [walletSetupOpen, setWalletSetupOpen] = useState(false);
+const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
+
+// Determine if we should show setup prompts
+const showWalletSetup = !loading && data?.wallet_users === null;
+const showConversionSetup = !loading && data?.converted_users === null;
 ```
 
-### Visual Design
-- Use subtle border/background for selected state
-- Compact cards to avoid too much scrolling
-- Status badges consistent with existing design (muted for pending, primary for verified, destructive for failed)
-- Globe icon for each website entry
+### Stats Grid Update
+
+Change from 3 columns to 4:
+
+```tsx
+<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <StatCard label="Unique Visitors" ... />
+  <StatCard label="Page Views" ... />
+  <StatCard 
+    label="Wallets Connected"
+    showSetup={showWalletSetup}
+    setupTitle="Track wallets"
+    setupDescription="See wallet connections"
+    onSetupClick={() => setWalletSetupOpen(true)}
+    ...
+  />
+  <StatCard 
+    label="Conversions"
+    showSetup={showConversionSetup}
+    setupTitle="Track conversions"
+    setupDescription="Measure signups & more"
+    onSetupClick={() => setConversionSetupOpen(true)}
+    ...
+  />
+</div>
+```
 
 ---
 
-## Summary of Changes
-| File | Change |
-|------|--------|
-| `src/pages/Install.tsx` | Add `WebsiteListItem` component, "Your Websites" section, `handleSelectWebsite` handler, and "+ Add new" button |
+## Summary
 
-This ensures users can see all their existing tags at a glance, select the one they want to work with, and understand which ones still need verification, reducing confusion and duplicate tag creation.
+This approach is clear because:
+1. **No hunting** - Setup prompts appear exactly where the data would be
+2. **No guessing** - One button, one action, one outcome
+3. **No confusion** - `null` vs `0` distinction prevents "is it broken?" questions
+4. **Copy-paste ready** - Users get working code immediately
+5. **Non-intrusive** - Once tracking is set up, prompts disappear automatically
+
