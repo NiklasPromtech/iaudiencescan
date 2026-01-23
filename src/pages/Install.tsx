@@ -123,6 +123,14 @@ const Install = () => {
   });
 </script>`;
 
+  const handleSelectWebsite = (website: Website) => {
+    setSelectedWebsite(website);
+    setStatus(website.status);
+    setTrackingSnippet(
+      `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${website.id}" defer></script>`
+    );
+  };
+
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text);
     setCopied(true);
@@ -310,12 +318,34 @@ const Install = () => {
           <p className="text-p1 text-muted-foreground">
             Install the script to start capturing visitor wallets and cohort intel.
           </p>
-          {websites.length > 1 && (
-            <p className="text-p3 text-muted-foreground mt-2">
-              Tracking: <strong>{selectedWebsite?.name}</strong>
-            </p>
-          )}
         </div>
+
+        {/* Your Websites Section */}
+        {websites.length > 0 && (
+          <Card className="border border-border shadow-elegant mb-8">
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h2 className="text-p1 font-medium text-foreground">Your Websites</h2>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowCreateForm(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add new
+              </Button>
+            </div>
+            <div className="divide-y divide-border">
+              {websites.map((website) => (
+                <WebsiteListItem
+                  key={website.id}
+                  website={website}
+                  isSelected={selectedWebsite?.id === website.id}
+                  onSelect={handleSelectWebsite}
+                />
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Installation Card */}
         <Card className="border border-border shadow-elegant mb-8">
@@ -508,5 +538,72 @@ const TeaserCard = ({ icon, title, subtitle, value }: TeaserCardProps) => (
     </div>
   </Card>
 );
+
+interface WebsiteListItemProps {
+  website: Website;
+  isSelected: boolean;
+  onSelect: (website: Website) => void;
+}
+
+const WebsiteListItem = ({ website, isSelected, onSelect }: WebsiteListItemProps) => {
+  const getWebsiteStatusBadge = () => {
+    switch (website.status) {
+      case "pending":
+        return (
+          <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground text-xs">
+            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+            Pending
+          </Badge>
+        );
+      case "verified":
+        return (
+          <Badge variant="outline" className="border-primary/50 text-primary text-xs">
+            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-primary" />
+            Verified
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="outline" className="border-destructive/50 text-destructive text-xs">
+            <span className="mr-1 h-1.5 w-1.5 rounded-full bg-destructive" />
+            Failed
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      className={`p-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-muted/50 ${
+        isSelected ? "bg-primary/5 border-l-2 border-l-primary" : ""
+      }`}
+      onClick={() => onSelect(website)}
+    >
+      <div className="flex-shrink-0">
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+          isSelected ? "bg-primary/10" : "bg-muted"
+        }`}>
+          <Globe className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-p2 font-medium truncate ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
+          {website.name}
+        </p>
+        <p className="text-p4 text-muted-foreground/70 truncate">
+          {website.base_url}
+        </p>
+      </div>
+      <div className="flex items-center gap-3">
+        {getWebsiteStatusBadge()}
+        {isSelected && (
+          <Check className="h-4 w-4 text-primary" />
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default Install;
