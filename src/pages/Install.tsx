@@ -102,9 +102,10 @@ const Install = () => {
         description: "Your tracking tag has been generated.",
       });
     } catch (error: any) {
+      const errorMessage = error.message || "Failed to create website";
       toast({
         title: "Error creating site",
-        description: error.message || "Failed to create website",
+        description: `${errorMessage}. Please contact support at support@audiencescan.io for assistance.`,
         variant: "destructive",
       });
     }
