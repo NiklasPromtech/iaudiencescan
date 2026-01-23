@@ -113,20 +113,49 @@ export interface ScorecardRequest {
   };
 }
 
+export interface FilterOptions {
+  sources: string[];
+  utm_source: string[];
+  utm_medium: string[];
+  utm_campaign: string[];
+  utm_content: string[];
+  utm_term: string[];
+  devices: string[];
+  browsers: string[];
+  os: string[];
+  countries: string[];
+  bot_status: string[];
+}
+
 export interface ScorecardResponse {
-  pageviews: number;
-  unique_visitors: number;
-  bounce_count: number;
-  stayed_10s: number;
-  stayed_30s: number;
-  stayed_60s: number;
-  stayed_5m: number;
-  wallet_users: number | null;
-  converted_users: number | null;
-  conversions_total: number | null;
-  bot_visitors: number | null;
-  bot_checked: number | null;
-  cost_total: number | null;
+  success: boolean;
+  tag_id: string;
+  range: {
+    from: string;
+    to: string;
+    timezone: string;
+  };
+  filters: Record<string, string[]>;
+  filter_options: FilterOptions;
+  conversion_events: string[];
+  conversion_events_configured: boolean;
+  cost: number | null;
+  cost_configured: boolean;
+  data: {
+    pageviews: number;
+    unique_visitors: number;
+    bounce_count: number;
+    stayed_10s: number;
+    stayed_30s: number;
+    stayed_60s: number;
+    stayed_5m: number;
+    wallet_users: number | null;
+    converted_users: number | null;
+    conversions_total: number | null;
+    bot_visitors: number | null;
+    bot_checked: number | null;
+    cost_total: number | null;
+  };
 }
 
 const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
