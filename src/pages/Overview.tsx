@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Clock,
   Zap,
+  Target,
 } from "lucide-react";
 import { 
   fetchScorecard, 
@@ -27,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
+import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -40,6 +42,8 @@ const Overview = () => {
   const [tableLoading, setTableLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
+  const [walletSetupOpen, setWalletSetupOpen] = useState(false);
+  const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -210,7 +214,7 @@ const Overview = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             label="Unique Visitors"
             value={loading ? null : (data?.unique_visitors?.toLocaleString() ?? "0")}
@@ -227,10 +231,25 @@ const Overview = () => {
           />
           <StatCard
             label="Wallets Connected"
-            value={loading ? null : (data?.wallet_users?.toLocaleString() ?? "—")}
+            value={loading ? null : (data?.wallet_users?.toLocaleString() ?? null)}
             sublabel="last 7 days"
             icon={<Wallet className="h-5 w-5" />}
             loading={loading}
+            showSetup={!loading && data?.wallet_users === null}
+            setupTitle="Track wallets"
+            setupDescription="See wallet connections"
+            onSetupClick={() => setWalletSetupOpen(true)}
+          />
+          <StatCard
+            label="Conversions"
+            value={loading ? null : (data?.converted_users?.toLocaleString() ?? null)}
+            sublabel="last 7 days"
+            icon={<Target className="h-5 w-5" />}
+            loading={loading}
+            showSetup={!loading && data?.converted_users === null}
+            setupTitle="Track conversions"
+            setupDescription="Measure signups & more"
+            onSetupClick={() => setConversionSetupOpen(true)}
           />
         </div>
 
@@ -361,6 +380,18 @@ const Overview = () => {
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Card>
+
+        {/* Setup Dialogs */}
+        <TrackingSetupDialog
+          type="wallet"
+          open={walletSetupOpen}
+          onOpenChange={setWalletSetupOpen}
+        />
+        <TrackingSetupDialog
+          type="conversion"
+          open={conversionSetupOpen}
+          onOpenChange={setConversionSetupOpen}
+        />
       </div>
     </div>
   );
@@ -372,22 +403,59 @@ interface StatCardProps {
   sublabel: string;
   icon: React.ReactNode;
   loading?: boolean;
+  showSetup?: boolean;
+  setupTitle?: string;
+  setupDescription?: string;
+  onSetupClick?: () => void;
 }
 
-const StatCard = ({ label, value, sublabel, icon, loading }: StatCardProps) => (
-  <Card className="p-5 border border-border">
-    <div className="flex items-start justify-between mb-3">
-      <span className="text-muted-foreground">{icon}</span>
-    </div>
-    {loading ? (
-      <Skeleton className="h-9 w-24 mb-1" />
-    ) : (
-      <p className="text-h2 text-foreground mb-1">{value}</p>
-    )}
-    <p className="text-p3 text-muted-foreground">
-      {label} <span className="text-p4">({sublabel})</span>
-    </p>
-  </Card>
-);
+const StatCard = ({ 
+  label, 
+  value, 
+  sublabel, 
+  icon, 
+  loading,
+  showSetup,
+  setupTitle,
+  setupDescription,
+  onSetupClick,
+}: StatCardProps) => {
+  // Show setup prompt when value is null and showSetup is true
+  if (showSetup) {
+    return (
+      <Card className="p-5 border border-border bg-muted/20 hover:bg-muted/30 transition-colors">
+        <div className="flex items-start justify-between mb-3">
+          <span className="text-primary">{icon}</span>
+        </div>
+        <p className="text-p2 font-medium text-foreground mb-1">{setupTitle}</p>
+        <p className="text-p4 text-muted-foreground mb-3">{setupDescription}</p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full text-primary border-primary/30 hover:bg-primary/10"
+          onClick={onSetupClick}
+        >
+          Set up tracking →
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-5 border border-border">
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-muted-foreground">{icon}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-9 w-24 mb-1" />
+      ) : (
+        <p className="text-h2 text-foreground mb-1">{value ?? "0"}</p>
+      )}
+      <p className="text-p3 text-muted-foreground">
+        {label} <span className="text-p4">({sublabel})</span>
+      </p>
+    </Card>
+  );
+};
 
 export default Overview;
