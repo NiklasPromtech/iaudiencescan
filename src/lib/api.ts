@@ -158,6 +158,77 @@ export interface ScorecardResponse {
   };
 }
 
+// Table API types
+export type TableDimension = 
+  | "referrer_domain" 
+  | "utm_source" 
+  | "utm_medium" 
+  | "utm_campaign" 
+  | "utm_content" 
+  | "utm_term" 
+  | "date_day" 
+  | "device_type" 
+  | "browser" 
+  | "os";
+
+export interface TableRequest {
+  tag_id: string;
+  dimension: TableDimension;
+  range: {
+    type: "last_full_days";
+    days: number;
+    timezone: string;
+  };
+  filters?: Record<string, string[]>;
+  conversion_events?: string[];
+  cost?: {
+    mode: "none" | "manual" | "auto";
+  };
+  pagination?: {
+    limit?: number;
+    offset?: number;
+  };
+}
+
+export interface TableRow {
+  dim_value: string;
+  pageviews: number;
+  unique_visitors: number;
+  wallet_users: number | null;
+  converted_users: number | null;
+  conversions_total: number | null;
+  bounce_count: number;
+  bot_visitors: number | null;
+  bot_checked: number | null;
+  stayed_10s: number;
+  stayed_30s: number;
+  stayed_60s: number;
+  stayed_5m: number;
+  cost_total: number | null;
+}
+
+export interface TableResponse {
+  success: boolean;
+  tag_id: string;
+  dimension: TableDimension;
+  range: {
+    from: string;
+    to: string;
+    timezone: string;
+  };
+  filters: Record<string, string[]>;
+  conversion_events: string[];
+  conversion_events_configured: boolean;
+  cost: number | null;
+  cost_configured: boolean;
+  pagination: {
+    limit: number;
+    offset: number;
+    total_rows: number;
+  };
+  rows: TableRow[];
+}
+
 const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
 
 export async function fetchScorecard(request: ScorecardRequest): Promise<ScorecardResponse> {
@@ -168,6 +239,30 @@ export async function fetchScorecard(request: ScorecardRequest): Promise<Scoreca
   }
 
   const response = await fetch(`${ANALYTICS_API_URL}/analytics/scorecard`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchTableData(request: TableRequest): Promise<TableResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/table`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

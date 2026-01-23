@@ -15,15 +15,29 @@ import {
   Clock,
   Zap,
 } from "lucide-react";
-import { fetchScorecard, ScorecardResponse, Website, FilterOptions } from "@/lib/api";
+import { 
+  fetchScorecard, 
+  fetchTableData, 
+  ScorecardResponse, 
+  TableResponse, 
+  TableDimension, 
+  Website 
+} from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
+import { DailyChart } from "@/components/overview/DailyChart";
+import { DimensionTable } from "@/components/overview/DimensionTable";
 
 const Overview = () => {
   const navigate = useNavigate();
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
   const [scorecard, setScorecard] = useState<ScorecardResponse | null>(null);
+  const [dailyData, setDailyData] = useState<TableResponse | null>(null);
+  const [tableData, setTableData] = useState<TableResponse | null>(null);
+  const [tableDimension, setTableDimension] = useState<TableDimension>("referrer_domain");
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
 
@@ -42,43 +56,99 @@ const Overview = () => {
     }
   }, [navigate]);
 
-  const loadScorecard = useCallback(async (filters: ActiveFilters) => {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const getFiltersParam = useCallback((filters: ActiveFilters) => {
+    return Object.keys(filters).length > 0
+      ? Object.fromEntries(
+          Object.entries(filters).filter(([_, v]) => v && v.length > 0)
+        ) as Record<string, string[]>
+      : undefined;
+  }, []);
+
+  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension) => {
     if (!selectedWebsite) return;
-    
+
     setLoading(true);
+    setChartLoading(true);
+    setTableLoading(true);
     setError(null);
+
+    const filtersParam = getFiltersParam(filters);
+
     try {
-      const data = await fetchScorecard({
-        tag_id: selectedWebsite.id,
-        range: {
-          type: "last_full_days",
-          days: 7,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        filters: Object.keys(filters).length > 0 
-          ? Object.fromEntries(
-              Object.entries(filters).filter(([_, v]) => v && v.length > 0)
-            ) as Record<string, string[]>
-          : undefined,
-        cost: { mode: "none" },
-      });
-      setScorecard(data);
+      // Fetch all data in parallel
+      const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
+        fetchScorecard({
+          tag_id: selectedWebsite.id,
+          range: { type: "last_full_days", days: 7, timezone },
+          filters: filtersParam,
+          cost: { mode: "none" },
+        }),
+        fetchTableData({
+          tag_id: selectedWebsite.id,
+          dimension: "date_day",
+          range: { type: "last_full_days", days: 7, timezone },
+          filters: filtersParam,
+          cost: { mode: "none" },
+        }),
+        fetchTableData({
+          tag_id: selectedWebsite.id,
+          dimension,
+          range: { type: "last_full_days", days: 7, timezone },
+          filters: filtersParam,
+          cost: { mode: "none" },
+          pagination: { limit: 50 },
+        }),
+      ]);
+
+      setScorecard(scorecardData);
+      setDailyData(dailyChartData);
+      setTableData(dimensionTableData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load analytics");
     } finally {
       setLoading(false);
+      setChartLoading(false);
+      setTableLoading(false);
     }
-  }, [selectedWebsite]);
+  }, [selectedWebsite, timezone, getFiltersParam]);
+
+  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters) => {
+    if (!selectedWebsite) return;
+
+    setTableLoading(true);
+    try {
+      const data = await fetchTableData({
+        tag_id: selectedWebsite.id,
+        dimension,
+        range: { type: "last_full_days", days: 7, timezone },
+        filters: getFiltersParam(filters),
+        cost: { mode: "none" },
+        pagination: { limit: 50 },
+      });
+      setTableData(data);
+    } catch (err) {
+      console.error("Failed to load table data:", err);
+    } finally {
+      setTableLoading(false);
+    }
+  }, [selectedWebsite, timezone, getFiltersParam]);
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadScorecard(activeFilters);
+      loadAllData(activeFilters, tableDimension);
     }
-  }, [selectedWebsite, loadScorecard]);
+  }, [selectedWebsite]);
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadScorecard(newFilters);
+    loadAllData(newFilters, tableDimension);
+  };
+
+  const handleDimensionChange = (newDimension: TableDimension) => {
+    setTableDimension(newDimension);
+    loadTableData(newDimension, activeFilters);
   };
 
   const data = scorecard?.data;
@@ -242,6 +312,22 @@ const Overview = () => {
               </div>
             </div>
           </Card>
+        </div>
+
+        {/* Daily Traffic Chart */}
+        <div className="mb-8">
+          <DailyChart data={dailyData?.rows ?? []} loading={chartLoading} />
+        </div>
+
+        {/* Dimension Breakdown Table */}
+        <div className="mb-8">
+          <DimensionTable
+            data={tableData?.rows ?? []}
+            loading={tableLoading}
+            dimension={tableDimension}
+            onDimensionChange={handleDimensionChange}
+            totalRows={tableData?.pagination?.total_rows ?? 0}
+          />
         </div>
 
         {/* Cohort Suggestions */}
