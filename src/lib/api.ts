@@ -97,3 +97,60 @@ export async function verifyWebsite(websiteId: string, url?: string): Promise<Ve
     body: JSON.stringify(url ? { url } : {}),
   });
 }
+
+// Analytics types
+export interface ScorecardRequest {
+  tag_id: string;
+  conversion_events?: string[];
+  range: {
+    type: "last_full_days";
+    days: number;
+    timezone: string;
+  };
+  filters?: Record<string, string[]>;
+  cost?: {
+    mode: "none" | "manual" | "auto";
+  };
+}
+
+export interface ScorecardResponse {
+  pageviews: number;
+  unique_visitors: number;
+  bounce_count: number;
+  stayed_10s: number;
+  stayed_30s: number;
+  stayed_60s: number;
+  stayed_5m: number;
+  wallet_users: number | null;
+  converted_users: number | null;
+  conversions_total: number | null;
+  bot_visitors: number | null;
+  bot_checked: number | null;
+  cost_total: number | null;
+}
+
+const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
+
+export async function fetchScorecard(request: ScorecardRequest): Promise<ScorecardResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/scorecard`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
