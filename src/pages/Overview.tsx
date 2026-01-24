@@ -230,14 +230,14 @@ const Overview = () => {
             loading={loading}
           />
           <StatCard
-            label="Wallets Connected"
+            label="Wallets Tracked"
             value={loading ? null : (data?.wallet_users?.toLocaleString() ?? null)}
             sublabel="last 7 days"
             icon={<Wallet className="h-5 w-5" />}
             loading={loading}
             showSetup={!loading && data?.wallet_users === null}
             setupTitle="Track wallets"
-            setupDescription="See wallet connections"
+            setupDescription="See wallet activity"
             onSetupClick={() => setWalletSetupOpen(true)}
           />
           <StatCard
