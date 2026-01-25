@@ -50,6 +50,10 @@ import PlaceholderAI from "./pages/PlaceholderAI";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import Overview from "./pages/Overview";
+import Events from "./pages/Events";
+import Audiences from "./pages/Audiences";
+import Costs from "./pages/Costs";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +110,10 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/install" element={<Install />} />
           <Route path="/overview" element={<Overview />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/audiences" element={<Audiences />} />
+          <Route path="/costs" element={<Costs />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

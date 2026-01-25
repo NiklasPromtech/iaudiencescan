@@ -29,6 +29,7 @@ import { ScorecardFilters, ActiveFilters } from "@/components/overview/Scorecard
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -183,9 +184,10 @@ const Overview = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      <div className="container max-w-5xl py-8 px-4">
-        {/* Header */}
+    <DashboardLayout>
+      <div className="bg-gradient-subtle min-h-full">
+        <div className="container max-w-5xl py-8 px-4">
+          {/* Header */}
         <div className="mb-8">
           <Badge variant="outline" className="border-primary/30 text-primary mb-3">
             <span className="mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -391,9 +393,10 @@ const Overview = () => {
           type="conversion"
           open={conversionSetupOpen}
           onOpenChange={setConversionSetupOpen}
-        />
+          />
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
