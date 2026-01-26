@@ -72,17 +72,33 @@ const Overview = () => {
   }, []);
 
   const getDays = useCallback(() => {
+    // For "Today" (includeToday=true, days=0), we use 1 day
+    // For custom ranges, days represents days from today to start date
+    if (dateRange.includeToday && dateRange.days === 0) {
+      return 1; // API minimum is 1
+    }
     return dateRange.days || 7;
   }, [dateRange]);
 
   const getDateRangeLabel = useCallback(() => {
+    if (dateRange.includeToday && dateRange.days === 0) {
+      return "today";
+    }
+    if (dateRange.type === "preset" && dateRange.days === 1) {
+      return "yesterday";
+    }
     if (dateRange.type === "preset" && dateRange.days) {
       return `last ${dateRange.days} days`;
     }
     return `selected period`;
   }, [dateRange]);
 
-  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension, days: number) => {
+  const getRangeType = useCallback(() => {
+    // Use "last_days" to include today, "last_full_days" for completed days only
+    return dateRange.includeToday ? "last_days" : "last_full_days";
+  }, [dateRange.includeToday]);
+
+  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension, days: number, rangeType: "last_full_days" | "last_days") => {
     if (!selectedWebsite) return;
 
     setLoading(true);
@@ -97,21 +113,21 @@ const Overview = () => {
       const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
         fetchScorecard({
           tag_id: selectedWebsite.id,
-          range: { type: "last_full_days", days, timezone },
+          range: { type: rangeType, days, timezone },
           filters: filtersParam,
           cost: { mode: "none" },
         }),
         fetchTableData({
           tag_id: selectedWebsite.id,
           dimension: "date_day",
-          range: { type: "last_full_days", days, timezone },
+          range: { type: rangeType, days, timezone },
           filters: filtersParam,
           cost: { mode: "none" },
         }),
         fetchTableData({
           tag_id: selectedWebsite.id,
           dimension,
-          range: { type: "last_full_days", days, timezone },
+          range: { type: rangeType, days, timezone },
           filters: filtersParam,
           cost: { mode: "none" },
           pagination: { limit: 50 },
@@ -130,7 +146,7 @@ const Overview = () => {
     }
   }, [selectedWebsite, timezone, getFiltersParam]);
 
-  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters, days: number) => {
+  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters, days: number, rangeType: "last_full_days" | "last_days") => {
     if (!selectedWebsite) return;
 
     setTableLoading(true);
@@ -138,7 +154,7 @@ const Overview = () => {
       const data = await fetchTableData({
         tag_id: selectedWebsite.id,
         dimension,
-        range: { type: "last_full_days", days, timezone },
+        range: { type: rangeType, days, timezone },
         filters: getFiltersParam(filters),
         cost: { mode: "none" },
         pagination: { limit: 50 },
@@ -153,18 +169,18 @@ const Overview = () => {
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadAllData(activeFilters, tableDimension, getDays());
+      loadAllData(activeFilters, tableDimension, getDays(), getRangeType());
     }
   }, [selectedWebsite, dateRange]);
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadAllData(newFilters, tableDimension, getDays());
+    loadAllData(newFilters, tableDimension, getDays(), getRangeType());
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
-    loadTableData(newDimension, activeFilters, getDays());
+    loadTableData(newDimension, activeFilters, getDays(), getRangeType());
   };
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
