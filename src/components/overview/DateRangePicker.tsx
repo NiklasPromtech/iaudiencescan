@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { format, differenceInDays, subDays, startOfDay, endOfDay } from "date-fns";
+import { useState, useEffect } from "react";
+import { format, differenceInDays, subDays, startOfDay } from "date-fns";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export interface DateRangeValue {
   days?: number;
   from?: Date;
   to?: Date;
+  includeToday?: boolean;
 }
 
 interface DateRangePickerProps {
@@ -24,6 +25,8 @@ interface DateRangePickerProps {
 }
 
 const PRESETS = [
+  { days: 0, label: "Today", includeToday: true },
+  { days: 1, label: "Yesterday" },
   { days: 7, label: "Last 7 days" },
   { days: 14, label: "Last 14 days" },
   { days: 30, label: "Last 30 days" },
@@ -38,29 +41,52 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     to: value.to,
   });
 
+  // Sync customRange when value changes externally
+  useEffect(() => {
+    if (value.from && value.to) {
+      setCustomRange({ from: value.from, to: value.to });
+    }
+  }, [value.from, value.to]);
+
   const getDisplayLabel = () => {
-    if (value.type === "preset" && value.days) {
-      return PRESETS.find((p) => p.days === value.days)?.label || `Last ${value.days} days`;
+    if (value.type === "preset") {
+      const preset = PRESETS.find((p) => p.days === value.days && p.includeToday === value.includeToday);
+      if (preset) return preset.label;
+      if (value.days !== undefined) return `Last ${value.days} days`;
     }
     if (value.type === "custom" && value.from && value.to) {
+      if (value.from.getTime() === value.to.getTime()) {
+        return format(value.from, "MMM d, yyyy");
+      }
       return `${format(value.from, "MMM d")} – ${format(value.to, "MMM d, yyyy")}`;
     }
     return "Select dates";
   };
 
-  const handlePresetSelect = (days: number) => {
-    onChange({ type: "preset", days });
+  const handlePresetSelect = (days: number, includeToday?: boolean) => {
+    onChange({ type: "preset", days, includeToday });
     setShowCustom(false);
     setOpen(false);
   };
 
   const handleCustomApply = () => {
     if (customRange.from && customRange.to) {
+      const today = startOfDay(new Date());
+      const toDate = startOfDay(customRange.to);
+      const fromDate = startOfDay(customRange.from);
+      
+      // Calculate days from today to the start of the range
+      // The API uses "last_full_days" which counts backwards from yesterday
+      // So we need to calculate how many days ago the "from" date is
+      const daysFromToday = differenceInDays(today, fromDate);
+      const includeToday = toDate.getTime() === today.getTime();
+      
       onChange({
         type: "custom",
         from: customRange.from,
         to: customRange.to,
-        days: differenceInDays(customRange.to, customRange.from) + 1,
+        days: daysFromToday,
+        includeToday,
       });
       setOpen(false);
       setShowCustom(false);
@@ -71,6 +97,11 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     if (range) {
       setCustomRange(range);
     }
+  };
+
+  const isPresetSelected = (preset: typeof PRESETS[0]) => {
+    if (value.type !== "preset") return false;
+    return value.days === preset.days && value.includeToday === preset.includeToday;
   };
 
   return (
@@ -95,12 +126,12 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
           <div className="p-2 space-y-1 min-w-[200px]">
             {PRESETS.map((preset) => (
               <button
-                key={preset.days}
-                onClick={() => handlePresetSelect(preset.days)}
+                key={`${preset.days}-${preset.includeToday}`}
+                onClick={() => handlePresetSelect(preset.days, preset.includeToday)}
                 className={cn(
                   "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
                   "hover:bg-muted",
-                  value.type === "preset" && value.days === preset.days
+                  isPresetSelected(preset)
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-foreground"
                 )}
@@ -111,7 +142,10 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
             <Separator className="my-2" />
             <button
               onClick={() => setShowCustom(true)}
-              className="w-full px-3 py-2 text-left text-sm rounded-md transition-colors hover:bg-muted text-foreground"
+              className={cn(
+                "w-full px-3 py-2 text-left text-sm rounded-md transition-colors hover:bg-muted",
+                value.type === "custom" ? "bg-primary/10 text-primary font-medium" : "text-foreground"
+              )}
             >
               Custom range...
             </button>
@@ -140,6 +174,10 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
                 {customRange.from && customRange.to ? (
                   <>
                     {format(customRange.from, "MMM d")} – {format(customRange.to, "MMM d, yyyy")}
+                  </>
+                ) : customRange.from ? (
+                  <>
+                    {format(customRange.from, "MMM d, yyyy")} → select end date
                   </>
                 ) : (
                   "Select start and end dates"

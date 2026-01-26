@@ -103,7 +103,7 @@ export interface ScorecardRequest {
   tag_id: string;
   conversion_events?: string[];
   range: {
-    type: "last_full_days";
+    type: "last_full_days" | "last_days";
     days: number;
     timezone: string;
   };
@@ -175,7 +175,7 @@ export interface TableRequest {
   tag_id: string;
   dimension: TableDimension;
   range: {
-    type: "last_full_days";
+    type: "last_full_days" | "last_days";
     days: number;
     timezone: string;
   };
