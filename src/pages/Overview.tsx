@@ -23,6 +23,7 @@ import {
   TableDimension, 
   Website,
   RangeConfig,
+  DIMENSION_TO_FILTER,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
@@ -207,6 +208,17 @@ const Overview = () => {
     setDateRange(newDateRange);
   };
 
+  const handleBotClick = (dimValue: string) => {
+    const params = new URLSearchParams();
+    params.set("dim", tableDimension);
+    params.set("val", dimValue);
+    params.set("range", JSON.stringify(dateRange));
+    if (Object.keys(activeFilters).length > 0) {
+      params.set("filters", JSON.stringify(activeFilters));
+    }
+    navigate(`/bots?${params.toString()}`);
+  };
+
   const data = scorecard?.data;
   const filterOptions = scorecard?.filter_options ?? null;
 
@@ -326,6 +338,7 @@ const Overview = () => {
               totalRows={tableData?.pagination?.total_rows ?? 0}
               showWalletColumns={data?.wallet_users !== null}
               showConversionColumns={data?.converted_users !== null}
+              onBotClick={handleBotClick}
             />
           </div>
 

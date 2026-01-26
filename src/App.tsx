@@ -54,6 +54,7 @@ import Events from "./pages/Events";
 import Audiences from "./pages/Audiences";
 import Costs from "./pages/Costs";
 import Settings from "./pages/Settings";
+import Bots from "./pages/Bots";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,7 @@ const App = () => (
           <Route path="/audiences" element={<Audiences />} />
           <Route path="/costs" element={<Costs />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/bots" element={<Bots />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
