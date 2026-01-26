@@ -29,6 +29,7 @@ interface DimensionTableProps {
   totalRows: number;
   showWalletColumns?: boolean;
   showConversionColumns?: boolean;
+  onBotClick?: (dimValue: string) => void;
 }
 
 const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
@@ -65,6 +66,7 @@ export function DimensionTable({
   totalRows,
   showWalletColumns,
   showConversionColumns,
+  onBotClick,
 }: DimensionTableProps) {
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
@@ -262,7 +264,15 @@ export function DimensionTable({
 
                     {/* Bots Group */}
                     {visibleGroups.has("bots") && (
-                      <TableCell className="text-right tabular-nums text-muted-foreground border-r border-border/50">
+                      <TableCell 
+                        className={cn(
+                          "text-right tabular-nums border-r border-border/50",
+                          onBotClick && row.bot_visitors !== null
+                            ? "text-primary cursor-pointer hover:underline"
+                            : "text-muted-foreground"
+                        )}
+                        onClick={() => onBotClick && row.bot_visitors !== null && onBotClick(row.dim_value)}
+                      >
                         {calcRate(row.bot_visitors, visitors)}
                       </TableCell>
                     )}
