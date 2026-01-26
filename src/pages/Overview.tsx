@@ -14,10 +14,12 @@ import {
   Clock,
   Zap,
   Target,
+  Radio,
 } from "lucide-react";
 import { 
   fetchScorecard, 
-  fetchTableData, 
+  fetchTableData,
+  fetchRealtimeVisitors,
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
@@ -48,6 +50,7 @@ const Overview = () => {
   const [walletSetupOpen, setWalletSetupOpen] = useState(false);
   const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7 });
+  const [realtimeVisitors, setRealtimeVisitors] = useState<number | null>(null);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -194,6 +197,29 @@ const Overview = () => {
     }
   }, [selectedWebsite, dateRange]);
 
+  // Realtime visitors polling
+  useEffect(() => {
+    if (!selectedWebsite) return;
+
+    const fetchRealtime = async () => {
+      try {
+        const response = await fetchRealtimeVisitors(selectedWebsite.id, 5);
+        setRealtimeVisitors(response.active_visitors);
+      } catch (err) {
+        console.error("Failed to fetch realtime:", err);
+        setRealtimeVisitors(null);
+      }
+    };
+
+    // Fetch immediately
+    fetchRealtime();
+
+    // Poll every 30 seconds
+    const interval = setInterval(fetchRealtime, 30000);
+
+    return () => clearInterval(interval);
+  }, [selectedWebsite]);
+
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
     loadAllData(newFilters, tableDimension, getRangeConfig());
@@ -283,8 +309,26 @@ const Overview = () => {
             />
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Realtime + Stats Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            {/* Realtime Visitors Card */}
+            <Card className="p-5 border border-border bg-gradient-to-br from-primary/5 to-primary/10">
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-primary">
+                  <Radio className="h-5 w-5" />
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs text-primary font-medium">Live</span>
+                </span>
+              </div>
+              <p className="text-h2 text-foreground mb-1">
+                {realtimeVisitors !== null ? realtimeVisitors.toLocaleString() : "—"}
+              </p>
+              <p className="text-p3 text-muted-foreground">
+                Active now <span className="text-p4">(last 5 min)</span>
+              </p>
+            </Card>
             <StatCard
               label="Unique Visitors"
               value={loading ? null : (data?.unique_visitors?.toLocaleString() ?? "0")}

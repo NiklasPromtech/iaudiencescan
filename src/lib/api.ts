@@ -365,3 +365,35 @@ export const DIMENSION_TO_FILTER: Partial<Record<TableDimension, keyof FilterOpt
   browser: "browsers",
   os: "os",
 };
+
+// Realtime Analytics types
+export interface RealtimeResponse {
+  success: boolean;
+  tag_id: string;
+  active_visitors: number;
+  window_minutes: number;
+  timestamp: string;
+}
+
+export async function fetchRealtimeVisitors(tagId: string, window?: number): Promise<RealtimeResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const params = window ? `?window=${window}` : "";
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/realtime/${tagId}${params}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
