@@ -47,6 +47,51 @@ export type Database = {
         }
         Relationships: []
       }
+      audiences: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+          wallets: string[] | null
+          website_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+          wallets?: string[] | null
+          website_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+          wallets?: string[] | null
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audiences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audiences_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_submissions: {
         Row: {
           created_at: string
