@@ -1,217 +1,217 @@
 
 
-# Conversion & Wallet Tracking Setup UX
+# Date Filtering & Expanded Breakdown Table
 
 ## Overview
-When `wallet_users` or `converted_users` is `null` (meaning no data has been tracked yet), we need to surface clear setup prompts that guide users to implement tracking without being overwhelming or confusing.
-
-## UX Approach: Progressive Disclosure with Contextual Prompts
-
-Rather than cluttering the main dashboard, we'll use **contextual empty states** - showing setup prompts exactly where the data would appear, making it crystal clear what's missing and how to fix it.
-
-### Design Principles
-1. **Show prompts where data would be** - Users immediately understand what they're missing
-2. **One action per prompt** - No confusion about what to click
-3. **Copy-paste ready** - The setup code is immediately visible
-4. **Dismissible once understood** - Won't nag forever
+This plan addresses three key improvements to the Overview page:
+1. Add a date range picker (defaulting to last 7 days)
+2. Remove the "Engagement" and "Bounce Rate" cards from the Overview
+3. Expand the Breakdown table to show all API columns with calculated rates, organized cleanly
 
 ---
 
-## Implementation: Setup Prompt Cards
+## 1. Date Range Picker
 
-### Location 1: Wallets Connected Stat Card
-When `wallet_users === null`, replace the stat card value with a setup prompt:
+### Implementation
+Add a date range selector near the top of the page (next to or above the filters) that allows users to select custom date ranges.
 
-```text
-+------------------------------------------+
-|  [Wallet icon]                           |
-|                                          |
-|  Track wallet connections                |
-|  See which visitors connect wallets      |
-|                                          |
-|  [Set up tracking →]                     |
-+------------------------------------------+
-```
-
-Clicking opens a dialog/sheet with the code snippet.
-
-### Location 2: New "Conversions" Stat Card (4th card)
-Add a 4th stat card for conversions. When `converted_users === null`:
+**UI Options:**
+- **Quick presets**: Last 7 days (default), Last 14 days, Last 30 days, Last 90 days
+- **Custom range**: Calendar picker for custom start/end dates
 
 ```text
-+------------------------------------------+
-|  [Target icon]                           |
-|                                          |
-|  Track conversions                       |
-|  Measure signups, purchases & more       |
-|                                          |
-|  [Set up tracking →]                     |
-+------------------------------------------+
++--------------------------------------------------+
+| Last 7 days ▼                                    |
++--------------------------------------------------+
+| ○ Last 7 days                                    |
+| ○ Last 14 days                                   |
+| ○ Last 30 days                                   |
+| ○ Last 90 days                                   |
+| ───────────────────────────────────────────────  |
+| Custom range...                                  |
+|   [Jan 1, 2026] → [Jan 25, 2026]                |
++--------------------------------------------------+
 ```
 
-When data exists, shows: "X Conversions" with the count.
+### State Changes
+```tsx
+const [dateRange, setDateRange] = useState<{
+  type: "preset" | "custom";
+  days?: number;          // For presets: 7, 14, 30, 90
+  from?: Date;            // For custom range
+  to?: Date;              // For custom range
+}>({ type: "preset", days: 7 });
+```
+
+### API Impact
+The current API uses `last_full_days` range type. For custom dates, we may need to adjust the request format or calculate the number of days between dates.
 
 ---
 
-## Setup Dialog/Sheet Content
+## 2. Remove Engagement & Bounce Rate Cards
 
-### Wallet Tracking Dialog
-```text
-┌─────────────────────────────────────────────────┐
-│  Track Wallet Connections                    [X]│
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  Call this when a user connects their wallet:   │
-│                                                 │
-│  ┌─────────────────────────────────────┐ [Copy] │
-│  │ AudienceScan.trackWallet(           │        │
-│  │   '0x1234...',  // wallet address   │        │
-│  │   'connected'   // event type       │        │
-│  │ );                                  │        │
-│  └─────────────────────────────────────┘        │
-│                                                 │
-│  Other event types you can use:                 │
-│  • 'staked' - User staked tokens                │
-│  • 'purchased' - User made a purchase           │
-│  • 'signed' - User signed a transaction         │
-│                                                 │
-│  ───────────────────────────────────────────    │
-│                                                 │
-│  Need help? support@audiencescan.io             │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
+### Current State
+Lines 258-336 in Overview.tsx contain:
+- Engagement card (shows stayed_10s, stayed_30s, stayed_60s, stayed_5m)
+- Bounce Rate card (shows bounce count and progress bar)
 
-### Conversion Events Dialog
-```text
-┌─────────────────────────────────────────────────┐
-│  Track Conversion Events                     [X]│
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  Call this when a conversion happens:           │
-│                                                 │
-│  ┌─────────────────────────────────────┐ [Copy] │
-│  │ AudienceScan.trackEvent(            │        │
-│  │   'Signed up',        // event name │        │
-│  │   'user@email.com'    // details    │        │
-│  │ );                                  │        │
-│  └─────────────────────────────────────┘        │
-│                                                 │
-│  Example: Track a purchase                      │
-│  ┌─────────────────────────────────────┐ [Copy] │
-│  │ AudienceScan.trackEvent('Purchase', │        │
-│  │   { amount: 99.99, currency: 'USD' }│        │
-│  │ );                                  │        │
-│  └─────────────────────────────────────┘        │
-│                                                 │
-│  ───────────────────────────────────────────    │
-│                                                 │
-│  Need help? support@audiencescan.io             │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
+### Action
+Delete both cards entirely. The engagement metrics will be visible in the expanded breakdown table with calculated rates.
 
 ---
 
-## Visual States Summary
+## 3. Expanded Breakdown Table
 
-| Scenario | What User Sees |
-|----------|----------------|
-| `wallet_users === null` | Setup prompt card with "Set up tracking" button |
-| `wallet_users === 0` | Normal stat card showing "0" (tracking works, just no data) |
-| `wallet_users > 0` | Normal stat card showing count |
-| `converted_users === null` | Setup prompt card with "Set up tracking" button |
-| `converted_users === 0` | Normal stat card showing "0" |
-| `converted_users > 0` | Normal stat card showing count |
+### Available API Columns
+Based on `TableRow` interface:
+- `dim_value` (dimension value)
+- `pageviews`
+- `unique_visitors`
+- `wallet_users` (nullable)
+- `converted_users` (nullable)
+- `conversions_total` (nullable)
+- `bounce_count`
+- `bot_visitors` (nullable)
+- `bot_checked` (nullable)
+- `stayed_10s`
+- `stayed_30s`
+- `stayed_60s`
+- `stayed_5m`
+- `cost_total` (nullable)
 
-The key distinction: `null` means "not configured", `0` means "configured but no events yet".
+### Proposed Table Layout with Column Groups
+
+To avoid messiness, organize columns into logical groups with subtle visual separators:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                        │     TRAFFIC     │         ENGAGEMENT         │    WALLETS    │   CONVERSIONS   │
+├────────────────────────┼─────────────────┼────────────────────────────┼───────────────┼─────────────────┤
+│ Referrer ▼             │ Visitors  Views │ 10s   30s   60s   5m   Bot │ Count   Rate  │ Users    Total  │
+├────────────────────────┼─────────────────┼────────────────────────────┼───────────────┼─────────────────┤
+│ (direct)               │   35       47   │ 29%   11%   6%    3%   46% │  —       —    │  —        —     │
+│ lovable.dev            │   4        37   │ 100%  100%  100%  75%  0%  │  —       —    │  —        —     │
+│ lovableproject.com     │   3        5    │ 100%  100%  100%  100% 0%  │  —       —    │  —        —     │
+└────────────────────────┴─────────────────┴────────────────────────────┴───────────────┴─────────────────┘
+```
+
+### Rate Calculations
+All rates are calculated as percentage of `unique_visitors`:
+
+| Metric | Calculation |
+|--------|-------------|
+| 10s Rate | `stayed_10s / unique_visitors * 100` |
+| 30s Rate | `stayed_30s / unique_visitors * 100` |
+| 60s Rate | `stayed_60s / unique_visitors * 100` |
+| 5m Rate | `stayed_5m / unique_visitors * 100` |
+| Bot Rate | `bot_visitors / unique_visitors * 100` |
+| Wallet Rate | `wallet_users / unique_visitors * 100` (if configured) |
+| Conversion Rate | `converted_users / unique_visitors * 100` (if configured) |
+
+### Clean UX Approach: Collapsible Column Groups
+
+To prevent overwhelming the user, implement **toggleable column groups**:
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│ Breakdown by Referrer                           [Referrer ▼]      │
+├────────────────────────────────────────────────────────────────────┤
+│ Show: [✓ Traffic] [✓ Engagement] [□ Bots] [□ Wallets] [□ Conversions] │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+**Default shown:** Traffic (Visitors, Views) + Engagement (10s, 30s, 60s, 5m rates)
+**Hidden by default:** Bots, Wallets, Conversions (shown if user has data)
+
+### Alternative: Horizontal Scroll with Sticky First Column
+
+If column toggles feel too complex, use a horizontally scrolling table with:
+- Sticky first column (dimension value)
+- All columns visible, subtle group headers
+- Muted text for null/unconfigured values (show "—")
 
 ---
 
 ## Technical Details
 
+### New Component: DateRangePicker
+
+| File | Purpose |
+|------|---------|
+| `src/components/overview/DateRangePicker.tsx` | Date range selector with presets + custom |
+
+Uses existing `Calendar` component and `Popover` for the custom date picker.
+
 ### File Changes
 
 | File | Change |
 |------|--------|
-| `src/pages/Overview.tsx` | Update stats grid to 4 cards, add conditional rendering for setup prompts, add dialog states |
-| `src/components/overview/TrackingSetupDialog.tsx` | New component - reusable dialog for wallet/conversion setup with code snippets |
+| `src/pages/Overview.tsx` | Add date range state, remove Engagement/Bounce cards, pass date range to API calls, add DateRangePicker |
+| `src/components/overview/DimensionTable.tsx` | Expand columns, add column group toggles, calculate all rates |
+| `src/components/overview/DateRangePicker.tsx` | New component for date selection |
+| `src/lib/api.ts` | May need to update range type if supporting custom dates |
 
-### New Component: TrackingSetupDialog
+### Updated DimensionTable Props
 
 ```tsx
-interface TrackingSetupDialogProps {
-  type: 'wallet' | 'conversion';
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface DimensionTableProps {
+  data: ApiTableRow[];
+  loading: boolean;
+  dimension: TableDimension;
+  onDimensionChange: (dimension: TableDimension) => void;
+  totalRows: number;
+  // New: to conditionally show columns
+  showWalletColumns?: boolean;      // true if wallet_users is configured
+  showConversionColumns?: boolean;  // true if converted_users is configured
 }
 ```
 
-### Updated StatCard Component
-
-Extend to support an "empty/setup" state:
+### Column Groups Configuration
 
 ```tsx
-interface StatCardProps {
-  label: string;
-  value: string | null;
-  sublabel: string;
-  icon: React.ReactNode;
-  loading?: boolean;
-  // New props for setup state
-  showSetup?: boolean;
-  setupTitle?: string;
-  setupDescription?: string;
-  onSetupClick?: () => void;
-}
-```
-
-### Overview.tsx State Additions
-
-```tsx
-const [walletSetupOpen, setWalletSetupOpen] = useState(false);
-const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
-
-// Determine if we should show setup prompts
-const showWalletSetup = !loading && data?.wallet_users === null;
-const showConversionSetup = !loading && data?.converted_users === null;
-```
-
-### Stats Grid Update
-
-Change from 3 columns to 4:
-
-```tsx
-<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <StatCard label="Unique Visitors" ... />
-  <StatCard label="Page Views" ... />
-  <StatCard 
-    label="Wallets Connected"
-    showSetup={showWalletSetup}
-    setupTitle="Track wallets"
-    setupDescription="See wallet connections"
-    onSetupClick={() => setWalletSetupOpen(true)}
-    ...
-  />
-  <StatCard 
-    label="Conversions"
-    showSetup={showConversionSetup}
-    setupTitle="Track conversions"
-    setupDescription="Measure signups & more"
-    onSetupClick={() => setConversionSetupOpen(true)}
-    ...
-  />
-</div>
+const COLUMN_GROUPS = [
+  { 
+    id: "traffic", 
+    label: "Traffic", 
+    columns: ["visitors", "views"],
+    defaultVisible: true 
+  },
+  { 
+    id: "engagement", 
+    label: "Engagement", 
+    columns: ["10s", "30s", "60s", "5m"],
+    defaultVisible: true 
+  },
+  { 
+    id: "bots", 
+    label: "Bots", 
+    columns: ["bot_rate"],
+    defaultVisible: false 
+  },
+  { 
+    id: "wallets", 
+    label: "Wallets", 
+    columns: ["wallet_count", "wallet_rate"],
+    defaultVisible: false  // auto-show if data exists
+  },
+  { 
+    id: "conversions", 
+    label: "Conversions", 
+    columns: ["conv_users", "conv_total"],
+    defaultVisible: false  // auto-show if data exists
+  },
+];
 ```
 
 ---
 
 ## Summary
 
-This approach is clear because:
-1. **No hunting** - Setup prompts appear exactly where the data would be
-2. **No guessing** - One button, one action, one outcome
-3. **No confusion** - `null` vs `0` distinction prevents "is it broken?" questions
-4. **Copy-paste ready** - Users get working code immediately
-5. **Non-intrusive** - Once tracking is set up, prompts disappear automatically
+| Change | Impact |
+|--------|--------|
+| **Date picker** | Users can analyze any time period, not just 7 days |
+| **Remove cards** | Cleaner Overview, less redundancy |
+| **Expanded table** | All data visible in one place with smart organization |
+| **Rate calculations** | Percentages make cross-segment comparison easy |
+| **Column toggles** | Prevents overwhelm while allowing full data access |
 
