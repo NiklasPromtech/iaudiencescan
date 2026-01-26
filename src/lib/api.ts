@@ -99,14 +99,14 @@ export async function verifyWebsite(websiteId: string, url?: string): Promise<Ve
 }
 
 // Analytics types
+export type RangeConfig = 
+  | { type: "last_full_days"; days: number; timezone: string }
+  | { type: "custom"; from: string; to: string; timezone: string };
+
 export interface ScorecardRequest {
   tag_id: string;
   conversion_events?: string[];
-  range: {
-    type: "last_full_days" | "last_days";
-    days: number;
-    timezone: string;
-  };
+  range: RangeConfig;
   filters?: Record<string, string[]>;
   cost?: {
     mode: "none" | "manual" | "auto";
@@ -174,11 +174,7 @@ export type TableDimension =
 export interface TableRequest {
   tag_id: string;
   dimension: TableDimension;
-  range: {
-    type: "last_full_days" | "last_days";
-    days: number;
-    timezone: string;
-  };
+  range: RangeConfig;
   filters?: Record<string, string[]>;
   conversion_events?: string[];
   cost?: {
