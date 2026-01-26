@@ -412,6 +412,7 @@ export interface WalletListRequest {
   range: RangeConfig;
   types?: string[];
   search?: string;
+  filters?: Record<string, string[]>;
   sort_by?: "wallet_id" | "first_seen" | "last_seen" | "visit_count";
   sort_dir?: "asc" | "desc";
   limit?: number;
@@ -426,6 +427,7 @@ export interface WalletListResponse {
     offset: number;
     total_rows: number;
   };
+  filter_options?: FilterOptions;
 }
 
 // Audience types
