@@ -1,30 +1,58 @@
 
 
-# Bot Analytics Drill-Down Page
+# Audiences Feature: Wallet-Based Audience Builder
 
 ## Overview
-Create a dedicated Bot Analytics page (`/bots`) that users can navigate to by clicking on "Bot %" values in the DimensionTable. The page will inherit all active filters from the Overview page and provide deep insights into bot traffic using the new `/api/analytics/bots` endpoint.
+Transform the `/audiences` page from a placeholder into a fully functional audience management system. Users will be able to:
+1. View a list of their saved audiences
+2. Create new audiences by selecting wallets from their tracked visitors
+3. Edit existing audiences (rename, add/remove wallets)
+4. Delete audiences
 
 ---
 
 ## User Flow
 
 ```text
-Overview Page                          Bot Analytics Page
-+------------------------+            +----------------------------------+
-| DimensionTable         |   click    |                                  |
-| ┌──────────────────┐   |   ──────>  |  Bot Analytics                   |
-| │ (direct)    46%  │   |            |                                  |
-| └──────────────────┘   |            |  Filters: utm_source=google ✕    |
-| Bot % is clickable     |            |  Date: Last 7 days               |
-+------------------------+            |                                  |
-                                      |  Summary Cards                   |
-                                      |  [Bot 15%] [Human 80%] [Unk 5%]  |
-                                      |                                  |
-                                      |  Signals Section                 |
-                                      |  Renderer Breakdown              |
-                                      |  Dimension Table                 |
-                                      +----------------------------------+
+/audiences (List View)
++----------------------------------------------------------+
+|  Audiences                           [+ Create Audience]  |
+|                                                           |
+|  Search audiences...                                      |
++----------------------------------------------------------+
+|  ┌──────────────────────────────────────────────────────┐ |
+|  │ High-Value Traders          150 wallets   Jan 25     │ |
+|  │ Website: mydefiapp.com      [Edit] [Delete]          │ |
+|  ├──────────────────────────────────────────────────────┤ |
+|  │ Early Stakers               42 wallets    Jan 20     │ |
+|  │ Website: mydefiapp.com      [Edit] [Delete]          │ |
+|  └──────────────────────────────────────────────────────┘ |
++----------------------------------------------------------+
+
+Create/Edit Audience Dialog
++----------------------------------------------------------+
+|  Create New Audience                              [X]     |
+|                                                           |
+|  Name                                                     |
+|  [High-Value Traders                              ]       |
+|                                                           |
+|  Website                                                  |
+|  [mydefiapp.com ▼]                                       |
+|                                                           |
+|  Select Wallets                                           |
+|  ┌────────────────────────────────────────────────────┐  |
+|  │ Search wallets...         [Type ▼] [Sort ▼]        │  |
+|  ├────────────────────────────────────────────────────┤  |
+|  │ [✓] 0x1234...abcd  connected,staked  Jan 25  12x   │  |
+|  │ [✓] 0x5678...efgh  connected         Jan 24  8x    │  |
+|  │ [ ] 0x9abc...ijkl  purchased         Jan 23  3x    │  |
+|  │ ...                                                 │  |
+|  └────────────────────────────────────────────────────┘  |
+|                                                           |
+|  Selected: 2 wallets                                      |
+|                                                           |
+|                        [Cancel]  [Create Audience]        |
++----------------------------------------------------------+
 ```
 
 ---
@@ -34,287 +62,278 @@ Overview Page                          Bot Analytics Page
 ### New Types in `src/lib/api.ts`
 
 ```typescript
-// Bot Analytics types
-export interface BotAnalyticsRequest {
+// Wallet List types
+export interface WalletRow {
+  wallet_id: string;
+  types: string[];  // ["connected", "staked", etc.]
+  first_seen: string;
+  last_seen: string;
+  visit_count: number;
+}
+
+export interface WalletListRequest {
   tag_id: string;
   range: RangeConfig;
-  filters?: Record<string, string[]>;
-  dimension?: TableDimension;
+  types?: string[];           // optional filter by wallet action types
+  search?: string;            // optional search by wallet address
+  sort_by?: "wallet_id" | "first_seen" | "last_seen" | "visit_count";
+  sort_dir?: "asc" | "desc";
   limit?: number;
   offset?: number;
 }
 
-export interface BotSummary {
-  total_visitors: number;
-  bot_visitors: number;
-  human_visitors: number;
-  unknown_visitors: number;
-  bot_pct: number;
-  human_pct: number;
-  unknown_pct: number;
-}
-
-export interface BotSignals {
-  webdriver_count: number;
-  headless_count: number;
-  total_checked: number;
-}
-
-export interface RendererBreakdown {
-  renderer: string;
-  visitor_count: number;
-  is_headless: boolean;
-}
-
-export interface BotDimensionRow {
-  dim_value: string;
-  total_visitors: number;
-  bot_visitors: number;
-  human_visitors: number;
-  unknown_visitors: number;
-  bot_pct: number;
-}
-
-export interface BotAnalyticsResponse {
+export interface WalletListResponse {
   success: boolean;
-  tag_id: string;
-  range: { from: string; to: string; timezone: string };
-  filters: Record<string, string[]>;
-  summary: BotSummary;
-  signals: BotSignals;
-  renderer_breakdown: RendererBreakdown[];
-  dimension: TableDimension | null;
-  pagination: { limit: number; offset: number; total_rows: number };
-  rows: BotDimensionRow[];
+  rows: WalletRow[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total_rows: number;
+  };
+}
+
+// Audience types
+export interface Audience {
+  id: string;
+  name: string;
+  website_id: string;
+  wallet_count: number;
+  wallets: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AudienceListResponse {
+  audiences: Audience[];
+}
+
+export interface AudienceResponse {
+  audience: Audience;
+}
+
+export interface CreateAudienceRequest {
+  name: string;
+  website_id: string;
+  wallets: string[];
+}
+
+export interface UpdateAudienceRequest {
+  name?: string;
+  wallets?: string[];
 }
 ```
 
-### New API Function
+### New API Functions
 
 ```typescript
-export async function fetchBotAnalytics(request: BotAnalyticsRequest): Promise<BotAnalyticsResponse> {
-  const token = await getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+// Wallet list
+export async function fetchWallets(request: WalletListRequest): Promise<WalletListResponse>;
 
-  const response = await fetch(`${ANALYTICS_API_URL}/analytics/bots`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `API error: ${response.status}`);
-  }
-
-  return response.json();
-}
+// Audiences CRUD
+export async function listAudiences(websiteId?: string): Promise<AudienceListResponse>;
+export async function getAudience(id: string): Promise<AudienceResponse>;
+export async function createAudience(data: CreateAudienceRequest): Promise<AudienceResponse>;
+export async function updateAudience(id: string, data: UpdateAudienceRequest): Promise<AudienceResponse>;
+export async function deleteAudience(id: string): Promise<void>;
 ```
 
 ---
 
-## 2. Navigation from DimensionTable
-
-### Make Bot % Clickable
-
-Update `DimensionTable.tsx` to:
-1. Accept `onBotClick` callback prop
-2. Style the Bot % cells as clickable links
-3. Pass current dimension and row value to the callback
-
-```typescript
-interface DimensionTableProps {
-  // ... existing props
-  onBotClick?: (dimValue: string) => void;  // New prop
-}
-
-// In the TableCell for bots:
-<TableCell 
-  className="text-right tabular-nums text-primary cursor-pointer hover:underline"
-  onClick={() => onBotClick?.(row.dim_value)}
->
-  {calcRate(row.bot_visitors, visitors)}
-</TableCell>
-```
-
-### Navigation with Query Parameters
-
-In `Overview.tsx`, handle the click:
-
-```typescript
-const handleBotClick = (dimValue: string) => {
-  const params = new URLSearchParams();
-  
-  // Encode current state
-  params.set("dim", tableDimension);
-  params.set("val", dimValue);
-  params.set("range", JSON.stringify(dateRange));
-  if (Object.keys(activeFilters).length > 0) {
-    params.set("filters", JSON.stringify(activeFilters));
-  }
-  
-  navigate(`/bots?${params.toString()}`);
-};
-```
-
----
-
-## 3. Bot Analytics Page
-
-### New File: `src/pages/Bots.tsx`
-
-#### Page Structure
-
-```text
-+----------------------------------------------------------+
-|  ← Back to Overview                                       |
-|                                                           |
-|  Bot Analytics                          [Date Picker]     |
-|  Analyzing traffic from: google.com (via utm_source)      |
-|                                                           |
-|  [Filters: utm_source ✕] [utm_medium ✕] [+ Add filter]   |
-+----------------------------------------------------------+
-|                                                           |
-|  Summary Cards (3-column grid)                            |
-|  +------------+ +------------+ +--------------+           |
-|  | 🤖 Bots    | | 👤 Humans  | | ❓ Unknown   |           |
-|  | 150        | | 800        | | 50           |           |
-|  | 15%        | | 80%        | | 5%           |           |
-|  +------------+ +------------+ +--------------+           |
-|                                                           |
-+----------------------------------------------------------+
-|  Detection Signals                                        |
-|  +------------------------------------------------------+ |
-|  | WebDriver Detected: 80 (8.4% of checked)             | |
-|  | Headless Browser: 70 (7.4% of checked)               | |
-|  | Total Checked: 950 visitors                          | |
-|  +------------------------------------------------------+ |
-+----------------------------------------------------------+
-|  Renderer Breakdown                                       |
-|  +------------------------------------------------------+ |
-|  | Renderer                              | Count | Flag  | |
-|  |---------------------------------------|-------|-------| |
-|  | ANGLE (NVIDIA GeForce...)             | 500   |       | |
-|  | Google SwiftShader                    | 50    | ⚠️    | |
-|  +------------------------------------------------------+ |
-+----------------------------------------------------------+
-|  Breakdown by [Referrer ▼]                                |
-|  +------------------------------------------------------+ |
-|  | Dim Value    | Total | Bots | Humans | Unk | Bot %   | |
-|  |--------------|-------|------|--------|-----|---------|  |
-|  | google.com   | 300   | 45   | 240    | 15  | 15.0%   | |
-|  +------------------------------------------------------+ |
-+----------------------------------------------------------+
-```
-
-#### Key Features
-
-1. **URL State Parsing**: Read `dim`, `val`, `range`, and `filters` from query params on mount
-2. **Pre-applied Filters**: If navigated from Overview with a dimension value, add it as a filter
-3. **Full Filtering UI**: Allow users to modify all filters (same as Overview page)
-4. **Date Range Picker**: Reuse the existing DateRangePicker component
-5. **Back Navigation**: Link back to Overview (preserve state if possible)
-
-#### State Management
-
-```typescript
-// Parse URL params on mount
-const [searchParams] = useSearchParams();
-const initialDim = searchParams.get("dim") as TableDimension;
-const initialVal = searchParams.get("val");
-const initialRange = searchParams.get("range");
-const initialFilters = searchParams.get("filters");
-
-// Initialize state from URL or defaults
-const [dateRange, setDateRange] = useState<DateRangeValue>(() => {
-  if (initialRange) return JSON.parse(initialRange);
-  return { type: "preset", days: 7 };
-});
-
-const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
-  const base = initialFilters ? JSON.parse(initialFilters) : {};
-  // Add the clicked dimension as a filter if present
-  if (initialDim && initialVal) {
-    const filterKey = dimensionToFilterKey(initialDim); // e.g., "referrer_domain" -> "sources"
-    base[filterKey] = [...(base[filterKey] || []), initialVal];
-  }
-  return base;
-});
-```
-
----
-
-## 4. Component Breakdown
+## 2. Component Architecture
 
 ### New Components
 
 | Component | Purpose |
 |-----------|---------|
-| `src/pages/Bots.tsx` | Main bot analytics page |
-| `src/components/bots/BotSummaryCards.tsx` | 3-card grid showing bot/human/unknown split |
-| `src/components/bots/BotSignalsCard.tsx` | Detection signals section |
-| `src/components/bots/RendererBreakdown.tsx` | Table showing GPU renderer distribution |
-| `src/components/bots/BotDimensionTable.tsx` | Breakdown table specific to bot data |
+| `src/components/audiences/AudienceList.tsx` | Table/list showing all audiences with actions |
+| `src/components/audiences/AudienceDialog.tsx` | Create/Edit audience modal dialog |
+| `src/components/audiences/WalletSelector.tsx` | Searchable, filterable wallet picker with checkboxes |
+| `src/components/audiences/WalletTable.tsx` | Table displaying wallets with selection state |
 
-### Reused Components
+### Component Relationships
 
-- `DateRangePicker` - for date range selection
-- `ScorecardFilters` - for filter management (may need filter_options from a separate call)
-- `DashboardLayout` - consistent sidebar navigation
-- `Card`, `Table`, `Badge`, `Skeleton` - UI primitives
+```text
+Audiences.tsx (page)
+├── AudienceList
+│   └── (displays audiences, triggers edit/delete)
+└── AudienceDialog
+    └── WalletSelector
+        └── WalletTable
+```
 
 ---
 
-## 5. File Changes Summary
+## 3. Page State Management
+
+### Audiences.tsx State
+
+```typescript
+// Audiences list
+const [audiences, setAudiences] = useState<Audience[]>([]);
+const [loading, setLoading] = useState(true);
+
+// Dialog state
+const [dialogOpen, setDialogOpen] = useState(false);
+const [editingAudience, setEditingAudience] = useState<Audience | null>(null);
+
+// Website context
+const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+
+// Delete confirmation
+const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+const [audienceToDelete, setAudienceToDelete] = useState<Audience | null>(null);
+```
+
+### AudienceDialog State
+
+```typescript
+// Form fields
+const [name, setName] = useState("");
+const [websiteId, setWebsiteId] = useState("");
+const [selectedWallets, setSelectedWallets] = useState<string[]>([]);
+
+// Wallet loading
+const [wallets, setWallets] = useState<WalletRow[]>([]);
+const [walletsLoading, setWalletsLoading] = useState(false);
+
+// Filters for wallet selector
+const [walletSearch, setWalletSearch] = useState("");
+const [walletTypes, setWalletTypes] = useState<string[]>([]);
+const [walletSortBy, setWalletSortBy] = useState<"last_seen" | "first_seen" | "visit_count">("last_seen");
+const [walletSortDir, setWalletSortDir] = useState<"desc" | "asc">("desc");
+```
+
+---
+
+## 4. WalletSelector Component Details
+
+This is the most complex component - a searchable, paginated wallet picker.
+
+### Features
+
+1. **Search**: Filter by wallet address (debounced 300ms)
+2. **Type Filter**: Multi-select for wallet action types (connected, staked, purchased, signed)
+3. **Sort**: Sort by last_seen (default), first_seen, or visit_count
+4. **Selection**: Checkbox for each wallet, "Select All" for current page
+5. **Pagination**: Load more / infinite scroll for large datasets
+6. **Persistence**: When editing, pre-check wallets from existing audience
+
+### UI Layout
+
+```text
++----------------------------------------------------------+
+|  Select Wallets                                           |
++----------------------------------------------------------+
+|  [Search by address...        ]  [Type ▼]  [Sort ▼]      |
++----------------------------------------------------------+
+|  [✓] Select all on this page           Showing 1-50 of 234|
++----------------------------------------------------------+
+|  Wallet Address          Type          Last Seen  Visits  |
+|  ─────────────────────────────────────────────────────────|
+|  [✓] 0x1234...abcd      connected      2h ago     12     |
+|  [✓] 0x5678...efgh      staked         1d ago     8      |
+|  [ ] 0x9abc...ijkl      purchased      3d ago     3      |
++----------------------------------------------------------+
+|  [Load more...]                                           |
++----------------------------------------------------------+
+|  Selected: 2 wallets                                      |
++----------------------------------------------------------+
+```
+
+---
+
+## 5. Delete Confirmation
+
+Use an AlertDialog for delete confirmation:
+
+```text
++------------------------------------------+
+|  Delete Audience?                        |
+|                                          |
+|  Are you sure you want to delete         |
+|  "High-Value Traders"? This cannot       |
+|  be undone.                              |
+|                                          |
+|           [Cancel]  [Delete]             |
++------------------------------------------+
+```
+
+---
+
+## 6. File Changes Summary
 
 | File | Change |
 |------|--------|
-| `src/lib/api.ts` | Add `BotAnalyticsRequest`, `BotAnalyticsResponse`, and `fetchBotAnalytics` |
-| `src/pages/Bots.tsx` | New page for bot analytics |
-| `src/components/bots/BotSummaryCards.tsx` | New component for summary stats |
-| `src/components/bots/BotSignalsCard.tsx` | New component for detection signals |
-| `src/components/bots/RendererBreakdown.tsx` | New component for renderer table |
-| `src/components/bots/BotDimensionTable.tsx` | New component for dimension breakdown |
-| `src/components/overview/DimensionTable.tsx` | Add `onBotClick` prop, make Bot % cells clickable |
-| `src/pages/Overview.tsx` | Add `handleBotClick` and pass to DimensionTable |
-| `src/App.tsx` | Add route for `/bots` |
+| `src/lib/api.ts` | Add wallet list types and audience CRUD functions |
+| `src/pages/Audiences.tsx` | Full rewrite: list view with create/edit/delete |
+| `src/components/audiences/AudienceList.tsx` | New: audience table with actions |
+| `src/components/audiences/AudienceDialog.tsx` | New: create/edit modal |
+| `src/components/audiences/WalletSelector.tsx` | New: wallet picker component |
+| `src/components/audiences/WalletTable.tsx` | New: wallet display table with checkboxes |
+| `src/components/audiences/DeleteAudienceDialog.tsx` | New: delete confirmation |
 
 ---
 
-## 6. Technical Considerations
+## 7. Technical Considerations
 
-### Dimension to Filter Key Mapping
+### API Endpoint Distinction
 
-The API uses different keys for dimensions vs filters. Need a utility function:
+The wallet list endpoint uses the analytics API base (`cdn.audiencescan.io/api`), while the audiences CRUD endpoints use the main API (`api-wldojy4riq-uc.a.run.app`):
 
 ```typescript
-const DIMENSION_TO_FILTER: Record<TableDimension, keyof ActiveFilters> = {
-  referrer_domain: "sources",
-  utm_source: "utm_source",
-  utm_medium: "utm_medium",
-  utm_campaign: "utm_campaign",
-  utm_content: "utm_content",
-  utm_term: "utm_term",
-  device_type: "devices",
-  browser: "browsers",
-  os: "os",
-  date_day: undefined, // Not applicable for filtering
-};
+// Wallet list - analytics API
+POST https://cdn.audiencescan.io/api/analytics/wallets
+
+// Audiences CRUD - main API
+GET/POST/PUT/DELETE https://api-wldojy4riq-uc.a.run.app/audiences
 ```
 
-### Filter Options on Bots Page
+### Website Context
 
-The bots endpoint doesn't return `filter_options`. Options:
-1. Make an initial scorecard call to get filter options
-2. Allow freeform filter editing (less ideal UX)
-3. Cache filter options from Overview in localStorage (quick solution)
+The page should read the selected website from localStorage (same pattern as Overview):
+- If no website selected, show a message prompting user to select one
+- When creating an audience, auto-populate website_id from context
+- When listing audiences, optionally filter by current website
 
-Recommendation: Make a lightweight scorecard call on page load to get `filter_options`.
+### Optimistic Updates
 
-### URL State Synchronization
+For better UX, implement optimistic updates:
+- Delete: Remove from list immediately, rollback on error
+- Create: Add to list on success, show loading state
+- Update: Reflect changes immediately, rollback on error
 
-When filters change on the Bots page, update the URL query params so users can share/bookmark specific views.
+### Wallet Selection Limits
+
+Consider adding:
+- Maximum wallet limit (e.g., 10,000 wallets per audience)
+- Warning when selecting large numbers
+- Bulk selection helpers ("Select all matching filters")
+
+### Empty States
+
+Handle three empty states:
+1. No website selected: "Select a website to manage audiences"
+2. No audiences yet: Current empty state with "Create your first audience"
+3. No wallets found: "No wallets match your filters" in the selector
+
+---
+
+## 8. UX Refinements
+
+### Responsive Design
+
+- Mobile: Stack filters vertically, use full-width dialog
+- Desktop: Inline filters, centered dialog with max-width
+
+### Loading States
+
+- Skeleton loaders for audience list
+- Spinner on wallet table during search/filter
+- Disabled "Create" button while submitting
+
+### Success Feedback
+
+- Toast notifications for create/update/delete actions
+- Auto-close dialog on success
+- Refresh list after mutations
 
