@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,8 @@ import {
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
-  Website 
+  Website,
+  RangeConfig,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
@@ -71,15 +73,6 @@ const Overview = () => {
       : undefined;
   }, []);
 
-  const getDays = useCallback(() => {
-    // For "Today" (includeToday=true, days=0), we use 1 day
-    // For custom ranges, days represents days from today to start date
-    if (dateRange.includeToday && dateRange.days === 0) {
-      return 1; // API minimum is 1
-    }
-    return dateRange.days || 7;
-  }, [dateRange]);
-
   const getDateRangeLabel = useCallback(() => {
     if (dateRange.includeToday && dateRange.days === 0) {
       return "today";
@@ -93,12 +86,39 @@ const Overview = () => {
     return `selected period`;
   }, [dateRange]);
 
-  const getRangeType = useCallback(() => {
-    // Use "last_days" to include today, "last_full_days" for completed days only
-    return dateRange.includeToday ? "last_days" : "last_full_days";
-  }, [dateRange.includeToday]);
+  const getRangeConfig = useCallback((): RangeConfig => {
+    // For "Today" or custom ranges with today included, use "custom" type with explicit dates
+    if (dateRange.includeToday || dateRange.type === "custom") {
+      const today = new Date();
+      const todayStr = format(today, "yyyy-MM-dd");
+      
+      if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
+        return {
+          type: "custom",
+          from: format(dateRange.from, "yyyy-MM-dd"),
+          to: format(dateRange.to, "yyyy-MM-dd"),
+          timezone,
+        };
+      }
+      
+      // For "Today" preset
+      return {
+        type: "custom",
+        from: todayStr,
+        to: todayStr,
+        timezone,
+      };
+    }
+    
+    // For standard presets, use last_full_days
+    return {
+      type: "last_full_days",
+      days: dateRange.days || 7,
+      timezone,
+    };
+  }, [dateRange, timezone]);
 
-  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension, days: number, rangeType: "last_full_days" | "last_days") => {
+  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension, rangeConfig: RangeConfig) => {
     if (!selectedWebsite) return;
 
     setLoading(true);
@@ -113,21 +133,21 @@ const Overview = () => {
       const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
         fetchScorecard({
           tag_id: selectedWebsite.id,
-          range: { type: rangeType, days, timezone },
+          range: rangeConfig,
           filters: filtersParam,
           cost: { mode: "none" },
         }),
         fetchTableData({
           tag_id: selectedWebsite.id,
           dimension: "date_day",
-          range: { type: rangeType, days, timezone },
+          range: rangeConfig,
           filters: filtersParam,
           cost: { mode: "none" },
         }),
         fetchTableData({
           tag_id: selectedWebsite.id,
           dimension,
-          range: { type: rangeType, days, timezone },
+          range: rangeConfig,
           filters: filtersParam,
           cost: { mode: "none" },
           pagination: { limit: 50 },
@@ -144,9 +164,9 @@ const Overview = () => {
       setChartLoading(false);
       setTableLoading(false);
     }
-  }, [selectedWebsite, timezone, getFiltersParam]);
+  }, [selectedWebsite, getFiltersParam]);
 
-  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters, days: number, rangeType: "last_full_days" | "last_days") => {
+  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters, rangeConfig: RangeConfig) => {
     if (!selectedWebsite) return;
 
     setTableLoading(true);
@@ -154,7 +174,7 @@ const Overview = () => {
       const data = await fetchTableData({
         tag_id: selectedWebsite.id,
         dimension,
-        range: { type: rangeType, days, timezone },
+        range: rangeConfig,
         filters: getFiltersParam(filters),
         cost: { mode: "none" },
         pagination: { limit: 50 },
@@ -165,22 +185,22 @@ const Overview = () => {
     } finally {
       setTableLoading(false);
     }
-  }, [selectedWebsite, timezone, getFiltersParam]);
+  }, [selectedWebsite, getFiltersParam]);
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadAllData(activeFilters, tableDimension, getDays(), getRangeType());
+      loadAllData(activeFilters, tableDimension, getRangeConfig());
     }
   }, [selectedWebsite, dateRange]);
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadAllData(newFilters, tableDimension, getDays(), getRangeType());
+    loadAllData(newFilters, tableDimension, getRangeConfig());
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
-    loadTableData(newDimension, activeFilters, getDays(), getRangeType());
+    loadTableData(newDimension, activeFilters, getRangeConfig());
   };
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
