@@ -20,11 +20,13 @@ import {
   fetchScorecard, 
   fetchTableData,
   fetchRealtimeVisitors,
+  listCostSources,
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
   Website,
   RangeConfig,
+  CostSource,
   DIMENSION_TO_FILTER,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +53,8 @@ const Overview = () => {
   const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7 });
   const [realtimeVisitors, setRealtimeVisitors] = useState<number | null>(null);
+  const [costSources, setCostSources] = useState<CostSource[]>([]);
+  const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -194,8 +198,21 @@ const Overview = () => {
   useEffect(() => {
     if (selectedWebsite) {
       loadAllData(activeFilters, tableDimension, getRangeConfig());
+      // Also load cost sources
+      loadCostSources();
     }
   }, [selectedWebsite, dateRange]);
+
+  // Load cost sources
+  const loadCostSources = useCallback(async () => {
+    if (!selectedWebsite) return;
+    try {
+      const response = await listCostSources(selectedWebsite.id);
+      setCostSources(response.cost_sources);
+    } catch (err) {
+      console.error("Failed to load cost sources:", err);
+    }
+  }, [selectedWebsite]);
 
   // Realtime visitors polling
   useEffect(() => {
@@ -227,7 +244,17 @@ const Overview = () => {
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
+    setSelectedCostSourceId(null); // Reset cost source when dimension changes
     loadTableData(newDimension, activeFilters, getRangeConfig());
+  };
+
+  const handleCostSourceChange = (costSourceId: string | null) => {
+    setSelectedCostSourceId(costSourceId);
+    // TODO: Re-fetch table data with cost source if needed
+  };
+
+  const handleAddCostSource = () => {
+    navigate("/attribution");
   };
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
@@ -372,7 +399,6 @@ const Overview = () => {
             <DailyChart data={dailyData?.rows ?? []} loading={chartLoading} />
           </div>
 
-          {/* Dimension Breakdown Table */}
           <div className="mb-8">
             <DimensionTable
               data={tableData?.rows ?? []}
@@ -383,6 +409,10 @@ const Overview = () => {
               showWalletColumns={data?.wallet_users !== null}
               showConversionColumns={data?.converted_users !== null}
               onBotClick={handleBotClick}
+              costSources={costSources}
+              selectedCostSourceId={selectedCostSourceId}
+              onCostSourceChange={handleCostSourceChange}
+              onAddCostSource={handleAddCostSource}
             />
           </div>
 

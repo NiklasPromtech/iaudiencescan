@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,8 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TableRow as ApiTableRow, TableDimension } from "@/lib/api";
+import { TableRow as ApiTableRow, TableDimension, CostSource } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
+
+// Dimensions that support cost sources
+const COST_SUPPORTED_DIMENSIONS: TableDimension[] = [
+  "referrer_domain",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+];
 
 interface DimensionTableProps {
   data: ApiTableRow[];
@@ -30,6 +42,10 @@ interface DimensionTableProps {
   showWalletColumns?: boolean;
   showConversionColumns?: boolean;
   onBotClick?: (dimValue: string) => void;
+  costSources?: CostSource[];
+  selectedCostSourceId?: string | null;
+  onCostSourceChange?: (costSourceId: string | null) => void;
+  onAddCostSource?: () => void;
 }
 
 const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
@@ -43,6 +59,16 @@ const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
   { value: "browser", label: "Browser" },
   { value: "os", label: "Operating System" },
 ];
+
+// Map TableDimension to CostDimension (they're the same for cost-supported ones)
+const DIMENSION_TO_COST_DIMENSION: Record<string, string> = {
+  referrer_domain: "referrer_domain",
+  utm_source: "utm_source",
+  utm_medium: "utm_medium",
+  utm_campaign: "utm_campaign",
+  utm_content: "utm_content",
+  utm_term: "utm_term",
+};
 
 interface ColumnGroup {
   id: string;
@@ -67,7 +93,17 @@ export function DimensionTable({
   showWalletColumns,
   showConversionColumns,
   onBotClick,
+  costSources = [],
+  selectedCostSourceId,
+  onCostSourceChange,
+  onAddCostSource,
 }: DimensionTableProps) {
+  // Filter cost sources for current dimension
+  const costDimension = DIMENSION_TO_COST_DIMENSION[dimension];
+  const matchingCostSources = costSources.filter(
+    (cs) => cs.dimension === costDimension
+  );
+  const supportsCost = COST_SUPPORTED_DIMENSIONS.includes(dimension);
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
   const hasConversionData = data.some((row) => row.converted_users !== null && row.converted_users > 0);
@@ -127,18 +163,52 @@ export function DimensionTable({
             {totalRows} total {totalRows === 1 ? "row" : "rows"}
           </p>
         </div>
-        <Select value={dimension} onValueChange={(v) => onDimensionChange(v as TableDimension)}>
-          <SelectTrigger className="w-[160px] bg-background">
-            <SelectValue placeholder="Select dimension" />
-          </SelectTrigger>
-          <SelectContent className="bg-background border border-border z-50">
-            {DIMENSION_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select value={dimension} onValueChange={(v) => onDimensionChange(v as TableDimension)}>
+            <SelectTrigger className="w-[160px] bg-background">
+              <SelectValue placeholder="Select dimension" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border z-50">
+              {DIMENSION_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Cost Source Selector */}
+          {supportsCost && (
+            matchingCostSources.length > 0 ? (
+              <Select 
+                value={selectedCostSourceId || "none"} 
+                onValueChange={(v) => onCostSourceChange?.(v === "none" ? null : v)}
+              >
+                <SelectTrigger className="w-[180px] bg-background">
+                  <SelectValue placeholder="Select cost source" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50">
+                  <SelectItem value="none">No cost data</SelectItem>
+                  {matchingCostSources.map((cs) => (
+                    <SelectItem key={cs.id} value={cs.id}>
+                      {cs.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onAddCostSource}
+                className="h-10 text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add cost source
+              </Button>
+            )
+          )}
+        </div>
       </div>
 
       {/* Column Group Toggles */}
