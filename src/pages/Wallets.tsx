@@ -70,7 +70,7 @@ export default function Wallets() {
       if (maxBalance) balanceFilter.max = parseFloat(maxBalance);
 
       const response = await fetchWallets({
-        tag_id: website.tag_id,
+        tag_id: website.id,
         range: { type: "last_full_days", days: 90, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
         search: debouncedSearch || undefined,
         balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
