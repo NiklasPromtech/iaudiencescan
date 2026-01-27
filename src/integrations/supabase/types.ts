@@ -92,6 +92,48 @@ export type Database = {
           },
         ]
       }
+      covalent_request_queue: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          priority: number
+          processed_at: string | null
+          request_type: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count: number
+          scan_id: string | null
+          status: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address: string
+          website_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          priority?: number
+          processed_at?: string | null
+          request_type: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count?: number
+          scan_id?: string | null
+          status?: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address: string
+          website_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          priority?: number
+          processed_at?: string | null
+          request_type?: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count?: number
+          scan_id?: string | null
+          status?: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address?: string
+          website_id?: string | null
+        }
+        Relationships: []
+      }
       email_submissions: {
         Row: {
           created_at: string
@@ -487,6 +529,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      CovalentQueueStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+      CovalentRequestType: "WALLET_ENRICHMENT" | "SCAN_WALLET"
       Plan: "FREE" | "PRO" | "ENTERPRISE"
       ScanStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
       StudyStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED"
@@ -618,6 +662,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      CovalentQueueStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+      CovalentRequestType: ["WALLET_ENRICHMENT", "SCAN_WALLET"],
       Plan: ["FREE", "PRO", "ENTERPRISE"],
       ScanStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
       StudyStatus: ["PENDING", "RUNNING", "COMPLETED", "FAILED"],
