@@ -32,8 +32,9 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { fetchWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
 
 const PAGE_SIZE = 50;
 
@@ -49,6 +50,7 @@ export default function Wallets() {
   const [maxBalance, setMaxBalance] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
+  const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 0, includeToday: true });
   const { toast } = useToast();
 
   // Debounce search
@@ -69,9 +71,18 @@ export default function Wallets() {
       if (minBalance) balanceFilter.min = parseFloat(minBalance);
       if (maxBalance) balanceFilter.max = parseFloat(maxBalance);
 
+      // Build range config based on dateRange state
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const rangeConfig = {
+        type: "last_full_days" as const,
+        days: dateRange.days || 0,
+        timezone,
+        include_today: dateRange.includeToday,
+      };
+
       const response = await fetchWallets({
         tag_id: website.id,
-        range: { type: "last_full_days", days: 90, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        range: rangeConfig,
         search: debouncedSearch || undefined,
         balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
         sort_by: sortBy,
@@ -93,7 +104,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, toast]);
+  }, [debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -215,6 +226,17 @@ export default function Wallets() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4 items-end">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Date Range</label>
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={(value) => {
+                    setDateRange(value);
+                    setCurrentPage(0);
+                  }}
+                />
+              </div>
+
               <div className="flex-1 min-w-[200px]">
                 <label className="text-sm font-medium mb-1.5 block">Search</label>
                 <div className="relative">
