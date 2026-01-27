@@ -178,6 +178,82 @@ export type Database = {
         }
         Relationships: []
       }
+      scans: {
+        Row: {
+          audience_id: string | null
+          chain: string
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          name: string | null
+          processed_count: number
+          progress: number
+          status: Database["public"]["Enums"]["ScanStatus"]
+          updated_at: string
+          user_id: string
+          wallet_count: number
+          wallets: string[] | null
+          website_id: string | null
+        }
+        Insert: {
+          audience_id?: string | null
+          chain: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          name?: string | null
+          processed_count?: number
+          progress?: number
+          status?: Database["public"]["Enums"]["ScanStatus"]
+          updated_at?: string
+          user_id: string
+          wallet_count: number
+          wallets?: string[] | null
+          website_id?: string | null
+        }
+        Update: {
+          audience_id?: string | null
+          chain?: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          name?: string | null
+          processed_count?: number
+          progress?: number
+          status?: Database["public"]["Enums"]["ScanStatus"]
+          updated_at?: string
+          user_id?: string
+          wallet_count?: number
+          wallets?: string[] | null
+          website_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "audiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           created_at: string
@@ -412,6 +488,7 @@ export type Database = {
     }
     Enums: {
       Plan: "FREE" | "PRO" | "ENTERPRISE"
+      ScanStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
       StudyStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED"
       WebsiteStatus: "PENDING" | "VERIFIED" | "FAILED"
     }
@@ -542,6 +619,7 @@ export const Constants = {
   public: {
     Enums: {
       Plan: ["FREE", "PRO", "ENTERPRISE"],
+      ScanStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
       StudyStatus: ["PENDING", "RUNNING", "COMPLETED", "FAILED"],
       WebsiteStatus: ["PENDING", "VERIFIED", "FAILED"],
     },

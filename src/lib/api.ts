@@ -514,3 +514,122 @@ export async function deleteAudience(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+// Scan types
+export const SUPPORTED_CHAINS = [
+  { value: "eth-mainnet", label: "Ethereum" },
+  { value: "matic-mainnet", label: "Polygon" },
+  { value: "bsc-mainnet", label: "BNB Chain" },
+  { value: "arbitrum-mainnet", label: "Arbitrum" },
+  { value: "optimism-mainnet", label: "Optimism" },
+  { value: "avalanche-mainnet", label: "Avalanche" },
+  { value: "base-mainnet", label: "Base" },
+  { value: "solana-mainnet", label: "Solana" },
+] as const;
+
+export type SupportedChain = typeof SUPPORTED_CHAINS[number]["value"];
+
+export interface Scan {
+  scan_id: string;
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  wallet_count: number;
+  chain: string;
+  name: string | null;
+  audience_id: string | null;
+  website_id: string | null;
+  created_at: string;
+  completed_at?: string | null;
+  progress?: number;
+  error?: string | null;
+}
+
+export interface CreateScanRequest {
+  wallets: string[];
+  chain: SupportedChain;
+  name?: string;
+  website_id?: string;
+  audience_id?: string;
+}
+
+export interface ScanListResponse {
+  scans: Scan[];
+}
+
+export interface ScanResponse {
+  scan_id: string;
+  status: string;
+  wallet_count: number;
+  chain: string;
+  name: string | null;
+  audience_id: string | null;
+  created_at: string;
+}
+
+// Scan API functions
+export async function createScan(data: CreateScanRequest): Promise<ScanResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function listScans(): Promise<ScanListResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getScan(scanId: string): Promise<Scan> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans/${scanId}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}

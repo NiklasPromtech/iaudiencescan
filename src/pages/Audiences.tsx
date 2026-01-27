@@ -8,6 +8,7 @@ import { Audience, Website, listAudiences } from "@/lib/api";
 import { AudienceList } from "@/components/audiences/AudienceList";
 import { AudienceDialog } from "@/components/audiences/AudienceDialog";
 import { DeleteAudienceDialog } from "@/components/audiences/DeleteAudienceDialog";
+import { CreateScanDialog } from "@/components/audiences/CreateScanDialog";
 
 const Audiences = () => {
   const navigate = useNavigate();
@@ -21,6 +22,10 @@ const Audiences = () => {
   const [editingAudience, setEditingAudience] = useState<Audience | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [audienceToDelete, setAudienceToDelete] = useState<Audience | null>(null);
+  
+  // Scan dialog states
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+  const [audienceForScan, setAudienceForScan] = useState<Audience | null>(null);
 
   // Load selected website from localStorage
   useEffect(() => {
@@ -74,6 +79,15 @@ const Audiences = () => {
 
   const handleDialogSuccess = () => {
     fetchAudiences();
+  };
+
+  const handleFindMoreClick = (audience: Audience) => {
+    setAudienceForScan(audience);
+    setScanDialogOpen(true);
+  };
+
+  const handleScanSuccess = (scanId: string) => {
+    navigate(`/scans/${scanId}`);
   };
 
   // No website selected state
@@ -172,6 +186,7 @@ const Audiences = () => {
             loading={loading}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
+            onFindMore={handleFindMoreClick}
           />
         )}
 
@@ -217,6 +232,14 @@ const Audiences = () => {
         onOpenChange={setDeleteDialogOpen}
         audience={audienceToDelete}
         onSuccess={handleDialogSuccess}
+      />
+
+      {/* Create Scan Dialog */}
+      <CreateScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        audience={audienceForScan}
+        onSuccess={handleScanSuccess}
       />
     </DashboardLayout>
   );

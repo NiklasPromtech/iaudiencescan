@@ -2,7 +2,7 @@ import { Audience } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pencil, Trash2, Users } from "lucide-react";
+import { Pencil, Trash2, Users, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface AudienceListProps {
@@ -10,6 +10,7 @@ interface AudienceListProps {
   loading: boolean;
   onEdit: (audience: Audience) => void;
   onDelete: (audience: Audience) => void;
+  onFindMore: (audience: Audience) => void;
 }
 
 export function AudienceList({
@@ -17,6 +18,7 @@ export function AudienceList({
   loading,
   onEdit,
   onDelete,
+  onFindMore,
 }: AudienceListProps) {
   if (loading) {
     return (
@@ -61,6 +63,24 @@ export function AudienceList({
               </div>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onFindMore(audience)}
+                className="hidden sm:flex"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Find More Users
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => onFindMore(audience)}
+                className="sm:hidden"
+                title="Find More Users"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
