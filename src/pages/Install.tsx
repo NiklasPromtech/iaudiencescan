@@ -41,12 +41,31 @@ const Install = () => {
         const response = await listWebsites();
         if (response.websites && response.websites.length > 0) {
           setWebsites(response.websites);
-          const firstSite = response.websites[0];
-          setSelectedWebsite(firstSite);
-          setStatus(firstSite.status);
+          
+          // Check for persisted selection in database
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("last_selected_website_id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          // Find the persisted website or fall back to first
+          let websiteToSelect = response.websites[0];
+          if (profile?.last_selected_website_id) {
+            const persisted = response.websites.find(w => w.id === profile.last_selected_website_id);
+            if (persisted) {
+              websiteToSelect = persisted;
+            }
+          }
+          
+          setSelectedWebsite(websiteToSelect);
+          setStatus(websiteToSelect.status);
+          // Store in localStorage for consistency
+          localStorage.setItem("selectedWebsiteId", websiteToSelect.id);
+          localStorage.setItem("selectedWebsite", JSON.stringify(websiteToSelect));
           // Generate tracking snippet for existing site
           setTrackingSnippet(
-            `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${firstSite.id}" defer></script>`
+            `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${websiteToSelect.id}" defer></script>`
           );
         }
       } catch (error) {
@@ -124,10 +143,23 @@ const Install = () => {
   });
 </script>`;
 
-  const handleSelectWebsite = (website: Website) => {
+  const handleSelectWebsite = async (website: Website) => {
     // Store selected website in localStorage for overview page
     localStorage.setItem("selectedWebsiteId", website.id);
     localStorage.setItem("selectedWebsite", JSON.stringify(website));
+    
+    // Persist to database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ last_selected_website_id: website.id })
+          .eq("user_id", user.id);
+      }
+    } catch (error) {
+      console.error("Failed to persist website selection:", error);
+    }
     
     // If verified, navigate to overview
     if (website.status === "verified") {
