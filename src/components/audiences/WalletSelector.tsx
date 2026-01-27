@@ -342,16 +342,20 @@ export function WalletSelector({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [types, setTypes] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"last_seen" | "first_seen" | "visit_count">("last_seen");
+  const [sortBy, setSortBy] = useState<"last_seen" | "first_seen" | "visit_count" | "total_balance_usd">("last_seen");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [offset, setOffset] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   
-  // New filter states
+  // Filter states
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7 });
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  
+  // Balance filters
+  const [minBalance, setMinBalance] = useState("");
+  const [maxBalance, setMaxBalance] = useState("");
 
   // Debounce search
   useEffect(() => {
@@ -416,6 +420,14 @@ export function WalletSelector({
         request.types = types;
       }
 
+      // Add balance filter
+      const balanceFilter: { min?: number; max?: number } = {};
+      if (minBalance) balanceFilter.min = parseFloat(minBalance);
+      if (maxBalance) balanceFilter.max = parseFloat(maxBalance);
+      if (Object.keys(balanceFilter).length > 0) {
+        request.balance = balanceFilter;
+      }
+
       // Add active filters
       const filtersToSend: Record<string, string[]> = {};
       Object.entries(activeFilters).forEach(([key, values]) => {
@@ -447,13 +459,13 @@ export function WalletSelector({
     } finally {
       setLoading(false);
     }
-  }, [websiteId, debouncedSearch, types, sortBy, sortDir, offset, activeFilters, buildRangeConfig]);
+  }, [websiteId, debouncedSearch, types, sortBy, sortDir, offset, activeFilters, buildRangeConfig, minBalance, maxBalance]);
 
   // Initial load and filter changes
   useEffect(() => {
     setOffset(0);
     loadWallets(false);
-  }, [websiteId, debouncedSearch, types, sortBy, sortDir, dateRange, activeFilters]);
+  }, [websiteId, debouncedSearch, types, sortBy, sortDir, dateRange, activeFilters, minBalance, maxBalance]);
 
   const handleLoadMore = () => {
     const newOffset = offset + PAGE_SIZE;
@@ -487,12 +499,15 @@ export function WalletSelector({
   const clearAllFilters = () => {
     setActiveFilters({});
     setTypes([]);
+    setMinBalance("");
+    setMaxBalance("");
   };
 
+  const hasBalanceFilter = minBalance !== "" || maxBalance !== "";
   const totalActiveFilters = Object.values(activeFilters).reduce(
     (sum, arr) => sum + (arr?.length || 0),
     0
-  ) + types.length;
+  ) + types.length + (hasBalanceFilter ? 1 : 0);
 
   const availableFilters = FILTER_CONFIGS.filter(
     (config) =>
@@ -501,7 +516,7 @@ export function WalletSelector({
 
   return (
     <div className="space-y-4">
-      {/* Search and Sort Row */}
+      {/* Search, Date, and Sort Row */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -509,7 +524,7 @@ export function WalletSelector({
             placeholder="Search by address..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9"
           />
         </div>
 
@@ -519,12 +534,35 @@ export function WalletSelector({
           <SelectTrigger className="w-[140px] h-9">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-popover">
             <SelectItem value="last_seen">Last Seen</SelectItem>
             <SelectItem value="first_seen">First Seen</SelectItem>
             <SelectItem value="visit_count">Visits</SelectItem>
+            <SelectItem value="total_balance_usd">Balance</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Balance Filters Row */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Balance:</span>
+          <Input
+            type="number"
+            placeholder="Min $"
+            value={minBalance}
+            onChange={(e) => setMinBalance(e.target.value)}
+            className="w-24 h-8"
+          />
+          <span className="text-muted-foreground">–</span>
+          <Input
+            type="number"
+            placeholder="Max $"
+            value={maxBalance}
+            onChange={(e) => setMaxBalance(e.target.value)}
+            className="w-24 h-8"
+          />
+        </div>
       </div>
 
       {/* Filters Row */}
