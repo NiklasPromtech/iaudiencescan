@@ -407,6 +407,8 @@ export interface WalletRow {
   visit_count: number;
   total_balance_usd?: number | null;
   chains?: string[];
+  enriched_at?: string | null;
+  enrichment_status?: "pending" | "processing" | "completed" | "failed" | null;
 }
 
 export interface WalletListRequest {

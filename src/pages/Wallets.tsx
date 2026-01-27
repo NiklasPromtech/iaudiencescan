@@ -379,6 +379,7 @@ export default function Wallets() {
                   <TableHead className="text-right">Balance</TableHead>
                   <TableHead className="text-right">Visits</TableHead>
                   <TableHead className="text-right">Last Seen</TableHead>
+                  <TableHead className="text-right">Enriched</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -391,76 +392,96 @@ export default function Wallets() {
                       <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : wallets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No wallets found matching your filters
                     </TableCell>
                   </TableRow>
                 ) : (
-                  wallets.map((wallet) => (
-                    <TableRow key={wallet.wallet_id}>
-                      <TableCell className="font-mono text-sm">
-                        <div className="flex items-center gap-2">
-                          {truncateAddress(wallet.wallet_id)}
-                          <a
-                            href={`https://etherscan.io/address/${wallet.wallet_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <LinkIcon className="h-3 w-3" />
-                          </a>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {wallet.types.map((type) => (
-                            <Badge key={type} variant="secondary" className="text-xs">
-                              {type}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {wallet.chains?.map((chain) => (
-                            <Badge key={chain} variant="outline" className="text-xs">
-                              {getChainLabel(chain)}
-                            </Badge>
-                          )) || <span className="text-muted-foreground text-sm">—</span>}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {wallet.total_balance_usd === null || wallet.total_balance_usd === undefined ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEnrichWallet(wallet.wallet_id)}
-                            disabled={enrichingWallets.has(wallet.wallet_id)}
-                            className="h-7 text-xs"
-                          >
-                            {enrichingWallets.has(wallet.wallet_id) ? (
+                  wallets.map((wallet) => {
+                    // Determine if we should show Enrich button
+                    const isEnriched = wallet.enrichment_status === "completed";
+                    const isPending = wallet.enrichment_status === "pending" || wallet.enrichment_status === "processing";
+                    const showEnrichButton = !isEnriched && !isPending;
+                    
+                    return (
+                      <TableRow key={wallet.wallet_id}>
+                        <TableCell className="font-mono text-sm">
+                          <div className="flex items-center gap-2">
+                            {truncateAddress(wallet.wallet_id)}
+                            <a
+                              href={`https://etherscan.io/address/${wallet.wallet_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <LinkIcon className="h-3 w-3" />
+                            </a>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {wallet.types.map((type) => (
+                              <Badge key={type} variant="secondary" className="text-xs">
+                                {type}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {wallet.chains?.map((chain) => (
+                              <Badge key={chain} variant="outline" className="text-xs">
+                                {getChainLabel(chain)}
+                              </Badge>
+                            )) || <span className="text-muted-foreground text-sm">—</span>}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {showEnrichButton ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEnrichWallet(wallet.wallet_id)}
+                              disabled={enrichingWallets.has(wallet.wallet_id)}
+                              className="h-7 text-xs"
+                            >
+                              {enrichingWallets.has(wallet.wallet_id) ? (
+                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                              ) : (
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                              )}
+                              Enrich
+                            </Button>
+                          ) : isPending ? (
+                            <Badge variant="outline" className="text-xs">
                               <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                            ) : (
-                              <RefreshCw className="h-3 w-3 mr-1" />
-                            )}
-                            Enrich
-                          </Button>
-                        ) : (
-                          formatBalance(wallet.total_balance_usd)
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {wallet.visit_count}
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground text-sm">
-                        {formatDistanceToNow(new Date(wallet.last_seen), { addSuffix: true })}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                              Pending
+                            </Badge>
+                          ) : (
+                            formatBalance(wallet.total_balance_usd ?? 0)
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {wallet.visit_count}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground text-sm">
+                          {formatDistanceToNow(new Date(wallet.last_seen), { addSuffix: true })}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground text-sm">
+                          {wallet.enriched_at ? (
+                            formatDistanceToNow(new Date(wallet.enriched_at), { addSuffix: true })
+                          ) : (
+                            <span className="text-muted-foreground/50">—</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
