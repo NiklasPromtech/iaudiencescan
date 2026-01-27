@@ -368,41 +368,39 @@ export function CreateCostSourceDialog({
         <DialogFooter className="flex-col sm:flex-row gap-2">
           {step === "config" && (
             <>
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      const file = e.target.files[0];
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        try {
-                          const text = ev.target?.result as string;
-                          const costs = parseCSV(text);
-                          setParsedCosts(costs);
-                          setStep("review");
-                          toast.success(`Parsed ${costs.length} cost entries`);
-                        } catch (error) {
-                          toast.error(error instanceof Error ? error.message : "Failed to parse CSV");
-                        }
-                      };
-                      reader.readAsText(file);
-                    }
-                  }}
-                  className="hidden"
-                  id="csv-upload-direct"
-                  disabled={!name.trim()}
-                />
-                <label htmlFor="csv-upload-direct">
-                  <Button variant="outline" asChild disabled={!name.trim()}>
-                    <span>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload CSV
-                    </span>
-                  </Button>
-                </label>
-              </div>
+              <Button
+                variant="outline"
+                disabled={!name.trim()}
+                onClick={() => document.getElementById("csv-upload-direct")?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload CSV
+              </Button>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      try {
+                        const text = ev.target?.result as string;
+                        const costs = parseCSV(text);
+                        setParsedCosts(costs);
+                        setStep("review");
+                        toast.success(`Parsed ${costs.length} cost entries`);
+                      } catch (error) {
+                        toast.error(error instanceof Error ? error.message : "Failed to parse CSV");
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                  e.target.value = "";
+                }}
+                className="hidden"
+                id="csv-upload-direct"
+              />
               <Button onClick={handleDownloadTemplate} disabled={downloading || !name.trim()}>
                 <Download className="h-4 w-4 mr-2" />
                 {downloading ? "Downloading..." : "Download Template"}
