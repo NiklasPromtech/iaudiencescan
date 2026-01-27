@@ -1,40 +1,123 @@
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Plus, Upload } from "lucide-react";
+import { DollarSign, Plus } from "lucide-react";
+import { CostSource, listCostSources, Website } from "@/lib/api";
+import { CostSourceList } from "@/components/costs/CostSourceList";
+import { CreateCostSourceDialog } from "@/components/costs/CreateCostSourceDialog";
+import { EditCostSourceDialog } from "@/components/costs/EditCostSourceDialog";
+import { DeleteCostSourceDialog } from "@/components/costs/DeleteCostSourceDialog";
 
 const Costs = () => {
+  const navigate = useNavigate();
+  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const [costSources, setCostSources] = useState<CostSource[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Dialog states
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCostSource, setSelectedCostSource] = useState<CostSource | null>(null);
+
+  useEffect(() => {
+    const storedWebsite = localStorage.getItem("selectedWebsite");
+    if (storedWebsite) {
+      try {
+        const website = JSON.parse(storedWebsite) as Website;
+        setSelectedWebsite(website);
+      } catch {
+        navigate("/install");
+      }
+    } else {
+      navigate("/install");
+    }
+  }, [navigate]);
+
+  const loadCostSources = useCallback(async () => {
+    if (!selectedWebsite) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await listCostSources(selectedWebsite.id);
+      setCostSources(response.cost_sources);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load cost sources");
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedWebsite]);
+
+  useEffect(() => {
+    if (selectedWebsite) {
+      loadCostSources();
+    }
+  }, [selectedWebsite, loadCostSources]);
+
+  const handleEdit = (costSource: CostSource) => {
+    setSelectedCostSource(costSource);
+    setEditDialogOpen(true);
+  };
+
+  const handleDelete = (costSource: CostSource) => {
+    setSelectedCostSource(costSource);
+    setDeleteDialogOpen(true);
+  };
+
+  const hasData = costSources.length > 0;
+
   return (
     <DashboardLayout>
       <div className="container max-w-5xl py-8 px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-h2 text-foreground mb-2">Cost Sources</h1>
-          <p className="text-p1 text-muted-foreground">
-            Add cost data to calculate ROI for your campaigns by UTM parameters.
-          </p>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-h2 text-foreground mb-2">Attribution</h1>
+            <p className="text-p1 text-muted-foreground">
+              Add cost data to calculate ROI for your campaigns by UTM parameters.
+            </p>
+          </div>
+          {hasData && (
+            <Button onClick={() => setCreateDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Cost Source
+            </Button>
+          )}
         </div>
 
-        {/* Empty State */}
-        <Card className="p-12 border border-dashed border-border text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <DollarSign className="h-6 w-6 text-primary" />
-          </div>
-          <h3 className="text-h3 text-foreground mb-2">No cost sources yet</h3>
-          <p className="text-p2 text-muted-foreground mb-6 max-w-md mx-auto">
-            Upload or enter cost data to see ROI metrics alongside your traffic data. Match costs to UTM campaigns.
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <Button variant="outline">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload CSV
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90">
+        {error && (
+          <Card className="p-4 mb-8 border-destructive bg-destructive/10">
+            <p className="text-destructive text-sm">{error}</p>
+          </Card>
+        )}
+
+        {/* Cost Source List or Empty State */}
+        {hasData ? (
+          <CostSourceList
+            costSources={costSources}
+            loading={loading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ) : (
+          <Card className="p-12 border border-dashed border-border text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <DollarSign className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-h3 text-foreground mb-2">No cost sources yet</h3>
+            <p className="text-p2 text-muted-foreground mb-6 max-w-md mx-auto">
+              Upload or enter cost data to see ROI metrics alongside your traffic data. Match costs to UTM campaigns.
+            </p>
+            <Button onClick={() => setCreateDialogOpen(true)} className="bg-primary hover:bg-primary/90">
               <Plus className="h-4 w-4 mr-2" />
-              Add manually
+              Add Cost Source
             </Button>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* How it works */}
         <Card className="mt-8 p-6 border border-border">
@@ -44,7 +127,7 @@ const Costs = () => {
               <div className="text-h2 text-primary mb-2">1</div>
               <h4 className="text-p2 font-medium text-foreground mb-1">Add cost data</h4>
               <p className="text-p4 text-muted-foreground">
-                Upload a CSV or manually enter costs with UTM parameters
+                Download a CSV template, fill in your spend, and upload it back
               </p>
             </div>
             <div>
@@ -63,6 +146,32 @@ const Costs = () => {
             </div>
           </div>
         </Card>
+
+        {/* Dialogs */}
+        {selectedWebsite && (
+          <>
+            <CreateCostSourceDialog
+              open={createDialogOpen}
+              onOpenChange={setCreateDialogOpen}
+              websiteId={selectedWebsite.id}
+              onSuccess={loadCostSources}
+            />
+            <EditCostSourceDialog
+              open={editDialogOpen}
+              onOpenChange={setEditDialogOpen}
+              costSource={selectedCostSource}
+              websiteId={selectedWebsite.id}
+              onSuccess={loadCostSources}
+            />
+            <DeleteCostSourceDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+              costSource={selectedCostSource}
+              websiteId={selectedWebsite.id}
+              onSuccess={loadCostSources}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
