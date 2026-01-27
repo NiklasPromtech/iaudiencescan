@@ -530,7 +530,7 @@ export const SUPPORTED_CHAINS = [
 export type SupportedChain = typeof SUPPORTED_CHAINS[number]["value"];
 
 export interface Scan {
-  scan_id: string;
+  id: string;
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   wallet_count: number;
   chain: string;
@@ -540,6 +540,7 @@ export interface Scan {
   created_at: string;
   completed_at?: string | null;
   progress?: number;
+  processed_count?: number;
   error?: string | null;
 }
 
@@ -631,5 +632,6 @@ export async function getScan(scanId: string): Promise<Scan> {
     throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return data.scan; // API returns { scan: {...} }
 }
