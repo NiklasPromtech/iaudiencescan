@@ -1,4 +1,4 @@
-import { WalletRow } from "@/lib/api";
+import { WalletRow, SUPPORTED_CHAINS } from "@/lib/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { Link as LinkIcon } from "lucide-react";
 
 interface WalletTableProps {
   wallets: WalletRow[];
@@ -50,6 +51,21 @@ export function WalletTable({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  const formatBalance = (balance: number | null | undefined) => {
+    if (balance === null || balance === undefined) return "—";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(balance);
+  };
+
+  const getChainLabel = (chainValue: string) => {
+    const chain = SUPPORTED_CHAINS.find(c => c.value === chainValue);
+    return chain?.label || chainValue;
+  };
+
   if (loading) {
     return (
       <div className="border rounded-md">
@@ -71,7 +87,7 @@ export function WalletTable({
   }
 
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -88,8 +104,10 @@ export function WalletTable({
             </TableHead>
             <TableHead>Wallet Address</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead className="text-right">Last Seen</TableHead>
+            <TableHead>Chains</TableHead>
+            <TableHead className="text-right">Balance</TableHead>
             <TableHead className="text-right">Visits</TableHead>
+            <TableHead className="text-right">Last Seen</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -102,7 +120,18 @@ export function WalletTable({
                 />
               </TableCell>
               <TableCell className="font-mono text-sm">
-                {truncateAddress(wallet.wallet_id)}
+                <div className="flex items-center gap-2">
+                  {truncateAddress(wallet.wallet_id)}
+                  <a
+                    href={`https://etherscan.io/address/${wallet.wallet_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <LinkIcon className="h-3 w-3" />
+                  </a>
+                </div>
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
@@ -113,11 +142,26 @@ export function WalletTable({
                   ))}
                 </div>
               </TableCell>
-              <TableCell className="text-right text-muted-foreground text-sm">
-                {formatDistanceToNow(new Date(wallet.last_seen), { addSuffix: true })}
+              <TableCell>
+                <div className="flex flex-wrap gap-1">
+                  {wallet.chains?.map((chain) => (
+                    <Badge key={chain} variant="outline" className="text-xs">
+                      {getChainLabel(chain)}
+                    </Badge>
+                  )) || <span className="text-muted-foreground text-sm">—</span>}
+                </div>
+              </TableCell>
+              <TableCell className="text-right font-medium">
+                {wallet.enrichment_status === "completed" || wallet.total_balance_usd !== null
+                  ? formatBalance(wallet.total_balance_usd ?? 0)
+                  : <span className="text-muted-foreground text-sm">Not enriched</span>
+                }
               </TableCell>
               <TableCell className="text-right tabular-nums">
                 {wallet.visit_count}
+              </TableCell>
+              <TableCell className="text-right text-muted-foreground text-sm whitespace-nowrap">
+                {formatDistanceToNow(new Date(wallet.last_seen), { addSuffix: true })}
               </TableCell>
             </TableRow>
           ))}
