@@ -6,6 +6,7 @@ import {
   DollarSign,
   Settings,
   ChevronDown,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,6 +46,11 @@ const trackingItems = [
 ];
 
 const audienceItems = [
+  {
+    title: "Wallet Data",
+    url: "/wallets",
+    icon: Wallet,
+  },
   {
     title: "Audiences",
     url: "/audiences",

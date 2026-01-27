@@ -405,6 +405,8 @@ export interface WalletRow {
   first_seen: string;
   last_seen: string;
   visit_count: number;
+  total_balance_usd?: number | null;
+  chains?: string[];
 }
 
 export interface WalletListRequest {
@@ -413,15 +415,27 @@ export interface WalletListRequest {
   types?: string[];
   search?: string;
   filters?: Record<string, string[]>;
-  sort_by?: "wallet_id" | "first_seen" | "last_seen" | "visit_count";
+  balance?: {
+    min?: number;
+    max?: number;
+  };
+  sort_by?: "wallet_id" | "first_seen" | "last_seen" | "visit_count" | "total_balance_usd";
   sort_dir?: "asc" | "desc";
   limit?: number;
   offset?: number;
 }
 
+export interface WalletSummary {
+  total_wallets: number;
+  total_balance_usd: number;
+  wallets_with_zero_balance: number;
+  wallets_not_enriched: number;
+}
+
 export interface WalletListResponse {
   success: boolean;
   rows: WalletRow[];
+  summary?: WalletSummary;
   pagination: {
     limit: number;
     offset: number;
