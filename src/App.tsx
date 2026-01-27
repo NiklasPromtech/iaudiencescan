@@ -55,6 +55,8 @@ import Audiences from "./pages/Audiences";
 import Costs from "./pages/Costs";
 import Settings from "./pages/Settings";
 import Bots from "./pages/Bots";
+import Scans from "./pages/Scans";
+import ScanDetail from "./pages/ScanDetail";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +115,8 @@ const App = () => (
           <Route path="/overview" element={<Overview />} />
           <Route path="/events" element={<Events />} />
           <Route path="/audiences" element={<Audiences />} />
+          <Route path="/scans" element={<Scans />} />
+          <Route path="/scans/:scanId" element={<ScanDetail />} />
           <Route path="/costs" element={<Costs />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/bots" element={<Bots />} />
