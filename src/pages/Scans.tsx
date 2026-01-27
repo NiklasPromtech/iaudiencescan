@@ -111,9 +111,9 @@ const Scans = () => {
           <div className="space-y-3">
             {scans.map((scan) => (
               <Card
-                key={scan.scan_id}
+                key={scan.id}
                 className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() => navigate(`/scans/${scan.scan_id}`)}
+                onClick={() => navigate(`/scans/${scan.id}`)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -122,7 +122,7 @@ const Scans = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-foreground">
-                        {scan.name || `Scan ${scan.scan_id.slice(0, 8)}`}
+                        {scan.name || `Scan ${scan.id.slice(0, 8)}`}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {scan.wallet_count} wallets · {getChainLabel(scan.chain)} ·{" "}

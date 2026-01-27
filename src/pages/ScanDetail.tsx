@@ -132,10 +132,10 @@ const ScanDetail = () => {
                   </div>
                   <div>
                     <h1 className="text-xl font-semibold text-foreground">
-                      {scan.name || `Scan ${scan.scan_id.slice(0, 8)}`}
+                      {scan.name || `Scan ${scan.id.slice(0, 8)}`}
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                      ID: {scan.scan_id}
+                      ID: {scan.id}
                     </p>
                   </div>
                 </div>
@@ -208,7 +208,7 @@ const ScanDetail = () => {
               <dl className="space-y-3">
                 <div className="flex justify-between py-2 border-b border-border">
                   <dt className="text-muted-foreground">Scan ID</dt>
-                  <dd className="font-mono text-sm">{scan.scan_id}</dd>
+                  <dd className="font-mono text-sm">{scan.id}</dd>
                 </div>
                 {scan.audience_id && (
                   <div className="flex justify-between py-2 border-b border-border">
@@ -245,7 +245,7 @@ const ScanDetail = () => {
                       View the results and insights from this scan
                     </p>
                   </div>
-                  <Button onClick={() => navigate(`/network/${scan.scan_id}`)}>
+                  <Button onClick={() => navigate(`/network/${scan.id}`)}>
                     View Results
                   </Button>
                 </div>
