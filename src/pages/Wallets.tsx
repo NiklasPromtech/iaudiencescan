@@ -32,7 +32,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { fetchWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
 
@@ -73,12 +73,27 @@ export default function Wallets() {
 
       // Build range config based on dateRange state
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const rangeConfig = {
-        type: "last_full_days" as const,
-        days: dateRange.days || 0,
-        timezone,
-        include_today: dateRange.includeToday,
-      };
+      const today = startOfDay(new Date());
+      
+      let rangeConfig: any;
+      
+      if (dateRange.includeToday || dateRange.days === 0) {
+        // For "Today" or when includeToday is true, use custom format with explicit dates
+        const fromDate = dateRange.days ? subDays(today, dateRange.days) : today;
+        rangeConfig = {
+          type: "custom",
+          from: format(fromDate, "yyyy-MM-dd"),
+          to: format(today, "yyyy-MM-dd"),
+          timezone,
+        };
+      } else {
+        // For standard presets without today, use last_full_days
+        rangeConfig = {
+          type: "last_full_days",
+          days: dateRange.days || 7,
+          timezone,
+        };
+      }
 
       const response = await fetchWallets({
         tag_id: website.id,
