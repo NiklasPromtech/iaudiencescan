@@ -649,3 +649,47 @@ export async function getScan(scanId: string): Promise<Scan> {
   const data = await response.json();
   return data.scan; // API returns { scan: {...} }
 }
+
+// Wallet Enrichment types and function
+export interface EnrichWalletsRequest {
+  tag_id: string;
+  wallets: string | string[];
+}
+
+export interface EnrichWalletsResponse {
+  success: boolean;
+  tag_id: string;
+  total_requested: number;
+  queued: number;
+  already_queued: number;
+  failed: number;
+  details: {
+    queued: string[];
+    already_queued: string[];
+    failed: string[];
+  };
+}
+
+export async function enrichWallets(request: EnrichWalletsRequest): Promise<EnrichWalletsResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallets/enrich`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}

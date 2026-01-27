@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2, RefreshCw } from "lucide-react";
 import {
   Wallet,
   DollarSign,
@@ -31,7 +32,7 @@ import {
   ArrowUpDown,
   Link as LinkIcon,
 } from "lucide-react";
-import { fetchWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
+import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -51,7 +52,54 @@ export default function Wallets() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 0, includeToday: true });
+  const [enrichingWallets, setEnrichingWallets] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+
+  const handleEnrichWallet = async (walletId: string) => {
+    const storedWebsite = localStorage.getItem("selectedWebsite");
+    if (!storedWebsite) return;
+
+    const website = JSON.parse(storedWebsite);
+    setEnrichingWallets(prev => new Set(prev).add(walletId));
+
+    try {
+      const response = await enrichWallets({
+        tag_id: website.id,
+        wallets: walletId,
+      });
+
+      if (response.success && response.queued > 0) {
+        toast({
+          title: "Enrichment queued",
+          description: "Wallet data will be enriched shortly.",
+        });
+      } else if (response.already_queued > 0) {
+        toast({
+          title: "Already queued",
+          description: "This wallet is already in the enrichment queue.",
+        });
+      } else {
+        toast({
+          title: "Enrichment failed",
+          description: "Could not queue wallet for enrichment.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to enrich wallet:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to enrich wallet",
+        variant: "destructive",
+      });
+    } finally {
+      setEnrichingWallets(prev => {
+        const next = new Set(prev);
+        next.delete(walletId);
+        return next;
+      });
+    }
+  };
 
   // Debounce search
   useEffect(() => {
@@ -386,7 +434,24 @@ export default function Wallets() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatBalance(wallet.total_balance_usd)}
+                        {wallet.total_balance_usd === null || wallet.total_balance_usd === undefined ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEnrichWallet(wallet.wallet_id)}
+                            disabled={enrichingWallets.has(wallet.wallet_id)}
+                            className="h-7 text-xs"
+                          >
+                            {enrichingWallets.has(wallet.wallet_id) ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                            )}
+                            Enrich
+                          </Button>
+                        ) : (
+                          formatBalance(wallet.total_balance_usd)
+                        )}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {wallet.visit_count}
