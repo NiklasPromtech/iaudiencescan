@@ -125,6 +125,7 @@ export interface FilterOptions {
   os: string[];
   countries: string[];
   bot_status: string[];
+  conversion_events: string[];
 }
 
 export interface ScorecardResponse {

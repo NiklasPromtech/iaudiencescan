@@ -36,6 +36,7 @@ import { DimensionTable } from "@/components/overview/DimensionTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
+import { ConversionEventFilter } from "@/components/overview/ConversionEventFilter";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ const Overview = () => {
   const [realtimeVisitors, setRealtimeVisitors] = useState<number | null>(null);
   const [costSources, setCostSources] = useState<CostSource[]>([]);
   const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
+  const [selectedConversionEvent, setSelectedConversionEvent] = useState<string | null>(null);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -139,7 +141,12 @@ const Overview = () => {
     };
   }, [dateRange, timezone]);
 
-  const loadAllData = useCallback(async (filters: ActiveFilters, dimension: TableDimension, rangeConfig: RangeConfig) => {
+  const loadAllData = useCallback(async (
+    filters: ActiveFilters, 
+    dimension: TableDimension, 
+    rangeConfig: RangeConfig,
+    conversionEvent: string | null
+  ) => {
     if (!selectedWebsite) return;
 
     setLoading(true);
@@ -148,6 +155,7 @@ const Overview = () => {
     setError(null);
 
     const filtersParam = getFiltersParam(filters);
+    const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
 
     try {
       // Fetch all data in parallel
@@ -156,6 +164,7 @@ const Overview = () => {
           tag_id: selectedWebsite.id,
           range: rangeConfig,
           filters: filtersParam,
+          conversion_events: conversionEvents,
           cost: { mode: "none" },
         }),
         fetchTableData({
@@ -163,6 +172,7 @@ const Overview = () => {
           dimension: "date_day",
           range: rangeConfig,
           filters: filtersParam,
+          conversion_events: conversionEvents,
           cost: { mode: "none" },
         }),
         fetchTableData({
@@ -170,6 +180,7 @@ const Overview = () => {
           dimension,
           range: rangeConfig,
           filters: filtersParam,
+          conversion_events: conversionEvents,
           cost: { mode: "none" },
           pagination: { limit: 50 },
         }),
@@ -187,16 +198,23 @@ const Overview = () => {
     }
   }, [selectedWebsite, getFiltersParam]);
 
-  const loadTableData = useCallback(async (dimension: TableDimension, filters: ActiveFilters, rangeConfig: RangeConfig) => {
+  const loadTableData = useCallback(async (
+    dimension: TableDimension, 
+    filters: ActiveFilters, 
+    rangeConfig: RangeConfig,
+    conversionEvent: string | null
+  ) => {
     if (!selectedWebsite) return;
 
     setTableLoading(true);
+    const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
     try {
       const data = await fetchTableData({
         tag_id: selectedWebsite.id,
         dimension,
         range: rangeConfig,
         filters: getFiltersParam(filters),
+        conversion_events: conversionEvents,
         cost: { mode: "none" },
         pagination: { limit: 50 },
       });
@@ -210,11 +228,11 @@ const Overview = () => {
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadAllData(activeFilters, tableDimension, getRangeConfig());
+      loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent);
       // Also load cost sources
       loadCostSources();
     }
-  }, [selectedWebsite, dateRange]);
+  }, [selectedWebsite, dateRange, selectedConversionEvent]);
 
   // Load cost sources
   const loadCostSources = useCallback(async () => {
@@ -252,13 +270,13 @@ const Overview = () => {
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadAllData(newFilters, tableDimension, getRangeConfig());
+    loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent);
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
     setSelectedCostSourceId(null); // Reset cost source when dimension changes
-    loadTableData(newDimension, activeFilters, getRangeConfig());
+    loadTableData(newDimension, activeFilters, getRangeConfig(), selectedConversionEvent);
   };
 
   const handleCostSourceChange = (costSourceId: string | null) => {
@@ -272,6 +290,10 @@ const Overview = () => {
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
     setDateRange(newDateRange);
+  };
+
+  const handleConversionEventChange = (event: string | null) => {
+    setSelectedConversionEvent(event);
   };
 
   const handleBotClick = (dimValue: string) => {
@@ -329,7 +351,15 @@ const Overview = () => {
                   Here's what we're seeing so far.
                 </p>
               </div>
-              <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
+              <div className="flex items-center gap-2">
+                <ConversionEventFilter
+                  availableEvents={filterOptions?.conversion_events ?? []}
+                  selectedEvent={selectedConversionEvent}
+                  onEventChange={handleConversionEventChange}
+                  loading={loading}
+                />
+                <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
+              </div>
             </div>
           </div>
 
