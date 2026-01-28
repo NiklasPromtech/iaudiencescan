@@ -22,6 +22,7 @@ import {
   fetchRealtimeVisitors,
   fetchEventsTable,
   fetchWalletsTable,
+  fetchWalletExtensions,
   listCostSources,
   ScorecardResponse, 
   TableResponse, 
@@ -31,6 +32,7 @@ import {
   CostSource,
   EventsTableResponse,
   WalletsTableResponse,
+  WalletExtensionsResponse,
   DIMENSION_TO_FILTER,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +41,7 @@ import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
 import { EventsTable } from "@/components/overview/EventsTable";
 import { WalletsOverviewTable } from "@/components/overview/WalletsOverviewTable";
+import { WalletExtensionsTable } from "@/components/overview/WalletExtensionsTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -65,8 +68,10 @@ const Overview = () => {
   const [selectedConversionEvent, setSelectedConversionEvent] = useState<string | null>(null);
   const [eventsData, setEventsData] = useState<EventsTableResponse | null>(null);
   const [walletsData, setWalletsData] = useState<WalletsTableResponse | null>(null);
+  const [walletExtensionsData, setWalletExtensionsData] = useState<WalletExtensionsResponse | null>(null);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [walletsLoading, setWalletsLoading] = useState(true);
+  const [walletExtensionsLoading, setWalletExtensionsLoading] = useState(true);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -164,6 +169,7 @@ const Overview = () => {
     setTableLoading(true);
     setEventsLoading(true);
     setWalletsLoading(true);
+    setWalletExtensionsLoading(true);
     setError(null);
 
     const filtersParam = getFiltersParam(filters);
@@ -238,6 +244,20 @@ const Overview = () => {
       console.error("Failed to load wallets data:", err);
     } finally {
       setWalletsLoading(false);
+    }
+
+    // Fetch wallet extensions data
+    try {
+      const walletExtensionsTableData = await fetchWalletExtensions({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: filtersParam,
+      });
+      setWalletExtensionsData(walletExtensionsTableData);
+    } catch (err) {
+      console.error("Failed to load wallet extensions data:", err);
+    } finally {
+      setWalletExtensionsLoading(false);
     }
   }, [selectedWebsite, getFiltersParam]);
 
@@ -506,8 +526,8 @@ const Overview = () => {
             />
           </div>
 
-          {/* Events & Wallets Tables */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Events, Wallets & Extensions Tables */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
             <EventsTable
               data={eventsData?.rows ?? []}
               loading={eventsLoading}
@@ -517,6 +537,11 @@ const Overview = () => {
               data={walletsData?.rows ?? []}
               loading={walletsLoading}
               totalRows={walletsData?.pagination?.total_rows ?? 0}
+            />
+            <WalletExtensionsTable
+              data={walletExtensionsData?.rows ?? []}
+              loading={walletExtensionsLoading}
+              totalRows={walletExtensionsData?.pagination?.total_rows ?? 0}
             />
           </div>
 

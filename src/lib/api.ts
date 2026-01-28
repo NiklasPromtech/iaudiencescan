@@ -475,6 +475,51 @@ export async function fetchWalletsTable(request: WalletsTableRequest): Promise<W
   return response.json();
 }
 
+// Wallet Extensions types
+export interface WalletExtensionsRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+}
+
+export interface WalletExtensionsRow {
+  extension_name: string;
+  extension_type: string;
+  unique_wallets: number;
+  first_seen: string;
+  last_seen: string;
+}
+
+export interface WalletExtensionsResponse {
+  success: boolean;
+  rows: WalletExtensionsRow[];
+  pagination: { limit: number; offset: number; total_rows: number };
+}
+
+export async function fetchWalletExtensions(request: WalletExtensionsRequest): Promise<WalletExtensionsResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallet-extensions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 // Realtime Analytics types
 export interface RealtimeResponse {
   success: boolean;

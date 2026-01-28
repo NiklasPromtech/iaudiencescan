@@ -47,24 +47,20 @@ export function MetricCell({
 
   return (
     <div className={cn("flex flex-col text-right", className)}>
-      {/* Count row */}
+      {/* Row 1: Count - always visible */}
       <span className="font-medium tabular-nums text-foreground">
         {count !== null ? count.toLocaleString() : "—"}
       </span>
       
-      {/* Rate row */}
-      {showRate && rate !== undefined && (
-        <span className={cn("text-xs tabular-nums", rateColorClass)}>
-          {rate !== null ? `${Math.round(rate)}%` : "—"}
-        </span>
-      )}
+      {/* Row 2: Rate - always takes space, content conditional */}
+      <span className={cn("text-xs tabular-nums h-4", showRate ? rateColorClass : "invisible")}>
+        {showRate && rate !== undefined && rate !== null ? `${Math.round(rate)}%` : "—"}
+      </span>
       
-      {/* Cost-per row */}
-      {showCost && (
-        <span className="text-xs tabular-nums text-muted-foreground">
-          {formatCurrency(costPer ?? null)}
-        </span>
-      )}
+      {/* Row 3: Cost-per - always takes space when showCost is true for any cell */}
+      <span className={cn("text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
+        {showCost ? formatCurrency(costPer ?? null) : "—"}
+      </span>
     </div>
   );
 }
