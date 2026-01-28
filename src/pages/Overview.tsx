@@ -95,30 +95,43 @@ const Overview = () => {
   }, [dateRange]);
 
   const getRangeConfig = useCallback((): RangeConfig => {
-    // For "Today" or custom ranges with today included, use "custom" type with explicit dates
-    if (dateRange.includeToday || dateRange.type === "custom") {
-      const today = new Date();
-      const todayStr = format(today, "yyyy-MM-dd");
-      
-      if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
+    const today = new Date();
+    const todayStr = format(today, "yyyy-MM-dd");
+    
+    // Custom date range (calendar selection)
+    if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
+      return {
+        type: "custom",
+        from: format(dateRange.from, "yyyy-MM-dd"),
+        to: format(dateRange.to, "yyyy-MM-dd"),
+        timezone,
+      };
+    }
+    
+    // Preset with includeToday: calculate from (days ago) to today
+    if (dateRange.includeToday && dateRange.days !== undefined) {
+      // For "Today" preset (days: 0)
+      if (dateRange.days === 0) {
         return {
           type: "custom",
-          from: format(dateRange.from, "yyyy-MM-dd"),
-          to: format(dateRange.to, "yyyy-MM-dd"),
+          from: todayStr,
+          to: todayStr,
           timezone,
         };
       }
       
-      // For "Today" preset
+      // For multi-day presets like "Last 7 days" including today
+      const fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - dateRange.days + 1);
       return {
         type: "custom",
-        from: todayStr,
+        from: format(fromDate, "yyyy-MM-dd"),
         to: todayStr,
         timezone,
       };
     }
     
-    // For standard presets, use last_full_days
+    // For standard presets (excluding today), use last_full_days
     return {
       type: "last_full_days",
       days: dateRange.days || 7,
