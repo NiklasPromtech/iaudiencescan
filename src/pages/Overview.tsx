@@ -207,7 +207,7 @@ const Overview = () => {
           tag_id: selectedWebsite.id,
           range: rangeConfig,
           filters: filtersParam,
-          sort: { by: "total_balance_usd", dir: "desc" },
+          sort: { by: "action_count", dir: "desc" },
           pagination: { limit: 10 },
         }),
       ]);
@@ -498,7 +498,6 @@ const Overview = () => {
             />
             <WalletsOverviewTable
               data={walletsData?.rows ?? []}
-              summary={walletsData?.summary ?? null}
               loading={walletsLoading}
               totalRows={walletsData?.pagination?.total_rows ?? 0}
             />
