@@ -414,36 +414,25 @@ export async function fetchEventsTable(request: EventsTableRequest): Promise<Eve
   return response.json();
 }
 
-// Wallets Table types
+// Wallets Table types (actions breakdown)
 export interface WalletsTableRequest {
   tag_id: string;
   range: RangeConfig;
   filters?: Record<string, string[]>;
-  balance_filter?: { min?: number; max?: number };
-  sort?: { by: "total_balance_usd" | "visit_count" | "first_seen" | "last_seen"; dir: "asc" | "desc" };
+  sort?: { by: "action_count" | "unique_wallets" | "first_seen" | "last_seen"; dir: "asc" | "desc" };
   pagination?: { limit?: number; offset?: number };
 }
 
 export interface WalletsTableRow {
-  wallet_address: string;
-  types: string[];
-  visit_count: number;
-  total_balance_usd: number | null;
-  chains: string[];
-  first_seen?: string;
-  last_seen?: string;
-}
-
-export interface WalletsTableSummary {
-  total_wallets: number;
-  total_balance_usd: number;
-  wallets_with_balance: number;
-  wallets_zero_balance: number;
+  action_type: string;
+  action_count: number;
+  unique_wallets: number;
+  first_seen: string;
+  last_seen: string;
 }
 
 export interface WalletsTableResponse {
   success: boolean;
-  summary: WalletsTableSummary;
   rows: WalletsTableRow[];
   pagination: { limit: number; offset: number; total_rows: number };
 }
