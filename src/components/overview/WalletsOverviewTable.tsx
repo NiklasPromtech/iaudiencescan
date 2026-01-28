@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Wallet } from "lucide-react";
+import { Wallet, ChevronDown, ChevronUp } from "lucide-react";
 import { WalletsTableRow } from "@/lib/api";
 import { format, parseISO } from "date-fns";
 
@@ -19,11 +21,15 @@ interface WalletsOverviewTableProps {
   totalRows: number;
 }
 
+const DEFAULT_VISIBLE_COUNT = 5;
+
 export const WalletsOverviewTable = ({ 
   data, 
   loading, 
   totalRows 
 }: WalletsOverviewTableProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "MMM d, HH:mm");
@@ -35,6 +41,10 @@ export const WalletsOverviewTable = ({
   const formatActionType = (type: string) => {
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
+
+  const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
+  const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
+  const hiddenCount = data.length - DEFAULT_VISIBLE_COUNT;
 
   if (loading) {
     return (
@@ -90,7 +100,7 @@ export const WalletsOverviewTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
+            {visibleData.map((row) => (
               <TableRow key={row.action_type} className="border-border">
                 <TableCell>
                   <Badge 
@@ -117,6 +127,29 @@ export const WalletsOverviewTable = ({
           </TableBody>
         </Table>
       </div>
+
+      {hasMore && (
+        <div className="mt-4 pt-3 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                View all {hiddenCount} more
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </Card>
   );
 };

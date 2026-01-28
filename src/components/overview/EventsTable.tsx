@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Target } from "lucide-react";
+import { Target, ChevronDown, ChevronUp } from "lucide-react";
 import { EventsTableRow } from "@/lib/api";
 import { format } from "date-fns";
 
@@ -18,7 +20,11 @@ interface EventsTableProps {
   totalRows: number;
 }
 
+const DEFAULT_VISIBLE_COUNT = 5;
+
 export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const formatDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "MMM d, HH:mm");
@@ -26,6 +32,10 @@ export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
       return dateStr;
     }
   };
+
+  const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
+  const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
+  const hiddenCount = data.length - DEFAULT_VISIBLE_COUNT;
 
   if (loading) {
     return (
@@ -81,7 +91,7 @@ export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
+            {visibleData.map((row) => (
               <TableRow key={row.event_type} className="border-border">
                 <TableCell className="font-medium text-foreground">
                   {row.event_type}
@@ -103,6 +113,29 @@ export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
           </TableBody>
         </Table>
       </div>
+
+      {hasMore && (
+        <div className="mt-4 pt-3 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                View all {hiddenCount} more
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </Card>
   );
 };
