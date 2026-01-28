@@ -640,19 +640,74 @@ export const SUPPORTED_CHAINS = [
 
 export type SupportedChain = typeof SUPPORTED_CHAINS[number]["value"];
 
+export type ScanStep =
+  | "QUEUED"
+  | "FETCHING_BALANCES"
+  | "FETCHING_TRANSACTIONS"
+  | "BUILDING_NETWORK"
+  | "ENRICHING_SOCIALS"
+  | "FETCHING_NEWS"
+  | "FINALIZING"
+  | "DONE";
+
 export interface Scan {
   id: string;
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  step: ScanStep;
+  step_label: string;
+  progress: number;
   wallet_count: number;
+  processed_count: number;
   chain: string;
   name: string | null;
   audience_id: string | null;
   website_id: string | null;
+  error: string | null;
   created_at: string;
-  completed_at?: string | null;
-  progress?: number;
-  processed_count?: number;
-  error?: string | null;
+  completed_at: string | null;
+}
+
+// Scan results types
+export interface ScanResultsNetworkNode {
+  token_address: string;
+  token_name: string;
+  token_symbol: string;
+  token_logo_url: string;
+  transaction_count: number;
+  unique_wallets: number;
+}
+
+export interface ScanResultsNetworkEdge {
+  source: string;
+  target: string;
+  weight: number;
+}
+
+export interface ScanResultsTopToken {
+  token_address: string;
+  token_symbol: string;
+  token_name?: string;
+  token_logo_url?: string;
+  website: string;
+  twitter: string;
+  description: string;
+  current_price_usd: number;
+  market_cap_usd: number;
+  news_count: number;
+  unique_wallets?: number;
+}
+
+export interface ScanResultsResponse {
+  scan_id: string;
+  status: string;
+  wallets_processed: number;
+  tokens_found: number;
+  tokens_enriched: number;
+  network: {
+    nodes: ScanResultsNetworkNode[];
+    edges: ScanResultsNetworkEdge[];
+  };
+  top_tokens: ScanResultsTopToken[];
 }
 
 export interface CreateScanRequest {
@@ -665,6 +720,9 @@ export interface CreateScanRequest {
 
 export interface ScanListResponse {
   scans: Scan[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface ScanResponse {
@@ -745,6 +803,28 @@ export async function getScan(scanId: string): Promise<Scan> {
 
   const data = await response.json();
   return data.scan; // API returns { scan: {...} }
+}
+
+export async function getScanResults(scanId: string): Promise<ScanResultsResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans/${scanId}/results`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 // Wallet Enrichment types and function

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Search, RefreshCw, ExternalLink } from "lucide-react";
 import { listScans, Scan, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
@@ -39,6 +40,17 @@ const Scans = () => {
   useEffect(() => {
     fetchScans();
   }, [fetchScans]);
+
+  // Auto-refresh when any scan is processing
+  useEffect(() => {
+    const hasActiveScans = scans.some(
+      (s) => s.status === "PENDING" || s.status === "PROCESSING"
+    );
+    if (hasActiveScans && !loading) {
+      const interval = setInterval(fetchScans, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [scans, loading, fetchScans]);
 
   const getChainLabel = (chain: string) => {
     return SUPPORTED_CHAINS.find((c) => c.value === chain)?.label || chain;
@@ -115,27 +127,39 @@ const Scans = () => {
                 className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => navigate(`/scans/${scan.id}`)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Search className="h-5 w-5 text-primary" />
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Search className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          {scan.name || `Scan ${scan.id.slice(0, 8)}`}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {scan.wallet_count} wallets · {getChainLabel(scan.chain)} ·{" "}
+                          {formatDistanceToNow(new Date(scan.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">
-                        {scan.name || `Scan ${scan.id.slice(0, 8)}`}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {scan.wallet_count} wallets · {getChainLabel(scan.chain)} ·{" "}
-                        {formatDistanceToNow(new Date(scan.created_at), { addSuffix: true })}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className={statusColors[scan.status] || ""}>
+                        {scan.status}
+                      </Badge>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={statusColors[scan.status] || ""}>
-                      {scan.status}
-                    </Badge>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                  </div>
+                  {/* Progress for active scans */}
+                  {(scan.status === "PROCESSING" || scan.status === "PENDING") && (
+                    <div className="mt-3 ml-14">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>{scan.step_label || "Queued"}</span>
+                        <span>{Math.round((scan.progress || 0) * 100)}%</span>
+                      </div>
+                      <Progress value={(scan.progress || 0) * 100} className="h-1" />
+                    </div>
+                  )}
                 </div>
               </Card>
             ))}
