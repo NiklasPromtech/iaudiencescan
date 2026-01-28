@@ -27,7 +27,7 @@ interface DateRangePickerProps {
 const PRESETS = [
   { days: 0, label: "Today", includeToday: true },
   { days: 1, label: "Yesterday" },
-  { days: 7, label: "Last 7 days" },
+  { days: 7, label: "Last 7 days", includeToday: true },
   { days: 14, label: "Last 14 days" },
   { days: 30, label: "Last 30 days" },
   { days: 90, label: "Last 90 days" },
