@@ -158,13 +158,16 @@ const ScanDetail = () => {
               </div>
 
               {/* Progress Bar (for processing) */}
-              {scan.status === "PROCESSING" && scan.progress !== undefined && (
+              {(scan.status === "PROCESSING" || scan.status === "PENDING") && (
                 <div className="mb-6">
+                  <p className="text-sm font-medium text-foreground mb-2">
+                    {scan.step_label || "Queued"}
+                  </p>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{Math.round(scan.progress * 100)}%</span>
+                    <span className="font-medium">{Math.round((scan.progress || 0) * 100)}%</span>
                   </div>
-                  <Progress value={scan.progress * 100} />
+                  <Progress value={(scan.progress || 0) * 100} />
                 </div>
               )}
 
@@ -245,7 +248,7 @@ const ScanDetail = () => {
                       View the results and insights from this scan
                     </p>
                   </div>
-                  <Button onClick={() => navigate(`/network/${scan.id}`)}>
+                  <Button onClick={() => navigate(`/scans/${scan.id}/results`)}>
                     View Results
                   </Button>
                 </div>

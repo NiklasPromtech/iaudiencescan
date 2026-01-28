@@ -235,6 +235,7 @@ export type Database = {
           processed_count: number
           progress: number
           status: Database["public"]["Enums"]["ScanStatus"]
+          step: Database["public"]["Enums"]["ScanStep"]
           updated_at: string
           user_id: string
           wallet_count: number
@@ -252,6 +253,7 @@ export type Database = {
           processed_count?: number
           progress?: number
           status?: Database["public"]["Enums"]["ScanStatus"]
+          step?: Database["public"]["Enums"]["ScanStep"]
           updated_at?: string
           user_id: string
           wallet_count: number
@@ -269,6 +271,7 @@ export type Database = {
           processed_count?: number
           progress?: number
           status?: Database["public"]["Enums"]["ScanStatus"]
+          step?: Database["public"]["Enums"]["ScanStep"]
           updated_at?: string
           user_id?: string
           wallet_count?: number
@@ -536,6 +539,15 @@ export type Database = {
       CovalentRequestType: "WALLET_ENRICHMENT" | "SCAN_WALLET"
       Plan: "FREE" | "PRO" | "ENTERPRISE"
       ScanStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+      ScanStep:
+        | "QUEUED"
+        | "FETCHING_BALANCES"
+        | "FETCHING_TRANSACTIONS"
+        | "BUILDING_NETWORK"
+        | "ENRICHING_SOCIALS"
+        | "FETCHING_NEWS"
+        | "FINALIZING"
+        | "DONE"
       StudyStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED"
       WebsiteStatus: "PENDING" | "VERIFIED" | "FAILED"
     }
@@ -669,6 +681,16 @@ export const Constants = {
       CovalentRequestType: ["WALLET_ENRICHMENT", "SCAN_WALLET"],
       Plan: ["FREE", "PRO", "ENTERPRISE"],
       ScanStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+      ScanStep: [
+        "QUEUED",
+        "FETCHING_BALANCES",
+        "FETCHING_TRANSACTIONS",
+        "BUILDING_NETWORK",
+        "ENRICHING_SOCIALS",
+        "FETCHING_NEWS",
+        "FINALIZING",
+        "DONE",
+      ],
       StudyStatus: ["PENDING", "RUNNING", "COMPLETED", "FAILED"],
       WebsiteStatus: ["PENDING", "VERIFIED", "FAILED"],
     },

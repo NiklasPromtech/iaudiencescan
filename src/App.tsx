@@ -57,6 +57,7 @@ import Settings from "./pages/Settings";
 import Bots from "./pages/Bots";
 import Scans from "./pages/Scans";
 import ScanDetail from "./pages/ScanDetail";
+import ScanResults from "./pages/ScanResults";
 import Wallets from "./pages/Wallets";
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => (
           <Route path="/wallets" element={<Wallets />} />
           <Route path="/scans" element={<Scans />} />
           <Route path="/scans/:scanId" element={<ScanDetail />} />
+          <Route path="/scans/:scanId/results" element={<ScanResults />} />
           <Route path="/costs" element={<Costs />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/bots" element={<Bots />} />
