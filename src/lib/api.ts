@@ -669,12 +669,19 @@ export interface Scan {
 
 // Scan results types
 export interface ScanResultsNetworkNode {
-  token_address: string;
-  token_name: string;
-  token_symbol: string;
-  token_logo_url: string;
-  transaction_count: number;
+  contract_address: string;
+  contract_name: string;
+  contract_ticker: string;
+  chain_name: string;
+  chain_display_name: string;
+  logo_url: string;
+  token_type: string;
+  is_native_token: boolean;
   unique_wallets: number;
+  total_balance: number;
+  total_value_usd: number;
+  avg_balance: number;
+  avg_value_usd: number;
 }
 
 export interface ScanResultsNetworkEdge {
@@ -684,48 +691,50 @@ export interface ScanResultsNetworkEdge {
 }
 
 export interface ScanResultsTopToken {
-  token_address: string;
-  token_symbol: string;
-  token_name?: string;
-  token_logo_url?: string;
-  website: string;
-  twitter: string;
-  description: string;
-  current_price_usd: number;
-  market_cap_usd: number;
-  news_count: number;
-  unique_wallets?: number;
+  contract_address: string;
+  contract_name: string;
+  contract_ticker: string;
+  chain_name: string;
+  chain_display_name: string;
+  logo_url: string;
+  token_type: string;
+  is_native_token: boolean;
+  unique_wallets: number;
+  total_balance: number;
+  total_value_usd: number | null;
+  avg_balance: number;
+  avg_value_usd: number | null;
+  // Enriched fields (may not be present)
+  website?: string;
+  twitter?: string;
+  description?: string;
+  current_price_usd?: number | null;
+  market_cap_usd?: number | null;
+  news_count?: number;
 }
 
 export interface ScanResultsResponse {
-  scan_id: string;
-  status: string;
-  wallets_processed: number;
-  tokens_found: number;
-  tokens_enriched: number;
-  network: {
+  total_wallets: number;
+  wallets_with_balance: number;
+  total_tokens: number;
+  total_value_usd: number;
+  top_tokens: ScanResultsTopToken[];
+  token_network: {
     nodes: ScanResultsNetworkNode[];
     edges: ScanResultsNetworkEdge[];
   };
-  top_tokens: ScanResultsTopToken[];
 }
 
+// Scan API functions
 export interface CreateScanRequest {
   wallets: string[];
   chain: SupportedChain;
   name?: string;
-  website_id?: string;
   audience_id?: string;
+  website_id?: string;
 }
 
-export interface ScanListResponse {
-  scans: Scan[];
-  total: number;
-  limit: number;
-  offset: number;
-}
-
-export interface ScanResponse {
+export interface CreateScanResponse {
   scan_id: string;
   status: string;
   wallet_count: number;
@@ -735,8 +744,14 @@ export interface ScanResponse {
   created_at: string;
 }
 
-// Scan API functions
-export async function createScan(data: CreateScanRequest): Promise<ScanResponse> {
+export interface ScansListResponse {
+  scans: Scan[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export async function createScan(data: CreateScanRequest): Promise<CreateScanResponse> {
   const token = await getAuthToken();
   
   if (!token) {
@@ -760,14 +775,19 @@ export async function createScan(data: CreateScanRequest): Promise<ScanResponse>
   return response.json();
 }
 
-export async function listScans(): Promise<ScanListResponse> {
+export async function listScans(limit?: number, offset?: number): Promise<ScansListResponse> {
   const token = await getAuthToken();
   
   if (!token) {
     throw new Error("Not authenticated");
   }
 
-  const response = await fetch(`${ANALYTICS_API_URL}/scans`, {
+  const params = new URLSearchParams();
+  if (limit) params.append("limit", String(limit));
+  if (offset) params.append("offset", String(offset));
+  const queryString = params.toString() ? `?${params.toString()}` : "";
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans${queryString}`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -802,7 +822,7 @@ export async function getScan(scanId: string): Promise<Scan> {
   }
 
   const data = await response.json();
-  return data.scan; // API returns { scan: {...} }
+  return data.scan;
 }
 
 export async function getScanResults(scanId: string): Promise<ScanResultsResponse> {

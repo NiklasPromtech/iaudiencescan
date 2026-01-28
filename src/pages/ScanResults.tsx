@@ -93,7 +93,7 @@ const ScanResults = () => {
   };
 
   // Get tokens with social data for targeting opportunities
-  const tokensWithSocials = results?.top_tokens.filter(
+  const tokensWithSocials = results?.top_tokens?.filter(
     (t) => t.twitter || t.website
   ) || [];
 
@@ -104,6 +104,11 @@ const ScanResults = () => {
   const visibleTargetingTokens = isTargetingExpanded
     ? tokensWithSocials
     : tokensWithSocials.slice(0, DEFAULT_VISIBLE_TOKENS);
+
+  // Computed stats
+  const walletsProcessed = results?.total_wallets || 0;
+  const tokensFound = results?.total_tokens || 0;
+  const tokensEnriched = results?.top_tokens?.filter(t => t.twitter || t.website || t.description).length || 0;
 
   return (
     <DashboardLayout>
@@ -188,7 +193,7 @@ const ScanResults = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Wallets</p>
                     <p className="text-2xl font-semibold">
-                      {results.wallets_processed}
+                      {walletsProcessed}
                     </p>
                   </div>
                 </div>
@@ -200,7 +205,7 @@ const ScanResults = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Tokens Found</p>
-                    <p className="text-2xl font-semibold">{results.tokens_found}</p>
+                    <p className="text-2xl font-semibold">{tokensFound}</p>
                   </div>
                 </div>
               </Card>
@@ -212,7 +217,7 @@ const ScanResults = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Enriched</p>
                     <p className="text-2xl font-semibold">
-                      {results.tokens_enriched}
+                      {tokensEnriched}
                     </p>
                   </div>
                 </div>
@@ -246,13 +251,13 @@ const ScanResults = () => {
                 </TableHeader>
                 <TableBody>
                   {visibleTopTokens.map((token) => (
-                    <TableRow key={token.token_address}>
+                    <TableRow key={token.contract_address}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {token.token_logo_url ? (
+                          {token.logo_url ? (
                             <img
-                              src={token.token_logo_url}
-                              alt={token.token_symbol}
+                              src={token.logo_url}
+                              alt={token.contract_ticker}
                               className="h-8 w-8 rounded-full"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = "none";
@@ -264,10 +269,10 @@ const ScanResults = () => {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium">{token.token_symbol}</p>
-                            {token.token_name && (
+                            <p className="font-medium">{token.contract_ticker}</p>
+                            {token.contract_name && (
                               <p className="text-xs text-muted-foreground">
-                                {token.token_name}
+                                {token.contract_name}
                               </p>
                             )}
                           </div>
@@ -328,13 +333,13 @@ const ScanResults = () => {
                   </TableHeader>
                   <TableBody>
                     {visibleTargetingTokens.map((token) => (
-                      <TableRow key={token.token_address}>
+                      <TableRow key={token.contract_address}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            {token.token_logo_url ? (
+                            {token.logo_url ? (
                               <img
-                                src={token.token_logo_url}
-                                alt={token.token_symbol}
+                                src={token.logo_url}
+                                alt={token.contract_ticker}
                                 className="h-8 w-8 rounded-full"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display = "none";
@@ -345,7 +350,7 @@ const ScanResults = () => {
                                 <Coins className="h-4 w-4 text-muted-foreground" />
                               </div>
                             )}
-                            <span className="font-medium">{token.token_symbol}</span>
+                            <span className="font-medium">{token.contract_ticker}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -381,7 +386,7 @@ const ScanResults = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          {token.news_count > 0 ? (
+                          {token.news_count && token.news_count > 0 ? (
                             <Badge variant="secondary" className="gap-1">
                               <Newspaper className="h-3 w-3" />
                               {token.news_count}
