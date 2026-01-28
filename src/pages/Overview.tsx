@@ -170,8 +170,8 @@ const Overview = () => {
     const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
 
     try {
-      // Fetch all data in parallel
-      const [scorecardData, dailyChartData, dimensionTableData, eventsTableData, walletsTableData] = await Promise.all([
+      // Fetch core data in parallel - these are critical
+      const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
         fetchScorecard({
           tag_id: selectedWebsite.id,
           range: rangeConfig,
@@ -196,34 +196,47 @@ const Overview = () => {
           cost: { mode: "none" },
           pagination: { limit: 50 },
         }),
-        fetchEventsTable({
-          tag_id: selectedWebsite.id,
-          range: rangeConfig,
-          filters: filtersParam,
-          sort: { by: "event_count", dir: "desc" },
-          pagination: { limit: 10 },
-        }),
-        fetchWalletsTable({
-          tag_id: selectedWebsite.id,
-          range: rangeConfig,
-          filters: filtersParam,
-          sort: { by: "action_count", dir: "desc" },
-          pagination: { limit: 10 },
-        }),
       ]);
 
       setScorecard(scorecardData);
       setDailyData(dailyChartData);
       setTableData(dimensionTableData);
-      setEventsData(eventsTableData);
-      setWalletsData(walletsTableData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load analytics");
     } finally {
       setLoading(false);
       setChartLoading(false);
       setTableLoading(false);
+    }
+
+    // Fetch optional data separately - these can fail without breaking the dashboard
+    try {
+      const eventsTableData = await fetchEventsTable({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: filtersParam,
+        sort: { by: "event_count", dir: "desc" },
+        pagination: { limit: 10 },
+      });
+      setEventsData(eventsTableData);
+    } catch (err) {
+      console.error("Failed to load events data:", err);
+    } finally {
       setEventsLoading(false);
+    }
+
+    try {
+      const walletsTableData = await fetchWalletsTable({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: filtersParam,
+        sort: { by: "action_count", dir: "desc" },
+        pagination: { limit: 10 },
+      });
+      setWalletsData(walletsTableData);
+    } catch (err) {
+      console.error("Failed to load wallets data:", err);
+    } finally {
       setWalletsLoading(false);
     }
   }, [selectedWebsite, getFiltersParam]);
