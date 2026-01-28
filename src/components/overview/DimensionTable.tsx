@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -82,6 +82,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
   { id: "bots", label: "Bots", defaultVisible: false },
   { id: "wallets", label: "Wallets", defaultVisible: false },
   { id: "conversions", label: "Conversions", defaultVisible: false },
+  { id: "costs", label: "Costs", defaultVisible: false },
 ];
 
 export function DimensionTable({
@@ -104,9 +105,12 @@ export function DimensionTable({
     (cs) => cs.dimension === costDimension
   );
   const supportsCost = COST_SUPPORTED_DIMENSIONS.includes(dimension);
+  const hasCostSource = selectedCostSourceId !== null && selectedCostSourceId !== "none";
+  
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
   const hasConversionData = data.some((row) => row.converted_users !== null && row.converted_users > 0);
+  const hasCostData = hasCostSource && data.some((row) => row.cost_total !== null);
 
   const [visibleGroups, setVisibleGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -117,6 +121,13 @@ export function DimensionTable({
     });
     return initial;
   });
+
+  // Auto-toggle costs visibility when cost source is selected
+  useEffect(() => {
+    if (hasCostSource) {
+      setVisibleGroups((prev) => new Set([...prev, "costs"]));
+    }
+  }, [hasCostSource]);
 
   const dimensionLabel = DIMENSION_OPTIONS.find((d) => d.value === dimension)?.label || dimension;
 
@@ -135,6 +146,16 @@ export function DimensionTable({
   const calcRate = (numerator: number | null, denominator: number): string => {
     if (numerator === null || denominator === 0) return "—";
     return `${Math.round((numerator / denominator) * 100)}%`;
+  };
+
+  const formatCurrency = (value: number | null): string => {
+    if (value === null || value === undefined) return "—";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   };
 
   if (loading) {
@@ -287,7 +308,16 @@ export function DimensionTable({
                 {visibleGroups.has("conversions") && (
                   <>
                     <TableHead className="text-right font-medium text-muted-foreground">Conv.</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground">Total</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground border-r border-border/50">Total</TableHead>
+                  </>
+                )}
+
+                {/* Costs Group */}
+                {visibleGroups.has("costs") && (
+                  <>
+                    <TableHead className="text-right font-medium text-muted-foreground">Cost</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground">CPV</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground">CPA</TableHead>
                   </>
                 )}
               </TableRow>
@@ -365,8 +395,23 @@ export function DimensionTable({
                         <TableCell className="text-right tabular-nums text-muted-foreground">
                           {row.converted_users?.toLocaleString() ?? "—"}
                         </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                        <TableCell className="text-right tabular-nums text-muted-foreground border-r border-border/50">
                           {row.conversions_total?.toLocaleString() ?? "—"}
+                        </TableCell>
+                      </>
+                    )}
+
+                    {/* Costs Group */}
+                    {visibleGroups.has("costs") && (
+                      <>
+                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                          {formatCurrency(row.cost_total)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                          {formatCurrency(row.cost_per_visitor)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-muted-foreground">
+                          {formatCurrency(row.cost_per_conversion)}
                         </TableCell>
                       </>
                     )}

@@ -245,7 +245,8 @@ const Overview = () => {
     dimension: TableDimension, 
     filters: ActiveFilters, 
     rangeConfig: RangeConfig,
-    conversionEvent: string | null
+    conversionEvent: string | null,
+    costSourceId: string | null = null
   ) => {
     if (!selectedWebsite) return;
 
@@ -258,7 +259,9 @@ const Overview = () => {
         range: rangeConfig,
         filters: getFiltersParam(filters),
         conversion_events: conversionEvents,
-        cost: { mode: "none" },
+        cost: costSourceId 
+          ? { mode: "cost_source", cost_source_id: costSourceId }
+          : { mode: "none" },
         pagination: { limit: 50 },
       });
       setTableData(data);
@@ -319,12 +322,13 @@ const Overview = () => {
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
     setSelectedCostSourceId(null); // Reset cost source when dimension changes
-    loadTableData(newDimension, activeFilters, getRangeConfig(), selectedConversionEvent);
+    loadTableData(newDimension, activeFilters, getRangeConfig(), selectedConversionEvent, null);
   };
 
   const handleCostSourceChange = (costSourceId: string | null) => {
     setSelectedCostSourceId(costSourceId);
-    // TODO: Re-fetch table data with cost source if needed
+    // Re-fetch table data with the selected cost source
+    loadTableData(tableDimension, activeFilters, getRangeConfig(), selectedConversionEvent, costSourceId);
   };
 
   const handleAddCostSource = () => {
