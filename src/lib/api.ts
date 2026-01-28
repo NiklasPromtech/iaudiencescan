@@ -205,6 +205,17 @@ export interface TableRow {
   cost_total: number | null;
   cost_per_visitor: number | null;
   cost_per_conversion: number | null;
+  // Cost-per engagement fields (calculated client-side if not from API)
+  cost_per_pageview: number | null;
+  cost_per_stayed_10s: number | null;
+  cost_per_stayed_30s: number | null;
+  cost_per_stayed_60s: number | null;
+  cost_per_stayed_5m: number | null;
+  cost_per_wallet: number | null;
+  // Wallet enrichment fields
+  wallets_enriched: number | null;
+  percent_enriched: number | null;
+  total_balance_usd: number | null;
 }
 
 export interface TableResponse {

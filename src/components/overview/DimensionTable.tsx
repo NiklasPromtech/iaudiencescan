@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +22,8 @@ import {
 import { TableRow as ApiTableRow, TableDimension, CostSource } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
+import { MetricCell, ENGAGEMENT_THRESHOLDS } from "./MetricCell";
+import { DimensionCell } from "./DimensionCell";
 
 // Dimensions that support cost sources
 const COST_SUPPORTED_DIMENSIONS: TableDimension[] = [
@@ -60,7 +62,7 @@ const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
   { value: "os", label: "Operating System" },
 ];
 
-// Map TableDimension to CostDimension (they're the same for cost-supported ones)
+// Map TableDimension to CostDimension
 const DIMENSION_TO_COST_DIMENSION: Record<string, string> = {
   referrer_domain: "referrer_domain",
   utm_source: "utm_source",
@@ -79,11 +81,30 @@ interface ColumnGroup {
 const COLUMN_GROUPS: ColumnGroup[] = [
   { id: "traffic", label: "Traffic", defaultVisible: true },
   { id: "engagement", label: "Engagement", defaultVisible: true },
-  { id: "bots", label: "Bots", defaultVisible: false },
   { id: "wallets", label: "Wallets", defaultVisible: false },
   { id: "conversions", label: "Conversions", defaultVisible: false },
-  { id: "costs", label: "Costs", defaultVisible: false },
 ];
+
+// Helper to calculate cost-per if not provided by API
+function calculateCostPer(costTotal: number | null, count: number | null): number | null {
+  if (costTotal === null || count === null || count === 0) return null;
+  return costTotal / count;
+}
+
+// Enrich row with calculated cost-per fields if missing
+function enrichRowWithCostPer(row: ApiTableRow): ApiTableRow {
+  const costTotal = row.cost_total;
+  
+  return {
+    ...row,
+    cost_per_pageview: row.cost_per_pageview ?? calculateCostPer(costTotal, row.pageviews),
+    cost_per_stayed_10s: row.cost_per_stayed_10s ?? calculateCostPer(costTotal, row.stayed_10s),
+    cost_per_stayed_30s: row.cost_per_stayed_30s ?? calculateCostPer(costTotal, row.stayed_30s),
+    cost_per_stayed_60s: row.cost_per_stayed_60s ?? calculateCostPer(costTotal, row.stayed_60s),
+    cost_per_stayed_5m: row.cost_per_stayed_5m ?? calculateCostPer(costTotal, row.stayed_5m),
+    cost_per_wallet: row.cost_per_wallet ?? calculateCostPer(costTotal, row.wallet_users),
+  };
+}
 
 export function DimensionTable({
   data,
@@ -106,11 +127,16 @@ export function DimensionTable({
   );
   const supportsCost = COST_SUPPORTED_DIMENSIONS.includes(dimension);
   const hasCostSource = selectedCostSourceId !== null && selectedCostSourceId !== "none";
-  
+
+  // Enrich data with calculated cost-per fields
+  const enrichedData = useMemo(() => 
+    data.map(row => enrichRowWithCostPer(row)), 
+    [data]
+  );
+
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
   const hasConversionData = data.some((row) => row.converted_users !== null && row.converted_users > 0);
-  const hasCostData = hasCostSource && data.some((row) => row.cost_total !== null);
 
   const [visibleGroups, setVisibleGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -122,12 +148,15 @@ export function DimensionTable({
     return initial;
   });
 
-  // Auto-toggle costs visibility when cost source is selected
+  // Update visibility when data changes
   useEffect(() => {
-    if (hasCostSource) {
-      setVisibleGroups((prev) => new Set([...prev, "costs"]));
+    if (hasWalletData) {
+      setVisibleGroups(prev => new Set([...prev, "wallets"]));
     }
-  }, [hasCostSource]);
+    if (hasConversionData) {
+      setVisibleGroups(prev => new Set([...prev, "conversions"]));
+    }
+  }, [hasWalletData, hasConversionData]);
 
   const dimensionLabel = DIMENSION_OPTIONS.find((d) => d.value === dimension)?.label || dimension;
 
@@ -143,19 +172,10 @@ export function DimensionTable({
     });
   };
 
-  const calcRate = (numerator: number | null, denominator: number): string => {
-    if (numerator === null || denominator === 0) return "—";
-    return `${Math.round((numerator / denominator) * 100)}%`;
-  };
-
-  const formatCurrency = (value: number | null): string => {
-    if (value === null || value === undefined) return "—";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+  // Calculate rate as percentage
+  const calcRate = (count: number | null, visitors: number): number | null => {
+    if (count === null || visitors === 0) return null;
+    return (count / visitors) * 100;
   };
 
   if (loading) {
@@ -167,7 +187,7 @@ export function DimensionTable({
         </div>
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       </Card>
@@ -182,6 +202,7 @@ export function DimensionTable({
           <h3 className="text-h3 text-foreground">Breakdown by {dimensionLabel}</h3>
           <p className="text-p4 text-muted-foreground mt-1">
             {totalRows} total {totalRows === 1 ? "row" : "rows"}
+            {hasCostSource && " • Cost data enabled"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -252,7 +273,7 @@ export function DimensionTable({
         ))}
       </div>
 
-      {data.length === 0 ? (
+      {enrichedData.length === 0 ? (
         <div className="h-[200px] flex items-center justify-center text-muted-foreground">
           No data available for this dimension
         </div>
@@ -261,15 +282,15 @@ export function DimensionTable({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 min-w-[140px]">
+                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 min-w-[180px]">
                   {dimensionLabel}
                 </TableHead>
 
                 {/* Traffic Group */}
                 {visibleGroups.has("traffic") && (
                   <>
-                    <TableHead className="text-right font-medium">Visitors</TableHead>
-                    <TableHead className="text-right font-medium border-r border-border/50">
+                    <TableHead className="text-right font-medium min-w-[80px]">Visitors</TableHead>
+                    <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
                       Views
                     </TableHead>
                   </>
@@ -278,28 +299,20 @@ export function DimensionTable({
                 {/* Engagement Group */}
                 {visibleGroups.has("engagement") && (
                   <>
-                    <TableHead className="text-right font-medium text-muted-foreground">10s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground">30s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground">60s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground border-r border-border/50">
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">10s</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
                       5m
                     </TableHead>
                   </>
                 )}
 
-                {/* Bots Group */}
-                {visibleGroups.has("bots") && (
-                  <TableHead className="text-right font-medium text-muted-foreground border-r border-border/50">
-                    Bot %
-                  </TableHead>
-                )}
-
                 {/* Wallets Group */}
                 {visibleGroups.has("wallets") && (
                   <>
-                    <TableHead className="text-right font-medium text-muted-foreground">Wallets</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground border-r border-border/50">
-                      Rate
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">
+                      Wallets
                     </TableHead>
                   </>
                 )}
@@ -307,111 +320,130 @@ export function DimensionTable({
                 {/* Conversions Group */}
                 {visibleGroups.has("conversions") && (
                   <>
-                    <TableHead className="text-right font-medium text-muted-foreground">Conv.</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground border-r border-border/50">Total</TableHead>
-                  </>
-                )}
-
-                {/* Costs Group */}
-                {visibleGroups.has("costs") && (
-                  <>
-                    <TableHead className="text-right font-medium text-muted-foreground">Cost</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground">CPV</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground">CPA</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Conv.</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Total</TableHead>
                   </>
                 )}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row, index) => {
+              {enrichedData.map((row, index) => {
                 const visitors = row.unique_visitors;
 
                 return (
-                  <TableRow key={index} className="hover:bg-muted/30">
-                    <TableCell className="font-medium sticky left-0 bg-background z-10">
-                      {row.dim_value || "(not set)"}
+                  <TableRow 
+                    key={index} 
+                    className={cn(
+                      "hover:bg-muted/30",
+                      hasCostSource && "h-auto" // Taller rows when cost is shown
+                    )}
+                  >
+                    {/* Dimension Cell with Grade + Bot Warning */}
+                    <TableCell className="sticky left-0 bg-background z-10 py-3">
+                      <DimensionCell 
+                        row={row}
+                        showGrade={true}
+                        showCost={hasCostSource}
+                        showBotRate={true}
+                      />
                     </TableCell>
 
                     {/* Traffic Group */}
                     {visibleGroups.has("traffic") && (
                       <>
-                        <TableCell className="text-right tabular-nums">
-                          {visitors.toLocaleString()}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={visitors}
+                            showRate={false}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_visitor}
+                          />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums border-r border-border/50">
-                          {row.pageviews.toLocaleString()}
+                        <TableCell className="text-right py-3 border-r border-border/50">
+                          <MetricCell
+                            count={row.pageviews}
+                            rate={calcRate(row.pageviews, visitors)}
+                            showRate={false}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_pageview}
+                          />
                         </TableCell>
                       </>
                     )}
 
-                    {/* Engagement Group (rates) */}
+                    {/* Engagement Group */}
                     {visibleGroups.has("engagement") && (
                       <>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {calcRate(row.stayed_10s, visitors)}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.stayed_10s}
+                            rate={calcRate(row.stayed_10s, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_stayed_10s}
+                            rateThresholds={ENGAGEMENT_THRESHOLDS}
+                          />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {calcRate(row.stayed_30s, visitors)}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.stayed_30s}
+                            rate={calcRate(row.stayed_30s, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_stayed_30s}
+                            rateThresholds={ENGAGEMENT_THRESHOLDS}
+                          />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {calcRate(row.stayed_60s, visitors)}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.stayed_60s}
+                            rate={calcRate(row.stayed_60s, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_stayed_60s}
+                            rateThresholds={ENGAGEMENT_THRESHOLDS}
+                          />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground border-r border-border/50">
-                          {calcRate(row.stayed_5m, visitors)}
+                        <TableCell className="text-right py-3 border-r border-border/50">
+                          <MetricCell
+                            count={row.stayed_5m}
+                            rate={calcRate(row.stayed_5m, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_stayed_5m}
+                            rateThresholds={ENGAGEMENT_THRESHOLDS}
+                          />
                         </TableCell>
                       </>
-                    )}
-
-                    {/* Bots Group */}
-                    {visibleGroups.has("bots") && (
-                      <TableCell 
-                        className={cn(
-                          "text-right tabular-nums border-r border-border/50",
-                          onBotClick && row.bot_visitors !== null
-                            ? "text-primary cursor-pointer hover:underline"
-                            : "text-muted-foreground"
-                        )}
-                        onClick={() => onBotClick && row.bot_visitors !== null && onBotClick(row.dim_value)}
-                      >
-                        {calcRate(row.bot_visitors, visitors)}
-                      </TableCell>
                     )}
 
                     {/* Wallets Group */}
                     {visibleGroups.has("wallets") && (
-                      <>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {row.wallet_users?.toLocaleString() ?? "—"}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground border-r border-border/50">
-                          {calcRate(row.wallet_users, visitors)}
-                        </TableCell>
-                      </>
+                      <TableCell className="text-right py-3 border-r border-border/50">
+                        <MetricCell
+                          count={row.wallet_users}
+                          rate={calcRate(row.wallet_users, visitors)}
+                          showCost={hasCostSource}
+                          costPer={row.cost_per_wallet}
+                          rateThresholds={{ good: 10, warning: 2 }}
+                        />
+                      </TableCell>
                     )}
 
                     {/* Conversions Group */}
                     {visibleGroups.has("conversions") && (
                       <>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {row.converted_users?.toLocaleString() ?? "—"}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.converted_users}
+                            rate={calcRate(row.converted_users, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_conversion}
+                            rateThresholds={{ good: 5, warning: 1 }}
+                          />
                         </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground border-r border-border/50">
-                          {row.conversions_total?.toLocaleString() ?? "—"}
-                        </TableCell>
-                      </>
-                    )}
-
-                    {/* Costs Group */}
-                    {visibleGroups.has("costs") && (
-                      <>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {formatCurrency(row.cost_total)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {formatCurrency(row.cost_per_visitor)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums text-muted-foreground">
-                          {formatCurrency(row.cost_per_conversion)}
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.conversions_total}
+                            showRate={false}
+                            showCost={false}
+                          />
                         </TableCell>
                       </>
                     )}
