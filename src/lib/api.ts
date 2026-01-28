@@ -179,7 +179,8 @@ export interface TableRequest {
   filters?: Record<string, string[]>;
   conversion_events?: string[];
   cost?: {
-    mode: "none" | "manual" | "auto";
+    mode: "none" | "cost_source";
+    cost_source_id?: string;
   };
   pagination?: {
     limit?: number;
@@ -202,6 +203,8 @@ export interface TableRow {
   stayed_60s: number;
   stayed_5m: number;
   cost_total: number | null;
+  cost_per_visitor: number | null;
+  cost_per_conversion: number | null;
 }
 
 export interface TableResponse {
