@@ -51,7 +51,7 @@ const Overview = () => {
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [walletSetupOpen, setWalletSetupOpen] = useState(false);
   const [conversionSetupOpen, setConversionSetupOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7 });
+  const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7, includeToday: true });
   const [realtimeVisitors, setRealtimeVisitors] = useState<number | null>(null);
   const [costSources, setCostSources] = useState<CostSource[]>([]);
   const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
