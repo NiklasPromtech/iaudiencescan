@@ -1,339 +1,247 @@
 
-
-# Audiences Feature: Wallet-Based Audience Builder
+# Plan: Create Scan Results Page
 
 ## Overview
-Transform the `/audiences` page from a placeholder into a fully functional audience management system. Users will be able to:
-1. View a list of their saved audiences
-2. Create new audiences by selecting wallets from their tracked visitors
-3. Edit existing audiences (rename, add/remove wallets)
-4. Delete audiences
 
----
+Create a new dedicated results page at `/scans/:scanId/results` that displays completed scan data in a more useful, actionable format. The network chart will be included as a visual element but the focus will be on actionable data tables and insights.
 
-## User Flow
+## Design Philosophy
+
+The current Network page is primarily visual - it shows tokens as nodes connected by edges, which is aesthetically pleasing but hard to extract actionable insights from. The new page will:
+
+1. **Lead with actionable data** - Top tokens table with social links, prices, and targeting opportunities
+2. **Include the network graph** - As a secondary visual element, not the main focus
+3. **Provide quick stats** - Summary cards showing what was discovered
+4. **Enable actions** - Links to Twitter/X accounts, websites, and potential ad targeting
+
+## Page Structure
 
 ```text
-/audiences (List View)
-+----------------------------------------------------------+
-|  Audiences                           [+ Create Audience]  |
-|                                                           |
-|  Search audiences...                                      |
-+----------------------------------------------------------+
-|  ┌──────────────────────────────────────────────────────┐ |
-|  │ High-Value Traders          150 wallets   Jan 25     │ |
-|  │ Website: mydefiapp.com      [Edit] [Delete]          │ |
-|  ├──────────────────────────────────────────────────────┤ |
-|  │ Early Stakers               42 wallets    Jan 20     │ |
-|  │ Website: mydefiapp.com      [Edit] [Delete]          │ |
-|  └──────────────────────────────────────────────────────┘ |
-+----------------------------------------------------------+
-
-Create/Edit Audience Dialog
-+----------------------------------------------------------+
-|  Create New Audience                              [X]     |
-|                                                           |
-|  Name                                                     |
-|  [High-Value Traders                              ]       |
-|                                                           |
-|  Website                                                  |
-|  [mydefiapp.com ▼]                                       |
-|                                                           |
-|  Select Wallets                                           |
-|  ┌────────────────────────────────────────────────────┐  |
-|  │ Search wallets...         [Type ▼] [Sort ▼]        │  |
-|  ├────────────────────────────────────────────────────┤  |
-|  │ [✓] 0x1234...abcd  connected,staked  Jan 25  12x   │  |
-|  │ [✓] 0x5678...efgh  connected         Jan 24  8x    │  |
-|  │ [ ] 0x9abc...ijkl  purchased         Jan 23  3x    │  |
-|  │ ...                                                 │  |
-|  └────────────────────────────────────────────────────┘  |
-|                                                           |
-|  Selected: 2 wallets                                      |
-|                                                           |
-|                        [Cancel]  [Create Audience]        |
-+----------------------------------------------------------+
++------------------------------------------------------------------+
+|  < Back to Scan Details                    [View Network Full]   |
++------------------------------------------------------------------+
+|                                                                   |
+|  Scan Results: "My Audience Scan"                                |
+|  BNB Chain • 100 wallets analyzed • Completed 2 hours ago        |
+|                                                                   |
++------------------+-------------------+-------------------+--------+
+|   Wallets        |   Tokens Found    |  Tokens Enriched  | Social |
+|   Processed      |                   |                   | Signals|
+|      100         |       250         |        50         |   25   |
++------------------+-------------------+-------------------+--------+
+|                                                                   |
+|  +------------------------+  +----------------------------------+ |
+|  |   NETWORK CHART        |  |  TOP TOKENS                      | |
+|  |   (Compact View)       |  |  +-------------------------------+| |
+|  |                        |  |  | Logo | Symbol | Wallets |Price|| |
+|  |   [ token nodes ]      |  |  |------|--------|---------|-----|| |
+|  |                        |  |  | ETH  |  ETH   |   45    |$3200|| |
+|  |                        |  |  | BNB  |  BNB   |   38    |$320 || |
+|  |                        |  |  | USDT |  USDT  |   32    |$1.00|| |
+|  |                        |  |  +-------------------------------+| |
+|  +------------------------+  +----------------------------------+ |
+|                                                                   |
+|  TARGETING OPPORTUNITIES                                          |
+|  +---------------------------------------------------------------+|
+|  | Token  | Twitter     | Website     | News | Action            ||
+|  |--------|-------------|-------------|------|-------------------||
+|  | ETH    | @ethereum   | ethereum.org|  5   | [Add to Audience] ||
+|  | BNB    | @BNBCHAIN   | bnbchain.org|  3   | [Add to Audience] ||
+|  +---------------------------------------------------------------+|
++------------------------------------------------------------------+
 ```
 
----
+## Files to Create/Modify
 
-## 1. API Integration
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/lib/api.ts` | Modify | Add scan results types and `getScanResults()` function |
+| `src/pages/ScanResults.tsx` | Create | New results page with summary stats, compact network, and token tables |
+| `src/App.tsx` | Modify | Add route for `/scans/:scanId/results` |
+| `src/pages/ScanDetail.tsx` | Modify | Change "View Results" button to navigate to new page instead of `/network/:id` |
+| `src/pages/Scans.tsx` | Modify (optional) | Update to show inline progress with `step_label` |
 
-### New Types in `src/lib/api.ts`
+## Technical Details
+
+### 1. API Types (src/lib/api.ts)
+
+Add new types for scan results:
 
 ```typescript
-// Wallet List types
-export interface WalletRow {
-  wallet_id: string;
-  types: string[];  // ["connected", "staked", etc.]
-  first_seen: string;
-  last_seen: string;
-  visit_count: number;
-}
+export type ScanStep =
+  | "QUEUED"
+  | "FETCHING_BALANCES"
+  | "FETCHING_TRANSACTIONS"
+  | "BUILDING_NETWORK"
+  | "ENRICHING_SOCIALS"
+  | "FETCHING_NEWS"
+  | "FINALIZING"
+  | "DONE";
 
-export interface WalletListRequest {
-  tag_id: string;
-  range: RangeConfig;
-  types?: string[];           // optional filter by wallet action types
-  search?: string;            // optional search by wallet address
-  sort_by?: "wallet_id" | "first_seen" | "last_seen" | "visit_count";
-  sort_dir?: "asc" | "desc";
-  limit?: number;
-  offset?: number;
-}
-
-export interface WalletListResponse {
-  success: boolean;
-  rows: WalletRow[];
-  pagination: {
-    limit: number;
-    offset: number;
-    total_rows: number;
-  };
-}
-
-// Audience types
-export interface Audience {
+// Update existing Scan interface
+export interface Scan {
   id: string;
-  name: string;
-  website_id: string;
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  step: ScanStep;        // NEW
+  step_label: string;    // NEW
+  progress: number;
   wallet_count: number;
-  wallets: string[];
+  processed_count: number;
+  chain: string;
+  name: string | null;
+  audience_id: string | null;
+  website_id: string | null;
+  error: string | null;
   created_at: string;
-  updated_at: string;
+  completed_at: string | null;
 }
 
-export interface AudienceListResponse {
-  audiences: Audience[];
+// New results types
+export interface ScanResultsNetworkNode {
+  token_address: string;
+  token_name: string;
+  token_symbol: string;
+  token_logo_url: string;
+  transaction_count: number;
+  unique_wallets: number;
 }
 
-export interface AudienceResponse {
-  audience: Audience;
+export interface ScanResultsNetworkEdge {
+  source: string;
+  target: string;
+  weight: number;
 }
 
-export interface CreateAudienceRequest {
-  name: string;
-  website_id: string;
-  wallets: string[];
+export interface ScanResultsTopToken {
+  token_address: string;
+  token_symbol: string;
+  token_name?: string;
+  token_logo_url?: string;
+  website: string;
+  twitter: string;
+  description: string;
+  current_price_usd: number;
+  market_cap_usd: number;
+  news_count: number;
+  unique_wallets?: number;
 }
 
-export interface UpdateAudienceRequest {
-  name?: string;
-  wallets?: string[];
+export interface ScanResultsResponse {
+  scan_id: string;
+  status: string;
+  wallets_processed: number;
+  tokens_found: number;
+  tokens_enriched: number;
+  network: {
+    nodes: ScanResultsNetworkNode[];
+    edges: ScanResultsNetworkEdge[];
+  };
+  top_tokens: ScanResultsTopToken[];
+}
+
+export async function getScanResults(scanId: string): Promise<ScanResultsResponse> {
+  // Fetch from /api/scans/:id/results
 }
 ```
 
-### New API Functions
+### 2. Results Page Components (src/pages/ScanResults.tsx)
 
+The page will have these sections:
+
+**Header Section:**
+- Back button to scan detail
+- Scan name and metadata
+- Link to view full network visualization
+
+**Summary Stats Row:**
+- Four stat cards: Wallets Processed, Tokens Found, Tokens Enriched, Social Signals
+- Use the existing Card component styling
+
+**Main Content (Two Columns on Desktop):**
+
+**Left Column - Compact Network Graph:**
+- Smaller version of the network visualization
+- Uses the same SVG rendering logic as Network.tsx but in a contained card
+- Shows top 30-40 nodes for performance
+- Click to expand or navigate to full network view
+
+**Right Column - Top Tokens Table:**
+- Sortable table showing discovered tokens
+- Columns: Logo, Symbol, Name, Unique Wallets, Price
+- Limited to 10 rows with "View all" expansion
+
+**Targeting Opportunities Section (Full Width):**
+- Table showing tokens with social/web presence
+- Columns: Token, Twitter Handle (linked), Website (linked), News Count, Actions
+- Filter to only show tokens with social data
+- "Add to Audience" button for future functionality
+
+### 3. Update ScanDetail Navigation
+
+Change the "View Results" button destination:
 ```typescript
-// Wallet list
-export async function fetchWallets(request: WalletListRequest): Promise<WalletListResponse>;
+// Before
+<Button onClick={() => navigate(`/network/${scan.id}`)}>
+  View Results
+</Button>
 
-// Audiences CRUD
-export async function listAudiences(websiteId?: string): Promise<AudienceListResponse>;
-export async function getAudience(id: string): Promise<AudienceResponse>;
-export async function createAudience(data: CreateAudienceRequest): Promise<AudienceResponse>;
-export async function updateAudience(id: string, data: UpdateAudienceRequest): Promise<AudienceResponse>;
-export async function deleteAudience(id: string): Promise<void>;
+// After
+<Button onClick={() => navigate(`/scans/${scan.id}/results`)}>
+  View Results
+</Button>
 ```
 
----
+### 4. Route Configuration (App.tsx)
 
-## 2. Component Architecture
-
-### New Components
-
-| Component | Purpose |
-|-----------|---------|
-| `src/components/audiences/AudienceList.tsx` | Table/list showing all audiences with actions |
-| `src/components/audiences/AudienceDialog.tsx` | Create/Edit audience modal dialog |
-| `src/components/audiences/WalletSelector.tsx` | Searchable, filterable wallet picker with checkboxes |
-| `src/components/audiences/WalletTable.tsx` | Table displaying wallets with selection state |
-
-### Component Relationships
-
-```text
-Audiences.tsx (page)
-├── AudienceList
-│   └── (displays audiences, triggers edit/delete)
-└── AudienceDialog
-    └── WalletSelector
-        └── WalletTable
-```
-
----
-
-## 3. Page State Management
-
-### Audiences.tsx State
-
+Add new route:
 ```typescript
-// Audiences list
-const [audiences, setAudiences] = useState<Audience[]>([]);
-const [loading, setLoading] = useState(true);
-
-// Dialog state
-const [dialogOpen, setDialogOpen] = useState(false);
-const [editingAudience, setEditingAudience] = useState<Audience | null>(null);
-
-// Website context
-const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
-
-// Delete confirmation
-const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-const [audienceToDelete, setAudienceToDelete] = useState<Audience | null>(null);
+<Route path="/scans/:scanId/results" element={<ScanResults />} />
 ```
 
-### AudienceDialog State
+## UI Components Breakdown
 
+**ScanResults Page Structure:**
 ```typescript
-// Form fields
-const [name, setName] = useState("");
-const [websiteId, setWebsiteId] = useState("");
-const [selectedWallets, setSelectedWallets] = useState<string[]>([]);
-
-// Wallet loading
-const [wallets, setWallets] = useState<WalletRow[]>([]);
-const [walletsLoading, setWalletsLoading] = useState(false);
-
-// Filters for wallet selector
-const [walletSearch, setWalletSearch] = useState("");
-const [walletTypes, setWalletTypes] = useState<string[]>([]);
-const [walletSortBy, setWalletSortBy] = useState<"last_seen" | "first_seen" | "visit_count">("last_seen");
-const [walletSortDir, setWalletSortDir] = useState<"desc" | "asc">("desc");
+const ScanResults = () => {
+  const { scanId } = useParams();
+  const [scan, setScan] = useState<Scan | null>(null);
+  const [results, setResults] = useState<ScanResultsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch both scan metadata and results
+  useEffect(() => {
+    Promise.all([getScan(scanId), getScanResults(scanId)])
+      .then(([scanData, resultsData]) => {
+        setScan(scanData);
+        setResults(resultsData);
+      })
+      .finally(() => setLoading(false));
+  }, [scanId]);
+  
+  return (
+    <DashboardLayout>
+      {/* Header with back button */}
+      {/* Summary stat cards */}
+      {/* Two-column layout: Network + Token table */}
+      {/* Targeting opportunities table */}
+    </DashboardLayout>
+  );
+};
 ```
 
----
+## Implementation Order
 
-## 4. WalletSelector Component Details
+1. **Update API types** - Add ScanStep, update Scan interface, add results types and function
+2. **Create ScanResults page** - Build out the new page with all sections
+3. **Add route** - Register the new route in App.tsx
+4. **Update ScanDetail** - Change navigation to use new results page
+5. **Update Scans list** (optional) - Add inline step_label progress display
 
-This is the most complex component - a searchable, paginated wallet picker.
+## Bonus: Update Scans List with Progress
 
-### Features
+While in the scan-related files, also update the Scans list page to show:
+- `step_label` text for processing scans
+- Mini progress bar inline with the scan card
+- Auto-refresh when active scans exist
 
-1. **Search**: Filter by wallet address (debounced 300ms)
-2. **Type Filter**: Multi-select for wallet action types (connected, staked, purchased, signed)
-3. **Sort**: Sort by last_seen (default), first_seen, or visit_count
-4. **Selection**: Checkbox for each wallet, "Select All" for current page
-5. **Pagination**: Load more / infinite scroll for large datasets
-6. **Persistence**: When editing, pre-check wallets from existing audience
-
-### UI Layout
-
-```text
-+----------------------------------------------------------+
-|  Select Wallets                                           |
-+----------------------------------------------------------+
-|  [Search by address...        ]  [Type ▼]  [Sort ▼]      |
-+----------------------------------------------------------+
-|  [✓] Select all on this page           Showing 1-50 of 234|
-+----------------------------------------------------------+
-|  Wallet Address          Type          Last Seen  Visits  |
-|  ─────────────────────────────────────────────────────────|
-|  [✓] 0x1234...abcd      connected      2h ago     12     |
-|  [✓] 0x5678...efgh      staked         1d ago     8      |
-|  [ ] 0x9abc...ijkl      purchased      3d ago     3      |
-+----------------------------------------------------------+
-|  [Load more...]                                           |
-+----------------------------------------------------------+
-|  Selected: 2 wallets                                      |
-+----------------------------------------------------------+
-```
-
----
-
-## 5. Delete Confirmation
-
-Use an AlertDialog for delete confirmation:
-
-```text
-+------------------------------------------+
-|  Delete Audience?                        |
-|                                          |
-|  Are you sure you want to delete         |
-|  "High-Value Traders"? This cannot       |
-|  be undone.                              |
-|                                          |
-|           [Cancel]  [Delete]             |
-+------------------------------------------+
-```
-
----
-
-## 6. File Changes Summary
-
-| File | Change |
-|------|--------|
-| `src/lib/api.ts` | Add wallet list types and audience CRUD functions |
-| `src/pages/Audiences.tsx` | Full rewrite: list view with create/edit/delete |
-| `src/components/audiences/AudienceList.tsx` | New: audience table with actions |
-| `src/components/audiences/AudienceDialog.tsx` | New: create/edit modal |
-| `src/components/audiences/WalletSelector.tsx` | New: wallet picker component |
-| `src/components/audiences/WalletTable.tsx` | New: wallet display table with checkboxes |
-| `src/components/audiences/DeleteAudienceDialog.tsx` | New: delete confirmation |
-
----
-
-## 7. Technical Considerations
-
-### API Endpoint Distinction
-
-The wallet list endpoint uses the analytics API base (`cdn.audiencescan.io/api`), while the audiences CRUD endpoints use the main API (`api-wldojy4riq-uc.a.run.app`):
-
-```typescript
-// Wallet list - analytics API
-POST https://cdn.audiencescan.io/api/analytics/wallets
-
-// Audiences CRUD - main API
-GET/POST/PUT/DELETE https://api-wldojy4riq-uc.a.run.app/audiences
-```
-
-### Website Context
-
-The page should read the selected website from localStorage (same pattern as Overview):
-- If no website selected, show a message prompting user to select one
-- When creating an audience, auto-populate website_id from context
-- When listing audiences, optionally filter by current website
-
-### Optimistic Updates
-
-For better UX, implement optimistic updates:
-- Delete: Remove from list immediately, rollback on error
-- Create: Add to list on success, show loading state
-- Update: Reflect changes immediately, rollback on error
-
-### Wallet Selection Limits
-
-Consider adding:
-- Maximum wallet limit (e.g., 10,000 wallets per audience)
-- Warning when selecting large numbers
-- Bulk selection helpers ("Select all matching filters")
-
-### Empty States
-
-Handle three empty states:
-1. No website selected: "Select a website to manage audiences"
-2. No audiences yet: Current empty state with "Create your first audience"
-3. No wallets found: "No wallets match your filters" in the selector
-
----
-
-## 8. UX Refinements
-
-### Responsive Design
-
-- Mobile: Stack filters vertically, use full-width dialog
-- Desktop: Inline filters, centered dialog with max-width
-
-### Loading States
-
-- Skeleton loaders for audience list
-- Spinner on wallet table during search/filter
-- Disabled "Create" button while submitting
-
-### Success Feedback
-
-- Toast notifications for create/update/delete actions
-- Auto-close dialog on success
-- Refresh list after mutations
-
+This provides better visibility into scan progress without needing to drill into details.
