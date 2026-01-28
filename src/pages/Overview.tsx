@@ -260,7 +260,7 @@ const Overview = () => {
         filters: getFiltersParam(filters),
         conversion_events: conversionEvents,
         cost: costSourceId 
-          ? { mode: "cost_source", cost_source_id: costSourceId }
+          ? { mode: "utm", cost_source_id: costSourceId }
           : { mode: "none" },
         pagination: { limit: 50 },
       });

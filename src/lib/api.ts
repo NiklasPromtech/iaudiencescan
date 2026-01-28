@@ -179,7 +179,7 @@ export interface TableRequest {
   filters?: Record<string, string[]>;
   conversion_events?: string[];
   cost?: {
-    mode: "none" | "cost_source";
+    mode: "none" | "utm" | "source" | "campaign";
     cost_source_id?: string;
   };
   pagination?: {
