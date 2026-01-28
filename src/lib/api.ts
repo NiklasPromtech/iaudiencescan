@@ -367,6 +367,111 @@ export const DIMENSION_TO_FILTER: Partial<Record<TableDimension, keyof FilterOpt
   os: "os",
 };
 
+// Events Table types
+export interface EventsTableRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+  sort?: { by: "event_count" | "unique_users" | "first_seen" | "last_seen"; dir: "asc" | "desc" };
+  pagination?: { limit?: number; offset?: number };
+}
+
+export interface EventsTableRow {
+  event_type: string;
+  event_count: number;
+  unique_users: number;
+  first_seen: string;
+  last_seen: string;
+}
+
+export interface EventsTableResponse {
+  success: boolean;
+  rows: EventsTableRow[];
+  pagination: { limit: number; offset: number; total_rows: number };
+}
+
+export async function fetchEventsTable(request: EventsTableRequest): Promise<EventsTableResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/events`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Wallets Table types
+export interface WalletsTableRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+  balance_filter?: { min?: number; max?: number };
+  sort?: { by: "total_balance_usd" | "visit_count" | "first_seen" | "last_seen"; dir: "asc" | "desc" };
+  pagination?: { limit?: number; offset?: number };
+}
+
+export interface WalletsTableRow {
+  wallet_address: string;
+  types: string[];
+  visit_count: number;
+  total_balance_usd: number | null;
+  chains: string[];
+  first_seen?: string;
+  last_seen?: string;
+}
+
+export interface WalletsTableSummary {
+  total_wallets: number;
+  total_balance_usd: number;
+  wallets_with_balance: number;
+  wallets_zero_balance: number;
+}
+
+export interface WalletsTableResponse {
+  success: boolean;
+  summary: WalletsTableSummary;
+  rows: WalletsTableRow[];
+  pagination: { limit: number; offset: number; total_rows: number };
+}
+
+export async function fetchWalletsTable(request: WalletsTableRequest): Promise<WalletsTableResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallets-table`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 // Realtime Analytics types
 export interface RealtimeResponse {
   success: boolean;

@@ -20,6 +20,8 @@ import {
   fetchScorecard, 
   fetchTableData,
   fetchRealtimeVisitors,
+  fetchEventsTable,
+  fetchWalletsTable,
   listCostSources,
   ScorecardResponse, 
   TableResponse, 
@@ -27,12 +29,16 @@ import {
   Website,
   RangeConfig,
   CostSource,
+  EventsTableResponse,
+  WalletsTableResponse,
   DIMENSION_TO_FILTER,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
+import { EventsTable } from "@/components/overview/EventsTable";
+import { WalletsOverviewTable } from "@/components/overview/WalletsOverviewTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -57,6 +63,10 @@ const Overview = () => {
   const [costSources, setCostSources] = useState<CostSource[]>([]);
   const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
   const [selectedConversionEvent, setSelectedConversionEvent] = useState<string | null>(null);
+  const [eventsData, setEventsData] = useState<EventsTableResponse | null>(null);
+  const [walletsData, setWalletsData] = useState<WalletsTableResponse | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [walletsLoading, setWalletsLoading] = useState(true);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -152,6 +162,8 @@ const Overview = () => {
     setLoading(true);
     setChartLoading(true);
     setTableLoading(true);
+    setEventsLoading(true);
+    setWalletsLoading(true);
     setError(null);
 
     const filtersParam = getFiltersParam(filters);
@@ -159,7 +171,7 @@ const Overview = () => {
 
     try {
       // Fetch all data in parallel
-      const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
+      const [scorecardData, dailyChartData, dimensionTableData, eventsTableData, walletsTableData] = await Promise.all([
         fetchScorecard({
           tag_id: selectedWebsite.id,
           range: rangeConfig,
@@ -184,17 +196,35 @@ const Overview = () => {
           cost: { mode: "none" },
           pagination: { limit: 50 },
         }),
+        fetchEventsTable({
+          tag_id: selectedWebsite.id,
+          range: rangeConfig,
+          filters: filtersParam,
+          sort: { by: "event_count", dir: "desc" },
+          pagination: { limit: 10 },
+        }),
+        fetchWalletsTable({
+          tag_id: selectedWebsite.id,
+          range: rangeConfig,
+          filters: filtersParam,
+          sort: { by: "total_balance_usd", dir: "desc" },
+          pagination: { limit: 10 },
+        }),
       ]);
 
       setScorecard(scorecardData);
       setDailyData(dailyChartData);
       setTableData(dimensionTableData);
+      setEventsData(eventsTableData);
+      setWalletsData(walletsTableData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load analytics");
     } finally {
       setLoading(false);
       setChartLoading(false);
       setTableLoading(false);
+      setEventsLoading(false);
+      setWalletsLoading(false);
     }
   }, [selectedWebsite, getFiltersParam]);
 
@@ -456,6 +486,21 @@ const Overview = () => {
               selectedCostSourceId={selectedCostSourceId}
               onCostSourceChange={handleCostSourceChange}
               onAddCostSource={handleAddCostSource}
+            />
+          </div>
+
+          {/* Events & Wallets Tables */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <EventsTable
+              data={eventsData?.rows ?? []}
+              loading={eventsLoading}
+              totalRows={eventsData?.pagination?.total_rows ?? 0}
+            />
+            <WalletsOverviewTable
+              data={walletsData?.rows ?? []}
+              summary={walletsData?.summary ?? null}
+              loading={walletsLoading}
+              totalRows={walletsData?.pagination?.total_rows ?? 0}
             />
           </div>
 
