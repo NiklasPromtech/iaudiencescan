@@ -216,6 +216,7 @@ export interface TableRow {
   wallets_enriched: number | null;
   percent_enriched: number | null;
   total_balance_usd: number | null;
+  visitors_with_wallet_extension: number | null;
 }
 
 export interface TableResponse {
