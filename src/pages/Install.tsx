@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { listWebsites, createWebsite, verifyWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
@@ -363,7 +364,7 @@ const Install = () => {
           </p>
         </div>
 
-        {/* Your Websites Section */}
+        {/* Your Websites Section - with integrated installation instructions */}
         {websites.length > 0 && (
           <Card className="border border-border shadow-elegant mb-8">
             <div className="p-4 border-b border-border flex justify-between items-center">
@@ -379,138 +380,29 @@ const Install = () => {
             </div>
             <div className="divide-y divide-border">
               {websites.map((website) => (
-                <WebsiteListItem
+                <WebsiteListItemWithTag
                   key={website.id}
                   website={website}
                   isSelected={selectedWebsite?.id === website.id}
                   onSelect={handleSelectWebsite}
+                  trackingSnippet={website.id === selectedWebsite?.id ? trackingSnippet : `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${website.id}" defer></script>`}
+                  gtmSnippet={`<script>
+  window.asLayer = window.asLayer || [];
+  window.asLayer.push({
+    'as.siteId': '${website.id}',
+    'as.tagId': '${website.tag_id}',
+    'as.start': new Date().getTime()
+  });
+</script>`}
+                  onCopy={handleCopy}
+                  onVerify={handleVerify}
+                  copied={copied}
+                  verifying={verifying}
                 />
               ))}
             </div>
           </Card>
         )}
-
-        {/* Installation Card */}
-        <Card className="border border-border shadow-elegant mb-8">
-          <Tabs defaultValue="website" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 bg-muted/50">
-              <TabsTrigger value="website" className="data-[state=active]:bg-background">
-                Website
-              </TabsTrigger>
-              <TabsTrigger value="gtm" className="data-[state=active]:bg-background">
-                GTM
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="website" className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <p className="text-p2 text-foreground font-medium mb-2">
-                    Paste this before <code className="bg-muted px-1.5 py-0.5 rounded text-p3">&lt;/head&gt;</code>
-                  </p>
-                  <div className="relative">
-                    <pre className="bg-foreground text-primary-foreground p-4 rounded-lg text-p3 overflow-x-auto">
-                      <code>{trackingSnippet}</code>
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-2 right-2"
-                      onClick={() => handleCopy(trackingSnippet)}
-                    >
-                      {copied ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Framework hints */}
-                <details className="group">
-                  <summary className="text-p3 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                    Using Next.js or React?
-                  </summary>
-                  <div className="mt-3 pl-4 border-l-2 border-muted text-p3 text-muted-foreground space-y-2">
-                    <p><strong>Next.js:</strong> Add to <code className="bg-muted px-1 rounded">_document.tsx</code> or use the <code className="bg-muted px-1 rounded">Script</code> component with <code className="bg-muted px-1 rounded">strategy="afterInteractive"</code></p>
-                    <p><strong>React (CRA/Vite):</strong> Add directly to <code className="bg-muted px-1 rounded">index.html</code> in your public folder</p>
-                  </div>
-                </details>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="gtm" className="p-6">
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-p3 font-medium">1</span>
-                    <div>
-                      <p className="text-p2 text-foreground font-medium">Create a new Custom HTML tag</p>
-                      <p className="text-p3 text-muted-foreground">In GTM, go to Tags → New → Custom HTML</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-p3 font-medium">2</span>
-                    <div>
-                      <p className="text-p2 text-foreground font-medium">Paste this snippet</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <pre className="bg-foreground text-primary-foreground p-4 rounded-lg text-p3 overflow-x-auto">
-                    <code>{gtmSnippet}</code>
-                  </pre>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="absolute top-2 right-2"
-                    onClick={() => handleCopy(gtmSnippet)}
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-p3 font-medium">3</span>
-                  <div>
-                    <p className="text-p2 text-foreground font-medium">Set trigger to "All Pages"</p>
-                    <p className="text-p3 text-muted-foreground">Publish your container when ready</p>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Action buttons */}
-          <div className="p-6 pt-0 flex gap-3">
-            <Button
-              className="flex-1 bg-primary hover:bg-primary/90"
-              onClick={() => handleCopy(trackingSnippet)}
-            >
-              {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-              Copy snippet
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={handleVerify}
-              disabled={verifying}
-            >
-              {verifying ? (
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
-              )}
-              Verify installation
-            </Button>
-          </div>
-        </Card>
 
         {/* Do this later */}
         <div className="text-center mb-8">
@@ -582,13 +474,29 @@ const TeaserCard = ({ icon, title, subtitle, value }: TeaserCardProps) => (
   </Card>
 );
 
-interface WebsiteListItemProps {
+interface WebsiteListItemWithTagProps {
   website: Website;
   isSelected: boolean;
   onSelect: (website: Website) => void;
+  trackingSnippet: string;
+  gtmSnippet: string;
+  onCopy: (text: string) => void;
+  onVerify: () => void;
+  copied: boolean;
+  verifying: boolean;
 }
 
-const WebsiteListItem = ({ website, isSelected, onSelect }: WebsiteListItemProps) => {
+const WebsiteListItemWithTag = ({ 
+  website, 
+  isSelected, 
+  onSelect, 
+  trackingSnippet, 
+  gtmSnippet, 
+  onCopy, 
+  onVerify,
+  copied,
+  verifying
+}: WebsiteListItemWithTagProps) => {
   const getWebsiteStatusBadge = () => {
     switch (website.status) {
       case "pending":
@@ -618,34 +526,127 @@ const WebsiteListItem = ({ website, isSelected, onSelect }: WebsiteListItemProps
   };
 
   return (
-    <div
-      className={`p-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-muted/50 ${
-        isSelected ? "bg-primary/5 border-l-2 border-l-primary" : ""
-      }`}
-      onClick={() => onSelect(website)}
-    >
-      <div className="flex-shrink-0">
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-          isSelected ? "bg-primary/10" : "bg-muted"
-        }`}>
-          <Globe className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+    <Collapsible open={isSelected}>
+      <CollapsibleTrigger asChild>
+        <div
+          className={`p-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-muted/50 ${
+            isSelected ? "bg-primary/5" : ""
+          }`}
+          onClick={() => onSelect(website)}
+        >
+          <div className="flex-shrink-0">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+              isSelected ? "bg-primary/10" : "bg-muted"
+            }`}>
+              <Globe className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`text-p2 font-medium truncate ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
+              {website.name}
+            </p>
+            <p className="text-p4 text-muted-foreground/70 truncate">
+              {website.base_url}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {getWebsiteStatusBadge()}
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isSelected ? "rotate-180" : ""}`} />
+          </div>
         </div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-p2 font-medium truncate ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
-          {website.name}
-        </p>
-        <p className="text-p4 text-muted-foreground/70 truncate">
-          {website.base_url}
-        </p>
-      </div>
-      <div className="flex items-center gap-3">
-        {getWebsiteStatusBadge()}
-        {isSelected && (
-          <Check className="h-4 w-4 text-primary" />
-        )}
-      </div>
-    </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
+          <div className="pt-4">
+            <Tabs defaultValue="website" className="w-full">
+              <TabsList className="w-full grid grid-cols-2 bg-muted/50">
+                <TabsTrigger value="website" className="data-[state=active]:bg-background text-sm">
+                  Website
+                </TabsTrigger>
+                <TabsTrigger value="gtm" className="data-[state=active]:bg-background text-sm">
+                  GTM
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="website" className="pt-4">
+                <div className="space-y-3">
+                  <p className="text-p3 text-foreground font-medium">
+                    Paste this before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
+                  </p>
+                  <div className="relative">
+                    <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
+                      <code>{trackingSnippet}</code>
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
+                    >
+                      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                  <details className="group">
+                    <summary className="text-p4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                      Using Next.js or React?
+                    </summary>
+                    <div className="mt-2 pl-3 border-l-2 border-muted text-p4 text-muted-foreground space-y-1">
+                      <p><strong>Next.js:</strong> Add to <code className="bg-muted px-1 rounded">_document.tsx</code></p>
+                      <p><strong>React:</strong> Add to <code className="bg-muted px-1 rounded">index.html</code></p>
+                    </div>
+                  </details>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="gtm" className="pt-4">
+                <div className="space-y-3">
+                  <p className="text-p3 text-foreground font-medium">Create a Custom HTML tag</p>
+                  <div className="relative">
+                    <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
+                      <code>{gtmSnippet}</code>
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute top-2 right-2"
+                      onClick={(e) => { e.stopPropagation(); onCopy(gtmSnippet); }}
+                    >
+                      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                  <p className="text-p4 text-muted-foreground">Set trigger to "All Pages" and publish.</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex gap-3 mt-4">
+              <Button
+                size="sm"
+                className="flex-1 bg-primary hover:bg-primary/90"
+                onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
+              >
+                {copied ? <Check className="mr-2 h-3 w-3" /> : <Copy className="mr-2 h-3 w-3" />}
+                Copy snippet
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={(e) => { e.stopPropagation(); onVerify(); }}
+                disabled={verifying}
+              >
+                {verifying ? (
+                  <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-3 w-3" />
+                )}
+                Verify
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
