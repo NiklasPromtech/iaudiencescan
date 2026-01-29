@@ -192,11 +192,16 @@ export function DimensionTable({
   const supportsCost = COST_SUPPORTED_DIMENSIONS.includes(dimension);
   const hasCostSource = selectedCostSourceId !== null && selectedCostSourceId !== "none";
 
-  // Enrich data with calculated cost-per fields
-  const enrichedData = useMemo(() => 
-    data.map(row => enrichRowWithCostPer(row)), 
-    [data]
-  );
+  // Enrich data with calculated cost-per fields and sort appropriately
+  const enrichedData = useMemo(() => {
+    const enriched = data.map(row => enrichRowWithCostPer(row));
+    
+    // Sort by date ascending if date dimension, otherwise by pageviews descending
+    if (dimension === "date_day") {
+      return enriched.sort((a, b) => a.dim_value.localeCompare(b.dim_value));
+    }
+    return enriched.sort((a, b) => (b.pageviews ?? 0) - (a.pageviews ?? 0));
+  }, [data, dimension]);
 
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => 
