@@ -330,10 +330,9 @@ export function DimensionTable({
                 {visibleGroups.has("enrichment") && (
                   <>
                     <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Enriched</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">% Enriched</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] border-r border-border/50">
-                      Balance
-                    </TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] whitespace-nowrap">% Enriched</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">Avg Bal</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">CPB</TableHead>
                   </>
                 )}
 
@@ -459,33 +458,53 @@ export function DimensionTable({
 
                     {/* Enrichment Group */}
                     {visibleGroups.has("enrichment") && (
-                      <>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.wallets_enriched}
-                            showRate={false}
-                            showCost={false}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3">
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span className="tabular-nums text-foreground">
-                              {row.percent_enriched !== null && row.percent_enriched !== undefined
-                                ? `${row.percent_enriched.toFixed(1)}%`
-                                : "—"}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right py-3 border-r border-border/50">
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span className="tabular-nums text-foreground">
-                              {row.total_balance_usd !== null && row.total_balance_usd !== undefined
-                                ? `$${row.total_balance_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                : "—"}
-                            </span>
-                          </div>
-                        </TableCell>
-                      </>
+                      (() => {
+                        const avgBalance = row.wallets_enriched && row.wallets_enriched > 0 && row.total_balance_usd !== null
+                          ? row.total_balance_usd / row.wallets_enriched
+                          : null;
+                        const cpb = row.cost_total !== null && row.total_balance_usd !== null && row.total_balance_usd > 0
+                          ? row.cost_total / row.total_balance_usd
+                          : null;
+                        
+                        return (
+                          <>
+                            <TableCell className="text-right py-3">
+                              <MetricCell
+                                count={row.wallets_enriched}
+                                showRate={false}
+                                showCost={false}
+                              />
+                            </TableCell>
+                            <TableCell className="text-right py-3">
+                              <div className="flex flex-col items-end gap-0.5">
+                                <span className="tabular-nums text-foreground">
+                                  {row.percent_enriched !== null && row.percent_enriched !== undefined
+                                    ? `${row.percent_enriched.toFixed(1)}%`
+                                    : "—"}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right py-3">
+                              <div className="flex flex-col items-end gap-0.5">
+                                <span className="tabular-nums text-foreground">
+                                  {avgBalance !== null
+                                    ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                                    : "—"}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right py-3 border-r border-border/50">
+                              <div className="flex flex-col items-end gap-0.5">
+                                <span className="tabular-nums text-foreground">
+                                  {cpb !== null
+                                    ? `$${cpb.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    : "—"}
+                                </span>
+                              </div>
+                            </TableCell>
+                          </>
+                        );
+                      })()
                     )}
 
                     {/* Conversions Group */}
