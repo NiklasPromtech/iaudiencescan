@@ -14,7 +14,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TableRow } from "@/lib/api";
 
 interface DailyChartProps {
@@ -116,7 +116,7 @@ export function DailyChart({ data, loading }: DailyChartProps) {
         </div>
       ) : (
         <ChartContainer config={chartConfig} className="h-[200px] w-full">
-          <ComposedChart data={chartData} margin={{ left: 0, right: 0 }}>
+          <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
             <XAxis
               dataKey="label"
@@ -157,16 +157,13 @@ export function DailyChart({ data, loading }: DailyChartProps) {
               fill="hsl(var(--primary))"
               radius={[4, 4, 0, 0]}
             />
-            <Line
+            <Bar
               yAxisId="right"
-              type="monotone"
               dataKey={metricRight}
-              stroke="hsl(var(--chart-3))"
-              strokeWidth={2}
-              dot={{ fill: "hsl(var(--chart-3))", strokeWidth: 0, r: 3 }}
-              activeDot={{ r: 5 }}
+              fill="hsl(var(--chart-3))"
+              radius={[4, 4, 0, 0]}
             />
-          </ComposedChart>
+          </BarChart>
         </ChartContainer>
       )}
     </Card>
