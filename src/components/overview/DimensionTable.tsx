@@ -345,11 +345,11 @@ export function DimensionTable({
           No data available for this dimension
         </div>
       ) : (
-        <div className="rounded-md border border-border overflow-x-auto">
-          <Table>
+        <div className="rounded-md border border-border overflow-x-auto w-full">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 min-w-[180px]">
+                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
                   {dimensionLabel}
                 </TableHead>
 
