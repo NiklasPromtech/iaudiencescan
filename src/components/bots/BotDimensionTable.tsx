@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BotDimensionRow, TableDimension } from "@/lib/api";
+import { ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
 
 interface BotDimensionTableProps {
   data: BotDimensionRow[];
@@ -38,6 +40,11 @@ const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
   { value: "os", label: "Operating System" },
 ];
 
+type SortField = "dim_value" | "total_visitors" | "bot_visitors" | "human_visitors" | "unknown_visitors" | "bot_pct";
+type SortDirection = "asc" | "desc";
+
+const INITIAL_ROWS = 5;
+
 export function BotDimensionTable({
   data,
   loading,
@@ -45,7 +52,67 @@ export function BotDimensionTable({
   onDimensionChange,
   totalRows,
 }: BotDimensionTableProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [sortField, setSortField] = useState<SortField>("total_visitors");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
   const dimensionLabel = DIMENSION_OPTIONS.find((d) => d.value === dimension)?.label || dimension;
+
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => {
+      let aVal: string | number = a[sortField];
+      let bVal: string | number = b[sortField];
+
+      // Handle null/empty dimension values
+      if (sortField === "dim_value") {
+        aVal = a.dim_value || "";
+        bVal = b.dim_value || "";
+        return sortDirection === "asc"
+          ? String(aVal).localeCompare(String(bVal))
+          : String(bVal).localeCompare(String(aVal));
+      }
+
+      // Numeric sorting
+      return sortDirection === "asc"
+        ? (aVal as number) - (bVal as number)
+        : (bVal as number) - (aVal as number);
+    });
+  }, [data, sortField, sortDirection]);
+
+  const displayedData = expanded ? sortedData : sortedData.slice(0, INITIAL_ROWS);
+  const hasMoreRows = sortedData.length > INITIAL_ROWS;
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
+
+  const SortableHeader = ({ field, children, className }: { field: SortField; children: React.ReactNode; className?: string }) => {
+    const isActive = sortField === field;
+    return (
+      <TableHead
+        className={`font-medium cursor-pointer hover:bg-muted/70 transition-colors select-none ${className || ""}`}
+        onClick={() => handleSort(field)}
+      >
+        <div className="flex items-center gap-1">
+          {children}
+          {isActive ? (
+            sortDirection === "asc" ? (
+              <ChevronUp className="h-3.5 w-3.5 text-foreground" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 text-foreground" />
+            )
+          ) : (
+            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />
+          )}
+        </div>
+      </TableHead>
+    );
+  };
 
   if (loading) {
     return (
@@ -92,46 +159,82 @@ export function BotDimensionTable({
           No data available for this dimension
         </div>
       ) : (
-        <div className="rounded-md border border-border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 min-w-[140px]">
-                  {dimensionLabel}
-                </TableHead>
-                <TableHead className="text-right font-medium">Total</TableHead>
-                <TableHead className="text-right font-medium">Bots</TableHead>
-                <TableHead className="text-right font-medium">Humans</TableHead>
-                <TableHead className="text-right font-medium">Unknown</TableHead>
-                <TableHead className="text-right font-medium">Bot %</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((row, index) => (
-                <TableRow key={index} className="hover:bg-muted/30">
-                  <TableCell className="font-medium sticky left-0 bg-background z-10">
-                    {row.dim_value || "(not set)"}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {row.total_visitors.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums text-destructive">
-                    {row.bot_visitors.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums text-primary">
-                    {row.human_visitors.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {row.unknown_visitors.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums font-medium">
-                    {row.bot_pct.toFixed(1)}%
-                  </TableCell>
+        <>
+          <div className="rounded-md border border-border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <SortableHeader field="dim_value" className="sticky left-0 bg-muted/50 z-10 min-w-[140px]">
+                    {dimensionLabel}
+                  </SortableHeader>
+                  <SortableHeader field="total_visitors" className="text-right">
+                    Total
+                  </SortableHeader>
+                  <SortableHeader field="bot_visitors" className="text-right">
+                    Bots
+                  </SortableHeader>
+                  <SortableHeader field="human_visitors" className="text-right">
+                    Humans
+                  </SortableHeader>
+                  <SortableHeader field="unknown_visitors" className="text-right">
+                    Unknown
+                  </SortableHeader>
+                  <SortableHeader field="bot_pct" className="text-right">
+                    Bot %
+                  </SortableHeader>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {displayedData.map((row, index) => (
+                  <TableRow key={index} className="hover:bg-muted/30">
+                    <TableCell className="font-medium sticky left-0 bg-background z-10">
+                      {row.dim_value || "(not set)"}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {row.total_visitors.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-destructive">
+                      {row.bot_visitors.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-primary">
+                      {row.human_visitors.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                      {row.unknown_visitors.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums font-medium">
+                      {row.bot_pct.toFixed(1)}%
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Show more/less toggle */}
+          {hasMoreRows && (
+            <div className="mt-3 flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpanded(!expanded)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {expanded ? (
+                  <>
+                    Show less
+                    <ChevronUp className="ml-1 h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    View all {sortedData.length - INITIAL_ROWS} more
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </Card>
   );
