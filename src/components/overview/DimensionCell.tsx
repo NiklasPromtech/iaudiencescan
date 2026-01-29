@@ -28,8 +28,8 @@ export function DimensionCell({
   showBotRate = true,
   botWarningThreshold = 20,
 }: DimensionCellProps) {
-  const visitors = row.unique_visitors;
-  const botRate = visitors > 0 ? ((row.bot_visitors ?? 0) / visitors) * 100 : 0;
+  const botChecked = row.bot_checked ?? 0;
+  const botRate = botChecked > 0 ? ((row.bot_visitors ?? 0) / botChecked) * 100 : 0;
   const hasHighBots = botRate > botWarningThreshold;
   const grade = calculateInvestmentGrade(row);
   
