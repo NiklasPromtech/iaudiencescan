@@ -30,10 +30,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Search, ChevronDown, Loader2, Filter, X, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface InitialFilters {
+  dateRange?: DateRangeValue;
+  filters?: ActiveFilters;
+}
+
 interface WalletSelectorProps {
   websiteId: string;
   selectedWallets: string[];
   onSelectionChange: (wallets: string[]) => void;
+  initialFilters?: InitialFilters;
 }
 
 interface ActiveFilters {
@@ -336,6 +342,7 @@ export function WalletSelector({
   websiteId,
   selectedWallets,
   onSelectionChange,
+  initialFilters,
 }: WalletSelectorProps) {
   const [wallets, setWallets] = useState<WalletRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -348,9 +355,13 @@ export function WalletSelector({
   const [totalRows, setTotalRows] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   
-  // Filter states
-  const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 7 });
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
+  // Filter states - initialize from props if provided
+  const [dateRange, setDateRange] = useState<DateRangeValue>(
+    initialFilters?.dateRange ?? { type: "preset", days: 7 }
+  );
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(
+    initialFilters?.filters ?? {}
+  );
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   
   // Balance filters

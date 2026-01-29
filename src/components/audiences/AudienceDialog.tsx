@@ -15,12 +15,24 @@ import { Audience, createAudience, updateAudience, Website } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
+export interface AudienceDialogInitialFilters {
+  dateRange?: {
+    type: "preset" | "custom";
+    days?: number;
+    from?: Date;
+    to?: Date;
+    includeToday?: boolean;
+  };
+  filters?: Record<string, string[]>;
+}
+
 interface AudienceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   audience: Audience | null;
   website: Website;
   onSuccess: () => void;
+  initialFilters?: AudienceDialogInitialFilters;
 }
 
 export function AudienceDialog({
@@ -29,6 +41,7 @@ export function AudienceDialog({
   audience,
   website,
   onSuccess,
+  initialFilters,
 }: AudienceDialogProps) {
   const [name, setName] = useState("");
   const [selectedWallets, setSelectedWallets] = useState<string[]>([]);
@@ -144,6 +157,7 @@ export function AudienceDialog({
               websiteId={website.id}
               selectedWallets={selectedWallets}
               onSelectionChange={setSelectedWallets}
+              initialFilters={initialFilters}
             />
           </div>
         </div>

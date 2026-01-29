@@ -46,6 +46,7 @@ import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
 import { ConversionEventFilter } from "@/components/overview/ConversionEventFilter";
+import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audiences/AudienceDialog";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -72,6 +73,10 @@ const Overview = () => {
   const [eventsLoading, setEventsLoading] = useState(true);
   const [walletsLoading, setWalletsLoading] = useState(true);
   const [walletExtensionsLoading, setWalletExtensionsLoading] = useState(true);
+  
+  // Audience dialog state
+  const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
+  const [audienceDialogFilters, setAudienceDialogFilters] = useState<AudienceDialogInitialFilters | undefined>(undefined);
 
   useEffect(() => {
     // Load selected website from localStorage
@@ -374,6 +379,27 @@ const Overview = () => {
     navigate(`/bots?${params.toString()}`);
   };
 
+  const handleWalletClick = (dimValue: string, _walletCount: number) => {
+    // Map the table dimension to filter key
+    const filterKey = DIMENSION_TO_FILTER[tableDimension];
+    if (!filterKey) return;
+
+    // Build filters combining current activeFilters with the clicked dimension value
+    const combinedFilters: Record<string, string[]> = { ...activeFilters };
+    combinedFilters[filterKey] = [dimValue];
+
+    setAudienceDialogFilters({
+      dateRange,
+      filters: combinedFilters,
+    });
+    setAudienceDialogOpen(true);
+  };
+
+  const handleAudienceDialogSuccess = () => {
+    // Navigate to audiences page after successful creation
+    navigate("/audiences");
+  };
+
   const data = scorecard?.data;
   const filterOptions = scorecard?.filter_options ?? null;
 
@@ -519,6 +545,7 @@ const Overview = () => {
               showWalletColumns={data?.wallet_users !== null}
               showConversionColumns={data?.converted_users !== null}
               onBotClick={handleBotClick}
+              onWalletClick={handleWalletClick}
               costSources={costSources}
               selectedCostSourceId={selectedCostSourceId}
               onCostSourceChange={handleCostSourceChange}
@@ -588,6 +615,18 @@ const Overview = () => {
             open={conversionSetupOpen}
             onOpenChange={setConversionSetupOpen}
           />
+
+          {/* Create Audience Dialog */}
+          {selectedWebsite && (
+            <AudienceDialog
+              open={audienceDialogOpen}
+              onOpenChange={setAudienceDialogOpen}
+              audience={null}
+              website={selectedWebsite}
+              onSuccess={handleAudienceDialogSuccess}
+              initialFilters={audienceDialogFilters}
+            />
+          )}
         </div>
       </div>
     </DashboardLayout>
