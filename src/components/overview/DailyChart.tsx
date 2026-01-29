@@ -99,13 +99,13 @@ export function DailyChart({ data, loading }: DailyChartProps) {
           <MetricSelector
             value={metricLeft}
             onChange={(v) => setMetricLeft(v as MetricKey)}
-            colorClass="bg-primary"
+            color="hsl(var(--primary))"
             label="Left axis"
           />
           <MetricSelector
             value={metricRight}
             onChange={(v) => setMetricRight(v as MetricKey)}
-            colorClass="bg-chart-3"
+            color="hsl(var(--chart-3))"
             label="Right axis"
           />
         </div>
@@ -173,14 +173,17 @@ export function DailyChart({ data, loading }: DailyChartProps) {
 interface MetricSelectorProps {
   value: MetricKey;
   onChange: (value: string) => void;
-  colorClass: string;
+  color: string;
   label: string;
 }
 
-function MetricSelector({ value, onChange, colorClass, label }: MetricSelectorProps) {
+function MetricSelector({ value, onChange, color, label }: MetricSelectorProps) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className={`h-3 w-3 rounded-sm ${colorClass}`} />
+      <span 
+        className="h-3 w-3 rounded-sm flex-shrink-0" 
+        style={{ backgroundColor: color }}
+      />
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="h-8 w-[150px] text-xs bg-background">
           <SelectValue />
