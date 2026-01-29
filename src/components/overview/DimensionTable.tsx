@@ -51,6 +51,7 @@ interface DimensionTableProps {
 }
 
 const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
+  { value: "date_day", label: "Date" },
   { value: "referrer_domain", label: "Referrer" },
   { value: "utm_source", label: "UTM Source" },
   { value: "utm_medium", label: "UTM Medium" },
@@ -353,12 +354,12 @@ export function DimensionTable({
                   {dimensionLabel}
                 </TableHead>
 
-                {/* Traffic Group */}
+                {/* Traffic Group - Views first, then Visitors */}
                 {visibleGroups.has("traffic") && (
                   <>
-                    <TableHead className="text-right font-medium min-w-[80px]">Visitors</TableHead>
+                    <TableHead className="text-right font-medium min-w-[80px]">Views</TableHead>
                     <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
-                      Views
+                      Visitors
                     </TableHead>
                   </>
                 )}
@@ -425,24 +426,24 @@ export function DimensionTable({
                       />
                     </TableCell>
 
-                    {/* Traffic Group */}
+                    {/* Traffic Group - Views first, then Visitors */}
                     {visibleGroups.has("traffic") && (
                       <>
                         <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={visitors}
-                            showRate={false}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_visitor}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3 border-r border-border/50">
                           <MetricCell
                             count={row.pageviews}
                             rate={calcRate(row.pageviews, visitors)}
                             showRate={false}
                             showCost={hasCostSource}
                             costPer={row.cost_per_pageview}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right py-3 border-r border-border/50">
+                          <MetricCell
+                            count={visitors}
+                            showRate={false}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_visitor}
                           />
                         </TableCell>
                       </>
