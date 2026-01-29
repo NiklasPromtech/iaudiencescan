@@ -261,7 +261,7 @@ const Bots = () => {
   return (
     <DashboardLayout>
       <div className="bg-gradient-subtle min-h-full">
-        <div className="container max-w-5xl py-8 px-4">
+        <div className="container max-w-7xl py-8 px-4">
           {/* Header */}
           <div className="mb-8">
             <Button
