@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/select";
 import { TableRow as ApiTableRow, TableDimension, CostSource } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { MetricCell, ENGAGEMENT_THRESHOLDS } from "./MetricCell";
 import { DimensionCell } from "./DimensionCell";
 
@@ -395,7 +401,7 @@ export function DimensionTable({
                   </>
                 )}
 
-                {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance */}
+                {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
                 {visibleGroups.has("wallets") && (
                   <>
                     <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
@@ -407,18 +413,52 @@ export function DimensionTable({
                     <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
                       Enriched
                     </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap border-r border-border/50">
-                      Avg Bal
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
+                            Avg Bal
+                            <Info className="h-3 w-3 text-muted-foreground/60" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[200px]">
+                            <p className="text-xs">Total Value ÷ Enriched Wallets</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[110px] whitespace-nowrap border-r border-border/50">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
+                            Total Value
+                            <Info className="h-3 w-3 text-muted-foreground/60" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[220px]">
+                            <p className="text-xs">Sum of all enriched wallet balances</p>
+                            {hasCostSource && <p className="text-xs mt-1">CPB = Cost ÷ Total Value</p>}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableHead>
                   </>
                 )}
 
                 {/* Conversions Group */}
                 {visibleGroups.has("conversions") && (
-                  <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Conv.</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Total</TableHead>
-                  </>
+                  <TableHead className="text-right font-medium text-muted-foreground min-w-[90px]">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
+                          Conv.
+                          <Info className="h-3 w-3 text-muted-foreground/60" />
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[200px]">
+                          <p className="text-xs">Unique users who converted</p>
+                          {hasCostSource && <p className="text-xs mt-1">CPA = Cost ÷ Conversions</p>}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -510,12 +550,13 @@ export function DimensionTable({
                       </>
                     )}
 
-                    {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance */}
+                    {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
                     {visibleGroups.has("wallets") && (
                       (() => {
                         const extensionsCount = row.visitors_with_wallet_extension;
                         const walletsCount = row.wallet_users;
                         const enrichedCount = row.wallets_enriched;
+                        const totalValue = row.total_balance_usd;
                         
                         // Extensions rate: extensions / visitors
                         const extensionsRate = calcRate(extensionsCount, visitors);
@@ -529,13 +570,13 @@ export function DimensionTable({
                         const enrichedRate = row.percent_enriched;
                         
                         // Avg Balance: total_balance_usd / wallets_enriched
-                        const avgBalance = enrichedCount && enrichedCount > 0 && row.total_balance_usd !== null
-                          ? row.total_balance_usd / enrichedCount
+                        const avgBalance = enrichedCount && enrichedCount > 0 && totalValue !== null
+                          ? totalValue / enrichedCount
                           : null;
                         
                         // CPB: cost / total_balance (only if cost source selected)
-                        const cpb = hasCostSource && row.cost_total !== null && row.total_balance_usd !== null && row.total_balance_usd > 0
-                          ? row.cost_total / row.total_balance_usd
+                        const cpb = hasCostSource && row.cost_total !== null && totalValue !== null && totalValue > 0
+                          ? row.cost_total / totalValue
                           : null;
                         
                         return (
@@ -574,11 +615,20 @@ export function DimensionTable({
                               />
                             </TableCell>
                             
-                            {/* Avg Balance: amount + CPB (when cost source) */}
-                            <TableCell className="text-right py-3 border-r border-border/50">
+                            {/* Avg Balance: amount (no cost row, just placeholder) */}
+                            <TableCell className="text-right py-3">
                               <WalletMetricCell
                                 count={null}
                                 customValue={avgBalance !== null ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
+                                showCost={hasCostSource}
+                              />
+                            </TableCell>
+                            
+                            {/* Total Value: total_balance_usd + CPB (when cost source) */}
+                            <TableCell className="text-right py-3 border-r border-border/50">
+                              <WalletMetricCell
+                                count={null}
+                                customValue={totalValue !== null ? `$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
                                 cpb={cpb}
                                 showCost={hasCostSource}
                               />
@@ -588,26 +638,19 @@ export function DimensionTable({
                       })()
                     )}
 
-                    {/* Conversions Group */}
+                    {/* Conversions Group - single column with CPA */}
                     {visibleGroups.has("conversions") && (
-                      <>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.converted_users}
-                            rate={calcRate(row.converted_users, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_conversion}
-                            rateThresholds={{ good: 5, warning: 1 }}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.conversions_total}
-                            showRate={false}
-                            showCost={false}
-                          />
-                        </TableCell>
-                      </>
+                      <TableCell className="text-right py-3">
+                        <MetricCell
+                          count={row.converted_users}
+                          rate={calcRate(row.converted_users, visitors)}
+                          showCost={hasCostSource}
+                          costPer={hasCostSource && row.cost_total !== null && row.converted_users !== null && row.converted_users > 0
+                            ? row.cost_total / row.converted_users
+                            : null}
+                          rateThresholds={{ good: 5, warning: 1 }}
+                        />
+                      </TableCell>
                     )}
                   </TableRow>
                 );
