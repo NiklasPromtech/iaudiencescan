@@ -2,11 +2,13 @@ import { useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Zap,
+  Globe,
+  Wallet,
   Users,
   DollarSign,
+  Search,
   Settings,
   ChevronDown,
-  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,17 +29,14 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import audiencescanLogo from "@/assets/audiencescan-logo-white.png";
 
-const mainNavItems = [
-  {
-    title: "Overview",
-    url: "/overview",
-    icon: LayoutDashboard,
-  },
-];
-
+// Navigation structure organized by user journey
 const trackingItems = [
+  {
+    title: "Websites",
+    url: "/install",
+    icon: Globe,
+  },
   {
     title: "Event Manager",
     url: "/events",
@@ -45,24 +44,37 @@ const trackingItems = [
   },
 ];
 
-const audienceItems = [
+const insightsItems = [
+  {
+    title: "Overview",
+    url: "/overview",
+    icon: LayoutDashboard,
+  },
   {
     title: "Wallet Data",
     url: "/wallets",
     icon: Wallet,
   },
+];
+
+const enrichmentItems = [
   {
-    title: "Audiences",
+    title: "Cost Sources",
+    url: "/costs",
+    icon: DollarSign,
+  },
+  {
+    title: "Wallet Groups",
     url: "/audiences",
     icon: Users,
   },
 ];
 
-const attributionItems = [
+const strategyItems = [
   {
-    title: "Cost Sources",
-    url: "/costs",
-    icon: DollarSign,
+    title: "Scans",
+    url: "/scans",
+    icon: Search,
   },
 ];
 
@@ -94,7 +106,8 @@ const NavItem = ({ item, collapsed }: NavItemProps) => {
           to={item.url}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50",
-            isActive && "bg-primary/10 text-primary font-medium"
+            isActive && "bg-primary/10 text-primary font-medium",
+            collapsed && "justify-center px-0"
           )}
         >
           <item.icon className="h-4 w-4 shrink-0" />
@@ -123,7 +136,7 @@ const NavGroup = ({ label, items, collapsed, defaultOpen = true }: NavGroupProps
   if (collapsed) {
     // In collapsed mode, just show icons without group labels
     return (
-      <SidebarGroup>
+      <SidebarGroup className="px-1">
         <SidebarGroupContent>
           <SidebarMenu>
             {items.map((item) => (
@@ -164,35 +177,27 @@ export const DashboardSidebar = () => {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className={cn("p-4", collapsed && "p-2 flex items-center justify-center")}>
         <Link to="/overview" className="flex items-center gap-2">
-          <img
-            src={audiencescanLogo}
-            alt="AudienceScan"
-            className={cn("h-6 transition-all", collapsed && "h-5")}
-          />
+          {/* Logo with dark text for visibility on light background */}
+          <div className={cn(
+            "font-bold text-foreground transition-all",
+            collapsed ? "text-lg" : "text-xl"
+          )}>
+            {collapsed ? "AS" : "AudienceScan"}
+          </div>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        {/* Main nav - no group label */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <NavItem key={item.url} item={item} collapsed={collapsed} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
+      <SidebarContent className={cn("px-2", collapsed && "px-1")}>
         <NavGroup label="Tracking" items={trackingItems} collapsed={collapsed} />
-        <NavGroup label="Audiences" items={audienceItems} collapsed={collapsed} />
-        <NavGroup label="Attribution" items={attributionItems} collapsed={collapsed} />
+        <NavGroup label="Insights" items={insightsItems} collapsed={collapsed} />
+        <NavGroup label="Enrichment" items={enrichmentItems} collapsed={collapsed} />
+        <NavGroup label="Strategy" items={strategyItems} collapsed={collapsed} />
       </SidebarContent>
 
-      <SidebarFooter className="px-2 pb-4">
-        <SidebarGroup>
+      <SidebarFooter className={cn("px-2 pb-4", collapsed && "px-1")}>
+        <SidebarGroup className={cn(collapsed && "px-1")}>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
