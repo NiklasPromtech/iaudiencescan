@@ -748,38 +748,54 @@ export interface ScanResultsNetworkEdge {
 }
 
 export interface ScanResultsTopToken {
-  contract_address: string;
-  contract_name: string;
-  contract_ticker: string;
+  token_address: string;
+  token_name: string;
+  token_symbol: string;
+  token_logo_url: string | null;
   chain_name: string;
-  chain_display_name: string;
-  logo_url: string;
-  token_type: string;
-  is_native_token: boolean;
+  transaction_count: number;
   unique_wallets: number;
-  total_balance: number;
-  total_value_usd: number | null;
-  avg_balance: number;
-  avg_value_usd: number | null;
-  // Enriched fields (may not be present)
-  website?: string;
-  twitter?: string;
-  description?: string;
+  // Social/targeting fields
+  website?: string | null;
+  twitter?: string | null;
+  telegram?: string | null;
+  discord?: string | null;
+  reddit?: string | null;
+  description?: string | null;
   current_price_usd?: number | null;
   market_cap_usd?: number | null;
   news_count?: number;
 }
 
+export interface ScanResultsNetworkNodeNew {
+  token_address: string;
+  token_name: string;
+  token_symbol: string;
+  token_logo_url: string | null;
+  chain_name: string;
+  transaction_count: number;
+  unique_wallets: number;
+  outgoing_count: number;
+  incoming_count: number;
+  total_value: number;
+}
+
 export interface ScanResultsResponse {
-  total_wallets: number;
+  scan_id: string;
+  status: string;
+  enriched: boolean;
+  wallets_processed: number;
   wallets_with_balance: number;
-  total_tokens: number;
-  total_value_usd: number;
+  transfers_found: number;
+  tokens_found: number;
+  tokens_enriched: number;
   top_tokens: ScanResultsTopToken[];
-  token_network: {
-    nodes: ScanResultsNetworkNode[];
+  network: {
+    nodes: ScanResultsNetworkNodeNew[];
     edges: ScanResultsNetworkEdge[];
   };
+  started_at: string;
+  completed_at: string;
 }
 
 // Scan API functions
