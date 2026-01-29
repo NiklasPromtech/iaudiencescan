@@ -49,7 +49,7 @@ export function MetricCell({
     <div className={cn("flex flex-col text-right", className)}>
       {/* Row 1: Count - always visible */}
       <span className="font-medium tabular-nums text-foreground">
-        {count !== null ? count.toLocaleString() : "—"}
+        {count !== null && count !== undefined ? count.toLocaleString() : "—"}
       </span>
       
       {/* Row 2: Rate - always takes space, content conditional */}
