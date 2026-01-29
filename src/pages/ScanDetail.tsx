@@ -68,6 +68,13 @@ const ScanDetail = () => {
     }
   }, [scan?.status, fetchScan]);
 
+  // Auto-redirect to results when scan completes
+  useEffect(() => {
+    if (scan?.status === "COMPLETED" && scanId) {
+      navigate(`/scans/${scanId}/results`);
+    }
+  }, [scan?.status, scanId, navigate]);
+
   const getChainLabel = (chain: string) => {
     return SUPPORTED_CHAINS.find((c) => c.value === chain)?.label || chain;
   };

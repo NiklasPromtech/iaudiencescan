@@ -16,7 +16,6 @@ import { formatDistanceToNow } from "date-fns";
 import { ScanResultsStats } from "@/components/scan-results/ScanResultsStats";
 import { TargetingFilters } from "@/components/scan-results/TargetingFilters";
 import { PlatformTargetingCard } from "@/components/scan-results/PlatformTargetingCard";
-import { XAdsIntegration } from "@/components/scan-results/XAdsIntegration";
 
 const ScanResults = () => {
   const { scanId } = useParams<{ scanId: string }>();
@@ -164,9 +163,6 @@ const ScanResults = () => {
 
             {/* Summary Stats */}
             <ScanResultsStats results={results} />
-
-            {/* X Ads Integration CTA */}
-            <XAdsIntegration tokens={filteredTokens} scanId={scanId!} />
 
             {/* Filters */}
             <Card className="p-4">
