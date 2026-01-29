@@ -48,6 +48,10 @@ const METRIC_OPTIONS: MetricOption[] = [
 
 const METRIC_MAP = Object.fromEntries(METRIC_OPTIONS.map((m) => [m.key, m]));
 
+// Define chart colors
+const COLOR_LEFT = "hsl(var(--primary))";
+const COLOR_RIGHT = "hsl(var(--foreground))";
+
 export function DailyChart({ data, loading }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
   const [metricRight, setMetricRight] = useState<MetricKey>("visitors_with_wallet_extension");
@@ -56,11 +60,11 @@ export function DailyChart({ data, loading }: DailyChartProps) {
     return {
       [metricLeft]: {
         label: METRIC_MAP[metricLeft]?.label ?? metricLeft,
-        color: "hsl(var(--primary))",
+        color: COLOR_LEFT,
       },
       [metricRight]: {
         label: METRIC_MAP[metricRight]?.label ?? metricRight,
-        color: "hsl(var(--chart-3))",
+        color: COLOR_RIGHT,
       },
     } satisfies ChartConfig;
   }, [metricLeft, metricRight]);
@@ -99,13 +103,13 @@ export function DailyChart({ data, loading }: DailyChartProps) {
           <MetricSelector
             value={metricLeft}
             onChange={(v) => setMetricLeft(v as MetricKey)}
-            color="hsl(var(--primary))"
+            color={COLOR_LEFT}
             label="Left axis"
           />
           <MetricSelector
             value={metricRight}
             onChange={(v) => setMetricRight(v as MetricKey)}
-            color="hsl(var(--chart-3))"
+            color={COLOR_RIGHT}
             label="Right axis"
           />
         </div>
@@ -154,13 +158,13 @@ export function DailyChart({ data, loading }: DailyChartProps) {
             <Bar
               yAxisId="left"
               dataKey={metricLeft}
-              fill="hsl(var(--primary))"
+              fill={COLOR_LEFT}
               radius={[4, 4, 0, 0]}
             />
             <Bar
               yAxisId="right"
               dataKey={metricRight}
-              fill="hsl(var(--chart-3))"
+              fill={COLOR_RIGHT}
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
