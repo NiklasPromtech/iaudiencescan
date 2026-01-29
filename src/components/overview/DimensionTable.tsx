@@ -82,7 +82,6 @@ const COLUMN_GROUPS: ColumnGroup[] = [
   { id: "traffic", label: "Traffic", defaultVisible: true },
   { id: "engagement", label: "Engagement", defaultVisible: true },
   { id: "wallets", label: "Wallets", defaultVisible: false },
-  { id: "enrichment", label: "Enrichment", defaultVisible: false },
   { id: "conversions", label: "Conversions", defaultVisible: false },
 ];
 
@@ -90,6 +89,69 @@ const COLUMN_GROUPS: ColumnGroup[] = [
 function calculateCostPer(costTotal: number | null, count: number | null): number | null {
   if (costTotal === null || count === null || count === 0) return null;
   return costTotal / count;
+}
+
+// Get rate color class based on thresholds
+function getRateColorClass(
+  rate: number | null,
+  thresholds?: { good: number; warning: number }
+): string {
+  if (rate === null || !thresholds) return "text-muted-foreground";
+  if (rate >= thresholds.good) return "text-emerald-500";
+  if (rate >= thresholds.warning) return "text-amber-500";
+  return "text-destructive";
+}
+
+// Wallet metric cell with consistent 3-row layout
+interface WalletMetricCellProps {
+  count: number | null;
+  rate?: number | null;
+  costPer?: number | null;
+  cpb?: number | null;  // Cost per balance (for Avg Balance column)
+  customValue?: string | null;  // For displaying formatted values like "$320"
+  showCost?: boolean;
+  rateThresholds?: { good: number; warning: number };
+}
+
+function WalletMetricCell({
+  count,
+  rate,
+  costPer,
+  cpb,
+  customValue,
+  showCost = false,
+  rateThresholds,
+}: WalletMetricCellProps) {
+  const rateColorClass = getRateColorClass(rate ?? null, rateThresholds);
+
+  return (
+    <div className="flex flex-col text-right">
+      {/* Row 1: Count or custom value */}
+      <span className="font-medium tabular-nums text-foreground">
+        {customValue !== undefined && customValue !== null
+          ? customValue
+          : count !== null && count !== undefined
+            ? count.toLocaleString()
+            : "—"}
+      </span>
+      
+      {/* Row 2: Rate % */}
+      <span className={cn("text-xs tabular-nums h-4", rate !== null && rate !== undefined ? rateColorClass : "text-muted-foreground")}>
+        {rate !== null && rate !== undefined ? `${Math.round(rate)}%` : "—"}
+      </span>
+      
+      {/* Row 3: Cost-per or CPB */}
+      <span className={cn("text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
+        {showCost
+          ? cpb !== null && cpb !== undefined
+            ? `$${cpb.toFixed(2)}`
+            : costPer !== null && costPer !== undefined
+              ? `$${costPer.toFixed(2)}`
+              : "—"
+          : "—"}
+      </span>
+    </div>
+  );
 }
 
 // Enrich row with calculated cost-per fields if missing
@@ -136,16 +198,18 @@ export function DimensionTable({
   );
 
   // Auto-show wallet/conversion columns if data exists
-  const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
+  const hasWalletData = data.some((row) => 
+    (row.wallet_users !== null && row.wallet_users > 0) ||
+    (row.visitors_with_wallet_extension !== null && row.visitors_with_wallet_extension > 0) ||
+    (row.wallets_enriched !== null && row.wallets_enriched > 0)
+  );
   const hasConversionData = data.some((row) => row.converted_users !== null && row.converted_users > 0);
-  const hasEnrichmentData = data.some((row) => row.wallets_enriched !== null && row.wallets_enriched > 0);
 
   const [visibleGroups, setVisibleGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     COLUMN_GROUPS.forEach((g) => {
       if (g.defaultVisible) initial.add(g.id);
       if (g.id === "wallets" && (showWalletColumns || hasWalletData)) initial.add(g.id);
-      if (g.id === "enrichment" && hasEnrichmentData) initial.add(g.id);
       if (g.id === "conversions" && (showConversionColumns || hasConversionData)) initial.add(g.id);
     });
     return initial;
@@ -156,13 +220,10 @@ export function DimensionTable({
     if (hasWalletData) {
       setVisibleGroups(prev => new Set([...prev, "wallets"]));
     }
-    if (hasEnrichmentData) {
-      setVisibleGroups(prev => new Set([...prev, "enrichment"]));
-    }
     if (hasConversionData) {
       setVisibleGroups(prev => new Set([...prev, "conversions"]));
     }
-  }, [hasWalletData, hasEnrichmentData, hasConversionData]);
+  }, [hasWalletData, hasConversionData]);
 
   const dimensionLabel = DIMENSION_OPTIONS.find((d) => d.value === dimension)?.label || dimension;
 
@@ -314,25 +375,21 @@ export function DimensionTable({
                   </>
                 )}
 
-                {/* Wallets Group */}
+                {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance */}
                 {visibleGroups.has("wallets") && (
                   <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">
-                      Wallets
-                    </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
                       Extensions
                     </TableHead>
-                  </>
-                )}
-
-                {/* Enrichment Group */}
-                {visibleGroups.has("enrichment") && (
-                  <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Enriched</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] whitespace-nowrap">% Enriched</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">Avg Bal</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">CPB</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                      Wallets
+                    </TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                      Enriched
+                    </TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap border-r border-border/50">
+                      Avg Bal
+                    </TableHead>
                   </>
                 )}
 
@@ -433,74 +490,75 @@ export function DimensionTable({
                       </>
                     )}
 
-                    {/* Wallets Group */}
+                    {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance */}
                     {visibleGroups.has("wallets") && (
-                      <>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.wallet_users}
-                            rate={calcRate(row.wallet_users, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_wallet}
-                            rateThresholds={{ good: 10, warning: 2 }}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3 border-r border-border/50">
-                          <MetricCell
-                            count={row.visitors_with_wallet_extension}
-                            rate={calcRate(row.visitors_with_wallet_extension, visitors)}
-                            showCost={false}
-                            rateThresholds={{ good: 20, warning: 5 }}
-                          />
-                        </TableCell>
-                      </>
-                    )}
-
-                    {/* Enrichment Group */}
-                    {visibleGroups.has("enrichment") && (
                       (() => {
-                        const avgBalance = row.wallets_enriched && row.wallets_enriched > 0 && row.total_balance_usd !== null
-                          ? row.total_balance_usd / row.wallets_enriched
+                        const extensionsCount = row.visitors_with_wallet_extension;
+                        const walletsCount = row.wallet_users;
+                        const enrichedCount = row.wallets_enriched;
+                        
+                        // Extensions rate: extensions / visitors
+                        const extensionsRate = calcRate(extensionsCount, visitors);
+                        
+                        // Wallets rate: wallets / extensions (how many with extension connected)
+                        const walletsRate = extensionsCount && extensionsCount > 0
+                          ? ((walletsCount ?? 0) / extensionsCount) * 100
                           : null;
-                        const cpb = row.cost_total !== null && row.total_balance_usd !== null && row.total_balance_usd > 0
+                        
+                        // Enriched rate: from API percent_enriched
+                        const enrichedRate = row.percent_enriched;
+                        
+                        // Avg Balance: total_balance_usd / wallets_enriched
+                        const avgBalance = enrichedCount && enrichedCount > 0 && row.total_balance_usd !== null
+                          ? row.total_balance_usd / enrichedCount
+                          : null;
+                        
+                        // CPB: cost / total_balance (only if cost source selected)
+                        const cpb = hasCostSource && row.cost_total !== null && row.total_balance_usd !== null && row.total_balance_usd > 0
                           ? row.cost_total / row.total_balance_usd
                           : null;
                         
                         return (
                           <>
+                            {/* Extensions: count + rate (% of visitors) */}
                             <TableCell className="text-right py-3">
-                              <MetricCell
-                                count={row.wallets_enriched}
-                                showRate={false}
-                                showCost={false}
+                              <WalletMetricCell
+                                count={extensionsCount}
+                                rate={extensionsRate}
+                                showCost={hasCostSource}
+                                rateThresholds={{ good: 20, warning: 5 }}
                               />
                             </TableCell>
+                            
+                            {/* Wallets: count + rate (% of extensions that connected) */}
                             <TableCell className="text-right py-3">
-                              <div className="flex flex-col items-end gap-0.5">
-                                <span className="tabular-nums text-foreground">
-                                  {row.percent_enriched !== null && row.percent_enriched !== undefined
-                                    ? `${row.percent_enriched.toFixed(1)}%`
-                                    : "—"}
-                                </span>
-                              </div>
+                              <WalletMetricCell
+                                count={walletsCount}
+                                rate={walletsRate}
+                                costPer={hasCostSource ? row.cost_per_wallet : undefined}
+                                showCost={hasCostSource}
+                                rateThresholds={{ good: 30, warning: 10 }}
+                              />
                             </TableCell>
+                            
+                            {/* Enriched: count + percent_enriched */}
                             <TableCell className="text-right py-3">
-                              <div className="flex flex-col items-end gap-0.5">
-                                <span className="tabular-nums text-foreground">
-                                  {avgBalance !== null
-                                    ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-                                    : "—"}
-                                </span>
-                              </div>
+                              <WalletMetricCell
+                                count={enrichedCount}
+                                rate={enrichedRate}
+                                showCost={hasCostSource}
+                                rateThresholds={{ good: 80, warning: 40 }}
+                              />
                             </TableCell>
+                            
+                            {/* Avg Balance: amount + CPB (when cost source) */}
                             <TableCell className="text-right py-3 border-r border-border/50">
-                              <div className="flex flex-col items-end gap-0.5">
-                                <span className="tabular-nums text-foreground">
-                                  {cpb !== null
-                                    ? `$${cpb.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                    : "—"}
-                                </span>
-                              </div>
+                              <WalletMetricCell
+                                count={null}
+                                customValue={avgBalance !== null ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
+                                cpb={cpb}
+                                showCost={hasCostSource}
+                              />
                             </TableCell>
                           </>
                         );
