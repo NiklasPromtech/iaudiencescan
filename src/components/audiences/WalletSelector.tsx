@@ -27,8 +27,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, ChevronDown, Loader2, Filter, X, CalendarIcon } from "lucide-react";
+import { Search, ChevronDown, Loader2, Filter, X, CalendarIcon, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InitialFilters {
   dateRange?: DateRangeValue;
@@ -364,6 +365,9 @@ export function WalletSelector({
   );
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   
+  // Check if opened with preset filters (from overview click)
+  const hasPresetFilters = !!(initialFilters?.filters && Object.keys(initialFilters.filters).length > 0);
+  
   // Balance filters
   const [minBalance, setMinBalance] = useState("");
   const [maxBalance, setMaxBalance] = useState("");
@@ -525,8 +529,84 @@ export function WalletSelector({
       filterOptions?.[config.key] && filterOptions[config.key].length > 0
   );
 
+  // Format preset filters for display
+  const formatPresetFilters = () => {
+    if (!initialFilters?.filters) return [];
+    
+    const filterLabels: { key: string; values: string[] }[] = [];
+    const labelMap: Record<string, string> = {
+      sources: "Source",
+      utm_source: "UTM Source",
+      utm_medium: "UTM Medium", 
+      utm_campaign: "Campaign",
+      utm_content: "Content",
+      utm_term: "Term",
+      devices: "Device",
+      browsers: "Browser",
+      os: "OS",
+      bot_status: "Bot Status",
+    };
+
+    Object.entries(initialFilters.filters).forEach(([key, values]) => {
+      if (values && values.length > 0) {
+        filterLabels.push({
+          key: labelMap[key] || key,
+          values,
+        });
+      }
+    });
+
+    return filterLabels;
+  };
+
+  const getDateRangeLabel = () => {
+    if (!initialFilters?.dateRange) return null;
+    const dr = initialFilters.dateRange;
+    
+    if (dr.type === "custom" && dr.from && dr.to) {
+      if (dr.from.getTime() === dr.to.getTime()) {
+        return format(dr.from, "MMM d, yyyy");
+      }
+      return `${format(dr.from, "MMM d")} – ${format(dr.to, "MMM d, yyyy")}`;
+    }
+    
+    if (dr.includeToday && dr.days === 0) return "Today";
+    if (dr.days === 1 && !dr.includeToday) return "Yesterday";
+    if (dr.days && dr.includeToday) return `Last ${dr.days} days`;
+    if (dr.days) return `Last ${dr.days} days`;
+    
+    return null;
+  };
+
   return (
     <div className="space-y-4">
+      {/* Preset Filters Banner */}
+      {hasPresetFilters && (
+        <Alert className="bg-primary/5 border-primary/20">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-sm">
+            <span className="font-medium">Filters applied from Overview:</span>{" "}
+            {formatPresetFilters().map((f, i) => (
+              <span key={f.key}>
+                {i > 0 && ", "}
+                <span className="text-foreground">{f.key}:</span>{" "}
+                <span className="font-medium text-primary">{f.values.join(", ")}</span>
+              </span>
+            ))}
+            {getDateRangeLabel() && (
+              <span>
+                {formatPresetFilters().length > 0 && ", "}
+                <span className="text-foreground">Date:</span>{" "}
+                <span className="font-medium text-primary">{getDateRangeLabel()}</span>
+              </span>
+            )}
+            <span className="block mt-1 text-muted-foreground text-xs">
+              To change filters, close this dialog and click a different wallet count in the Overview.
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Search, Date, and Sort Row */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
@@ -539,7 +619,10 @@ export function WalletSelector({
           />
         </div>
 
-        <DateRangePicker value={dateRange} onChange={setDateRange} />
+        {/* Only show date picker when NOT using preset filters */}
+        {!hasPresetFilters && (
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
+        )}
 
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
           <SelectTrigger className="w-[140px] h-9">
@@ -576,72 +659,74 @@ export function WalletSelector({
         </div>
       </div>
 
-      {/* Filters Row */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5 text-muted-foreground mr-1">
-          <Filter className="h-4 w-4" />
-          <span className="text-sm font-medium">Filters</span>
-        </div>
+      {/* Filters Row - only show when NOT using preset filters */}
+      {!hasPresetFilters && (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground mr-1">
+            <Filter className="h-4 w-4" />
+            <span className="text-sm font-medium">Filters</span>
+          </div>
 
-        {/* Wallet Type Filter */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={cn(
-                "h-8 border-border bg-background hover:bg-muted/50",
-                types.length > 0 && "border-primary/50 bg-primary/5"
-              )}
-            >
-              Type {types.length > 0 && (
-                <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
-                  {types.length}
-                </Badge>
-              )}
-              <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="bg-popover">
-            {WALLET_TYPES.map((type) => (
-              <DropdownMenuCheckboxItem
-                key={type}
-                checked={types.includes(type)}
-                onCheckedChange={() => handleTypeToggle(type)}
+          {/* Wallet Type Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={cn(
+                  "h-8 border-border bg-background hover:bg-muted/50",
+                  types.length > 0 && "border-primary/50 bg-primary/5"
+                )}
               >
-                {type}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                Type {types.length > 0 && (
+                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
+                    {types.length}
+                  </Badge>
+                )}
+                <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-popover">
+              {WALLET_TYPES.map((type) => (
+                <DropdownMenuCheckboxItem
+                  key={type}
+                  checked={types.includes(type)}
+                  onCheckedChange={() => handleTypeToggle(type)}
+                >
+                  {type}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* Dynamic Filters from API */}
-        {availableFilters.map((config) => (
-          <FilterDropdown
-            key={config.key}
-            filterKey={config.key}
-            label={config.label}
-            options={filterOptions?.[config.key] || []}
-            selectedValues={activeFilters[config.key] || []}
-            onToggle={handleFilterToggle}
-          />
-        ))}
+          {/* Dynamic Filters from API */}
+          {availableFilters.map((config) => (
+            <FilterDropdown
+              key={config.key}
+              filterKey={config.key}
+              label={config.label}
+              options={filterOptions?.[config.key] || []}
+              selectedValues={activeFilters[config.key] || []}
+              onToggle={handleFilterToggle}
+            />
+          ))}
 
-        {totalActiveFilters > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-muted-foreground hover:text-foreground"
-            onClick={clearAllFilters}
-          >
-            <X className="h-3.5 w-3.5 mr-1" />
-            Clear all
-            <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
-              {totalActiveFilters}
-            </Badge>
-          </Button>
-        )}
-      </div>
+          {totalActiveFilters > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              onClick={clearAllFilters}
+            >
+              <X className="h-3.5 w-3.5 mr-1" />
+              Clear all
+              <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
+                {totalActiveFilters}
+              </Badge>
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Selection Info */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
