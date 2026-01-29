@@ -82,6 +82,7 @@ const COLUMN_GROUPS: ColumnGroup[] = [
   { id: "traffic", label: "Traffic", defaultVisible: true },
   { id: "engagement", label: "Engagement", defaultVisible: true },
   { id: "wallets", label: "Wallets", defaultVisible: false },
+  { id: "enrichment", label: "Enrichment", defaultVisible: false },
   { id: "conversions", label: "Conversions", defaultVisible: false },
 ];
 
@@ -137,12 +138,14 @@ export function DimensionTable({
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => row.wallet_users !== null && row.wallet_users > 0);
   const hasConversionData = data.some((row) => row.converted_users !== null && row.converted_users > 0);
+  const hasEnrichmentData = data.some((row) => row.wallets_enriched !== null && row.wallets_enriched > 0);
 
   const [visibleGroups, setVisibleGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     COLUMN_GROUPS.forEach((g) => {
       if (g.defaultVisible) initial.add(g.id);
       if (g.id === "wallets" && (showWalletColumns || hasWalletData)) initial.add(g.id);
+      if (g.id === "enrichment" && hasEnrichmentData) initial.add(g.id);
       if (g.id === "conversions" && (showConversionColumns || hasConversionData)) initial.add(g.id);
     });
     return initial;
@@ -153,10 +156,13 @@ export function DimensionTable({
     if (hasWalletData) {
       setVisibleGroups(prev => new Set([...prev, "wallets"]));
     }
+    if (hasEnrichmentData) {
+      setVisibleGroups(prev => new Set([...prev, "enrichment"]));
+    }
     if (hasConversionData) {
       setVisibleGroups(prev => new Set([...prev, "conversions"]));
     }
-  }, [hasWalletData, hasConversionData]);
+  }, [hasWalletData, hasEnrichmentData, hasConversionData]);
 
   const dimensionLabel = DIMENSION_OPTIONS.find((d) => d.value === dimension)?.label || dimension;
 
@@ -311,8 +317,22 @@ export function DimensionTable({
                 {/* Wallets Group */}
                 {visibleGroups.has("wallets") && (
                   <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">
                       Wallets
+                    </TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px] border-r border-border/50">
+                      Extensions
+                    </TableHead>
+                  </>
+                )}
+
+                {/* Enrichment Group */}
+                {visibleGroups.has("enrichment") && (
+                  <>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">Enriched</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[80px]">% Enriched</TableHead>
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] border-r border-border/50">
+                      Balance
                     </TableHead>
                   </>
                 )}
@@ -345,6 +365,7 @@ export function DimensionTable({
                         showGrade={true}
                         showCost={hasCostSource}
                         showBotRate={true}
+                        onBotClick={onBotClick}
                       />
                     </TableCell>
 
@@ -415,15 +436,56 @@ export function DimensionTable({
 
                     {/* Wallets Group */}
                     {visibleGroups.has("wallets") && (
-                      <TableCell className="text-right py-3 border-r border-border/50">
-                        <MetricCell
-                          count={row.wallet_users}
-                          rate={calcRate(row.wallet_users, visitors)}
-                          showCost={hasCostSource}
-                          costPer={row.cost_per_wallet}
-                          rateThresholds={{ good: 10, warning: 2 }}
-                        />
-                      </TableCell>
+                      <>
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.wallet_users}
+                            rate={calcRate(row.wallet_users, visitors)}
+                            showCost={hasCostSource}
+                            costPer={row.cost_per_wallet}
+                            rateThresholds={{ good: 10, warning: 2 }}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right py-3 border-r border-border/50">
+                          <MetricCell
+                            count={row.visitors_with_wallet_extension}
+                            rate={calcRate(row.visitors_with_wallet_extension, visitors)}
+                            showCost={false}
+                            rateThresholds={{ good: 20, warning: 5 }}
+                          />
+                        </TableCell>
+                      </>
+                    )}
+
+                    {/* Enrichment Group */}
+                    {visibleGroups.has("enrichment") && (
+                      <>
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.wallets_enriched}
+                            showRate={false}
+                            showCost={false}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right py-3">
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="tabular-nums text-foreground">
+                              {row.percent_enriched !== null && row.percent_enriched !== undefined
+                                ? `${row.percent_enriched.toFixed(1)}%`
+                                : "—"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right py-3 border-r border-border/50">
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="tabular-nums text-foreground">
+                              {row.total_balance_usd !== null && row.total_balance_usd !== undefined
+                                ? `$${row.total_balance_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                : "—"}
+                            </span>
+                          </div>
+                        </TableCell>
+                      </>
                     )}
 
                     {/* Conversions Group */}

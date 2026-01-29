@@ -9,6 +9,7 @@ interface DimensionCellProps {
   showCost?: boolean;
   showBotRate?: boolean;
   botWarningThreshold?: number; // Default 20%
+  onBotClick?: (dimValue: string) => void;
 }
 
 function formatCurrency(value: number | null): string {
@@ -27,6 +28,7 @@ export function DimensionCell({
   showCost = false,
   showBotRate = true,
   botWarningThreshold = 20,
+  onBotClick,
 }: DimensionCellProps) {
   const botChecked = row.bot_checked ?? 0;
   const botRate = botChecked > 0 ? ((row.bot_visitors ?? 0) / botChecked) * 100 : 0;
@@ -67,9 +69,19 @@ export function DimensionCell({
       
       {/* Row 3: Bot rate */}
       {showBotRate && row.bot_visitors !== null && (
-        <span className={cn("text-xs tabular-nums", getBotRateColor())}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onBotClick?.(row.dim_value);
+          }}
+          className={cn(
+            "text-xs tabular-nums text-left hover:underline cursor-pointer",
+            getBotRateColor()
+          )}
+        >
           {Math.round(botRate)}% bots
-        </span>
+        </button>
       )}
     </div>
   );
