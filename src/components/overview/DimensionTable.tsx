@@ -44,6 +44,7 @@ interface DimensionTableProps {
   showWalletColumns?: boolean;
   showConversionColumns?: boolean;
   onBotClick?: (dimValue: string) => void;
+  onWalletClick?: (dimValue: string, walletCount: number) => void;
   costSources?: CostSource[];
   selectedCostSourceId?: string | null;
   onCostSourceChange?: (costSourceId: string | null) => void;
@@ -112,6 +113,7 @@ interface WalletMetricCellProps {
   customValue?: string | null;  // For displaying formatted values like "$320"
   showCost?: boolean;
   rateThresholds?: { good: number; warning: number };
+  onClick?: () => void;  // Optional click handler
 }
 
 function WalletMetricCell({
@@ -122,19 +124,30 @@ function WalletMetricCell({
   customValue,
   showCost = false,
   rateThresholds,
+  onClick,
 }: WalletMetricCellProps) {
   const rateColorClass = getRateColorClass(rate ?? null, rateThresholds);
+  const isClickable = onClick && count !== null && count > 0;
 
   return (
     <div className="flex flex-col text-right">
       {/* Row 1: Count or custom value */}
-      <span className="font-medium tabular-nums text-foreground">
-        {customValue !== undefined && customValue !== null
-          ? customValue
-          : count !== null && count !== undefined
-            ? count.toLocaleString()
-            : "—"}
-      </span>
+      {isClickable ? (
+        <button
+          onClick={onClick}
+          className="font-medium tabular-nums text-primary hover:text-primary/80 hover:underline cursor-pointer transition-colors text-right"
+        >
+          {count!.toLocaleString()}
+        </button>
+      ) : (
+        <span className="font-medium tabular-nums text-foreground">
+          {customValue !== undefined && customValue !== null
+            ? customValue
+            : count !== null && count !== undefined
+              ? count.toLocaleString()
+              : "—"}
+        </span>
+      )}
       
       {/* Row 2: Rate % */}
       <span className={cn("text-xs tabular-nums h-4", rate !== null && rate !== undefined ? rateColorClass : "text-muted-foreground")}>
@@ -179,6 +192,7 @@ export function DimensionTable({
   showWalletColumns,
   showConversionColumns,
   onBotClick,
+  onWalletClick,
   costSources = [],
   selectedCostSourceId,
   onCostSourceChange,
@@ -544,6 +558,9 @@ export function DimensionTable({
                                 costPer={hasCostSource ? row.cost_per_wallet : undefined}
                                 showCost={hasCostSource}
                                 rateThresholds={{ good: 30, warning: 10 }}
+                                onClick={walletsCount && walletsCount > 0 && onWalletClick 
+                                  ? () => onWalletClick(row.dim_value, walletsCount) 
+                                  : undefined}
                               />
                             </TableCell>
                             
