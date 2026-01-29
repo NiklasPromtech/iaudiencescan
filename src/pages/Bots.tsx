@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,27 +99,33 @@ const Bots = () => {
   }, []);
 
   const getRangeConfig = useCallback((): RangeConfig => {
-    if (dateRange.includeToday || dateRange.type === "custom") {
-      const today = new Date();
-      const todayStr = format(today, "yyyy-MM-dd");
-      
-      if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
-        return {
-          type: "custom",
-          from: format(dateRange.from, "yyyy-MM-dd"),
-          to: format(dateRange.to, "yyyy-MM-dd"),
-          timezone,
-        };
-      }
-      
+    const today = new Date();
+    const todayStr = format(today, "yyyy-MM-dd");
+    
+    // Handle custom date range
+    if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
       return {
         type: "custom",
-        from: todayStr,
+        from: format(dateRange.from, "yyyy-MM-dd"),
+        to: format(dateRange.to, "yyyy-MM-dd"),
+        timezone,
+      };
+    }
+    
+    // Handle presets with includeToday (e.g., "Last 7 days" including today)
+    if (dateRange.includeToday) {
+      const days = dateRange.days || 0;
+      // For "Last 7 days" including today: from = today - 6, to = today (7 days total)
+      const fromDate = days > 0 ? subDays(today, days - 1) : today;
+      return {
+        type: "custom",
+        from: format(fromDate, "yyyy-MM-dd"),
         to: todayStr,
         timezone,
       };
     }
     
+    // Standard rolling window (excludes today)
     return {
       type: "last_full_days",
       days: dateRange.days || 7,
