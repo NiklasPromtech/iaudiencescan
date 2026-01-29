@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Puzzle, ChevronDown, ChevronUp } from "lucide-react";
 import { WalletExtensionsRow } from "@/lib/api";
-import { format, parseISO } from "date-fns";
 
 interface WalletExtensionsTableProps {
   data: WalletExtensionsRow[];
@@ -29,14 +27,6 @@ export const WalletExtensionsTable = ({
   totalRows 
 }: WalletExtensionsTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), "MMM d, HH:mm");
-    } catch {
-      return "—";
-    }
-  };
 
   const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
   const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
@@ -88,35 +78,18 @@ export const WalletExtensionsTable = ({
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Extension</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Type</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Unique Wallets</TableHead>
-              <TableHead className="text-muted-foreground font-medium">First Seen</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Last Seen</TableHead>
+              <TableHead className="text-muted-foreground font-medium">Wallet Type</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right">Count</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {visibleData.map((row) => (
-              <TableRow key={row.extension_name} className="border-border">
+              <TableRow key={row.wallet_type} className="border-border">
                 <TableCell className="font-medium text-foreground">
-                  {row.extension_name}
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant="secondary" 
-                    className="bg-muted text-muted-foreground"
-                  >
-                    {row.extension_type}
-                  </Badge>
+                  {row.wallet_type}
                 </TableCell>
                 <TableCell className="text-right text-foreground font-medium">
-                  {row.unique_wallets.toLocaleString()}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {formatDate(row.first_seen)}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {formatDate(row.last_seen)}
+                  {row.count?.toLocaleString() ?? "—"}
                 </TableCell>
               </TableRow>
             ))}

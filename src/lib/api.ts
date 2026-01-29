@@ -483,11 +483,8 @@ export interface WalletExtensionsRequest {
 }
 
 export interface WalletExtensionsRow {
-  extension_name: string;
-  extension_type: string;
-  unique_wallets: number;
-  first_seen: string;
-  last_seen: string;
+  wallet_type: string;
+  count: number;
 }
 
 export interface WalletExtensionsResponse {
