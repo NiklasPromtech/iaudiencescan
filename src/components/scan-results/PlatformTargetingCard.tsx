@@ -12,9 +12,11 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
-  Lightbulb
+  Lightbulb,
+  Rocket
 } from "lucide-react";
 import { toast } from "sonner";
+import { toast as shadcnToast } from "@/hooks/use-toast";
 import { ScanResultsTopToken } from "@/lib/api";
 
 type Platform = "twitter" | "telegram" | "reddit" | "discord";
@@ -27,6 +29,9 @@ interface PlatformConfig {
   tip: string;
   getHandle: (token: ScanResultsTopToken) => string | null | undefined;
   getUrl: (handle: string) => string;
+  adPlatformUrl?: string;
+  adButtonLabel?: string;
+  adPasteInstructions?: string;
 }
 
 const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
@@ -38,6 +43,9 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
     tip: "Add these accounts to your X Ads audience targeting, or engage with their posts to reach their followers.",
     getHandle: (t) => t.twitter,
     getUrl: (handle) => `https://x.com/${handle}`,
+    adPlatformUrl: "https://ads.x.com",
+    adButtonLabel: "Create X Ads Campaign",
+    adPasteInstructions: "Paste them under \"Follower look-alikes\" in your ad group targeting to reach users similar to these communities.",
   },
   telegram: {
     icon: <MessageCircle className="h-5 w-5" />,
@@ -47,6 +55,9 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
     tip: "Use the TG Ads Assistant extension to bulk-add these communities to your Telegram Ads targeting.",
     getHandle: (t) => t.telegram,
     getUrl: (handle) => `https://t.me/${handle}`,
+    adPlatformUrl: "https://ads.telegram.org",
+    adButtonLabel: "Create Telegram Ad",
+    adPasteInstructions: "Paste them in the channel targeting section to reach users in these communities.",
   },
   reddit: {
     icon: <Globe className="h-5 w-5" />,
@@ -56,6 +67,9 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
     tip: "Engage authentically in these subreddits. Share valuable insights, not just promotional content.",
     getHandle: (t) => t.reddit,
     getUrl: (handle) => `https://reddit.com/r/${handle}`,
+    adPlatformUrl: "https://ads.reddit.com",
+    adButtonLabel: "Create Reddit Ad",
+    adPasteInstructions: "Paste them in the subreddit targeting section to reach users in these communities.",
   },
   discord: {
     icon: <MessageCircle className="h-5 w-5" />,
@@ -65,6 +79,7 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
     tip: "Join these servers to understand the community, participate in discussions, and find collaboration opportunities.",
     getHandle: (t) => t.discord,
     getUrl: (handle) => `https://discord.gg/${handle}`,
+    // No ad platform for Discord
   },
 };
 
@@ -76,6 +91,7 @@ interface PlatformTargetingCardProps {
 export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCardProps) => {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
   const config = PLATFORM_CONFIGS[platform];
 
   const tokensWithPlatform = tokens.filter((t) => {
@@ -98,6 +114,55 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCreateCampaign = async () => {
+    if (!config.adPlatformUrl) return;
+    
+    setIsCreatingCampaign(true);
+    
+    // Format handles appropriately for the platform
+    const handles = tokensWithPlatform
+      .map((t) => {
+        const handle = config.getHandle(t);
+        if (!handle) return null;
+        // Add @ prefix for Twitter handles
+        if (platform === "twitter") {
+          return handle.startsWith("@") ? handle : `@${handle}`;
+        }
+        // Add r/ prefix for Reddit
+        if (platform === "reddit") {
+          return handle.startsWith("r/") ? handle : `r/${handle}`;
+        }
+        return handle;
+      })
+      .filter(Boolean)
+      .join(", ");
+    
+    try {
+      await navigator.clipboard.writeText(handles);
+      
+      shadcnToast({
+        title: `✓ ${tokensWithPlatform.length} ${config.label} handles copied!`,
+        description: `Opening ${config.label} Ads... ${config.adPasteInstructions}`,
+        duration: 6000,
+      });
+      
+      // Short delay so user can see the toast before redirect
+      setTimeout(() => {
+        window.open(config.adPlatformUrl, "_blank");
+        setIsCreatingCampaign(false);
+      }, 1000);
+      
+    } catch (err) {
+      console.error("Failed to copy handles:", err);
+      shadcnToast({
+        title: "Failed to copy handles",
+        description: "Please try again or copy them manually using the Copy All button.",
+        variant: "destructive",
+      });
+      setIsCreatingCampaign(false);
+    }
+  };
+
   const formatMarketCap = (cap: number | null | undefined) => {
     if (!cap) return null;
     if (cap >= 1e9) return `$${(cap / 1e9).toFixed(1)}B`;
@@ -110,25 +175,47 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
     <Card className="overflow-hidden">
       {/* Header */}
       <div className={`p-4 ${config.bgColor} border-b border-border`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className={config.color}>{config.icon}</div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-semibold text-foreground">{config.label}</h3>
               <p className="text-sm text-muted-foreground">
                 {tokensWithPlatform.length} communities found
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={copyAllHandles}
-            className="gap-2"
-          >
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            Copy All
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={copyAllHandles}
+              className="gap-2"
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              Copy All
+            </Button>
+            {config.adPlatformUrl && (
+              <Button
+                size="sm"
+                onClick={handleCreateCampaign}
+                disabled={isCreatingCampaign}
+                className="gap-2"
+              >
+                {isCreatingCampaign ? (
+                  <>
+                    <Copy className="h-4 w-4 animate-pulse" />
+                    Copying...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-4 w-4" />
+                    {config.adButtonLabel}
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
