@@ -630,20 +630,20 @@ Need help? Contact support@audiencescan.io`;
               {website.base_url}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {getWebsiteStatusBadge()}
             {website.status === "verified" && (
               <Button
                 size="sm"
                 variant="default"
-                className="h-7 text-xs bg-primary hover:bg-primary/90"
+                className="h-7 px-3 text-xs bg-primary hover:bg-primary/90"
                 onClick={(e) => { e.stopPropagation(); onGoToData(website); }}
               >
                 Go to data
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             )}
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isSelected ? "rotate-180" : ""}`} />
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform flex-shrink-0 ${isSelected ? "rotate-180" : ""}`} />
           </div>
         </div>
       </CollapsibleTrigger>
@@ -675,8 +675,8 @@ Need help? Contact support@audiencescan.io`;
                       Paste before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
                     </p>
                     <div className="relative">
-                      <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
-                        <code>{trackingSnippet}</code>
+                      <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto">
+                        <code className="break-all">{trackingSnippet}</code>
                       </pre>
                       <Button
                         size="sm"
@@ -694,8 +694,8 @@ Need help? Contact support@audiencescan.io`;
                   <div className="space-y-2">
                     <p className="text-p4 text-muted-foreground">Create a Custom HTML tag, trigger on All Pages</p>
                     <div className="relative">
-                      <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
-                        <code>{gtmSnippet}</code>
+                      <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto">
+                        <code className="break-all">{gtmSnippet}</code>
                       </pre>
                       <Button
                         size="sm"
@@ -727,7 +727,7 @@ Need help? Contact support@audiencescan.io`;
                   To get the most out of AudienceScan Analytics, track wallet interactions on your site.
                 </p>
                 <div className="relative">
-                  <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                  <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
                     <code>{walletTrackingSnippet}</code>
                   </pre>
                   <Button
@@ -752,7 +752,7 @@ Need help? Contact support@audiencescan.io`;
                 </p>
               </div>
               <div className="relative">
-                <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
                   <code>{conversionEventSnippet}</code>
                 </pre>
                 <Button
