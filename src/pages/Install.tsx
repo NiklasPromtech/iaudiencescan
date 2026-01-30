@@ -165,12 +165,7 @@ const Install = () => {
       console.error("Failed to persist website selection:", error);
     }
     
-    // If verified, navigate to overview
-    if (website.status === "verified") {
-      navigate("/overview");
-      return;
-    }
-    
+    // Always stay on page to show code/share options
     setSelectedWebsite(website);
     setStatus(website.status);
     setTrackingSnippet(
