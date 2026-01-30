@@ -96,10 +96,17 @@ const Costs = () => {
         )}
 
         {/* Cost Source List or Empty State */}
-        {hasData ? (
+        {loading ? (
+          <CostSourceList
+            costSources={[]}
+            loading={true}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ) : hasData ? (
           <CostSourceList
             costSources={costSources}
-            loading={loading}
+            loading={false}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
