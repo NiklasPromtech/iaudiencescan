@@ -1198,7 +1198,7 @@ export interface AccessibleWebsitesResponse {
 
 // Share a website with an email
 export async function shareWebsite(websiteId: string, email: string): Promise<ShareWebsiteResponse> {
-  return apiRequest<ShareWebsiteResponse>(`/api/websites/${websiteId}/share`, {
+  return apiRequest<ShareWebsiteResponse>(`/websites/${websiteId}/share`, {
     method: "POST",
     body: JSON.stringify({ email }),
   });
@@ -1206,17 +1206,17 @@ export async function shareWebsite(websiteId: string, email: string): Promise<Sh
 
 // List shares for a website
 export async function listWebsiteShares(websiteId: string): Promise<ListSharesResponse> {
-  return apiRequest<ListSharesResponse>(`/api/websites/${websiteId}/shares`);
+  return apiRequest<ListSharesResponse>(`/websites/${websiteId}/shares`);
 }
 
 // Revoke a share
 export async function revokeWebsiteShare(websiteId: string, shareId: string): Promise<{ success: boolean }> {
-  return apiRequest<{ success: boolean }>(`/api/websites/${websiteId}/shares/${shareId}`, {
+  return apiRequest<{ success: boolean }>(`/websites/${websiteId}/shares/${shareId}`, {
     method: "DELETE",
   });
 }
 
 // Get all websites user has access to (owned + shared)
 export async function listAccessibleWebsites(): Promise<AccessibleWebsitesResponse> {
-  return apiRequest<AccessibleWebsitesResponse>(`/api/websites/accessible`);
+  return apiRequest<AccessibleWebsitesResponse>(`/websites/accessible`);
 }
