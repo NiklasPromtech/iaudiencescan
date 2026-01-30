@@ -174,13 +174,20 @@ function WalletMetricCell({
   );
 }
 
+// Extended row type with calculated cost-per fields
+type EnrichedTableRow = ApiTableRow & {
+  cost_per_extension?: number | null;
+};
+
 // Enrich row with calculated cost-per fields if missing
-function enrichRowWithCostPer(row: ApiTableRow): ApiTableRow {
+function enrichRowWithCostPer(row: ApiTableRow): EnrichedTableRow {
   const costTotal = row.cost_total;
   
   return {
     ...row,
     cost_per_pageview: row.cost_per_pageview ?? calculateCostPer(costTotal, row.pageviews),
+    cost_per_visitor: row.cost_per_visitor ?? calculateCostPer(costTotal, row.unique_visitors),
+    cost_per_extension: calculateCostPer(costTotal, row.visitors_with_wallet_extension),
     cost_per_stayed_10s: row.cost_per_stayed_10s ?? calculateCostPer(costTotal, row.stayed_10s),
     cost_per_stayed_30s: row.cost_per_stayed_30s ?? calculateCostPer(costTotal, row.stayed_30s),
     cost_per_stayed_60s: row.cost_per_stayed_60s ?? calculateCostPer(costTotal, row.stayed_60s),
@@ -581,11 +588,12 @@ export function DimensionTable({
                         
                         return (
                           <>
-                            {/* Extensions: count + rate (% of visitors) */}
+                            {/* Extensions: count + rate (% of visitors) + cost per extension */}
                             <TableCell className="text-right py-3">
                               <WalletMetricCell
                                 count={extensionsCount}
                                 rate={extensionsRate}
+                                costPer={hasCostSource ? row.cost_per_extension : undefined}
                                 showCost={hasCostSource}
                                 rateThresholds={{ good: 20, warning: 5 }}
                               />
