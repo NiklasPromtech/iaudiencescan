@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Search, RefreshCw, ExternalLink } from "lucide-react";
 import { listScans, Scan, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -19,15 +20,18 @@ const statusColors: Record<string, string> = {
 
 const Scans = () => {
   const navigate = useNavigate();
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const [scans, setScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchScans = useCallback(async () => {
+    if (!selectedWebsite?.id) return;
+    
     setLoading(true);
     setError(null);
     try {
-      const response = await listScans();
+      const response = await listScans(selectedWebsite.id);
       setScans(response.scans || []);
     } catch (err) {
       console.error("Failed to fetch scans:", err);
@@ -35,11 +39,13 @@ const Scans = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedWebsite?.id]);
 
   useEffect(() => {
-    fetchScans();
-  }, [fetchScans]);
+    if (!websiteLoading && selectedWebsite?.id) {
+      fetchScans();
+    }
+  }, [fetchScans, websiteLoading, selectedWebsite?.id]);
 
   // Auto-refresh when any scan is processing
   useEffect(() => {
