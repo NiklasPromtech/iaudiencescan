@@ -1168,3 +1168,53 @@ export async function downloadCostTemplate(
 
   return response.blob();
 }
+
+// Website Sharing types
+export interface WebsiteShare {
+  id: string;
+  website_id: string;
+  email: string;
+  user_id: string | null;
+  shared_by_id: string;
+  created_at: string;
+}
+
+export interface ShareWebsiteResponse {
+  success: boolean;
+  share: WebsiteShare;
+}
+
+export interface ListSharesResponse {
+  success: boolean;
+  shares: WebsiteShare[];
+}
+
+export interface AccessibleWebsitesResponse {
+  success: boolean;
+  websites: Website[];
+}
+
+// Share a website with an email
+export async function shareWebsite(websiteId: string, email: string): Promise<ShareWebsiteResponse> {
+  return apiRequest<ShareWebsiteResponse>(`/websites/${websiteId}/share`, {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+// List shares for a website
+export async function listWebsiteShares(websiteId: string): Promise<ListSharesResponse> {
+  return apiRequest<ListSharesResponse>(`/websites/${websiteId}/shares`);
+}
+
+// Revoke a share
+export async function revokeWebsiteShare(websiteId: string, shareId: string): Promise<{ success: boolean }> {
+  return apiRequest<{ success: boolean }>(`/websites/${websiteId}/shares/${shareId}`, {
+    method: "DELETE",
+  });
+}
+
+// Get all websites user has access to (owned + shared)
+export async function listAccessibleWebsites(): Promise<AccessibleWebsitesResponse> {
+  return apiRequest<AccessibleWebsitesResponse>(`/websites/accessible`);
+}
