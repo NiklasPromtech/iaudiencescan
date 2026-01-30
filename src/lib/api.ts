@@ -81,18 +81,18 @@ export interface VerifyWebsiteResponse {
 // API functions
 export async function listWebsites(status?: string): Promise<{ websites: Website[] }> {
   const params = status ? `?status=${status}` : "";
-  return apiRequest<{ websites: Website[] }>(`/api/websites${params}`);
+  return apiRequest<{ websites: Website[] }>(`/websites${params}`);
 }
 
 export async function createWebsite(name: string, base_url: string): Promise<CreateWebsiteResponse> {
-  return apiRequest<CreateWebsiteResponse>("/api/websites", {
+  return apiRequest<CreateWebsiteResponse>("/websites", {
     method: "POST",
     body: JSON.stringify({ name, base_url }),
   });
 }
 
 export async function verifyWebsite(websiteId: string, url?: string): Promise<VerifyWebsiteResponse> {
-  return apiRequest<VerifyWebsiteResponse>(`/api/websites/${websiteId}/verify`, {
+  return apiRequest<VerifyWebsiteResponse>(`/websites/${websiteId}/verify`, {
     method: "POST",
     body: JSON.stringify(url ? { url } : {}),
   });
