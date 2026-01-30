@@ -1181,7 +1181,9 @@ export interface WebsiteShare {
 
 export interface ShareWebsiteResponse {
   success: boolean;
-  share: WebsiteShare;
+  share_id: string;
+  has_account: boolean;
+  message: string;
 }
 
 export interface ListSharesResponse {
