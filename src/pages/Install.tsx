@@ -521,6 +521,12 @@ const WebsiteListItemWithTag = ({
   const [allCopied, setAllCopied] = useState(false);
 
   // All tracking code snippets
+  const walletTrackingSnippet = `// Track wallet events
+AudienceScan.trackWallet(
+  'WALLET_ADDRESS',  // e.g. '0x1234...'
+  'EVENT_TYPE'       // 'connected' | 'staked' | 'purchased' | 'signed'
+);`;
+
   const conversionEventSnippet = `// Track conversion events (sign up, purchase, etc.)
 AudienceScan.trackEvent(
   'EVENT_NAME',     // e.g. 'Signed up', 'Purchase'
@@ -532,12 +538,6 @@ AudienceScan.trackEvent('Purchase', {
   amount: 99.99,
   currency: 'USD'
 });`;
-
-  const walletTrackingSnippet = `// Track wallet connections
-AudienceScan.trackWallet(
-  'WALLET_ADDRESS',  // e.g. '0x1234...'
-  'EVENT_TYPE'       // 'connected' | 'staked' | 'purchased' | 'signed'
-);`;
 
   // Generate full instructions for developer/AI
   const generateFullInstructions = () => {
@@ -553,18 +553,18 @@ ${trackingSnippet}
 ${gtmSnippet}
 
 
-STEP 2: Track Conversion Events (Optional)
+STEP 2: Track Wallet Events (Recommended)
+-----------------------------------------
+To get the most out of AudienceScan, track wallet interactions:
+
+${walletTrackingSnippet}
+
+
+STEP 3: Track Conversion Events (Optional)
 ------------------------------------------
 Call this when users complete key actions:
 
 ${conversionEventSnippet}
-
-
-STEP 3: Track Wallet Connections (Optional)
--------------------------------------------
-Call this when users connect their wallets:
-
-${walletTrackingSnippet}
 
 
 Need help? Contact support@audiencescan.io`;
@@ -709,10 +709,41 @@ Need help? Contact support@audiencescan.io`;
               </Tabs>
             </div>
 
-            {/* Step 2: Conversion Events */}
+            {/* Step 2: Wallet Tracking - IMPORTANT */}
+            <div className="space-y-3 p-4 -mx-4 bg-primary/5 border border-primary/20 rounded-lg relative overflow-hidden">
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 animate-pulse pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-medium">2</span>
+                  <p className="text-p3 text-foreground font-medium">
+                    Track wallet events
+                    <span className="text-primary font-normal ml-1">(recommended)</span>
+                  </p>
+                </div>
+                <p className="text-p4 text-muted-foreground mt-2 mb-3">
+                  To get the most out of AudienceScan Analytics, track wallet interactions on your site.
+                </p>
+                <div className="relative">
+                  <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                    <code>{walletTrackingSnippet}</code>
+                  </pre>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2"
+                    onClick={(e) => { e.stopPropagation(); onCopy(walletTrackingSnippet); }}
+                  >
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Conversion Events */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-medium">2</span>
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-medium">3</span>
                 <p className="text-p3 text-foreground font-medium">
                   Track conversion events
                   <span className="text-muted-foreground font-normal ml-1">(optional)</span>
@@ -727,30 +758,6 @@ Need help? Contact support@audiencescan.io`;
                   variant="secondary"
                   className="absolute top-2 right-2"
                   onClick={(e) => { e.stopPropagation(); onCopy(conversionEventSnippet); }}
-                >
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                </Button>
-              </div>
-            </div>
-
-            {/* Step 3: Wallet Tracking */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-medium">3</span>
-                <p className="text-p3 text-foreground font-medium">
-                  Track wallet connections
-                  <span className="text-muted-foreground font-normal ml-1">(optional)</span>
-                </p>
-              </div>
-              <div className="relative">
-                <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
-                  <code>{walletTrackingSnippet}</code>
-                </pre>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute top-2 right-2"
-                  onClick={(e) => { e.stopPropagation(); onCopy(walletTrackingSnippet); }}
                 >
                   {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 </Button>
