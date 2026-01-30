@@ -483,6 +483,55 @@ export type Database = {
         }
         Relationships: []
       }
+      website_shares: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          shared_by_id: string
+          user_id: string | null
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          shared_by_id: string
+          user_id?: string | null
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          shared_by_id?: string
+          user_id?: string | null
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_shares_shared_by_id_fkey"
+            columns: ["shared_by_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_shares_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       websites: {
         Row: {
           base_url: string
