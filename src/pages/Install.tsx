@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown, Share2 } from "lucide-react";
+import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown, Share2, ArrowRight, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { listWebsites, createWebsite, verifyWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
@@ -400,6 +400,11 @@ const Install = () => {
                     setShareWebsite(w);
                     setShareDialogOpen(true);
                   }}
+                  onGoToData={(w) => {
+                    localStorage.setItem("selectedWebsiteId", w.id);
+                    localStorage.setItem("selectedWebsite", JSON.stringify(w));
+                    navigate("/overview");
+                  }}
                 />
               ))}
             </div>
@@ -497,6 +502,7 @@ interface WebsiteListItemWithTagProps {
   copied: boolean;
   verifying: boolean;
   onShare: (website: Website) => void;
+  onGoToData: (website: Website) => void;
 }
 
 const WebsiteListItemWithTag = ({ 
@@ -509,8 +515,67 @@ const WebsiteListItemWithTag = ({
   onVerify,
   copied,
   verifying,
-  onShare
+  onShare,
+  onGoToData
 }: WebsiteListItemWithTagProps) => {
+  const [allCopied, setAllCopied] = useState(false);
+
+  // All tracking code snippets
+  const conversionEventSnippet = `// Track conversion events (sign up, purchase, etc.)
+AudienceScan.trackEvent(
+  'EVENT_NAME',     // e.g. 'Signed up', 'Purchase'
+  'USER_ID'         // optional: email or user identifier
+);
+
+// With additional data:
+AudienceScan.trackEvent('Purchase', {
+  amount: 99.99,
+  currency: 'USD'
+});`;
+
+  const walletTrackingSnippet = `// Track wallet connections
+AudienceScan.trackWallet(
+  'WALLET_ADDRESS',  // e.g. '0x1234...'
+  'EVENT_TYPE'       // 'connected' | 'staked' | 'purchased' | 'signed'
+);`;
+
+  // Generate full instructions for developer/AI
+  const generateFullInstructions = () => {
+    return `=== AudienceScan Tracking Setup ===
+
+STEP 1: Install Main Tracking Script
+-------------------------------------
+Add this before </head> in your HTML:
+
+${trackingSnippet}
+
+(If using GTM, create a Custom HTML tag instead:)
+${gtmSnippet}
+
+
+STEP 2: Track Conversion Events (Optional)
+------------------------------------------
+Call this when users complete key actions:
+
+${conversionEventSnippet}
+
+
+STEP 3: Track Wallet Connections (Optional)
+-------------------------------------------
+Call this when users connect their wallets:
+
+${walletTrackingSnippet}
+
+
+Need help? Contact support@audiencescan.io`;
+  };
+
+  const handleCopyAll = async () => {
+    await navigator.clipboard.writeText(generateFullInstructions());
+    setAllCopied(true);
+    setTimeout(() => setAllCopied(false), 2000);
+  };
+
   const getWebsiteStatusBadge = () => {
     switch (website.status) {
       case "pending":
@@ -571,98 +636,163 @@ const WebsiteListItemWithTag = ({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
-          <div className="pt-4">
-            <Tabs defaultValue="website" className="w-full">
-              <TabsList className="w-full grid grid-cols-2 bg-muted/50">
-                <TabsTrigger value="website" className="data-[state=active]:bg-background text-sm">
-                  Website
-                </TabsTrigger>
-                <TabsTrigger value="gtm" className="data-[state=active]:bg-background text-sm">
-                  GTM
-                </TabsTrigger>
-              </TabsList>
+          <div className="pt-4 space-y-6">
+            
+            {/* Go to Data button for verified sites */}
+            {website.status === "verified" && (
+              <Button
+                className="w-full bg-primary hover:bg-primary/90"
+                onClick={(e) => { e.stopPropagation(); onGoToData(website); }}
+              >
+                Go to data
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
 
-              <TabsContent value="website" className="pt-4">
-                <div className="space-y-3">
-                  <p className="text-p3 text-foreground font-medium">
-                    Paste this before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
-                  </p>
-                  <div className="relative">
-                    <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
-                      <code>{trackingSnippet}</code>
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-2 right-2"
-                      onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
-                    >
-                      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                    </Button>
-                  </div>
-                  <details className="group">
-                    <summary className="text-p4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                      Using Next.js or React?
-                    </summary>
-                    <div className="mt-2 pl-3 border-l-2 border-muted text-p4 text-muted-foreground space-y-1">
-                      <p><strong>Next.js:</strong> Add to <code className="bg-muted px-1 rounded">_document.tsx</code></p>
-                      <p><strong>React:</strong> Add to <code className="bg-muted px-1 rounded">index.html</code></p>
+            {/* Step 1: Main Tag */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-medium">1</span>
+                <p className="text-p3 text-foreground font-medium">
+                  Install main tracking script
+                </p>
+              </div>
+              <Tabs defaultValue="website" className="w-full">
+                <TabsList className="w-full grid grid-cols-2 bg-muted/50">
+                  <TabsTrigger value="website" className="data-[state=active]:bg-background text-sm">
+                    Website
+                  </TabsTrigger>
+                  <TabsTrigger value="gtm" className="data-[state=active]:bg-background text-sm">
+                    GTM
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="website" className="pt-3">
+                  <div className="space-y-2">
+                    <p className="text-p4 text-muted-foreground">
+                      Paste before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
+                    </p>
+                    <div className="relative">
+                      <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
+                        <code>{trackingSnippet}</code>
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute top-2 right-2"
+                        onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
+                      >
+                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      </Button>
                     </div>
-                  </details>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="gtm" className="pt-4">
-                <div className="space-y-3">
-                  <p className="text-p3 text-foreground font-medium">Create a Custom HTML tag</p>
-                  <div className="relative">
-                    <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
-                      <code>{gtmSnippet}</code>
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute top-2 right-2"
-                      onClick={(e) => { e.stopPropagation(); onCopy(gtmSnippet); }}
-                    >
-                      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                    </Button>
                   </div>
-                  <p className="text-p4 text-muted-foreground">Set trigger to "All Pages" and publish.</p>
-                </div>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
 
-            <div className="flex gap-3 mt-4">
-              <Button
-                size="sm"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
-              >
-                {copied ? <Check className="mr-2 h-3 w-3" /> : <Copy className="mr-2 h-3 w-3" />}
-                Copy snippet
-              </Button>
+                <TabsContent value="gtm" className="pt-3">
+                  <div className="space-y-2">
+                    <p className="text-p4 text-muted-foreground">Create a Custom HTML tag, trigger on All Pages</p>
+                    <div className="relative">
+                      <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto">
+                        <code>{gtmSnippet}</code>
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute top-2 right-2"
+                        onClick={(e) => { e.stopPropagation(); onCopy(gtmSnippet); }}
+                      >
+                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Step 2: Conversion Events */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-medium">2</span>
+                <p className="text-p3 text-foreground font-medium">
+                  Track conversion events
+                  <span className="text-muted-foreground font-normal ml-1">(optional)</span>
+                </p>
+              </div>
+              <div className="relative">
+                <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                  <code>{conversionEventSnippet}</code>
+                </pre>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute top-2 right-2"
+                  onClick={(e) => { e.stopPropagation(); onCopy(conversionEventSnippet); }}
+                >
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+
+            {/* Step 3: Wallet Tracking */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-medium">3</span>
+                <p className="text-p3 text-foreground font-medium">
+                  Track wallet connections
+                  <span className="text-muted-foreground font-normal ml-1">(optional)</span>
+                </p>
+              </div>
+              <div className="relative">
+                <pre className="bg-foreground text-primary-foreground p-3 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                  <code>{walletTrackingSnippet}</code>
+                </pre>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute top-2 right-2"
+                  onClick={(e) => { e.stopPropagation(); onCopy(walletTrackingSnippet); }}
+                >
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-3 pt-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1"
-                onClick={(e) => { e.stopPropagation(); onVerify(); }}
-                disabled={verifying}
+                className="w-full"
+                onClick={(e) => { e.stopPropagation(); handleCopyAll(); }}
               >
-                {verifying ? (
-                  <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-3 w-3" />
+                {allCopied ? <Check className="mr-2 h-3 w-3" /> : <FileText className="mr-2 h-3 w-3" />}
+                Copy all instructions for developer / AI
+              </Button>
+              <div className="flex gap-3">
+                {website.status !== "verified" && (
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                    onClick={(e) => { e.stopPropagation(); onVerify(); }}
+                    disabled={verifying}
+                  >
+                    {verifying ? (
+                      <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-2 h-3 w-3" />
+                    )}
+                    Verify installation
+                  </Button>
                 )}
-                Verify
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => { e.stopPropagation(); onShare(website); }}
-              >
-                <Share2 className="h-3 w-3" />
-              </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => { e.stopPropagation(); onShare(website); }}
+                >
+                  <Share2 className="h-3 w-3 mr-2" />
+                  Share
+                </Button>
+              </div>
             </div>
           </div>
         </div>
