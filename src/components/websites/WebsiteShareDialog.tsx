@@ -82,8 +82,14 @@ export function WebsiteShareDialog({
 
     setSharing(true);
     try {
-      await shareWebsite(websiteId, email.trim());
-      toast.success(`Shared access with ${email.trim()}`);
+      const response = await shareWebsite(websiteId, email.trim());
+      if (response.has_account) {
+        toast.success(`Shared access with ${email.trim()}`);
+      } else {
+        toast.success(`Invite sent to ${email.trim()}`, {
+          description: "They'll get access once they create an account",
+        });
+      }
       setEmail("");
       fetchShares();
     } catch (error: any) {
