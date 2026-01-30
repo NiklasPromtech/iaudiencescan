@@ -196,6 +196,8 @@ function enrichRowWithCostPer(row: ApiTableRow): EnrichedTableRow {
   };
 }
 
+const DEFAULT_VISIBLE_ROWS = 5;
+
 export function DimensionTable({
   data,
   loading,
@@ -211,6 +213,7 @@ export function DimensionTable({
   onCostSourceChange,
   onAddCostSource,
 }: DimensionTableProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   // Filter cost sources for current dimension
   const costDimension = DIMENSION_TO_COST_DIMENSION[dimension];
   const matchingCostSources = costSources.filter(
@@ -229,6 +232,17 @@ export function DimensionTable({
     }
     return enriched.sort((a, b) => (b.pageviews ?? 0) - (a.pageviews ?? 0));
   }, [data, dimension]);
+
+  // Slice data based on expansion state
+  const visibleData = useMemo(() => {
+    if (isExpanded || enrichedData.length <= DEFAULT_VISIBLE_ROWS) {
+      return enrichedData;
+    }
+    return enrichedData.slice(0, DEFAULT_VISIBLE_ROWS);
+  }, [enrichedData, isExpanded]);
+
+  const hasMoreRows = enrichedData.length > DEFAULT_VISIBLE_ROWS;
+  const hiddenRowCount = enrichedData.length - DEFAULT_VISIBLE_ROWS;
 
   // Auto-show wallet/conversion columns if data exists
   const hasWalletData = data.some((row) => 
@@ -378,294 +392,312 @@ export function DimensionTable({
           No data available for this dimension
         </div>
       ) : (
-        <div className="rounded-md border border-border overflow-x-auto w-full">
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
-                  {dimensionLabel}
-                </TableHead>
+        <>
+          <div className="rounded-md border border-border overflow-x-auto w-full">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
+                    {dimensionLabel}
+                  </TableHead>
 
-                {/* Traffic Group - Views first, then Visitors */}
-                {visibleGroups.has("traffic") && (
-                  <>
-                    <TableHead className="text-right font-medium min-w-[80px]">Views</TableHead>
-                    <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
-                      Visitors
-                    </TableHead>
-                  </>
-                )}
+                  {/* Traffic Group - Views first, then Visitors */}
+                  {visibleGroups.has("traffic") && (
+                    <>
+                      <TableHead className="text-right font-medium min-w-[80px]">Views</TableHead>
+                      <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
+                        Visitors
+                      </TableHead>
+                    </>
+                  )}
 
-                {/* Engagement Group */}
-                {visibleGroups.has("engagement") && (
-                  <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">10s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
-                      5m
-                    </TableHead>
-                  </>
-                )}
+                  {/* Engagement Group */}
+                  {visibleGroups.has("engagement") && (
+                    <>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">10s</TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
+                        5m
+                      </TableHead>
+                    </>
+                  )}
 
-                {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
-                {visibleGroups.has("wallets") && (
-                  <>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
-                      Extensions
-                    </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
-                      Wallets
-                    </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
-                      Enriched
-                    </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                  {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
+                  {visibleGroups.has("wallets") && (
+                    <>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                        Extensions
+                      </TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                        Wallets
+                      </TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                        Enriched
+                      </TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
+                              Avg Bal
+                              <Info className="h-3 w-3 text-muted-foreground/60" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[200px]">
+                              <p className="text-xs">Total Value ÷ Enriched Wallets</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[110px] whitespace-nowrap border-r border-border/50">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
+                              Total Value
+                              <Info className="h-3 w-3 text-muted-foreground/60" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[220px]">
+                              <p className="text-xs">Sum of all enriched wallet balances</p>
+                              {hasCostSource && <p className="text-xs mt-1">CPB = Cost ÷ Total Value</p>}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableHead>
+                    </>
+                  )}
+
+                  {/* Conversions Group */}
+                  {visibleGroups.has("conversions") && (
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px]">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
-                            Avg Bal
+                            Conv.
                             <Info className="h-3 w-3 text-muted-foreground/60" />
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-[200px]">
-                            <p className="text-xs">Total Value ÷ Enriched Wallets</p>
+                            <p className="text-xs">Unique users who converted</p>
+                            {hasCostSource && <p className="text-xs mt-1">CPA = Cost ÷ Conversions</p>}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableHead>
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[110px] whitespace-nowrap border-r border-border/50">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
-                            Total Value
-                            <Info className="h-3 w-3 text-muted-foreground/60" />
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[220px]">
-                            <p className="text-xs">Sum of all enriched wallet balances</p>
-                            {hasCostSource && <p className="text-xs mt-1">CPB = Cost ÷ Total Value</p>}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                  </>
-                )}
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleData.map((row, index) => {
+                  const visitors = row.unique_visitors;
 
-                {/* Conversions Group */}
-                {visibleGroups.has("conversions") && (
-                  <TableHead className="text-right font-medium text-muted-foreground min-w-[90px]">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
-                          Conv.
-                          <Info className="h-3 w-3 text-muted-foreground/60" />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[200px]">
-                          <p className="text-xs">Unique users who converted</p>
-                          {hasCostSource && <p className="text-xs mt-1">CPA = Cost ÷ Conversions</p>}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableHead>
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {enrichedData.map((row, index) => {
-                const visitors = row.unique_visitors;
-
-                return (
-                  <TableRow 
-                    key={index} 
-                    className={cn(
-                      "hover:bg-muted/30",
-                      hasCostSource && "h-auto" // Taller rows when cost is shown
-                    )}
-                  >
-                    {/* Dimension Cell with Grade + Bot Warning */}
-                    <TableCell className="sticky left-0 bg-background z-10 py-3">
-                      <DimensionCell 
-                        row={row}
-                        showGrade={true}
-                        showCost={hasCostSource}
-                        showBotRate={true}
-                        onBotClick={onBotClick}
-                      />
-                    </TableCell>
-
-                    {/* Traffic Group - Views first, then Visitors */}
-                    {visibleGroups.has("traffic") && (
-                      <>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.pageviews}
-                            rate={calcRate(row.pageviews, visitors)}
-                            showRate={false}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_pageview}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3 border-r border-border/50">
-                          <MetricCell
-                            count={visitors}
-                            showRate={false}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_visitor}
-                          />
-                        </TableCell>
-                      </>
-                    )}
-
-                    {/* Engagement Group */}
-                    {visibleGroups.has("engagement") && (
-                      <>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.stayed_10s}
-                            rate={calcRate(row.stayed_10s, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_stayed_10s}
-                            rateThresholds={ENGAGEMENT_THRESHOLDS}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.stayed_30s}
-                            rate={calcRate(row.stayed_30s, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_stayed_30s}
-                            rateThresholds={ENGAGEMENT_THRESHOLDS}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3">
-                          <MetricCell
-                            count={row.stayed_60s}
-                            rate={calcRate(row.stayed_60s, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_stayed_60s}
-                            rateThresholds={ENGAGEMENT_THRESHOLDS}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right py-3 border-r border-border/50">
-                          <MetricCell
-                            count={row.stayed_5m}
-                            rate={calcRate(row.stayed_5m, visitors)}
-                            showCost={hasCostSource}
-                            costPer={row.cost_per_stayed_5m}
-                            rateThresholds={ENGAGEMENT_THRESHOLDS}
-                          />
-                        </TableCell>
-                      </>
-                    )}
-
-                    {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
-                    {visibleGroups.has("wallets") && (
-                      (() => {
-                        const extensionsCount = row.visitors_with_wallet_extension;
-                        const walletsCount = row.wallet_users;
-                        const enrichedCount = row.wallets_enriched;
-                        const totalValue = row.total_balance_usd;
-                        
-                        // Extensions rate: extensions / visitors
-                        const extensionsRate = calcRate(extensionsCount, visitors);
-                        
-                        // Wallets rate: wallets / extensions (how many with extension connected)
-                        const walletsRate = extensionsCount && extensionsCount > 0
-                          ? ((walletsCount ?? 0) / extensionsCount) * 100
-                          : null;
-                        
-                        // Enriched rate: from API percent_enriched
-                        const enrichedRate = row.percent_enriched;
-                        
-                        // Avg Balance: total_balance_usd / wallets_enriched
-                        const avgBalance = enrichedCount && enrichedCount > 0 && totalValue !== null
-                          ? totalValue / enrichedCount
-                          : null;
-                        
-                        // CPB: cost / total_balance (only if cost source selected)
-                        const cpb = hasCostSource && row.cost_total !== null && totalValue !== null && totalValue > 0
-                          ? row.cost_total / totalValue
-                          : null;
-                        
-                        return (
-                          <>
-                            {/* Extensions: count + rate (% of visitors) + cost per extension */}
-                            <TableCell className="text-right py-3">
-                              <WalletMetricCell
-                                count={extensionsCount}
-                                rate={extensionsRate}
-                                costPer={hasCostSource ? row.cost_per_extension : undefined}
-                                showCost={hasCostSource}
-                                rateThresholds={{ good: 20, warning: 5 }}
-                              />
-                            </TableCell>
-                            
-                            {/* Wallets: count + rate (% of extensions that connected) */}
-                            <TableCell className="text-right py-3">
-                              <WalletMetricCell
-                                count={walletsCount}
-                                rate={walletsRate}
-                                costPer={hasCostSource ? row.cost_per_wallet : undefined}
-                                showCost={hasCostSource}
-                                rateThresholds={{ good: 30, warning: 10 }}
-                                onClick={walletsCount && walletsCount > 0 && onWalletClick 
-                                  ? () => onWalletClick(row.dim_value, walletsCount) 
-                                  : undefined}
-                              />
-                            </TableCell>
-                            
-                            {/* Enriched: count + percent_enriched */}
-                            <TableCell className="text-right py-3">
-                              <WalletMetricCell
-                                count={enrichedCount}
-                                rate={enrichedRate}
-                                showCost={hasCostSource}
-                                rateThresholds={{ good: 80, warning: 40 }}
-                              />
-                            </TableCell>
-                            
-                            {/* Avg Balance: amount (no cost row, just placeholder) */}
-                            <TableCell className="text-right py-3">
-                              <WalletMetricCell
-                                count={null}
-                                customValue={avgBalance !== null ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
-                                showCost={hasCostSource}
-                              />
-                            </TableCell>
-                            
-                            {/* Total Value: total_balance_usd + CPB (when cost source) */}
-                            <TableCell className="text-right py-3 border-r border-border/50">
-                              <WalletMetricCell
-                                count={null}
-                                customValue={totalValue !== null ? `$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
-                                cpb={cpb}
-                                showCost={hasCostSource}
-                              />
-                            </TableCell>
-                          </>
-                        );
-                      })()
-                    )}
-
-                    {/* Conversions Group - single column with CPA */}
-                    {visibleGroups.has("conversions") && (
-                      <TableCell className="text-right py-3">
-                        <MetricCell
-                          count={row.converted_users}
-                          rate={calcRate(row.converted_users, visitors)}
+                  return (
+                    <TableRow 
+                      key={index} 
+                      className={cn(
+                        "hover:bg-muted/30",
+                        hasCostSource && "h-auto" // Taller rows when cost is shown
+                      )}
+                    >
+                      {/* Dimension Cell with Grade + Bot Warning */}
+                      <TableCell className="sticky left-0 bg-background z-10 py-3">
+                        <DimensionCell 
+                          row={row}
+                          showGrade={true}
                           showCost={hasCostSource}
-                          costPer={hasCostSource && row.cost_total !== null && row.converted_users !== null && row.converted_users > 0
-                            ? row.cost_total / row.converted_users
-                            : null}
-                          rateThresholds={{ good: 5, warning: 1 }}
+                          showBotRate={true}
+                          onBotClick={onBotClick}
                         />
                       </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+
+                      {/* Traffic Group - Views first, then Visitors */}
+                      {visibleGroups.has("traffic") && (
+                        <>
+                          <TableCell className="text-right py-3">
+                            <MetricCell
+                              count={row.pageviews}
+                              rate={calcRate(row.pageviews, visitors)}
+                              showRate={false}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_pageview}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right py-3 border-r border-border/50">
+                            <MetricCell
+                              count={visitors}
+                              showRate={false}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_visitor}
+                            />
+                          </TableCell>
+                        </>
+                      )}
+
+                      {/* Engagement Group */}
+                      {visibleGroups.has("engagement") && (
+                        <>
+                          <TableCell className="text-right py-3">
+                            <MetricCell
+                              count={row.stayed_10s}
+                              rate={calcRate(row.stayed_10s, visitors)}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_stayed_10s}
+                              rateThresholds={ENGAGEMENT_THRESHOLDS}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right py-3">
+                            <MetricCell
+                              count={row.stayed_30s}
+                              rate={calcRate(row.stayed_30s, visitors)}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_stayed_30s}
+                              rateThresholds={ENGAGEMENT_THRESHOLDS}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right py-3">
+                            <MetricCell
+                              count={row.stayed_60s}
+                              rate={calcRate(row.stayed_60s, visitors)}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_stayed_60s}
+                              rateThresholds={ENGAGEMENT_THRESHOLDS}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right py-3 border-r border-border/50">
+                            <MetricCell
+                              count={row.stayed_5m}
+                              rate={calcRate(row.stayed_5m, visitors)}
+                              showCost={hasCostSource}
+                              costPer={row.cost_per_stayed_5m}
+                              rateThresholds={ENGAGEMENT_THRESHOLDS}
+                            />
+                          </TableCell>
+                        </>
+                      )}
+
+                      {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
+                      {visibleGroups.has("wallets") && (
+                        (() => {
+                          const extensionsCount = row.visitors_with_wallet_extension;
+                          const walletsCount = row.wallet_users;
+                          const enrichedCount = row.wallets_enriched;
+                          const totalValue = row.total_balance_usd;
+                          
+                          // Extensions rate: extensions / visitors
+                          const extensionsRate = calcRate(extensionsCount, visitors);
+                          
+                          // Wallets rate: wallets / extensions (how many with extension connected)
+                          const walletsRate = extensionsCount && extensionsCount > 0
+                            ? ((walletsCount ?? 0) / extensionsCount) * 100
+                            : null;
+                          
+                          // Enriched rate: from API percent_enriched
+                          const enrichedRate = row.percent_enriched;
+                          
+                          // Avg Balance: total_balance_usd / wallets_enriched
+                          const avgBalance = enrichedCount && enrichedCount > 0 && totalValue !== null
+                            ? totalValue / enrichedCount
+                            : null;
+                          
+                          // CPB: cost / total_balance (only if cost source selected)
+                          const cpb = hasCostSource && row.cost_total !== null && totalValue !== null && totalValue > 0
+                            ? row.cost_total / totalValue
+                            : null;
+                          
+                          return (
+                            <>
+                              {/* Extensions: count + rate (% of visitors) + cost per extension */}
+                              <TableCell className="text-right py-3">
+                                <WalletMetricCell
+                                  count={extensionsCount}
+                                  rate={extensionsRate}
+                                  costPer={hasCostSource ? row.cost_per_extension : undefined}
+                                  showCost={hasCostSource}
+                                  rateThresholds={{ good: 20, warning: 5 }}
+                                />
+                              </TableCell>
+                              
+                              {/* Wallets: count + rate (% of extensions that connected) */}
+                              <TableCell className="text-right py-3">
+                                <WalletMetricCell
+                                  count={walletsCount}
+                                  rate={walletsRate}
+                                  costPer={hasCostSource ? row.cost_per_wallet : undefined}
+                                  showCost={hasCostSource}
+                                  rateThresholds={{ good: 30, warning: 10 }}
+                                  onClick={walletsCount && walletsCount > 0 && onWalletClick 
+                                    ? () => onWalletClick(row.dim_value, walletsCount) 
+                                    : undefined}
+                                />
+                              </TableCell>
+                              
+                              {/* Enriched: count + percent_enriched */}
+                              <TableCell className="text-right py-3">
+                                <WalletMetricCell
+                                  count={enrichedCount}
+                                  rate={enrichedRate}
+                                  showCost={hasCostSource}
+                                  rateThresholds={{ good: 80, warning: 40 }}
+                                />
+                              </TableCell>
+                              
+                              {/* Avg Balance: amount (no cost row, just placeholder) */}
+                              <TableCell className="text-right py-3">
+                                <WalletMetricCell
+                                  count={null}
+                                  customValue={avgBalance !== null ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
+                                  showCost={hasCostSource}
+                                />
+                              </TableCell>
+                              
+                              {/* Total Value: total_balance_usd + CPB (when cost source) */}
+                              <TableCell className="text-right py-3 border-r border-border/50">
+                                <WalletMetricCell
+                                  count={null}
+                                  customValue={totalValue !== null ? `$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
+                                  cpb={cpb}
+                                  showCost={hasCostSource}
+                                />
+                              </TableCell>
+                            </>
+                          );
+                        })()
+                      )}
+
+                      {/* Conversions Group - single column with CPA */}
+                      {visibleGroups.has("conversions") && (
+                        <TableCell className="text-right py-3">
+                          <MetricCell
+                            count={row.converted_users}
+                            rate={calcRate(row.converted_users, visitors)}
+                            showCost={hasCostSource}
+                            costPer={hasCostSource && row.cost_total !== null && row.converted_users !== null && row.converted_users > 0
+                              ? row.cost_total / row.converted_users
+                              : null}
+                            rateThresholds={{ good: 5, warning: 1 }}
+                          />
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* View all / Show less toggle */}
+          {hasMoreRows && (
+            <div className="mt-3 flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {isExpanded 
+                  ? "Show less" 
+                  : `View all ${enrichedData.length} rows (+${hiddenRowCount} more)`}
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </Card>
   );
