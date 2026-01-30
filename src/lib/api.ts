@@ -848,7 +848,7 @@ export async function createScan(data: CreateScanRequest): Promise<CreateScanRes
   return response.json();
 }
 
-export async function listScans(limit?: number, offset?: number): Promise<ScansListResponse> {
+export async function listScans(websiteId?: string, limit?: number, offset?: number): Promise<ScansListResponse> {
   const token = await getAuthToken();
   
   if (!token) {
@@ -856,6 +856,7 @@ export async function listScans(limit?: number, offset?: number): Promise<ScansL
   }
 
   const params = new URLSearchParams();
+  if (websiteId) params.append("website_id", websiteId);
   if (limit) params.append("limit", String(limit));
   if (offset) params.append("offset", String(offset));
   const queryString = params.toString() ? `?${params.toString()}` : "";
