@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown } from "lucide-react";
+import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { listWebsites, createWebsite, verifyWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
+import { WebsiteShareDialog } from "@/components/websites/WebsiteShareDialog";
 
 type InstallStatus = "pending" | "verified" | "failed";
 
@@ -26,6 +27,8 @@ const Install = () => {
   const [creating, setCreating] = useState(false);
   const [newSiteName, setNewSiteName] = useState("");
   const [newSiteUrl, setNewSiteUrl] = useState("");
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareWebsite, setShareWebsite] = useState<Website | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -398,6 +401,10 @@ const Install = () => {
                   onVerify={handleVerify}
                   copied={copied}
                   verifying={verifying}
+                  onShare={(w) => {
+                    setShareWebsite(w);
+                    setShareDialogOpen(true);
+                  }}
                 />
               ))}
             </div>
@@ -448,6 +455,16 @@ const Install = () => {
           </p>
         </div>
       </div>
+
+      {/* Share Dialog */}
+      {shareWebsite && (
+        <WebsiteShareDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          websiteId={shareWebsite.id}
+          websiteName={shareWebsite.name}
+        />
+      )}
     </div>
   );
 };
@@ -484,6 +501,7 @@ interface WebsiteListItemWithTagProps {
   onVerify: () => void;
   copied: boolean;
   verifying: boolean;
+  onShare: (website: Website) => void;
 }
 
 const WebsiteListItemWithTag = ({ 
@@ -495,7 +513,8 @@ const WebsiteListItemWithTag = ({
   onCopy, 
   onVerify,
   copied,
-  verifying
+  verifying,
+  onShare
 }: WebsiteListItemWithTagProps) => {
   const getWebsiteStatusBadge = () => {
     switch (website.status) {
@@ -641,6 +660,13 @@ const WebsiteListItemWithTag = ({
                   <RefreshCw className="mr-2 h-3 w-3" />
                 )}
                 Verify
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => { e.stopPropagation(); onShare(website); }}
+              >
+                <Share2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
