@@ -148,6 +148,12 @@ const Install = () => {
 </script>`;
 
   const handleSelectWebsite = async (website: Website) => {
+    // Toggle: if clicking the already-selected website, collapse it
+    if (selectedWebsite?.id === website.id) {
+      setSelectedWebsite(null);
+      return;
+    }
+
     // Store selected website in localStorage for overview page
     localStorage.setItem("selectedWebsiteId", website.id);
     localStorage.setItem("selectedWebsite", JSON.stringify(website));
@@ -165,7 +171,7 @@ const Install = () => {
       console.error("Failed to persist website selection:", error);
     }
     
-    // Always stay on page to show code/share options
+    // Expand and show code/share options
     setSelectedWebsite(website);
     setStatus(website.status);
     setTrackingSnippet(
