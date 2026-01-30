@@ -496,6 +496,7 @@ export function CreateCostSourceDialog({
                         <Checkbox
                           checked={selectedColumns.has(value)}
                           onCheckedChange={() => toggleColumn(value)}
+                          onClick={(e) => e.stopPropagation()}
                         />
                         <span className="text-sm truncate">{value}</span>
                       </div>
