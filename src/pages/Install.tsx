@@ -62,15 +62,11 @@ const Install = () => {
             }
           }
           
-          setSelectedWebsite(websiteToSelect);
+          // Don't auto-expand any website - keep all collapsed by default
+          // Just store in localStorage for other pages
           setStatus(websiteToSelect.status);
-          // Store in localStorage for consistency
           localStorage.setItem("selectedWebsiteId", websiteToSelect.id);
           localStorage.setItem("selectedWebsite", JSON.stringify(websiteToSelect));
-          // Generate tracking snippet for existing site
-          setTrackingSnippet(
-            `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${websiteToSelect.id}" defer></script>`
-          );
         }
       } catch (error) {
         console.error("Error fetching websites:", error);
@@ -634,8 +630,19 @@ Need help? Contact support@audiencescan.io`;
               {website.base_url}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {getWebsiteStatusBadge()}
+            {website.status === "verified" && (
+              <Button
+                size="sm"
+                variant="default"
+                className="h-7 text-xs bg-primary hover:bg-primary/90"
+                onClick={(e) => { e.stopPropagation(); onGoToData(website); }}
+              >
+                Go to data
+                <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
+            )}
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isSelected ? "rotate-180" : ""}`} />
           </div>
         </div>
@@ -643,17 +650,6 @@ Need help? Contact support@audiencescan.io`;
       <CollapsibleContent>
         <div className="px-4 pb-4 pt-0 border-t border-border/50 bg-muted/30">
           <div className="pt-4 space-y-6">
-            
-            {/* Go to Data button for verified sites */}
-            {website.status === "verified" && (
-              <Button
-                className="w-full bg-primary hover:bg-primary/90"
-                onClick={(e) => { e.stopPropagation(); onGoToData(website); }}
-              >
-                Go to data
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
 
             {/* Step 1: Main Tag */}
             <div className="space-y-3">
