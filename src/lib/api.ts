@@ -81,18 +81,18 @@ export interface VerifyWebsiteResponse {
 // API functions
 export async function listWebsites(status?: string): Promise<{ websites: Website[] }> {
   const params = status ? `?status=${status}` : "";
-  return apiRequest<{ websites: Website[] }>(`/websites${params}`);
+  return apiRequest<{ websites: Website[] }>(`/api/websites${params}`);
 }
 
 export async function createWebsite(name: string, base_url: string): Promise<CreateWebsiteResponse> {
-  return apiRequest<CreateWebsiteResponse>("/websites", {
+  return apiRequest<CreateWebsiteResponse>("/api/websites", {
     method: "POST",
     body: JSON.stringify({ name, base_url }),
   });
 }
 
 export async function verifyWebsite(websiteId: string, url?: string): Promise<VerifyWebsiteResponse> {
-  return apiRequest<VerifyWebsiteResponse>(`/websites/${websiteId}/verify`, {
+  return apiRequest<VerifyWebsiteResponse>(`/api/websites/${websiteId}/verify`, {
     method: "POST",
     body: JSON.stringify(url ? { url } : {}),
   });
@@ -1196,7 +1196,7 @@ export interface AccessibleWebsitesResponse {
 
 // Share a website with an email
 export async function shareWebsite(websiteId: string, email: string): Promise<ShareWebsiteResponse> {
-  return apiRequest<ShareWebsiteResponse>(`/websites/${websiteId}/share`, {
+  return apiRequest<ShareWebsiteResponse>(`/api/websites/${websiteId}/share`, {
     method: "POST",
     body: JSON.stringify({ email }),
   });
@@ -1204,17 +1204,17 @@ export async function shareWebsite(websiteId: string, email: string): Promise<Sh
 
 // List shares for a website
 export async function listWebsiteShares(websiteId: string): Promise<ListSharesResponse> {
-  return apiRequest<ListSharesResponse>(`/websites/${websiteId}/shares`);
+  return apiRequest<ListSharesResponse>(`/api/websites/${websiteId}/shares`);
 }
 
 // Revoke a share
 export async function revokeWebsiteShare(websiteId: string, shareId: string): Promise<{ success: boolean }> {
-  return apiRequest<{ success: boolean }>(`/websites/${websiteId}/shares/${shareId}`, {
+  return apiRequest<{ success: boolean }>(`/api/websites/${websiteId}/shares/${shareId}`, {
     method: "DELETE",
   });
 }
 
 // Get all websites user has access to (owned + shared)
 export async function listAccessibleWebsites(): Promise<AccessibleWebsitesResponse> {
-  return apiRequest<AccessibleWebsitesResponse>(`/websites/accessible`);
+  return apiRequest<AccessibleWebsitesResponse>(`/api/websites/accessible`);
 }
