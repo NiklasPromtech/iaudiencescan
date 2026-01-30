@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,10 +15,22 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for email verification success
+    const verified = searchParams.get("verified");
+    if (verified === "true") {
+      setEmailVerified(true);
+      toast({
+        title: "Email verified!",
+        description: "Your email has been verified. You can now sign in.",
+      });
+    }
+
     // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -37,7 +50,7 @@ const Auth = () => {
     checkSession();
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +72,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/auth?verified=true`,
             data: {
               display_name: displayName,
             },
@@ -118,6 +131,17 @@ const Auth = () => {
                 : "Sign up to get started with AudienceScan"}
             </p>
           </div>
+
+          {/* Email Verified Alert */}
+          {emailVerified && (
+            <Alert className="border-primary bg-primary/10">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              <AlertTitle className="text-primary">Email Verified!</AlertTitle>
+              <AlertDescription className="text-muted-foreground">
+                Your email has been successfully verified. You can now sign in to your account.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
