@@ -59,6 +59,7 @@ import Scans from "./pages/Scans";
 import ScanDetail from "./pages/ScanDetail";
 import ScanResults from "./pages/ScanResults";
 import Wallets from "./pages/Wallets";
+import LandingPageV2 from "./pages/LandingPageV2";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,7 @@ const App = () => (
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           <Route path="/wizard/v2" element={<WizardV2 />} />
+          <Route path="/v2/landingPage" element={<LandingPageV2 />} />
           <Route path="/no-niche" element={<NoNiche />} />
           <Route path="/no-niche/v2" element={<NoNicheV2 />} />
           <Route path="/no-niche/v3" element={<NoNicheV3 />} />

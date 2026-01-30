@@ -225,6 +225,7 @@ export type Database = {
       }
       scans: {
         Row: {
+          archived_at: string | null
           audience_id: string | null
           chain: string
           completed_at: string | null
@@ -243,6 +244,7 @@ export type Database = {
           website_id: string | null
         }
         Insert: {
+          archived_at?: string | null
           audience_id?: string | null
           chain: string
           completed_at?: string | null
@@ -261,6 +263,7 @@ export type Database = {
           website_id?: string | null
         }
         Update: {
+          archived_at?: string | null
           audience_id?: string | null
           chain?: string
           completed_at?: string | null
@@ -534,6 +537,7 @@ export type Database = {
       }
       websites: {
         Row: {
+          archived_at: string | null
           base_url: string
           created_at: string
           id: string
@@ -545,6 +549,7 @@ export type Database = {
           verified_at: string | null
         }
         Insert: {
+          archived_at?: string | null
           base_url: string
           created_at?: string
           id: string
@@ -556,6 +561,7 @@ export type Database = {
           verified_at?: string | null
         }
         Update: {
+          archived_at?: string | null
           base_url?: string
           created_at?: string
           id?: string
