@@ -105,25 +105,15 @@ const DarkHeader = () => {
           </Link>
         </div>
         
-        <div className="flex items-center gap-2 md:gap-6">
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/case-studies" className="text-p2 text-white/60 hover:text-white transition-all duration-300">
-              Case Studies
-            </Link>
-            <Link to="/pricing" className="text-p2 text-white/60 hover:text-white transition-all duration-300">
-              Pricing
-            </Link>
-          </div>
-          <a 
-            href="https://calendly.com/niklas-audiencescan/audiencescan-demo" 
-            target="_blank" 
-            rel="nofollow noopener noreferrer"
-          >
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] text-sm md:text-base px-3 sm:px-4 md:px-6">
-              Book a demo
-            </Button>
-          </a>
-        </div>
+        <Button 
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] text-sm md:text-base px-4 sm:px-6 md:px-8"
+          asChild
+        >
+          <Link to="/auth">
+            Place Your Tag
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </header>
   );
@@ -132,11 +122,11 @@ const DarkHeader = () => {
 // Dark Footer Component
 const DarkFooter = () => {
   return (
-    <footer className="bg-black border-t border-white/[0.08] py-16">
+    <footer className="bg-black border-t border-white/[0.08] py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
           {/* Brand */}
-          <div className="col-span-1">
+          <div className="max-w-xs">
             <div className="flex items-center gap-3 mb-4">
               <img 
                 src="/lovable-uploads/7badbb3e-0d49-4228-97e2-42ebc92a02e0.png" 
@@ -146,29 +136,8 @@ const DarkFooter = () => {
               <span className="text-h3 font-bold text-white">AudienceScan</span>
             </div>
             <p className="text-p3 text-white/50 leading-relaxed">
-              Built by marketers & devs who've scaled Web3 projects. 
               Turn wallet data into marketing signal.
             </p>
-          </div>
-          
-          {/* Product */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">Product</h3>
-            <ul className="space-y-2 text-sm">
-              <li><a href="/proposed-features" className="text-white/50 hover:text-purple-400 transition-all duration-300">Proposed Features</a></li>
-              <li><a href="#" className="text-white/50 hover:text-purple-400 transition-all duration-300">API docs (Coming soon)</a></li>
-              <li><a href="#" className="text-white/50 hover:text-purple-400 transition-all duration-300">Integrations (Coming soon)</a></li>
-            </ul>
-          </div>
-          
-          {/* Company */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">Company</h3>
-            <ul className="space-y-2 text-sm">
-              <li><a href="/blog" className="text-white/50 hover:text-purple-400 transition-all duration-300">Blog</a></li>
-              <li><a href="/case-studies" className="text-white/50 hover:text-purple-400 transition-all duration-300">Case Studies</a></li>
-              <li><a href="/pricing" className="text-white/50 hover:text-purple-400 transition-all duration-300">Pricing</a></li>
-            </ul>
           </div>
           
           {/* Connect */}
@@ -200,29 +169,13 @@ const DarkFooter = () => {
                 <img src={xLogo} alt="X" className="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
             </div>
-            
-            <div className="mt-6">
-              <h4 className="font-semibold text-white mb-2 text-sm">Useable for</h4>
-              <div className="flex flex-wrap gap-2">
-                <a href="https://ads.google.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/[0.03] hover:bg-purple-500/20 border border-white/[0.06] rounded text-xs text-white/50 hover:text-purple-400 transition-all duration-300">Google Ads</a>
-                <a href="https://marketingplatform.google.com/about/display-video-360/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/[0.03] hover:bg-purple-500/20 border border-white/[0.06] rounded text-xs text-white/50 hover:text-purple-400 transition-all duration-300">DV360</a>
-                <a href="https://ads.x.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/[0.03] hover:bg-purple-500/20 border border-white/[0.06] rounded text-xs text-white/50 hover:text-purple-400 transition-all duration-300">X ads</a>
-                <a href="https://ads.telegram.org/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/[0.03] hover:bg-purple-500/20 border border-white/[0.06] rounded text-xs text-white/50 hover:text-purple-400 transition-all duration-300">Telegram ads</a>
-                <a href="https://ads.reddit.com/" target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white/[0.03] hover:bg-purple-500/20 border border-white/[0.06] rounded text-xs text-white/50 hover:text-purple-400 transition-all duration-300">Reddit Ads</a>
-              </div>
-            </div>
           </div>
         </div>
         
-        <div className="border-t border-white/[0.08] mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
+        <div className="border-t border-white/[0.08] mt-8 pt-6 text-center">
           <p className="text-sm text-white/40">
             © 2024 AudienceScan. All rights reserved.
           </p>
-          <div className="flex gap-6 mt-4 sm:mt-0">
-            <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-all duration-300">Privacy</a>
-            <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-all duration-300">Terms</a>
-            <a href="#" className="text-sm text-white/40 hover:text-purple-400 transition-all duration-300">Support</a>
-          </div>
         </div>
       </div>
     </footer>
@@ -349,8 +302,8 @@ const LandingPageV2 = () => {
       <section className="relative py-20 lg:py-28 overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto text-center space-y-8">
-            <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-4 py-2 text-sm font-semibold animate-pulse">
-              🚀 FREE ALPHA - First 100 Projects
+            <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/40 px-4 py-2 text-sm font-semibold tracking-wide">
+              FREE ALPHA ACCESS
             </Badge>
             
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
@@ -548,20 +501,22 @@ const LandingPageV2 = () => {
               <h2 className="text-h2 font-bold text-white">Why CPB Changes Everything</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 items-stretch">
               {/* Without - Muted, dark styling */}
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 opacity-70">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6 opacity-70 flex flex-col h-full">
                 <h3 className="text-h3 font-semibold text-white/50 mb-4">Without AudienceScan</h3>
-                <div className="space-y-4 font-mono text-sm">
+                <div className="space-y-4 font-mono text-sm flex-1 flex flex-col">
                   <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-lg">
                     <div className="text-white/60">Campaign A: $1,000 spent</div>
                     <div className="text-white/40">→ 500 clicks → ??? value</div>
+                    <div className="text-white/30">→ ??? outcome</div>
                   </div>
                   <div className="p-3 bg-white/[0.02] border border-white/[0.04] rounded-lg">
                     <div className="text-white/60">Campaign B: $1,000 spent</div>
                     <div className="text-white/40">→ 200 clicks → ??? value</div>
+                    <div className="text-white/30">→ ??? outcome</div>
                   </div>
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mt-auto">
                     <span className="text-red-400 font-semibold">Winner: Campaign A</span>
                     <span className="text-white/40 ml-2">(more clicks!)</span>
                   </div>
@@ -569,7 +524,7 @@ const LandingPageV2 = () => {
               </div>
 
               {/* With - Bright, glowing, spotlight effect */}
-              <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-xl p-6 shadow-[0_0_40px_rgba(168,85,247,0.3)] relative overflow-hidden">
+              <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-xl p-6 shadow-[0_0_40px_rgba(168,85,247,0.3)] relative overflow-hidden flex flex-col h-full">
                 {/* Spotlight glow */}
                 <div className="absolute inset-0 bg-gradient-radial from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                 
@@ -577,7 +532,7 @@ const LandingPageV2 = () => {
                   <h3 className="text-h3 font-semibold text-purple-300">With AudienceScan</h3>
                   <Badge className="bg-purple-500/30 text-purple-200 border border-purple-400/50">WINNER</Badge>
                 </div>
-                <div className="space-y-4 font-mono text-sm relative z-10">
+                <div className="space-y-4 font-mono text-sm relative z-10 flex-1 flex flex-col">
                   <div className="p-3 bg-black/40 border border-white/[0.08] rounded-lg">
                     <div className="text-white/80">Campaign A: $1,000 → 500 clicks</div>
                     <div className="text-white/50">→ Users holding $2,000 total</div>
@@ -588,7 +543,7 @@ const LandingPageV2 = () => {
                     <div className="text-purple-300 font-semibold">→ Users holding $50,000 total</div>
                     <div className="text-purple-300 font-semibold">→ CPB: $0.02</div>
                   </div>
-                  <div className="p-4 bg-purple-500/20 border border-purple-400/50 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                  <div className="p-4 bg-purple-500/20 border border-purple-400/50 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.3)] mt-auto">
                     <span className="text-purple-300 font-semibold">Winner: Campaign B</span>
                     <span className="text-white ml-2">(25x better ROI!)</span>
                   </div>
