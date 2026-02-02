@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { TableRow as ApiTableRow, TableDimension, CostSource } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { Plus, Info } from "lucide-react";
+import { Plus, Info, Tag, Wallet, MousePointerClick } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +30,52 @@ import {
 } from "@/components/ui/tooltip";
 import { MetricCell, ENGAGEMENT_THRESHOLDS } from "./MetricCell";
 import { DimensionCell } from "./DimensionCell";
+
+// Tracking source indicator component
+type TrackingSource = "main" | "wallet" | "conversion";
+
+interface TrackingBadgeProps {
+  source: TrackingSource;
+  className?: string;
+}
+
+function TrackingBadge({ source, className }: TrackingBadgeProps) {
+  const config = {
+    main: {
+      icon: Tag,
+      label: "Main Tag",
+      tooltip: "Auto-tracked with the main tracking tag",
+      color: "text-blue-500",
+    },
+    wallet: {
+      icon: Wallet,
+      label: "Wallet Script",
+      tooltip: "Requires trackWallet() implementation",
+      color: "text-purple-500",
+    },
+    conversion: {
+      icon: MousePointerClick,
+      label: "Conversion Script",
+      tooltip: "Requires trackEvent() implementation",
+      color: "text-emerald-500",
+    },
+  };
+
+  const { icon: Icon, tooltip, color } = config[source];
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Icon className={cn("h-3 w-3", color, className)} />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[200px]">
+          <p className="text-xs">{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 // Dimensions that support cost sources
 const COST_SUPPORTED_DIMENSIONS: TableDimension[] = [
@@ -402,20 +448,33 @@ export function DimensionTable({
                     {dimensionLabel}
                   </TableHead>
 
-                  {/* Traffic Group - Views first, then Visitors */}
+                  {/* Traffic Group - Views first, then Visitors (Main Tag) */}
                   {visibleGroups.has("traffic") && (
                     <>
-                      <TableHead className="text-right font-medium min-w-[80px]">Views</TableHead>
+                      <TableHead className="text-right font-medium min-w-[80px]">
+                        <div className="flex items-center justify-end gap-1">
+                          Views
+                          <TrackingBadge source="main" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
-                        Visitors
+                        <div className="flex items-center justify-end gap-1">
+                          Visitors
+                          <TrackingBadge source="main" />
+                        </div>
                       </TableHead>
                     </>
                   )}
 
-                  {/* Engagement Group */}
+                  {/* Engagement Group (Main Tag) */}
                   {visibleGroups.has("engagement") && (
                     <>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">10s</TableHead>
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">
+                        <div className="flex items-center justify-end gap-1">
+                          10s
+                          <TrackingBadge source="main" />
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
                       <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
                       <TableHead className="text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
@@ -424,14 +483,20 @@ export function DimensionTable({
                     </>
                   )}
 
-                  {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
+                  {/* Wallets Group - Extensions (Main), Tracked (Wallet Script), Enriched, Avg Balance, Total Value */}
                   {visibleGroups.has("wallets") && (
                     <>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
-                        Extensions
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          Extensions
+                          <TrackingBadge source="main" />
+                        </div>
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
-                        Wallets
+                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          Tracked
+                          <TrackingBadge source="wallet" />
+                        </div>
                       </TableHead>
                       <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
                         Enriched
@@ -466,17 +531,18 @@ export function DimensionTable({
                     </>
                   )}
 
-                  {/* Conversions Group */}
+                  {/* Conversions Group (Conversion Script) */}
                   {visibleGroups.has("conversions") && (
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[90px]">
+                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px]">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
                             Conv.
-                            <Info className="h-3 w-3 text-muted-foreground/60" />
+                            <TrackingBadge source="conversion" />
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-[200px]">
                             <p className="text-xs">Unique users who converted</p>
+                            <p className="text-xs text-muted-foreground mt-1">Requires trackEvent() setup</p>
                             {hasCostSource && <p className="text-xs mt-1">CPA = Cost ÷ Conversions</p>}
                           </TooltipContent>
                         </Tooltip>
