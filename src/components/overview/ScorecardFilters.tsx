@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,8 +7,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Filter, X, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface FilterOptions {
@@ -78,12 +79,17 @@ const FilterDropdown = ({
   selectedValues: string[];
   onToggle: (key: keyof FilterOptions, value: string) => void;
 }) => {
+  const [search, setSearch] = useState("");
+  
   if (!options || options.length === 0) return null;
 
   const hasSelection = selectedValues.length > 0;
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <Popover>
+    <Popover onOpenChange={() => setSearch("")}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -109,29 +115,44 @@ const FilterDropdown = ({
         className="w-56 p-0 bg-popover border-border z-50"
         align="start"
       >
-        <div className="p-2 border-b border-border">
+        <div className="p-2 border-b border-border space-y-2">
           <p className="text-sm font-medium text-foreground">{label}</p>
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 pl-7 text-sm bg-background"
+            />
+          </div>
         </div>
         <div className="max-h-64 overflow-y-auto">
           <div className="p-2 space-y-1">
-            {options.map((option) => {
-              const isSelected = selectedValues.includes(option);
-              return (
-                <label
-                  key={option}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => onToggle(filterKey, option)}
-                    className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <span className="text-sm text-foreground truncate">
-                    {option}
-                  </span>
-                </label>
-              );
-            })}
+            {filteredOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                No results found
+              </p>
+            ) : (
+              filteredOptions.map((option) => {
+                const isSelected = selectedValues.includes(option);
+                return (
+                  <label
+                    key={option}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => onToggle(filterKey, option)}
+                      className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <span className="text-sm text-foreground truncate">
+                      {option}
+                    </span>
+                  </label>
+                );
+              })
+            )}
           </div>
         </div>
         {hasSelection && (
