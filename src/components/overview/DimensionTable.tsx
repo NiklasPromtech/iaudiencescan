@@ -68,6 +68,7 @@ const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
   { value: "device_type", label: "Device" },
   { value: "browser", label: "Browser" },
   { value: "os", label: "Operating System" },
+  { value: "country", label: "Country" },
 ];
 
 // Map TableDimension to CostDimension

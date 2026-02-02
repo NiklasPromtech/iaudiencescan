@@ -191,7 +191,8 @@ export type TableDimension =
   | "date_day" 
   | "device_type" 
   | "browser" 
-  | "os";
+  | "os"
+  | "country";
 
 export interface TableRequest {
   tag_id: string;
