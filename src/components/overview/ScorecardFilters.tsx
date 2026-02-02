@@ -112,7 +112,7 @@ const FilterDropdown = ({
         <div className="p-2 border-b border-border">
           <p className="text-sm font-medium text-foreground">{label}</p>
         </div>
-        <ScrollArea className="max-h-64">
+        <div className="max-h-64 overflow-y-auto">
           <div className="p-2 space-y-1">
             {options.map((option) => {
               const isSelected = selectedValues.includes(option);
@@ -133,7 +133,7 @@ const FilterDropdown = ({
               );
             })}
           </div>
-        </ScrollArea>
+        </div>
         {hasSelection && (
           <div className="p-2 border-t border-border">
             <Button
