@@ -43,6 +43,7 @@ export interface Website {
   tag_id: string;
   verified_at: string | null;
   created_at: string;
+  archived_at: string | null;
 }
 
 export interface CreateWebsiteResponse {
@@ -79,9 +80,29 @@ export interface VerifyWebsiteResponse {
 }
 
 // API functions
-export async function listWebsites(status?: string): Promise<{ websites: Website[] }> {
-  const params = status ? `?status=${status}` : "";
-  return apiRequest<{ websites: Website[] }>(`/websites${params}`);
+export interface ListWebsitesOptions {
+  status?: string;
+  include_archived?: boolean;
+}
+
+export async function listWebsites(options?: ListWebsitesOptions): Promise<{ websites: Website[] }> {
+  const params = new URLSearchParams();
+  if (options?.status) params.append("status", options.status);
+  if (options?.include_archived) params.append("include_archived", "true");
+  const queryString = params.toString() ? `?${params.toString()}` : "";
+  return apiRequest<{ websites: Website[] }>(`/websites${queryString}`);
+}
+
+export async function archiveWebsite(websiteId: string): Promise<{ website: Website }> {
+  return apiRequest<{ website: Website }>(`/websites/${websiteId}/archive`, {
+    method: "PUT",
+  });
+}
+
+export async function unarchiveWebsite(websiteId: string): Promise<{ website: Website }> {
+  return apiRequest<{ website: Website }>(`/websites/${websiteId}/unarchive`, {
+    method: "PUT",
+  });
 }
 
 export async function createWebsite(name: string, base_url: string): Promise<CreateWebsiteResponse> {
@@ -722,6 +743,7 @@ export interface Scan {
   error: string | null;
   created_at: string;
   completed_at: string | null;
+  archived_at: string | null;
 }
 
 // Scan results types
@@ -848,7 +870,20 @@ export async function createScan(data: CreateScanRequest): Promise<CreateScanRes
   return response.json();
 }
 
-export async function listScans(websiteId?: string, limit?: number, offset?: number): Promise<ScansListResponse> {
+export interface ListScansOptions {
+  websiteId?: string;
+  limit?: number;
+  offset?: number;
+  include_archived?: boolean;
+}
+
+export async function listScans(options?: ListScansOptions): Promise<ScansListResponse>;
+export async function listScans(websiteId?: string, limit?: number, offset?: number): Promise<ScansListResponse>;
+export async function listScans(
+  optionsOrWebsiteId?: ListScansOptions | string,
+  limit?: number,
+  offset?: number
+): Promise<ScansListResponse> {
   const token = await getAuthToken();
   
   if (!token) {
@@ -856,13 +891,69 @@ export async function listScans(websiteId?: string, limit?: number, offset?: num
   }
 
   const params = new URLSearchParams();
-  if (websiteId) params.append("website_id", websiteId);
-  if (limit) params.append("limit", String(limit));
-  if (offset) params.append("offset", String(offset));
+  
+  // Handle both old and new API signatures
+  if (typeof optionsOrWebsiteId === "object" && optionsOrWebsiteId !== null) {
+    const options = optionsOrWebsiteId;
+    if (options.websiteId) params.append("website_id", options.websiteId);
+    if (options.limit) params.append("limit", String(options.limit));
+    if (options.offset) params.append("offset", String(options.offset));
+    if (options.include_archived) params.append("include_archived", "true");
+  } else if (typeof optionsOrWebsiteId === "string") {
+    // Legacy signature support
+    params.append("website_id", optionsOrWebsiteId);
+    if (limit) params.append("limit", String(limit));
+    if (offset) params.append("offset", String(offset));
+  }
+  
   const queryString = params.toString() ? `?${params.toString()}` : "";
 
   const response = await fetch(`${ANALYTICS_API_URL}/scans${queryString}`, {
     method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function archiveScan(scanId: string): Promise<{ scan: Scan }> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans/${scanId}/archive`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function unarchiveScan(scanId: string): Promise<{ scan: Scan }> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/scans/${scanId}/unarchive`, {
+    method: "PUT",
     headers: {
       "Authorization": `Bearer ${token}`,
     },
