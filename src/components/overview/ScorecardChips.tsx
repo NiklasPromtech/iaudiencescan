@@ -205,6 +205,16 @@ const METRICS: MetricDefinition[] = [
   },
 ];
 
+// Category labels for grouping
+const CATEGORY_LABELS: Record<string, string> = {
+  traffic: "Traffic",
+  engagement: "Time on Site",
+  wallets: "Wallet Tracking",
+  conversions: "Conversions",
+  bots: "Bot Detection",
+  costs: "Costs & ROI",
+};
+
 interface ScorecardChipsProps {
   data: ScorecardResponse["data"] | null;
   loading: boolean;
@@ -307,18 +317,35 @@ export function ScorecardChips({
         </button>
       </div>
 
-      {/* Expanded section - unstarred metrics (smaller) */}
+      {/* Expanded section - unstarred metrics grouped by category */}
       {showAll && !loading && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 pt-3 border-t border-border/50">
-          {unstarredMetricsList.map((metric) => (
-            <MetricPillSmall
-              key={metric.key}
-              metric={metric}
-              value={data ? metric.getValue(data) : null}
-              formatValue={formatValue}
-              onToggleStar={() => onToggleStar(metric.key)}
-            />
-          ))}
+        <div className="space-y-4 pt-3 border-t border-border/50">
+          {/* Group by category */}
+          {Object.entries(CATEGORY_LABELS).map(([category, label]) => {
+            const categoryMetrics = unstarredMetricsList.filter(
+              (m) => m.category === category
+            );
+            if (categoryMetrics.length === 0) return null;
+            
+            return (
+              <div key={category}>
+                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+                  {label}
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                  {categoryMetrics.map((metric) => (
+                    <MetricPillSmall
+                      key={metric.key}
+                      metric={metric}
+                      value={data ? metric.getValue(data) : null}
+                      formatValue={formatValue}
+                      onToggleStar={() => onToggleStar(metric.key)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
