@@ -1,17 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Filter, Search, X, ChevronRight } from "lucide-react";
+import { ChevronDown, X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
 
@@ -32,6 +30,148 @@ const FILTER_SECTIONS: FilterSection[] = [
   { key: "countries", label: "Country" },
 ];
 
+interface FilterButtonProps {
+  filterKey: FilterKey;
+  label: string;
+  options: FilterOptionItem[];
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+  onClear: () => void;
+}
+
+const FilterButton = ({
+  filterKey,
+  label,
+  options,
+  selectedValues,
+  onToggle,
+  onClear,
+}: FilterButtonProps) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const hasSelection = selectedValues.length > 0;
+
+  // Filter and sort options
+  const filteredOptions = useMemo(() => {
+    const sorted = [...options].sort((a, b) => b.count - a.count);
+    if (!search) return sorted.slice(0, 15); // Show top 15 by default
+    
+    return sorted.filter((opt) =>
+      opt.value.toLowerCase().includes(search.toLowerCase())
+    ).slice(0, 30); // Show up to 30 when searching
+  }, [options, search]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) setSearch("");
+  };
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "h-8 gap-1.5 font-normal",
+            hasSelection && "border-primary/50 bg-primary/5"
+          )}
+        >
+          <span>{label}</span>
+          {hasSelection && (
+            <Badge
+              variant="secondary"
+              className="h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs"
+            >
+              {selectedValues.length}
+            </Badge>
+          )}
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-72 p-0" 
+        align="start"
+        sideOffset={4}
+      >
+        {/* Search */}
+        <div className="p-3 border-b border-border">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={`Search ${label.toLowerCase()}...`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-8 text-sm"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Options */}
+        <ScrollArea className="max-h-64">
+          <div className="p-2">
+            {filteredOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {search ? "No matches found" : "No options available"}
+              </p>
+            ) : (
+              <div className="space-y-0.5">
+                {filteredOptions.map((option) => {
+                  const isSelected = selectedValues.includes(option.value);
+                  return (
+                    <label
+                      key={option.value}
+                      className={cn(
+                        "flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer transition-colors",
+                        isSelected ? "bg-primary/10" : "hover:bg-muted/50"
+                      )}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => onToggle(option.value)}
+                        className="h-4 w-4"
+                      />
+                      <span className="flex-1 text-sm truncate">
+                        {option.value}
+                      </span>
+                      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                        {option.count.toLocaleString()}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            {!search && options.length > 15 && (
+              <p className="text-xs text-muted-foreground text-center pt-2 pb-1">
+                Type to search {options.length.toLocaleString()} values
+              </p>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        {hasSelection && (
+          <div className="p-2 border-t border-border">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full h-7 text-xs"
+              onClick={() => {
+                onClear();
+              }}
+            >
+              Clear selection
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 interface FilterDialogProps {
   filterOptions: FilterOptionsResponse | null;
   activeFilters: ActiveFilters;
@@ -45,61 +185,33 @@ export const FilterDialog = ({
   onFiltersChange,
   loading,
 }: FilterDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const [pendingFilters, setPendingFilters] = useState<ActiveFilters>({});
-  const [activeTab, setActiveTab] = useState<FilterKey>("sources");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Get available sections (those with data)
-  const availableSections = useMemo(() => {
-    return FILTER_SECTIONS.filter((section) => {
-      const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
-      return options && Array.isArray(options) && options.length > 0;
-    });
-  }, [filterOptions]);
-
-  // Sync pending filters with active filters when dialog opens
-  useEffect(() => {
-    if (open) {
-      setPendingFilters({ ...activeFilters });
-      setSearchTerm("");
-      // Set first available tab
-      if (availableSections.length > 0 && !availableSections.find(s => s.key === activeTab)) {
-        setActiveTab(availableSections[0].key);
-      }
-    }
-  }, [open, activeFilters, availableSections]);
-
-  // Reset search when changing tabs
-  useEffect(() => {
-    setSearchTerm("");
-  }, [activeTab]);
-
-  const handleToggle = (key: string, value: string) => {
-    const currentValues = pendingFilters[key] || [];
+  
+  const handleToggle = (key: FilterKey, value: string) => {
+    const currentValues = activeFilters[key] || [];
     const newValues = currentValues.includes(value)
       ? currentValues.filter((v) => v !== value)
       : [...currentValues, value];
 
-    const newFilters = { ...pendingFilters };
+    const newFilters = { ...activeFilters };
     if (newValues.length === 0) {
       delete newFilters[key];
     } else {
       newFilters[key] = newValues;
     }
-    setPendingFilters(newFilters);
+    onFiltersChange(newFilters);
   };
 
-  const handleApply = () => {
-    onFiltersChange(pendingFilters);
-    setOpen(false);
+  const handleClear = (key: FilterKey) => {
+    const newFilters = { ...activeFilters };
+    delete newFilters[key];
+    onFiltersChange(newFilters);
   };
 
-  const handleClear = () => {
-    setPendingFilters({});
+  const handleClearAll = () => {
+    onFiltersChange({});
   };
 
-  const handleRemoveActiveFilter = (key: string, value: string) => {
+  const handleRemoveFilter = (key: string, value: string) => {
     const currentValues = activeFilters[key] || [];
     const newValues = currentValues.filter((v) => v !== value);
 
@@ -112,232 +224,77 @@ export const FilterDialog = ({
     onFiltersChange(newFilters);
   };
 
+  // Get available sections (those with data)
+  const availableSections = useMemo(() => {
+    return FILTER_SECTIONS.filter((section) => {
+      const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
+      return options && Array.isArray(options) && options.length > 0;
+    });
+  }, [filterOptions]);
+
   const totalActiveFilters = Object.values(activeFilters).reduce(
     (sum, arr) => sum + (arr?.length || 0),
     0
   );
-
-  const totalPendingFilters = Object.values(pendingFilters).reduce(
-    (sum, arr) => sum + (arr?.length || 0),
-    0
-  );
-
-  // Get current tab's options
-  const currentOptions = useMemo(() => {
-    const rawOptions = filterOptions?.[activeTab] as FilterOptionItem[] | undefined;
-    if (!rawOptions) return [];
-    
-    // Sort by count descending
-    const sorted = [...rawOptions].sort((a, b) => b.count - a.count);
-    
-    // Filter by search
-    if (searchTerm) {
-      return sorted.filter((opt) =>
-        opt.value.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    return sorted;
-  }, [filterOptions, activeTab, searchTerm]);
-
-  const currentSelectedValues = pendingFilters[activeTab] || [];
-  const currentLabel = FILTER_SECTIONS.find(s => s.key === activeTab)?.label || "";
 
   // Flatten active filters into badges
   const activeFilterBadges = Object.entries(activeFilters).flatMap(([key, values]) =>
     (values || []).map((value) => ({ key, value }))
   );
 
+  if (!filterOptions || availableSections.length === 0) {
+    return null;
+  }
+
   return (
-    <>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "h-8 gap-2",
-            totalActiveFilters > 0 && "border-primary/50 bg-primary/5"
-          )}
-          onClick={() => setOpen(true)}
-          disabled={loading}
-        >
-          <Filter className="h-4 w-4" />
-          <span>Filter</span>
-          {totalActiveFilters > 0 && (
+    <div className="flex flex-wrap items-center gap-2">
+      {/* Filter buttons */}
+      {availableSections.map((section) => (
+        <FilterButton
+          key={section.key}
+          filterKey={section.key}
+          label={section.label}
+          options={(filterOptions[section.key] as FilterOptionItem[]) || []}
+          selectedValues={activeFilters[section.key] || []}
+          onToggle={(value) => handleToggle(section.key, value)}
+          onClear={() => handleClear(section.key)}
+        />
+      ))}
+
+      {/* Active filter badges */}
+      {activeFilterBadges.length > 0 && (
+        <>
+          <div className="h-5 w-px bg-border mx-1" />
+          {activeFilterBadges.slice(0, 5).map(({ key, value }) => (
             <Badge
+              key={`${key}-${value}`}
               variant="secondary"
-              className="ml-1 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs"
+              className="h-7 gap-1 pl-2.5 pr-1.5 bg-primary/10 text-primary hover:bg-primary/20"
             >
-              {totalActiveFilters}
+              <span className="text-xs truncate max-w-[120px]">{value}</span>
+              <button
+                onClick={() => handleRemoveFilter(key, value)}
+                className="ml-0.5 hover:bg-primary/20 rounded-full p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+          {activeFilterBadges.length > 5 && (
+            <Badge variant="secondary" className="h-7 px-2 bg-muted text-muted-foreground">
+              +{activeFilterBadges.length - 5} more
             </Badge>
           )}
-        </Button>
-
-        {/* Active filter badges */}
-        {activeFilterBadges.map(({ key, value }) => (
-          <Badge
-            key={`${key}-${value}`}
-            variant="secondary"
-            className="h-7 gap-1 pl-2.5 pr-1.5 bg-primary/10 text-primary hover:bg-primary/20"
-          >
-            <span className="text-xs truncate max-w-[150px]">{value}</span>
-            <button
-              onClick={() => handleRemoveActiveFilter(key, value)}
-              className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </Badge>
-        ))}
-
-        {totalActiveFilters > 0 && (
           <Button
             variant="ghost"
             size="sm"
             className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => onFiltersChange({})}
+            onClick={handleClearAll}
           >
             Clear all
           </Button>
-        )}
-      </div>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Filter className="h-5 w-5" />
-              Filter Data
-            </DialogTitle>
-          </DialogHeader>
-
-          {availableSections.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                No filter options available yet. Data will appear as traffic comes in.
-              </p>
-            </div>
-          ) : (
-            <div className="flex min-h-[400px]">
-              {/* Left sidebar - categories */}
-              <div className="w-44 border-r border-border bg-muted/30 py-2">
-                {availableSections.map((section) => {
-                  const count = pendingFilters[section.key]?.length || 0;
-                  const isActive = activeTab === section.key;
-                  
-                  return (
-                    <button
-                      key={section.key}
-                      onClick={() => setActiveTab(section.key)}
-                      className={cn(
-                        "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors text-left",
-                        isActive 
-                          ? "bg-background text-foreground font-medium border-r-2 border-primary" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                      )}
-                    >
-                      <span>{section.label}</span>
-                      {count > 0 && (
-                        <Badge 
-                          variant="secondary" 
-                          className="h-5 min-w-5 px-1.5 text-xs bg-primary/20 text-primary"
-                        >
-                          {count}
-                        </Badge>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Right content - options */}
-              <div className="flex-1 flex flex-col">
-                {/* Search */}
-                <div className="p-4 border-b border-border">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder={`Search ${currentLabel.toLowerCase()}...`}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 h-9"
-                    />
-                  </div>
-                </div>
-
-                {/* Options list */}
-                <ScrollArea className="flex-1">
-                  <div className="p-4 space-y-1">
-                    {currentOptions.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-8">
-                        {searchTerm ? "No matches found" : "No options available"}
-                      </p>
-                    ) : (
-                      currentOptions.slice(0, 50).map((option) => {
-                        const isSelected = currentSelectedValues.includes(option.value);
-                        return (
-                          <label
-                            key={option.value}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors",
-                              isSelected
-                                ? "bg-primary/10"
-                                : "hover:bg-muted/50"
-                            )}
-                          >
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={() => handleToggle(activeTab, option.value)}
-                              className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                            />
-                            <span className="flex-1 text-sm text-foreground truncate">
-                              {option.value}
-                            </span>
-                            <span className="text-xs text-muted-foreground tabular-nums">
-                              {option.count.toLocaleString()}
-                            </span>
-                          </label>
-                        );
-                      })
-                    )}
-                    {currentOptions.length > 50 && (
-                      <p className="text-xs text-muted-foreground text-center pt-4">
-                        Showing top 50 results. Use search to find more.
-                      </p>
-                    )}
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">
-            <div className="flex items-center justify-between w-full">
-              <Button
-                variant="ghost"
-                onClick={handleClear}
-                disabled={totalPendingFilters === 0}
-                size="sm"
-              >
-                Clear all
-              </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  size="sm"
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleApply} size="sm">
-                  Apply
-                  {totalPendingFilters > 0 && ` (${totalPendingFilters})`}
-                </Button>
-              </div>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </>
+      )}
+    </div>
   );
 };
