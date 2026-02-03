@@ -35,6 +35,7 @@ interface FilterButtonProps {
   options: FilterOptionItem[];
   selectedValues: string[];
   onToggle: (value: string) => void;
+  onSelectAll: (values: string[]) => void;
   onClear: () => void;
 }
 
@@ -43,6 +44,7 @@ const FilterButton = ({
   options,
   selectedValues,
   onToggle,
+  onSelectAll,
   onClear,
 }: FilterButtonProps) => {
   const [open, setOpen] = useState(false);
@@ -90,8 +92,8 @@ const FilterButton = ({
         align="start"
         sideOffset={4}
       >
-        {/* Search */}
-        <div className="p-3 border-b border-border">
+        {/* Search + Select All */}
+        <div className="p-3 border-b border-border space-y-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -101,6 +103,25 @@ const FilterButton = ({
               className="pl-8 h-8 text-sm"
               autoFocus
             />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {selectedValues.length} of {options.length} selected
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => {
+                if (selectedValues.length === options.length) {
+                  onClear();
+                } else {
+                  onSelectAll(options.map(o => o.value));
+                }
+              }}
+            >
+              {selectedValues.length === options.length ? "Deselect all" : "Select all"}
+            </Button>
           </div>
         </div>
 
@@ -202,6 +223,11 @@ export const FilterDialog = ({
     onFiltersChange(newFilters);
   };
 
+  const handleSelectAll = (key: FilterKey, values: string[]) => {
+    const newFilters = { ...activeFilters, [key]: values };
+    onFiltersChange(newFilters);
+  };
+
   const handleClearAll = () => {
     onFiltersChange({});
   };
@@ -251,6 +277,7 @@ export const FilterDialog = ({
           options={(filterOptions[section.key] as FilterOptionItem[]) || []}
           selectedValues={activeFilters[section.key] || []}
           onToggle={(value) => handleToggle(section.key, value)}
+          onSelectAll={(values) => handleSelectAll(section.key, values)}
           onClear={() => handleClear(section.key)}
         />
       ))}
