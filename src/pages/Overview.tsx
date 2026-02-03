@@ -24,6 +24,7 @@ import {
   fetchWalletsTable,
   fetchWalletExtensions,
   listCostSources,
+  fetchFilterOptions,
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
@@ -33,10 +34,12 @@ import {
   EventsTableResponse,
   WalletsTableResponse,
   WalletExtensionsResponse,
+  FilterOptionsResponse,
+  ActiveFilters,
   DIMENSION_TO_FILTER,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
-import { ScorecardFilters, ActiveFilters } from "@/components/overview/ScorecardFilters";
+import { FilterDialog } from "@/components/overview/FilterDialog";
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
 import { EventsTable } from "@/components/overview/EventsTable";
@@ -73,6 +76,8 @@ const Overview = () => {
   const [eventsLoading, setEventsLoading] = useState(true);
   const [walletsLoading, setWalletsLoading] = useState(true);
   const [walletExtensionsLoading, setWalletExtensionsLoading] = useState(true);
+  const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
+  const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
@@ -297,11 +302,29 @@ const Overview = () => {
     }
   }, [selectedWebsite, getFiltersParam]);
 
+  // Load filter options
+  const loadFilterOptions = useCallback(async () => {
+    if (!selectedWebsite) return;
+    setFilterOptionsLoading(true);
+    try {
+      const response = await fetchFilterOptions({
+        tag_id: selectedWebsite.id,
+        range: getRangeConfig(),
+      });
+      setFilterOptions(response);
+    } catch (err) {
+      console.error("Failed to load filter options:", err);
+    } finally {
+      setFilterOptionsLoading(false);
+    }
+  }, [selectedWebsite, getRangeConfig]);
+
   useEffect(() => {
     if (selectedWebsite) {
       loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent);
-      // Also load cost sources
+      // Also load cost sources and filter options
       loadCostSources();
+      loadFilterOptions();
     }
   }, [selectedWebsite, dateRange, selectedConversionEvent]);
 
@@ -401,7 +424,7 @@ const Overview = () => {
   };
 
   const data = scorecard?.data;
-  const filterOptions = scorecard?.filter_options ?? null;
+  const conversionEvents = filterOptions?.conversion_events ?? [];
 
   const suggestedCohorts = [
     {
@@ -464,11 +487,11 @@ const Overview = () => {
 
           {/* Filters */}
           <div className="mb-6">
-            <ScorecardFilters
+            <FilterDialog
               filterOptions={filterOptions}
               activeFilters={activeFilters}
               onFiltersChange={handleFiltersChange}
-              loading={loading}
+              loading={filterOptionsLoading}
             />
           </div>
 
