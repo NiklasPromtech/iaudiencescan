@@ -463,6 +463,8 @@ export default function Wallets() {
                               <Loader2 className="h-3 w-3 animate-spin mr-1" />
                               Pending
                             </Badge>
+                          ) : isFailed ? (
+                            <span className="text-destructive text-sm">Failed</span>
                           ) : (
                             formatBalance(wallet.total_balance_usd ?? 0)
                           )}
