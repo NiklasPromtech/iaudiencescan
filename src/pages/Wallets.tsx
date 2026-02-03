@@ -406,7 +406,8 @@ export default function Wallets() {
                     // Determine if we should show Enrich button
                     const isEnriched = wallet.enrichment_status === "completed";
                     const isPending = wallet.enrichment_status === "pending" || wallet.enrichment_status === "processing";
-                    const showEnrichButton = !isEnriched && !isPending;
+                    const isFailed = wallet.enrichment_status === "failed";
+                    const showEnrichButton = !isEnriched && !isPending && !isFailed;
                     
                     return (
                       <TableRow key={wallet.wallet_id}>
