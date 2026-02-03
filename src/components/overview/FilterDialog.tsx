@@ -13,10 +13,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Filter, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FilterOptionsResponse, ActiveFilters } from "@/lib/api";
+import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
+
+type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries";
 
 interface FilterSection {
-  key: keyof Omit<FilterOptionsResponse, "success" | "tag_id" | "cost_sources">;
+  key: FilterKey;
   label: string;
 }
 
@@ -103,7 +105,7 @@ export const FilterDialog = ({
   );
 
   const availableSections = FILTER_SECTIONS.filter((section) => {
-    const options = filterOptions?.[section.key];
+    const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
     return options && Array.isArray(options) && options.length > 0;
   });
 
@@ -188,12 +190,15 @@ export const FilterDialog = ({
                 </p>
               ) : (
                 availableSections.map((section) => {
-                  const options = filterOptions?.[section.key] as string[] | undefined;
-                  if (!options || options.length === 0) return null;
+                  const rawOptions = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
+                  if (!rawOptions || rawOptions.length === 0) return null;
 
+                  // Sort by count descending
+                  const sortedOptions = [...rawOptions].sort((a, b) => b.count - a.count);
+                  
                   const searchTerm = searchTerms[section.key] || "";
-                  const filteredOptions = options.filter((opt) =>
-                    opt.toLowerCase().includes(searchTerm.toLowerCase())
+                  const filteredOptions = sortedOptions.filter((opt) =>
+                    opt.value.toLowerCase().includes(searchTerm.toLowerCase())
                   );
                   const selectedValues = pendingFilters[section.key] || [];
 
@@ -210,7 +215,7 @@ export const FilterDialog = ({
                         )}
                       </div>
 
-                      {options.length > 5 && (
+                      {sortedOptions.length > 5 && (
                         <div className="relative">
                           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                           <Input
@@ -234,10 +239,10 @@ export const FilterDialog = ({
                           </p>
                         ) : (
                           filteredOptions.map((option) => {
-                            const isSelected = selectedValues.includes(option);
+                            const isSelected = selectedValues.includes(option.value);
                             return (
                               <label
-                                key={option}
+                                key={option.value}
                                 className={cn(
                                   "flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm",
                                   isSelected
@@ -248,12 +253,15 @@ export const FilterDialog = ({
                                 <Checkbox
                                   checked={isSelected}
                                   onCheckedChange={() =>
-                                    handleToggle(section.key, option)
+                                    handleToggle(section.key, option.value)
                                   }
                                   className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                 />
-                                <span className="truncate text-foreground">
-                                  {option}
+                                <span className="truncate text-foreground flex-1">
+                                  {option.value}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {option.count.toLocaleString()}
                                 </span>
                               </label>
                             );

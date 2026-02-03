@@ -469,7 +469,7 @@ const Overview = () => {
               </div>
               <div className="flex items-center gap-2">
                 <ConversionEventFilter
-                  availableEvents={filterOptions?.conversion_events ?? []}
+                  availableEvents={filterOptions?.conversion_events?.map(e => e.value) ?? []}
                   selectedEvent={selectedConversionEvent}
                   onEventChange={handleConversionEventChange}
                   loading={loading}
