@@ -1,8 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard,
-  Zap,
-  Globe,
   Wallet,
   Users,
   DollarSign,
@@ -32,19 +30,6 @@ import { cn } from "@/lib/utils";
 import audiencescanIcon from "@/assets/audiencescan-icon.png";
 import audiencescanLogo from "@/assets/audiencescan-logo-dark.png";
 
-// Navigation structure organized by user journey
-const trackingItems = [
-  {
-    title: "Websites",
-    url: "/install",
-    icon: Globe,
-  },
-  {
-    title: "Event Manager",
-    url: "/events",
-    icon: Zap,
-  },
-];
 
 const insightsItems = [
   {
@@ -198,7 +183,7 @@ export const DashboardSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent className={cn("px-2", collapsed && "px-1")}>
-        <NavGroup label="Tracking" items={trackingItems} collapsed={collapsed} />
+        
         <NavGroup label="Insights" items={insightsItems} collapsed={collapsed} />
         <NavGroup label="Enrichment" items={enrichmentItems} collapsed={collapsed} />
         <NavGroup label="Strategy" items={strategyItems} collapsed={collapsed} />
