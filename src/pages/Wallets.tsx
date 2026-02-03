@@ -182,8 +182,19 @@ export default function Wallets() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const formatBalance = (balance: number | null | undefined) => {
+  const formatBalance = (balance: number | null | undefined, compact = false) => {
     if (balance === null || balance === undefined) return "—";
+    
+    // Use compact notation for large numbers in scorecards
+    if (compact && Math.abs(balance) >= 1000000) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(balance);
+    }
+    
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -247,8 +258,8 @@ export default function Wallets() {
               {loading && !summary ? (
                 <Skeleton className="h-7 w-24" />
               ) : (
-                <div className="text-2xl font-bold">
-                  {formatBalance(summary?.total_balance_usd)}
+              <div className="text-2xl font-bold">
+                  {formatBalance(summary?.total_balance_usd, true)}
                 </div>
               )}
             </CardContent>
@@ -263,8 +274,8 @@ export default function Wallets() {
               {loading && !summary ? (
                 <Skeleton className="h-7 w-20" />
               ) : (
-                <div className="text-2xl font-bold">
-                  {formatBalance(summary?.median_balance_usd)}
+              <div className="text-2xl font-bold">
+                  {formatBalance(summary?.median_balance_usd, true)}
                 </div>
               )}
             </CardContent>
