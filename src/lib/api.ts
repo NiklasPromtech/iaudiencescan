@@ -149,6 +149,57 @@ export interface FilterOptions {
   conversion_events: string[];
 }
 
+// Active filters type for the UI
+export type ActiveFilters = Partial<Record<string, string[]>>;
+
+// Filter options response from the new /api/analytics/filtering endpoint
+export interface FilterOptionsResponse {
+  success: boolean;
+  tag_id: string;
+  sources: string[];
+  utm_source: string[];
+  utm_medium: string[];
+  utm_campaign: string[];
+  utm_content: string[];
+  utm_term: string[];
+  countries: string[];
+  conversion_events: string[];
+  cost_sources: Array<{
+    id: string;
+    name: string;
+    dimension: string;
+  }>;
+}
+
+export interface FilterOptionsRequest {
+  tag_id: string;
+  range?: RangeConfig;
+}
+
+export async function fetchFilterOptions(request: FilterOptionsRequest): Promise<FilterOptionsResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/filtering`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export interface ScorecardResponse {
   success: boolean;
   tag_id: string;
