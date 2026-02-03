@@ -235,6 +235,13 @@ export interface ScorecardResponse {
     bot_visitors: number | null;
     bot_checked: number | null;
     cost_total: number | null;
+    wallets_enriched: number | null;
+    percent_enriched: number | null;
+    total_balance_usd: number | null;
+    median_balance_usd: number | null;
+    wallets_not_enriched: number | null;
+    wallets_enrichment_failed: number | null;
+    visitors_with_wallet_extension: number | null;
   };
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -14,9 +14,11 @@ import {
   ChevronUp,
   Star,
   Radio,
+  DollarSign,
+  PieChart,
+  Puzzle,
 } from "lucide-react";
 import { ScorecardResponse } from "@/lib/api";
-import { Button } from "@/components/ui/button";
 
 // Metric definition
 interface MetricDefinition {
@@ -26,7 +28,7 @@ interface MetricDefinition {
   icon: React.ReactNode;
   getValue: (data: ScorecardResponse["data"]) => number | null;
   format?: "number" | "percent" | "currency";
-  category: "traffic" | "engagement" | "wallets" | "conversions" | "bots";
+  category: "traffic" | "engagement" | "wallets" | "conversions" | "bots" | "costs";
 }
 
 // All available metrics
@@ -55,6 +57,14 @@ const METRICS: MetricDefinition[] = [
     icon: <TrendingDown className="h-4 w-4" />,
     getValue: (d) => d.unique_visitors > 0 ? Math.round((d.bounce_count / d.unique_visitors) * 100) : null,
     format: "percent",
+    category: "traffic",
+  },
+  {
+    key: "visitors_with_wallet_extension",
+    label: "Wallet Extensions",
+    shortLabel: "Extensions",
+    icon: <Puzzle className="h-4 w-4" />,
+    getValue: (d) => d.visitors_with_wallet_extension ?? null,
     category: "traffic",
   },
   // Engagement
@@ -115,6 +125,41 @@ const METRICS: MetricDefinition[] = [
     getValue: (d) => d.wallet_users,
     category: "wallets",
   },
+  {
+    key: "wallets_enriched",
+    label: "Wallets Enriched",
+    shortLabel: "Enriched",
+    icon: <Wallet className="h-4 w-4" />,
+    getValue: (d) => d.wallets_enriched ?? null,
+    category: "wallets",
+  },
+  {
+    key: "percent_enriched",
+    label: "Enriched %",
+    shortLabel: "Enrich %",
+    icon: <PieChart className="h-4 w-4" />,
+    getValue: (d) => d.percent_enriched ?? null,
+    format: "percent",
+    category: "wallets",
+  },
+  {
+    key: "total_balance_usd",
+    label: "Total Balance",
+    shortLabel: "Balance",
+    icon: <DollarSign className="h-4 w-4" />,
+    getValue: (d) => d.total_balance_usd ?? null,
+    format: "currency",
+    category: "wallets",
+  },
+  {
+    key: "median_balance_usd",
+    label: "Median Balance",
+    shortLabel: "Median",
+    icon: <DollarSign className="h-4 w-4" />,
+    getValue: (d) => d.median_balance_usd ?? null,
+    format: "currency",
+    category: "wallets",
+  },
   // Conversions
   {
     key: "converted_users",
@@ -147,6 +192,16 @@ const METRICS: MetricDefinition[] = [
     icon: <Bot className="h-4 w-4" />,
     getValue: (d) => d.bot_visitors,
     category: "bots",
+  },
+  // Costs
+  {
+    key: "cost_total",
+    label: "Total Cost",
+    shortLabel: "Cost",
+    icon: <DollarSign className="h-4 w-4" />,
+    getValue: (d) => d.cost_total ?? null,
+    format: "currency",
+    category: "costs",
   },
 ];
 
@@ -252,16 +307,15 @@ export function ScorecardChips({
         </button>
       </div>
 
-      {/* Expanded section - unstarred metrics */}
+      {/* Expanded section - unstarred metrics (smaller) */}
       {showAll && !loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pt-3 border-t border-border/50">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 pt-3 border-t border-border/50">
           {unstarredMetricsList.map((metric) => (
-            <MetricPill
+            <MetricPillSmall
               key={metric.key}
               metric={metric}
               value={data ? metric.getValue(data) : null}
               formatValue={formatValue}
-              isStarred={false}
               onToggleStar={() => onToggleStar(metric.key)}
             />
           ))}
@@ -287,7 +341,6 @@ interface MetricPillProps {
 function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: MetricPillProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Determine if metric has no data configured (null) vs zero value
   const isUnconfigured = value === null;
   const displayValue = formatValue(value, metric.format);
 
@@ -303,7 +356,6 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Icon */}
       <div className={cn(
         "flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center",
         isStarred ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
@@ -311,7 +363,6 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
         {metric.icon}
       </div>
 
-      {/* Value + Label */}
       <div className="min-w-0 flex-1">
         <p className={cn(
           "text-lg font-semibold leading-tight truncate",
@@ -324,7 +375,6 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
         </p>
       </div>
 
-      {/* Star button - appears on hover */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -336,9 +386,60 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
           isStarred ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary hover:border-primary"
         )}
       >
-        <Star
-          className={cn("h-3 w-3", isStarred && "fill-primary")}
-        />
+        <Star className={cn("h-3 w-3", isStarred && "fill-primary")} />
+      </button>
+    </div>
+  );
+}
+
+// Smaller pill for unstarred metrics in expanded section
+interface MetricPillSmallProps {
+  metric: MetricDefinition;
+  value: number | null;
+  formatValue: (value: number | null, format?: "number" | "percent" | "currency") => string;
+  onToggleStar: () => void;
+}
+
+function MetricPillSmall({ metric, value, formatValue, onToggleStar }: MetricPillSmallProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isUnconfigured = value === null;
+  const displayValue = formatValue(value, metric.format);
+
+  return (
+    <div
+      className={cn(
+        "group relative flex items-center gap-2 px-2.5 py-2 rounded-lg border transition-all duration-150",
+        "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
+        isUnconfigured && "opacity-50"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+        {React.cloneElement(metric.icon as React.ReactElement, { className: "h-3 w-3" })}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-muted-foreground leading-tight truncate">
+          {displayValue}
+        </p>
+        <p className="text-[10px] text-muted-foreground/70 truncate">
+          {metric.shortLabel || metric.label}
+        </p>
+      </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleStar();
+        }}
+        className={cn(
+          "absolute -right-1 -top-1 p-0.5 rounded-full bg-background border shadow-sm transition-all duration-150",
+          isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75",
+          "border-border text-muted-foreground hover:text-primary hover:border-primary"
+        )}
+      >
+        <Star className="h-2.5 w-2.5" />
       </button>
     </div>
   );
