@@ -605,8 +605,10 @@ export interface WalletListRequest {
 export interface WalletSummary {
   total_wallets: number;
   total_balance_usd: number;
+  median_balance_usd: number;
   wallets_with_zero_balance: number;
   wallets_not_enriched: number;
+  wallets_enrichment_failed: number;
 }
 
 export interface WalletListResponse {
