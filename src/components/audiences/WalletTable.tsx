@@ -154,7 +154,9 @@ export function WalletTable({
               <TableCell className="text-right font-medium">
                 {wallet.enrichment_status === "completed" || wallet.total_balance_usd !== null
                   ? formatBalance(wallet.total_balance_usd ?? 0)
-                  : <span className="text-muted-foreground text-sm">Not enriched</span>
+                  : wallet.enrichment_status === "failed"
+                    ? <span className="text-destructive text-sm">Failed</span>
+                    : <span className="text-muted-foreground text-sm">Not enriched</span>
                 }
               </TableCell>
               <TableCell className="text-right tabular-nums">
