@@ -383,6 +383,8 @@ export function WalletSelector({
 
   const buildRangeConfig = useCallback((): RangeConfig => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const today = new Date();
+    const todayStr = format(today, "yyyy-MM-dd");
     
     if (dateRange.type === "custom" && dateRange.from && dateRange.to) {
       return {
@@ -393,13 +395,15 @@ export function WalletSelector({
       };
     }
     
-    // Handle "Today" preset
-    if (dateRange.includeToday && dateRange.days === 0) {
-      const today = format(new Date(), "yyyy-MM-dd");
+    // Handle presets with includeToday (e.g., "Last 7 days" including today)
+    if (dateRange.includeToday) {
+      const days = dateRange.days ?? 0;
+      // For "Last 7 days" including today: from = today - 6, to = today (7 days total)
+      const fromDate = days > 0 ? subDays(today, days - 1) : today;
       return {
         type: "custom",
-        from: today,
-        to: today,
+        from: format(fromDate, "yyyy-MM-dd"),
+        to: todayStr,
         timezone,
       };
     }
