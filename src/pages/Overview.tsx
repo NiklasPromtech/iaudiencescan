@@ -3,18 +3,12 @@ import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Users,
-  FileText,
-  Wallet,
   Sparkles,
   ArrowRight,
   TrendingUp,
   Clock,
   Zap,
-  Target,
-  Radio,
 } from "lucide-react";
 import { 
   fetchScorecard, 
@@ -50,9 +44,12 @@ import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
 import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audiences/AudienceDialog";
+import { ScorecardChips } from "@/components/overview/ScorecardChips";
+import { useStarredMetrics } from "@/hooks/use-starred-metrics";
 
 const Overview = () => {
   const navigate = useNavigate();
+  const { starredMetrics, toggleMetric } = useStarredMetrics();
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
   const [scorecard, setScorecard] = useState<ScorecardResponse | null>(null);
   const [dailyData, setDailyData] = useState<TableResponse | null>(null);
@@ -500,61 +497,15 @@ const Overview = () => {
             />
           </div>
 
-          {/* Realtime + Stats Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            {/* Realtime Visitors Card */}
-            <Card className="p-5 border border-border bg-gradient-to-br from-primary/5 to-primary/10">
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-primary">
-                  <Radio className="h-5 w-5" />
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-xs text-primary font-medium">Live</span>
-                </span>
-              </div>
-              <p className="text-h2 text-foreground mb-1">
-                {realtimeVisitors !== null ? realtimeVisitors.toLocaleString() : "—"}
-              </p>
-              <p className="text-p3 text-muted-foreground">
-                Active now <span className="text-p4">(last 5 min)</span>
-              </p>
-            </Card>
-            <StatCard
-              label="Unique Visitors"
-              value={loading ? null : (data?.unique_visitors?.toLocaleString() ?? "0")}
-              sublabel={getDateRangeLabel()}
-              icon={<Users className="h-5 w-5" />}
+          {/* Compact Scorecard Chips */}
+          <div className="mb-8">
+            <ScorecardChips
+              data={data ?? null}
               loading={loading}
-            />
-            <StatCard
-              label="Page Views"
-              value={loading ? null : (data?.pageviews?.toLocaleString() ?? "0")}
-              sublabel={getDateRangeLabel()}
-              icon={<FileText className="h-5 w-5" />}
-              loading={loading}
-            />
-            <StatCard
-              label="Wallets Tracked"
-              value={loading ? null : (data?.wallet_users?.toLocaleString() ?? null)}
-              sublabel={getDateRangeLabel()}
-              icon={<Wallet className="h-5 w-5" />}
-              loading={loading}
-              showSetup={!loading && data?.wallet_users === null}
-              setupTitle="Track wallets"
-              setupDescription="See wallet activity"
-              onSetupClick={() => setWalletSetupOpen(true)}
-            />
-            <StatCard
-              label="Conversions"
-              value={loading ? null : (data?.converted_users?.toLocaleString() ?? null)}
-              sublabel={getDateRangeLabel()}
-              icon={<Target className="h-5 w-5" />}
-              loading={loading}
-              showSetup={!loading && data?.converted_users === null}
-              setupTitle="Track conversions"
-              setupDescription="Measure signups & more"
-              onSetupClick={() => setConversionSetupOpen(true)}
+              realtimeVisitors={realtimeVisitors}
+              starredMetrics={starredMetrics}
+              onToggleStar={toggleMetric}
+              dateRangeLabel={getDateRangeLabel()}
             />
           </div>
 
@@ -658,67 +609,6 @@ const Overview = () => {
         </div>
       </div>
     </DashboardLayout>
-  );
-};
-
-interface StatCardProps {
-  label: string;
-  value: string | null;
-  sublabel: string;
-  icon: React.ReactNode;
-  loading?: boolean;
-  showSetup?: boolean;
-  setupTitle?: string;
-  setupDescription?: string;
-  onSetupClick?: () => void;
-}
-
-const StatCard = ({ 
-  label, 
-  value, 
-  sublabel, 
-  icon, 
-  loading,
-  showSetup,
-  setupTitle,
-  setupDescription,
-  onSetupClick,
-}: StatCardProps) => {
-  // Show setup prompt when value is null and showSetup is true
-  if (showSetup) {
-    return (
-      <Card className="p-5 border border-border bg-muted/20 hover:bg-muted/30 transition-colors">
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-primary">{icon}</span>
-        </div>
-        <p className="text-p2 font-medium text-foreground mb-1">{setupTitle}</p>
-        <p className="text-p4 text-muted-foreground mb-3">{setupDescription}</p>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full text-primary border-primary/30 hover:bg-primary/10"
-          onClick={onSetupClick}
-        >
-          Set up tracking →
-        </Button>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="p-5 border border-border">
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-muted-foreground">{icon}</span>
-      </div>
-      {loading ? (
-        <Skeleton className="h-9 w-24 mb-1" />
-      ) : (
-        <p className="text-h2 text-foreground mb-1">{value ?? "0"}</p>
-      )}
-      <p className="text-p3 text-muted-foreground">
-        {label} <span className="text-p4">({sublabel})</span>
-      </p>
-    </Card>
   );
 };
 
