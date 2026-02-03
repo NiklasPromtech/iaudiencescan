@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,7 +9,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Search } from "lucide-react";
+import { X, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
 
@@ -201,47 +201,76 @@ export const FilterDialog = ({
   onFiltersChange,
   loading,
 }: FilterDialogProps) => {
+  // Pending filters (local state before applying)
+  const [pendingFilters, setPendingFilters] = useState<ActiveFilters>(activeFilters);
   
+  // Sync pending with active when active changes externally
+  useEffect(() => {
+    setPendingFilters(activeFilters);
+  }, [activeFilters]);
+
+  // Check if there are unapplied changes
+  const hasChanges = useMemo(() => {
+    const activeKeys = Object.keys(activeFilters);
+    const pendingKeys = Object.keys(pendingFilters);
+    if (activeKeys.length !== pendingKeys.length) return true;
+    
+    for (const key of pendingKeys) {
+      const activeVals = activeFilters[key] || [];
+      const pendingVals = pendingFilters[key] || [];
+      if (activeVals.length !== pendingVals.length) return true;
+      if (!activeVals.every(v => pendingVals.includes(v))) return true;
+    }
+    return false;
+  }, [activeFilters, pendingFilters]);
+
   const handleToggle = (key: FilterKey, value: string) => {
-    const currentValues = activeFilters[key] || [];
+    const currentValues = pendingFilters[key] || [];
     const newValues = currentValues.includes(value)
       ? currentValues.filter((v) => v !== value)
       : [...currentValues, value];
 
-    const newFilters = { ...activeFilters };
+    const newFilters = { ...pendingFilters };
     if (newValues.length === 0) {
       delete newFilters[key];
     } else {
       newFilters[key] = newValues;
     }
-    onFiltersChange(newFilters);
+    setPendingFilters(newFilters);
   };
 
   const handleClear = (key: FilterKey) => {
-    const newFilters = { ...activeFilters };
+    const newFilters = { ...pendingFilters };
     delete newFilters[key];
-    onFiltersChange(newFilters);
+    setPendingFilters(newFilters);
   };
 
   const handleSelectAll = (key: FilterKey, values: string[]) => {
-    const newFilters = { ...activeFilters, [key]: values };
-    onFiltersChange(newFilters);
+    const newFilters = { ...pendingFilters, [key]: values };
+    setPendingFilters(newFilters);
+  };
+
+  const handleApply = () => {
+    onFiltersChange(pendingFilters);
   };
 
   const handleClearAll = () => {
+    setPendingFilters({});
     onFiltersChange({});
   };
 
   const handleRemoveFilter = (key: string, value: string) => {
-    const currentValues = activeFilters[key] || [];
+    const currentValues = pendingFilters[key] || [];
     const newValues = currentValues.filter((v) => v !== value);
 
-    const newFilters = { ...activeFilters };
+    const newFilters = { ...pendingFilters };
     if (newValues.length === 0) {
       delete newFilters[key];
     } else {
       newFilters[key] = newValues;
     }
+    setPendingFilters(newFilters);
+    // Also apply immediately when removing via badge
     onFiltersChange(newFilters);
   };
 
@@ -253,12 +282,12 @@ export const FilterDialog = ({
     });
   }, [filterOptions]);
 
-  const totalActiveFilters = Object.values(activeFilters).reduce(
+  const totalPendingFilters = Object.values(pendingFilters).reduce(
     (sum, arr) => sum + (arr?.length || 0),
     0
   );
 
-  // Flatten active filters into badges
+  // Flatten active (applied) filters into badges
   const activeFilterBadges = Object.entries(activeFilters).flatMap(([key, values]) =>
     (values || []).map((value) => ({ key, value }))
   );
@@ -269,20 +298,32 @@ export const FilterDialog = ({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Filter buttons */}
+      {/* Filter buttons - use pendingFilters for display */}
       {availableSections.map((section) => (
         <FilterButton
           key={section.key}
           label={section.label}
           options={(filterOptions[section.key] as FilterOptionItem[]) || []}
-          selectedValues={activeFilters[section.key] || []}
+          selectedValues={pendingFilters[section.key] || []}
           onToggle={(value) => handleToggle(section.key, value)}
           onSelectAll={(values) => handleSelectAll(section.key, values)}
           onClear={() => handleClear(section.key)}
         />
       ))}
 
-      {/* Active filter badges */}
+      {/* Apply button - only show when there are unapplied changes */}
+      {hasChanges && (
+        <Button
+          size="sm"
+          className="h-7 px-3 gap-1.5"
+          onClick={handleApply}
+        >
+          <Check className="h-3.5 w-3.5" />
+          Apply
+        </Button>
+      )}
+
+      {/* Active filter badges (applied filters) */}
       {activeFilterBadges.length > 0 && (
         <>
           <div className="h-4 w-px bg-border mx-1" />
