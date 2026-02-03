@@ -317,14 +317,11 @@ export function ScorecardChips({
         </button>
       </div>
 
-      {/* Expanded section - unstarred metrics grouped by category */}
+      {/* Expanded section - ALL metrics grouped by category, starred ones highlighted */}
       {showAll && !loading && (
         <div className="space-y-4 pt-3 border-t border-border/50">
-          {/* Group by category */}
           {Object.entries(CATEGORY_LABELS).map(([category, label]) => {
-            const categoryMetrics = unstarredMetricsList.filter(
-              (m) => m.category === category
-            );
+            const categoryMetrics = METRICS.filter((m) => m.category === category);
             if (categoryMetrics.length === 0) return null;
             
             return (
@@ -339,6 +336,7 @@ export function ScorecardChips({
                       metric={metric}
                       value={data ? metric.getValue(data) : null}
                       formatValue={formatValue}
+                      isStarred={starredMetrics.includes(metric.key)}
                       onToggleStar={() => onToggleStar(metric.key)}
                     />
                   ))}
@@ -419,15 +417,16 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
   );
 }
 
-// Smaller pill for unstarred metrics in expanded section
+// Smaller pill for metrics in expanded section - highlights starred ones
 interface MetricPillSmallProps {
   metric: MetricDefinition;
   value: number | null;
   formatValue: (value: number | null, format?: "number" | "percent" | "currency") => string;
+  isStarred: boolean;
   onToggleStar: () => void;
 }
 
-function MetricPillSmall({ metric, value, formatValue, onToggleStar }: MetricPillSmallProps) {
+function MetricPillSmall({ metric, value, formatValue, isStarred, onToggleStar }: MetricPillSmallProps) {
   const [isHovered, setIsHovered] = useState(false);
   const isUnconfigured = value === null;
   const displayValue = formatValue(value, metric.format);
@@ -436,18 +435,26 @@ function MetricPillSmall({ metric, value, formatValue, onToggleStar }: MetricPil
     <div
       className={cn(
         "group relative flex items-center gap-2 px-2.5 py-2 rounded-lg border transition-all duration-150",
-        "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
+        isStarred
+          ? "bg-primary/10 border-primary/30 hover:border-primary/50"
+          : "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
         isUnconfigured && "opacity-50"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+      <div className={cn(
+        "flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center",
+        isStarred ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+      )}>
         {React.cloneElement(metric.icon as React.ReactElement, { className: "h-3 w-3" })}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-muted-foreground leading-tight truncate">
+        <p className={cn(
+          "text-sm font-medium leading-tight truncate",
+          isStarred ? "text-foreground" : "text-muted-foreground"
+        )}>
           {displayValue}
         </p>
         <p className="text-[10px] text-muted-foreground/70 truncate">
@@ -463,10 +470,12 @@ function MetricPillSmall({ metric, value, formatValue, onToggleStar }: MetricPil
         className={cn(
           "absolute -right-1 -top-1 p-0.5 rounded-full bg-background border shadow-sm transition-all duration-150",
           isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75",
-          "border-border text-muted-foreground hover:text-primary hover:border-primary"
+          isStarred 
+            ? "border-primary text-primary" 
+            : "border-border text-muted-foreground hover:text-primary hover:border-primary"
         )}
       >
-        <Star className="h-2.5 w-2.5" />
+        <Star className={cn("h-2.5 w-2.5", isStarred && "fill-primary")} />
       </button>
     </div>
   );
