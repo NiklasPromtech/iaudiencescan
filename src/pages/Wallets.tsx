@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -31,6 +32,8 @@ import {
   ChevronRight,
   ArrowUpDown,
   Link as LinkIcon,
+  TrendingUp,
+  XCircle,
 } from "lucide-react";
 import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
@@ -53,6 +56,7 @@ export default function Wallets() {
   const [totalRows, setTotalRows] = useState(0);
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 0, includeToday: true });
   const [enrichingWallets, setEnrichingWallets] = useState<Set<string>>(new Set());
+  const [showFailed, setShowFailed] = useState(false);
   const { toast } = useToast();
 
   const handleEnrichWallet = async (walletId: string) => {
@@ -217,7 +221,7 @@ export default function Wallets() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Wallets</CardTitle>
@@ -245,6 +249,22 @@ export default function Wallets() {
               ) : (
                 <div className="text-2xl font-bold">
                   {formatBalance(summary?.total_balance_usd)}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Median Balance</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading && !summary ? (
+                <Skeleton className="h-7 w-20" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  {formatBalance(summary?.median_balance_usd)}
                 </div>
               )}
             </CardContent>
@@ -281,6 +301,23 @@ export default function Wallets() {
                 </div>
               )}
               <p className="text-xs text-muted-foreground">Pending enrichment</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Failed</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              {loading && !summary ? (
+                <Skeleton className="h-7 w-16" />
+              ) : (
+                <div className="text-2xl font-bold text-destructive">
+                  {summary?.wallets_enrichment_failed?.toLocaleString() || 0}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Enrichment failed</p>
             </CardContent>
           </Card>
         </div>
@@ -363,6 +400,23 @@ export default function Wallets() {
               >
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
+
+              <div className="flex items-center gap-2 ml-4">
+                <Checkbox
+                  id="show-failed"
+                  checked={showFailed}
+                  onCheckedChange={(checked) => {
+                    setShowFailed(checked === true);
+                    setCurrentPage(0);
+                  }}
+                />
+                <label
+                  htmlFor="show-failed"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Show failed
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -402,7 +456,9 @@ export default function Wallets() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  wallets.map((wallet) => {
+                  wallets
+                    .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
+                    .map((wallet) => {
                     // Determine if we should show Enrich button
                     const isEnriched = wallet.enrichment_status === "completed";
                     const isPending = wallet.enrichment_status === "pending" || wallet.enrichment_status === "processing";
