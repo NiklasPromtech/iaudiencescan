@@ -40,6 +40,7 @@ import {
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { FilterDialog } from "@/components/overview/FilterDialog";
+import { PrimaryFilters } from "@/components/overview/PrimaryFilters";
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
 import { EventsTable } from "@/components/overview/EventsTable";
@@ -48,7 +49,6 @@ import { WalletExtensionsTable } from "@/components/overview/WalletExtensionsTab
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
-import { ConversionEventFilter } from "@/components/overview/ConversionEventFilter";
 import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audiences/AudienceDialog";
 
 const Overview = () => {
@@ -70,6 +70,7 @@ const Overview = () => {
   const [costSources, setCostSources] = useState<CostSource[]>([]);
   const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
   const [selectedConversionEvent, setSelectedConversionEvent] = useState<string | null>(null);
+  const [selectedWalletAction, setSelectedWalletAction] = useState<string | null>(null);
   const [eventsData, setEventsData] = useState<EventsTableResponse | null>(null);
   const [walletsData, setWalletsData] = useState<WalletsTableResponse | null>(null);
   const [walletExtensionsData, setWalletExtensionsData] = useState<WalletExtensionsResponse | null>(null);
@@ -455,7 +456,7 @@ const Overview = () => {
       <div className="bg-gradient-subtle min-h-full">
         <div className="container max-w-7xl py-8 px-4">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-6">
             <Badge variant="outline" className="border-primary/30 text-primary mb-3">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
               {selectedWebsite?.name || "Loading..."}
@@ -467,12 +468,16 @@ const Overview = () => {
                   Here's what we're seeing so far.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <ConversionEventFilter
-                  availableEvents={filterOptions?.conversion_events?.map(e => e.value) ?? []}
-                  selectedEvent={selectedConversionEvent}
-                  onEventChange={handleConversionEventChange}
-                  loading={loading}
+              {/* Primary row: Date + Conversion + Wallet Action */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <PrimaryFilters
+                  conversionEvents={filterOptions?.conversion_events ?? []}
+                  walletActions={filterOptions?.wallet_actions ?? []}
+                  selectedConversionEvent={selectedConversionEvent}
+                  selectedWalletAction={selectedWalletAction}
+                  onConversionEventChange={handleConversionEventChange}
+                  onWalletActionChange={setSelectedWalletAction}
+                  loading={filterOptionsLoading}
                 />
                 <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
               </div>
@@ -480,12 +485,12 @@ const Overview = () => {
           </div>
 
           {error && (
-            <Card className="p-4 mb-8 border-destructive bg-destructive/10">
+            <Card className="p-4 mb-6 border-destructive bg-destructive/10">
               <p className="text-destructive text-sm">{error}</p>
             </Card>
           )}
 
-          {/* Filters */}
+          {/* Secondary row: Dimension filters */}
           <div className="mb-6">
             <FilterDialog
               filterOptions={filterOptions}
