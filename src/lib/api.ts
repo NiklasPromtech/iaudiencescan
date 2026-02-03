@@ -402,6 +402,7 @@ export const DIMENSION_TO_FILTER: Partial<Record<TableDimension, keyof FilterOpt
   device_type: "devices",
   browser: "browsers",
   os: "os",
+  country: "countries",
 };
 
 // Events Table types
