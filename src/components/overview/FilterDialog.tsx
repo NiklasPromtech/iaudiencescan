@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,7 +11,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Search, X, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
 
@@ -47,15 +47,33 @@ export const FilterDialog = ({
 }: FilterDialogProps) => {
   const [open, setOpen] = useState(false);
   const [pendingFilters, setPendingFilters] = useState<ActiveFilters>({});
-  const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState<FilterKey>("sources");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Get available sections (those with data)
+  const availableSections = useMemo(() => {
+    return FILTER_SECTIONS.filter((section) => {
+      const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
+      return options && Array.isArray(options) && options.length > 0;
+    });
+  }, [filterOptions]);
 
   // Sync pending filters with active filters when dialog opens
   useEffect(() => {
     if (open) {
       setPendingFilters({ ...activeFilters });
-      setSearchTerms({});
+      setSearchTerm("");
+      // Set first available tab
+      if (availableSections.length > 0 && !availableSections.find(s => s.key === activeTab)) {
+        setActiveTab(availableSections[0].key);
+      }
     }
-  }, [open, activeFilters]);
+  }, [open, activeFilters, availableSections]);
+
+  // Reset search when changing tabs
+  useEffect(() => {
+    setSearchTerm("");
+  }, [activeTab]);
 
   const handleToggle = (key: string, value: string) => {
     const currentValues = pendingFilters[key] || [];
@@ -104,10 +122,26 @@ export const FilterDialog = ({
     0
   );
 
-  const availableSections = FILTER_SECTIONS.filter((section) => {
-    const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
-    return options && Array.isArray(options) && options.length > 0;
-  });
+  // Get current tab's options
+  const currentOptions = useMemo(() => {
+    const rawOptions = filterOptions?.[activeTab] as FilterOptionItem[] | undefined;
+    if (!rawOptions) return [];
+    
+    // Sort by count descending
+    const sorted = [...rawOptions].sort((a, b) => b.count - a.count);
+    
+    // Filter by search
+    if (searchTerm) {
+      return sorted.filter((opt) =>
+        opt.value.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return sorted;
+  }, [filterOptions, activeTab, searchTerm]);
+
+  const currentSelectedValues = pendingFilters[activeTab] || [];
+  const currentLabel = FILTER_SECTIONS.find(s => s.key === activeTab)?.label || "";
 
   // Flatten active filters into badges
   const activeFilterBadges = Object.entries(activeFilters).flatMap(([key, values]) =>
@@ -169,128 +203,138 @@ export const FilterDialog = ({
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
+            <DialogTitle className="flex items-center gap-2 text-lg">
               <Filter className="h-5 w-5" />
               Filter Data
-              {totalPendingFilters > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {totalPendingFilters} selected
-                </Badge>
-              )}
             </DialogTitle>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 -mx-6 px-6">
-            <div className="space-y-6 py-4">
-              {availableSections.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No filter options available yet. Data will appear as traffic comes in.
-                </p>
-              ) : (
-                availableSections.map((section) => {
-                  const rawOptions = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
-                  if (!rawOptions || rawOptions.length === 0) return null;
-
-                  // Sort by count descending
-                  const sortedOptions = [...rawOptions].sort((a, b) => b.count - a.count);
-                  
-                  const searchTerm = searchTerms[section.key] || "";
-                  const filteredOptions = sortedOptions.filter((opt) =>
-                    opt.value.toLowerCase().includes(searchTerm.toLowerCase())
-                  );
-                  const selectedValues = pendingFilters[section.key] || [];
-
-                  return (
-                    <div key={section.key} className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium text-foreground">
-                          {section.label}
-                        </h4>
-                        {selectedValues.length > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            {selectedValues.length} selected
-                          </Badge>
-                        )}
-                      </div>
-
-                      {sortedOptions.length > 5 && (
-                        <div className="relative">
-                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                          <Input
-                            placeholder={`Search ${section.label.toLowerCase()}...`}
-                            value={searchTerm}
-                            onChange={(e) =>
-                              setSearchTerms((prev) => ({
-                                ...prev,
-                                [section.key]: e.target.value,
-                              }))
-                            }
-                            className="h-8 pl-8 text-sm"
-                          />
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto">
-                        {filteredOptions.length === 0 ? (
-                          <p className="text-xs text-muted-foreground col-span-full py-2">
-                            No matches found
-                          </p>
-                        ) : (
-                          filteredOptions.map((option) => {
-                            const isSelected = selectedValues.includes(option.value);
-                            return (
-                              <label
-                                key={option.value}
-                                className={cn(
-                                  "flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-colors text-sm",
-                                  isSelected
-                                    ? "border-primary/50 bg-primary/10"
-                                    : "border-border hover:bg-muted/50"
-                                )}
-                              >
-                                <Checkbox
-                                  checked={isSelected}
-                                  onCheckedChange={() =>
-                                    handleToggle(section.key, option.value)
-                                  }
-                                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                />
-                                <span className="truncate text-foreground flex-1">
-                                  {option.value}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {option.count.toLocaleString()}
-                                </span>
-                              </label>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+          {availableSections.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No filter options available yet. Data will appear as traffic comes in.
+              </p>
             </div>
-          </ScrollArea>
+          ) : (
+            <div className="flex min-h-[400px]">
+              {/* Left sidebar - categories */}
+              <div className="w-44 border-r border-border bg-muted/30 py-2">
+                {availableSections.map((section) => {
+                  const count = pendingFilters[section.key]?.length || 0;
+                  const isActive = activeTab === section.key;
+                  
+                  return (
+                    <button
+                      key={section.key}
+                      onClick={() => setActiveTab(section.key)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors text-left",
+                        isActive 
+                          ? "bg-background text-foreground font-medium border-r-2 border-primary" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                      )}
+                    >
+                      <span>{section.label}</span>
+                      {count > 0 && (
+                        <Badge 
+                          variant="secondary" 
+                          className="h-5 min-w-5 px-1.5 text-xs bg-primary/20 text-primary"
+                        >
+                          {count}
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-          <DialogFooter className="flex-row gap-2 sm:gap-2">
-            <Button
-              variant="ghost"
-              onClick={handleClear}
-              disabled={totalPendingFilters === 0}
-              className="flex-1 sm:flex-none"
-            >
-              Clear
-            </Button>
-            <Button
-              onClick={handleApply}
-              className="flex-1 sm:flex-none"
-            >
-              Apply Filters
-              {totalPendingFilters > 0 && ` (${totalPendingFilters})`}
-            </Button>
+              {/* Right content - options */}
+              <div className="flex-1 flex flex-col">
+                {/* Search */}
+                <div className="p-4 border-b border-border">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder={`Search ${currentLabel.toLowerCase()}...`}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* Options list */}
+                <ScrollArea className="flex-1">
+                  <div className="p-4 space-y-1">
+                    {currentOptions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-8">
+                        {searchTerm ? "No matches found" : "No options available"}
+                      </p>
+                    ) : (
+                      currentOptions.slice(0, 50).map((option) => {
+                        const isSelected = currentSelectedValues.includes(option.value);
+                        return (
+                          <label
+                            key={option.value}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors",
+                              isSelected
+                                ? "bg-primary/10"
+                                : "hover:bg-muted/50"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => handleToggle(activeTab, option.value)}
+                              className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <span className="flex-1 text-sm text-foreground truncate">
+                              {option.value}
+                            </span>
+                            <span className="text-xs text-muted-foreground tabular-nums">
+                              {option.count.toLocaleString()}
+                            </span>
+                          </label>
+                        );
+                      })
+                    )}
+                    {currentOptions.length > 50 && (
+                      <p className="text-xs text-muted-foreground text-center pt-4">
+                        Showing top 50 results. Use search to find more.
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="ghost"
+                onClick={handleClear}
+                disabled={totalPendingFilters === 0}
+                size="sm"
+              >
+                Clear all
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleApply} size="sm">
+                  Apply
+                  {totalPendingFilters > 0 && ` (${totalPendingFilters})`}
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
