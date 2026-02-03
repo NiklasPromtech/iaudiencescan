@@ -152,19 +152,25 @@ export interface FilterOptions {
 // Active filters type for the UI
 export type ActiveFilters = Partial<Record<string, string[]>>;
 
+// Filter option item with value and count
+export interface FilterOptionItem {
+  value: string;
+  count: number;
+}
+
 // Filter options response from the new /api/analytics/filtering endpoint
 export interface FilterOptionsResponse {
   success: boolean;
   tag_id: string;
-  sources: string[];
-  utm_source: string[];
-  utm_medium: string[];
-  utm_campaign: string[];
-  utm_content: string[];
-  utm_term: string[];
-  countries: string[];
-  conversion_events: string[];
-  cost_sources: Array<{
+  sources?: FilterOptionItem[];
+  utm_source?: FilterOptionItem[];
+  utm_medium?: FilterOptionItem[];
+  utm_campaign?: FilterOptionItem[];
+  utm_content?: FilterOptionItem[];
+  utm_term?: FilterOptionItem[];
+  countries?: FilterOptionItem[];
+  conversion_events?: FilterOptionItem[];
+  cost_sources?: Array<{
     id: string;
     name: string;
     dimension: string;
