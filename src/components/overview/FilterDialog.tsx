@@ -9,7 +9,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, X, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
 
@@ -23,7 +23,7 @@ interface FilterSection {
 const FILTER_SECTIONS: FilterSection[] = [
   { key: "sources", label: "Source" },
   { key: "utm_source", label: "UTM Source" },
-  { key: "utm_medium", label: "UTM Medium" },
+  { key: "utm_medium", label: "Medium" },
   { key: "utm_campaign", label: "Campaign" },
   { key: "utm_content", label: "Content" },
   { key: "utm_term", label: "Term" },
@@ -31,7 +31,6 @@ const FILTER_SECTIONS: FilterSection[] = [
 ];
 
 interface FilterButtonProps {
-  filterKey: FilterKey;
   label: string;
   options: FilterOptionItem[];
   selectedValues: string[];
@@ -40,7 +39,6 @@ interface FilterButtonProps {
 }
 
 const FilterButton = ({
-  filterKey,
   label,
   options,
   selectedValues,
@@ -52,14 +50,12 @@ const FilterButton = ({
 
   const hasSelection = selectedValues.length > 0;
 
-  // Filter and sort options
   const filteredOptions = useMemo(() => {
     const sorted = [...options].sort((a, b) => b.count - a.count);
-    if (!search) return sorted.slice(0, 15); // Show top 15 by default
-    
+    if (!search) return sorted.slice(0, 20);
     return sorted.filter((opt) =>
       opt.value.toLowerCase().includes(search.toLowerCase())
-    ).slice(0, 30); // Show up to 30 when searching
+    ).slice(0, 50);
   }, [options, search]);
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -71,23 +67,22 @@ const FilterButton = ({
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           className={cn(
-            "h-8 gap-1.5 font-normal",
-            hasSelection && "border-primary/50 bg-primary/5"
+            "h-7 px-2.5 gap-1 font-normal text-muted-foreground hover:text-foreground",
+            hasSelection && "text-primary bg-primary/5 hover:bg-primary/10"
           )}
         >
-          <span>{label}</span>
+          <span className="text-xs">{label}</span>
           {hasSelection && (
             <Badge
               variant="secondary"
-              className="h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs"
+              className="h-4 min-w-4 px-1 bg-primary/20 text-primary text-[10px]"
             >
               {selectedValues.length}
             </Badge>
           )}
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
@@ -252,7 +247,6 @@ export const FilterDialog = ({
       {availableSections.map((section) => (
         <FilterButton
           key={section.key}
-          filterKey={section.key}
           label={section.label}
           options={(filterOptions[section.key] as FilterOptionItem[]) || []}
           selectedValues={activeFilters[section.key] || []}
@@ -264,35 +258,33 @@ export const FilterDialog = ({
       {/* Active filter badges */}
       {activeFilterBadges.length > 0 && (
         <>
-          <div className="h-5 w-px bg-border mx-1" />
-          {activeFilterBadges.slice(0, 5).map(({ key, value }) => (
+          <div className="h-4 w-px bg-border mx-1" />
+          {activeFilterBadges.slice(0, 4).map(({ key, value }) => (
             <Badge
               key={`${key}-${value}`}
               variant="secondary"
-              className="h-7 gap-1 pl-2.5 pr-1.5 bg-primary/10 text-primary hover:bg-primary/20"
+              className="h-6 gap-1 pl-2 pr-1 bg-primary/10 text-primary hover:bg-primary/15"
             >
-              <span className="text-xs truncate max-w-[120px]">{value}</span>
+              <span className="text-xs truncate max-w-[100px]">{value}</span>
               <button
                 onClick={() => handleRemoveFilter(key, value)}
-                className="ml-0.5 hover:bg-primary/20 rounded-full p-0.5"
+                className="hover:bg-primary/20 rounded p-0.5"
               >
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           ))}
-          {activeFilterBadges.length > 5 && (
-            <Badge variant="secondary" className="h-7 px-2 bg-muted text-muted-foreground">
-              +{activeFilterBadges.length - 5} more
+          {activeFilterBadges.length > 4 && (
+            <Badge variant="secondary" className="h-6 px-2 bg-muted text-muted-foreground text-xs">
+              +{activeFilterBadges.length - 4}
             </Badge>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          <button
             onClick={handleClearAll}
+            className="text-xs text-muted-foreground hover:text-foreground ml-1"
           >
-            Clear all
-          </Button>
+            Clear
+          </button>
         </>
       )}
     </div>

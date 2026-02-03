@@ -170,6 +170,7 @@ export interface FilterOptionsResponse {
   utm_term?: FilterOptionItem[];
   countries?: FilterOptionItem[];
   conversion_events?: FilterOptionItem[];
+  wallet_actions?: FilterOptionItem[];
   cost_sources?: Array<{
     id: string;
     name: string;
