@@ -60,6 +60,7 @@ import ScanDetail from "./pages/ScanDetail";
 import ScanResults from "./pages/ScanResults";
 import Wallets from "./pages/Wallets";
 import LandingPageV2 from "./pages/LandingPageV2";
+import Touchpoints from "./pages/Touchpoints";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,7 @@ const App = () => (
           <Route path="/costs" element={<Costs />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/bots" element={<Bots />} />
+          <Route path="/touchpoints" element={<Touchpoints />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
