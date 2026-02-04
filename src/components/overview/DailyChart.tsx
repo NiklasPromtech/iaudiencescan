@@ -116,28 +116,63 @@ export function DailyChart({ data, loading }: DailyChartProps) {
   const chartDates = useMemo(() => chartData.map((d) => d.date), [chartData]);
 
   // Get touchpoints mapped to chart dates
+  // For range events, expand to all dates they cover
   const touchpointsForChart = useMemo((): TouchpointForChart[] => {
     if (!chartData.length || !touchpoints.length) return [];
     
-    return touchpoints
-      .map((tp) => {
-        // For single events, use timestamp date; for ranges, use start_date
+    const result: TouchpointForChart[] = [];
+    const chartDateSet = new Set(chartData.map(d => d.date));
+    
+    touchpoints.forEach((tp) => {
+      if (tp.event_type === "single") {
+        // Single events: use timestamp date
         const tpDate = tp.timestamp 
           ? format(parseISO(tp.timestamp), "yyyy-MM-dd")
           : tp.start_date;
-        return {
-          id: tp.id,
-          name: tp.name,
-          event_type: tp.event_type,
-          timestamp: tp.timestamp,
-          start_date: tp.start_date,
-          end_date: tp.end_date,
-          notes: tp.notes,
-          color: tp.color,
-          dateKey: tpDate || "",
-        };
-      })
-      .filter((tp) => chartData.some((d) => d.date === tp.dateKey));
+        if (tpDate && chartDateSet.has(tpDate)) {
+          result.push({
+            id: tp.id,
+            name: tp.name,
+            event_type: tp.event_type,
+            timestamp: tp.timestamp,
+            start_date: tp.start_date,
+            end_date: tp.end_date,
+            notes: tp.notes,
+            color: tp.color,
+            dateKey: tpDate,
+          });
+        }
+      } else {
+        // Range events: expand to all dates they cover
+        if (tp.start_date && tp.end_date) {
+          const startDate = parseISO(tp.start_date);
+          const endDate = parseISO(tp.end_date);
+          let currentDate = startDate;
+          
+          while (currentDate <= endDate) {
+            const dateKey = format(currentDate, "yyyy-MM-dd");
+            if (chartDateSet.has(dateKey)) {
+              result.push({
+                id: tp.id,
+                name: tp.name,
+                event_type: tp.event_type,
+                timestamp: tp.timestamp,
+                start_date: tp.start_date,
+                end_date: tp.end_date,
+                notes: tp.notes,
+                color: tp.color,
+                dateKey,
+              });
+            }
+            // Move to next day
+            currentDate = new Date(currentDate);
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+        }
+      }
+    });
+    
+    return result;
   }, [chartData, touchpoints]);
 
   const handleTouchpointClick = (tp: TouchpointForChart) => {
