@@ -73,13 +73,13 @@ export function TouchpointMarkers({
 
           return (
             <div key={dateKey} className="flex-1 flex items-center justify-center relative">
-              {/* Range events - full width lines with transparency, stacked */}
+              {/* Range events - full width rounded bars with border */}
               {rangeEvents.length > 0 && (
                 <HoverCard openDelay={100} closeDelay={50}>
                   <HoverCardTrigger asChild>
                     <div
-                      className="absolute inset-x-1 cursor-pointer"
-                      style={{ height: 14 }}
+                      className="absolute inset-x-1 cursor-pointer flex flex-col gap-0.5 justify-center"
+                      style={{ height: rangeEvents.length > 1 ? rangeEvents.length * 10 : 14 }}
                       onClick={() => {
                         if (rangeEvents.length === 1) {
                           onTouchpointClick(rangeEvents[0]);
@@ -88,15 +88,13 @@ export function TouchpointMarkers({
                         }
                       }}
                     >
-                      {rangeEvents.map((tp, idx) => (
+                      {rangeEvents.map((tp) => (
                         <div
                           key={tp.id}
-                          className="absolute inset-x-0 rounded-full"
+                          className="w-full rounded-full border-2 border-background hover:scale-105 transition-transform"
                           style={{ 
-                            backgroundColor: tp.color || "#8b5cf6",
-                            opacity: 0.5,
-                            height: 14,
-                            top: 0,
+                            backgroundColor: "hsl(var(--primary) / 0.4)",
+                            height: rangeEvents.length > 1 ? 8 : 14,
                           }}
                         />
                       ))}
@@ -133,13 +131,13 @@ export function TouchpointMarkers({
                 </HoverCard>
               )}
 
-              {/* Single events - 14px dots with transparency, stacked */}
+              {/* Single events - 14px dots with border */}
               {singleEvents.length > 0 && (
                 <HoverCard openDelay={100} closeDelay={50}>
                   <HoverCardTrigger asChild>
                     <div
                       className="cursor-pointer group flex items-center justify-center relative z-10"
-                      style={{ width: 14, height: 14 }}
+                      style={{ width: 14 + (singleEvents.length - 1) * 6, height: 14 }}
                       onClick={() => {
                         if (singleEvents.length === 1) {
                           onTouchpointClick(singleEvents[0]);
@@ -148,17 +146,16 @@ export function TouchpointMarkers({
                         }
                       }}
                     >
-                      {/* Stack dots - each one slightly offset and semi-transparent */}
+                      {/* Stack dots with offset, each has border */}
                       {singleEvents.map((tp, idx) => (
                         <div
                           key={tp.id}
-                          className="absolute rounded-full transition-transform group-hover:scale-110"
+                          className="absolute rounded-full border-2 border-background transition-transform group-hover:scale-110"
                           style={{ 
-                            backgroundColor: tp.color || "#8b5cf6",
-                            opacity: 0.5,
+                            backgroundColor: "hsl(var(--primary) / 0.5)",
                             width: 14,
                             height: 14,
-                            left: idx * 3,
+                            left: idx * 6,
                           }}
                         />
                       ))}
