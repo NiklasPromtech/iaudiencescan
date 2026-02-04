@@ -21,14 +21,13 @@ import { useToast } from "@/hooks/use-toast";
 import { TokenContract } from "@/pages/Contracts";
 
 const CHAINS = [
-  { value: "ethereum", label: "Ethereum" },
-  { value: "polygon", label: "Polygon" },
-  { value: "arbitrum", label: "Arbitrum" },
-  { value: "optimism", label: "Optimism" },
-  { value: "base", label: "Base" },
-  { value: "avalanche", label: "Avalanche" },
-  { value: "bsc", label: "BNB Chain" },
-  { value: "solana", label: "Solana" },
+  { value: "ethereum", label: "Ethereum", chainId: "eth-mainnet" },
+  { value: "polygon", label: "Polygon", chainId: "matic-mainnet" },
+  { value: "bsc", label: "BNB Smart Chain (BSC)", chainId: "bsc-mainnet" },
+  { value: "avalanche", label: "Avalanche C-Chain", chainId: "avalanche-mainnet" },
+  { value: "fantom", label: "Fantom", chainId: "fantom-mainnet" },
+  { value: "arbitrum", label: "Arbitrum", chainId: "arbitrum-mainnet" },
+  { value: "base", label: "Base", chainId: "base-mainnet" },
 ];
 
 interface EditContractDialogProps {
@@ -72,12 +71,14 @@ export const EditContractDialog = ({
 
     setLoading(true);
     try {
+      const selectedChain = CHAINS.find(c => c.value === chain);
       const { error } = await supabase
         .from("website_tag_contracts")
         .update({
           name: name.trim(),
           contract_address: contractAddress.trim(),
           chain,
+          chain_id: selectedChain?.chainId || null,
           start_date: startDate || null,
           updated_at: new Date().toISOString(),
         })

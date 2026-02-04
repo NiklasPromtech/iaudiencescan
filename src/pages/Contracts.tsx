@@ -24,6 +24,7 @@ export interface TokenContract {
   name: string;
   contract_address: string;
   chain: string;
+  chain_id: string | null;
   start_date: string | null;
   created_at: string;
   updated_at: string;
