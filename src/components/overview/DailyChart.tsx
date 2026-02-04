@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,13 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Plus } from "lucide-react";
 import { TableRow } from "@/lib/api";
 import { CreateTouchpointDialog } from "@/components/touchpoints/CreateTouchpointDialog";
+import { TouchpointDetailsDialog, type TouchpointDetails } from "@/components/touchpoints/TouchpointDetailsDialog";
+import { TouchpointListDialog } from "@/components/touchpoints/TouchpointListDialog";
+import { TouchpointMarkers, type TouchpointForChart } from "@/components/overview/TouchpointMarkers";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -64,6 +67,10 @@ export function DailyChart({ data, loading }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
   const [metricRight, setMetricRight] = useState<MetricKey>("visitors_with_wallet_extension");
   const [createTouchpointOpen, setCreateTouchpointOpen] = useState(false);
+  const [detailsTouchpoint, setDetailsTouchpoint] = useState<TouchpointDetails | null>(null);
+  const [listDialogTouchpoints, setListDialogTouchpoints] = useState<TouchpointForChart[]>([]);
+  const [listDialogDate, setListDialogDate] = useState<string>("");
+  const chartContainerRef = useRef<HTMLDivElement>(null);
   const { selectedWebsite } = useSelectedWebsite();
 
   // Fetch touchpoints for this website
@@ -105,23 +112,42 @@ export function DailyChart({ data, loading }: DailyChartProps) {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [data, metricLeft, metricRight]);
 
-  // Get touchpoint lines that fall within the chart date range
-  const touchpointLines = useMemo(() => {
+  // Get chart date keys for positioning
+  const chartDates = useMemo(() => chartData.map((d) => d.date), [chartData]);
+
+  // Get touchpoints mapped to chart dates
+  const touchpointsForChart = useMemo((): TouchpointForChart[] => {
     if (!chartData.length || !touchpoints.length) return [];
     
     return touchpoints
       .map((tp) => {
+        // For single events, use timestamp date; for ranges, use start_date
         const tpDate = tp.timestamp 
           ? format(parseISO(tp.timestamp), "yyyy-MM-dd")
           : tp.start_date;
         return {
-          ...tp,
-          dateKey: tpDate,
-          label: formatDate(tpDate || ""),
+          id: tp.id,
+          name: tp.name,
+          event_type: tp.event_type,
+          timestamp: tp.timestamp,
+          start_date: tp.start_date,
+          end_date: tp.end_date,
+          notes: tp.notes,
+          color: tp.color,
+          dateKey: tpDate || "",
         };
       })
       .filter((tp) => chartData.some((d) => d.date === tp.dateKey));
   }, [chartData, touchpoints]);
+
+  const handleTouchpointClick = (tp: TouchpointForChart) => {
+    setDetailsTouchpoint(tp);
+  };
+
+  const handleMultipleTouchpointsClick = (tps: TouchpointForChart[], dateKey: string) => {
+    setListDialogTouchpoints(tps);
+    setListDialogDate(dateKey);
+  };
 
   if (loading) {
     return (
@@ -174,73 +200,70 @@ export function DailyChart({ data, loading }: DailyChartProps) {
             No data available
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
-              <XAxis
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                fontSize={12}
-              />
-              {/* Left Y-Axis for first metric */}
-              <YAxis
-                yAxisId="left"
-                orientation="left"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                fontSize={12}
-                tickFormatter={(value) => value.toLocaleString()}
-                stroke="hsl(var(--primary))"
-              />
-              {/* Right Y-Axis for second metric */}
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                fontSize={12}
-                tickFormatter={(value) => value.toLocaleString()}
-                stroke="hsl(var(--chart-3))"
-              />
-              <ChartTooltip
-                cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
-                content={<ChartTooltipContent />}
-              />
-              {/* Touchpoint reference lines */}
-              {touchpointLines.map((tp) => (
-                <ReferenceLine
-                  key={tp.id}
-                  x={tp.label}
-                  yAxisId="left"
-                  stroke={tp.color}
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  label={{
-                    value: tp.name,
-                    position: "top",
-                    fill: tp.color,
-                    fontSize: 10,
-                  }}
+          <div className="relative" ref={chartContainerRef}>
+            <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
                 />
-              ))}
-              <Bar
-                yAxisId="left"
-                dataKey={metricLeft}
-                fill={COLOR_LEFT}
-                radius={[4, 4, 0, 0]}
+                {/* Left Y-Axis for first metric */}
+                <YAxis
+                  yAxisId="left"
+                  orientation="left"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  stroke="hsl(var(--primary))"
+                />
+                {/* Right Y-Axis for second metric */}
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  stroke="hsl(var(--chart-3))"
+                />
+                <ChartTooltip
+                  cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
+                  content={<ChartTooltipContent />}
+                />
+                <Bar
+                  yAxisId="left"
+                  dataKey={metricLeft}
+                  fill={COLOR_LEFT}
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  yAxisId="right"
+                  dataKey={metricRight}
+                  fill={COLOR_RIGHT}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
+            
+            {/* Touchpoint markers overlay */}
+            {touchpointsForChart.length > 0 && (
+              <TouchpointMarkers
+                touchpoints={touchpointsForChart}
+                chartDates={chartDates}
+                chartWidth={chartContainerRef.current?.clientWidth || 0}
+                chartLeftMargin={50}
+                onTouchpointClick={handleTouchpointClick}
+                onMultipleTouchpointsClick={handleMultipleTouchpointsClick}
               />
-              <Bar
-                yAxisId="right"
-                dataKey={metricRight}
-                fill={COLOR_RIGHT}
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ChartContainer>
+            )}
+          </div>
         )}
       </Card>
 
@@ -249,6 +272,20 @@ export function DailyChart({ data, loading }: DailyChartProps) {
         onOpenChange={setCreateTouchpointOpen}
         websiteId={selectedWebsite?.id}
         onSuccess={() => refetchTouchpoints()}
+      />
+
+      <TouchpointDetailsDialog
+        open={!!detailsTouchpoint}
+        onOpenChange={(open) => !open && setDetailsTouchpoint(null)}
+        touchpoint={detailsTouchpoint}
+      />
+
+      <TouchpointListDialog
+        open={listDialogTouchpoints.length > 0}
+        onOpenChange={(open) => !open && setListDialogTouchpoints([])}
+        touchpoints={listDialogTouchpoints}
+        dateKey={listDialogDate}
+        onSelect={handleTouchpointClick}
       />
     </>
   );
