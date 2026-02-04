@@ -65,18 +65,21 @@ export const CreateContractDialog = ({
     try {
       const id = crypto.randomUUID();
       const selectedChain = CHAINS.find(c => c.value === chain);
-      const chainIdValue = selectedChain?.chainId || null;
+      console.log("Selected chain:", chain, "Found:", selectedChain);
       
-      const { error } = await supabase.from("website_tag_contracts").insert({
+      const insertData = {
         id,
         website_id: websiteId,
         name: name.trim(),
         contract_address: contractAddress.trim(),
         chain,
-        chain_id: chainIdValue,
+        chain_id: selectedChain ? selectedChain.chainId : null,
         start_date: startDate || null,
         updated_at: new Date().toISOString(),
-      });
+      };
+      console.log("Insert data:", insertData);
+      
+      const { error } = await supabase.from("website_tag_contracts").insert(insertData);
 
       if (error) throw error;
 
