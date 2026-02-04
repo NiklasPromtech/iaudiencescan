@@ -55,6 +55,10 @@ export function EditTouchpointDialog({
   );
   const [notes, setNotes] = useState(touchpoint.notes || "");
   const [color, setColor] = useState(touchpoint.color);
+  const [costAmount, setCostAmount] = useState<string>(
+    touchpoint.cost_amount?.toString() || ""
+  );
+  const [costCurrency, setCostCurrency] = useState(touchpoint.cost_currency || "USD");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -65,6 +69,8 @@ export function EditTouchpointDialog({
     setEndDate(touchpoint.end_date ? parseISO(touchpoint.end_date) : undefined);
     setNotes(touchpoint.notes || "");
     setColor(touchpoint.color);
+    setCostAmount(touchpoint.cost_amount?.toString() || "");
+    setCostCurrency(touchpoint.cost_currency || "USD");
   }, [touchpoint]);
 
   const handleSubmit = async () => {
@@ -85,6 +91,8 @@ export function EditTouchpointDialog({
 
     setSaving(true);
 
+    const parsedCost = costAmount ? parseFloat(costAmount) : null;
+
     const { error } = await supabase
       .from("touchpoints")
       .update({
@@ -95,6 +103,8 @@ export function EditTouchpointDialog({
         end_date: eventType === "range" ? format(endDate!, "yyyy-MM-dd") : null,
         notes: notes.trim() || null,
         color,
+        cost_amount: parsedCost,
+        cost_currency: parsedCost ? costCurrency : null,
       })
       .eq("id", touchpoint.id);
 
@@ -246,6 +256,32 @@ export function EditTouchpointDialog({
                   onClick={() => setColor(c)}
                 />
               ))}
+            </div>
+          </div>
+
+          {/* Cost */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-cost">Marketing Spend (optional)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="edit-cost"
+                type="number"
+                placeholder="0.00"
+                value={costAmount}
+                onChange={(e) => setCostAmount(e.target.value)}
+                className="flex-1"
+                min="0"
+                step="0.01"
+              />
+              <select
+                value={costCurrency}
+                onChange={(e) => setCostCurrency(e.target.value)}
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
             </div>
           </div>
 

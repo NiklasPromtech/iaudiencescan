@@ -50,6 +50,8 @@ export function CreateTouchpointDialog({
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [notes, setNotes] = useState("");
   const [color, setColor] = useState(COLOR_OPTIONS[0]);
+  const [costAmount, setCostAmount] = useState<string>("");
+  const [costCurrency, setCostCurrency] = useState("USD");
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
@@ -77,6 +79,8 @@ export function CreateTouchpointDialog({
       return;
     }
 
+    const parsedCost = costAmount ? parseFloat(costAmount) : null;
+
     const { error } = await supabase.from("touchpoints").insert({
       website_id: websiteId,
       user_id: userData.user.id,
@@ -87,6 +91,8 @@ export function CreateTouchpointDialog({
       end_date: eventType === "range" ? format(endDate!, "yyyy-MM-dd") : null,
       notes: notes.trim() || null,
       color,
+      cost_amount: parsedCost,
+      cost_currency: parsedCost ? costCurrency : null,
     });
 
     setSaving(false);
@@ -111,6 +117,8 @@ export function CreateTouchpointDialog({
     setEndDate(undefined);
     setNotes("");
     setColor(COLOR_OPTIONS[0]);
+    setCostAmount("");
+    setCostCurrency("USD");
   };
 
   return (
@@ -287,6 +295,35 @@ export function CreateTouchpointDialog({
                 />
               ))}
             </div>
+          </div>
+
+          {/* Cost */}
+          <div className="space-y-2">
+            <Label htmlFor="cost">Marketing Spend (optional)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="cost"
+                type="number"
+                placeholder="0.00"
+                value={costAmount}
+                onChange={(e) => setCostAmount(e.target.value)}
+                className="flex-1"
+                min="0"
+                step="0.01"
+              />
+              <select
+                value={costCurrency}
+                onChange={(e) => setCostCurrency(e.target.value)}
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Used to calculate cost per incremental visitor
+            </p>
           </div>
 
           {/* Notes */}

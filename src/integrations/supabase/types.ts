@@ -468,6 +468,8 @@ export type Database = {
       touchpoints: {
         Row: {
           color: string | null
+          cost_amount: number | null
+          cost_currency: string | null
           created_at: string
           end_date: string | null
           event_type: string
@@ -482,6 +484,8 @@ export type Database = {
         }
         Insert: {
           color?: string | null
+          cost_amount?: number | null
+          cost_currency?: string | null
           created_at?: string
           end_date?: string | null
           event_type?: string
@@ -496,6 +500,8 @@ export type Database = {
         }
         Update: {
           color?: string | null
+          cost_amount?: number | null
+          cost_currency?: string | null
           created_at?: string
           end_date?: string | null
           event_type?: string

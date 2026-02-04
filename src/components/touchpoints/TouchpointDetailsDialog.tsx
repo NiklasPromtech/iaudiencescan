@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
-import { Calendar, Clock, FileText, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Clock, DollarSign, FileText, Pencil, Trash2 } from "lucide-react";
 
 export interface TouchpointDetails {
   id: string;
@@ -17,6 +17,8 @@ export interface TouchpointDetails {
   end_date: string | null;
   notes: string | null;
   color: string | null;
+  cost_amount?: number | null;
+  cost_currency?: string | null;
 }
 
 interface TouchpointDetailsDialogProps {
@@ -76,6 +78,19 @@ export function TouchpointDetailsDialog({
             </div>
             <span className="text-foreground">{formatDateTime()}</span>
           </div>
+
+          {/* Cost */}
+          {touchpoint.cost_amount != null && touchpoint.cost_amount > 0 && (
+            <div className="flex items-start gap-3 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground min-w-[80px]">
+                <DollarSign className="h-4 w-4" />
+                <span>Spend</span>
+              </div>
+              <span className="text-foreground">
+                {touchpoint.cost_currency || "USD"} {touchpoint.cost_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          )}
 
           {/* Notes */}
           {touchpoint.notes && (
