@@ -46,7 +46,7 @@ export function TouchpointMarkers({
   const hasTouchpoints = touchpoints.length > 0;
 
   return (
-    <div className="flex border-t border-border/50">
+    <div className="flex border-t border-border/50 pt-3 mt-2">
       {/* Label on the left - matches Y-axis width */}
       <div className="w-[50px] flex-shrink-0 flex items-center justify-end pr-2">
         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
