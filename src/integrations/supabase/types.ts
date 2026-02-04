@@ -465,6 +465,59 @@ export type Database = {
         }
         Relationships: []
       }
+      touchpoints: {
+        Row: {
+          color: string | null
+          created_at: string
+          end_date: string | null
+          event_type: string
+          id: string
+          name: string
+          notes: string | null
+          start_date: string | null
+          timestamp: string | null
+          updated_at: string
+          user_id: string
+          website_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id: string
+          website_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "touchpoints_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string

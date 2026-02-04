@@ -5,6 +5,7 @@ import {
   Users,
   DollarSign,
   Search,
+  Megaphone,
   Settings,
   ChevronDown,
 } from "lucide-react";
@@ -54,6 +55,11 @@ const enrichmentItems = [
     title: "Wallet Groups",
     url: "/audiences",
     icon: Users,
+  },
+  {
+    title: "Touchpoints",
+    url: "/touchpoints",
+    icon: Megaphone,
   },
 ];
 

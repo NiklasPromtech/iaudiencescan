@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -14,8 +15,15 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
+import { Plus } from "lucide-react";
 import { TableRow } from "@/lib/api";
+import { CreateTouchpointDialog } from "@/components/touchpoints/CreateTouchpointDialog";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import type { Touchpoint } from "@/pages/Touchpoints";
+import { format, parseISO } from "date-fns";
 
 interface DailyChartProps {
   data: TableRow[];
@@ -55,6 +63,23 @@ const COLOR_RIGHT = "hsl(var(--foreground))";
 export function DailyChart({ data, loading }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
   const [metricRight, setMetricRight] = useState<MetricKey>("visitors_with_wallet_extension");
+  const [createTouchpointOpen, setCreateTouchpointOpen] = useState(false);
+  const { selectedWebsite } = useSelectedWebsite();
+
+  // Fetch touchpoints for this website
+  const { data: touchpoints = [], refetch: refetchTouchpoints } = useQuery({
+    queryKey: ["touchpoints", selectedWebsite?.id],
+    queryFn: async () => {
+      if (!selectedWebsite?.id) return [];
+      const { data, error } = await supabase
+        .from("touchpoints")
+        .select("*")
+        .eq("website_id", selectedWebsite.id);
+      if (error) throw error;
+      return data as Touchpoint[];
+    },
+    enabled: !!selectedWebsite?.id,
+  });
 
   const chartConfig = useMemo(() => {
     return {
@@ -80,6 +105,24 @@ export function DailyChart({ data, loading }: DailyChartProps) {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [data, metricLeft, metricRight]);
 
+  // Get touchpoint lines that fall within the chart date range
+  const touchpointLines = useMemo(() => {
+    if (!chartData.length || !touchpoints.length) return [];
+    
+    return touchpoints
+      .map((tp) => {
+        const tpDate = tp.timestamp 
+          ? format(parseISO(tp.timestamp), "yyyy-MM-dd")
+          : tp.start_date;
+        return {
+          ...tp,
+          dateKey: tpDate,
+          label: formatDate(tpDate || ""),
+        };
+      })
+      .filter((tp) => chartData.some((d) => d.date === tp.dateKey));
+  }, [chartData, touchpoints]);
+
   if (loading) {
     return (
       <Card className="p-6 border border-border">
@@ -96,81 +139,118 @@ export function DailyChart({ data, loading }: DailyChartProps) {
   }
 
   return (
-    <Card className="p-6 border border-border">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <h3 className="text-h3 text-foreground">Daily Metrics</h3>
-        <div className="flex flex-wrap gap-3">
-          <MetricSelector
-            value={metricLeft}
-            onChange={(v) => setMetricLeft(v as MetricKey)}
-            color={COLOR_LEFT}
-            label="Left axis"
-          />
-          <MetricSelector
-            value={metricRight}
-            onChange={(v) => setMetricRight(v as MetricKey)}
-            color={COLOR_RIGHT}
-            label="Right axis"
-          />
+    <>
+      <Card className="p-6 border border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-h3 text-foreground">Daily Metrics</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+              onClick={() => setCreateTouchpointOpen(true)}
+              title="Add touchpoint"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <MetricSelector
+              value={metricLeft}
+              onChange={(v) => setMetricLeft(v as MetricKey)}
+              color={COLOR_LEFT}
+              label="Left axis"
+            />
+            <MetricSelector
+              value={metricRight}
+              onChange={(v) => setMetricRight(v as MetricKey)}
+              color={COLOR_RIGHT}
+              label="Right axis"
+            />
+          </div>
         </div>
-      </div>
-      {chartData.length === 0 ? (
-        <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-          No data available
-        </div>
-      ) : (
-        <ChartContainer config={chartConfig} className="h-[200px] w-full">
-          <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
-            <XAxis
-              dataKey="label"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              fontSize={12}
-            />
-            {/* Left Y-Axis for first metric */}
-            <YAxis
-              yAxisId="left"
-              orientation="left"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              fontSize={12}
-              tickFormatter={(value) => value.toLocaleString()}
-              stroke="hsl(var(--primary))"
-            />
-            {/* Right Y-Axis for second metric */}
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              fontSize={12}
-              tickFormatter={(value) => value.toLocaleString()}
-              stroke="hsl(var(--chart-3))"
-            />
-            <ChartTooltip
-              cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
-              content={<ChartTooltipContent />}
-            />
-            <Bar
-              yAxisId="left"
-              dataKey={metricLeft}
-              fill={COLOR_LEFT}
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              yAxisId="right"
-              dataKey={metricRight}
-              fill={COLOR_RIGHT}
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ChartContainer>
-      )}
-    </Card>
+        {chartData.length === 0 ? (
+          <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+            No data available
+          </div>
+        ) : (
+          <ChartContainer config={chartConfig} className="h-[200px] w-full">
+            <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+              />
+              {/* Left Y-Axis for first metric */}
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+                tickFormatter={(value) => value.toLocaleString()}
+                stroke="hsl(var(--primary))"
+              />
+              {/* Right Y-Axis for second metric */}
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                fontSize={12}
+                tickFormatter={(value) => value.toLocaleString()}
+                stroke="hsl(var(--chart-3))"
+              />
+              <ChartTooltip
+                cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
+                content={<ChartTooltipContent />}
+              />
+              {/* Touchpoint reference lines */}
+              {touchpointLines.map((tp) => (
+                <ReferenceLine
+                  key={tp.id}
+                  x={tp.label}
+                  yAxisId="left"
+                  stroke={tp.color}
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  label={{
+                    value: tp.name,
+                    position: "top",
+                    fill: tp.color,
+                    fontSize: 10,
+                  }}
+                />
+              ))}
+              <Bar
+                yAxisId="left"
+                dataKey={metricLeft}
+                fill={COLOR_LEFT}
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                yAxisId="right"
+                dataKey={metricRight}
+                fill={COLOR_RIGHT}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </Card>
+
+      <CreateTouchpointDialog
+        open={createTouchpointOpen}
+        onOpenChange={setCreateTouchpointOpen}
+        websiteId={selectedWebsite?.id}
+        onSuccess={() => refetchTouchpoints()}
+      />
+    </>
   );
 }
 
