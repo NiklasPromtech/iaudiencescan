@@ -52,11 +52,22 @@ export function TouchpointMarkers({
     ? (chartWidth - chartLeftMargin) / chartDates.length 
     : 0;
 
+  const hasTouchpoints = touchpoints.length > 0;
+
   return (
     <div 
-      className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none"
-      style={{ marginLeft: chartLeftMargin }}
+      className="relative h-6 border-t border-border/50"
+      style={{ marginLeft: chartLeftMargin, marginRight: 0 }}
     >
+      {/* Label on the left */}
+      <span 
+        className="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground uppercase tracking-wider"
+        style={{ marginLeft: -chartLeftMargin, width: chartLeftMargin - 8, textAlign: 'right' }}
+      >
+        Events
+      </span>
+      
+      {/* Touchpoint markers */}
       {chartDates.map((dateKey, index) => {
         const tps = groupedByDate[dateKey];
         if (!tps || tps.length === 0) return null;
@@ -69,11 +80,10 @@ export function TouchpointMarkers({
           <HoverCard key={dateKey} openDelay={100} closeDelay={50}>
             <HoverCardTrigger asChild>
               <div
-                className="absolute top-0 bottom-8 pointer-events-auto cursor-pointer group"
+                className="absolute top-1/2 -translate-y-1/2 cursor-pointer group flex items-center justify-center"
                 style={{
                   left: leftPos,
-                  width: 2,
-                  transform: "translateX(-50%)",
+                  transform: "translateX(-50%) translateY(-50%)",
                 }}
                 onClick={() => {
                   if (isSingle) {
@@ -83,25 +93,28 @@ export function TouchpointMarkers({
                   }
                 }}
               >
-                {/* The line */}
+                {/* Primary dot */}
                 <div
-                  className="w-full h-full transition-opacity group-hover:opacity-60"
-                  style={{
-                    backgroundColor: primaryColor,
-                    opacity: 0.3,
-                  }}
-                />
-                {/* Top indicator dot */}
-                <div
-                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full transition-transform group-hover:scale-150"
+                  className="w-2.5 h-2.5 rounded-full transition-transform group-hover:scale-125"
                   style={{ backgroundColor: primaryColor }}
                 />
-                {/* Multiple indicator */}
+                {/* Multiple indicator - second dot offset */}
                 {!isSingle && (
                   <div
-                    className="absolute -top-1 left-1/2 translate-x-1 w-2 h-2 rounded-full border-2 border-background"
-                    style={{ backgroundColor: tps[1].color || "#3b82f6" }}
+                    className="absolute w-2.5 h-2.5 rounded-full border-2 border-background"
+                    style={{ 
+                      backgroundColor: tps[1].color || "#3b82f6",
+                      left: 6,
+                    }}
                   />
+                )}
+                {/* Count badge for 3+ */}
+                {tps.length > 2 && (
+                  <div
+                    className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-foreground text-background text-[8px] flex items-center justify-center font-medium"
+                  >
+                    {tps.length}
+                  </div>
                 )}
               </div>
             </HoverCardTrigger>
