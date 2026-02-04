@@ -200,7 +200,7 @@ export function DailyChart({ data, loading }: DailyChartProps) {
             No data available
           </div>
         ) : (
-          <div className="relative" ref={chartContainerRef}>
+          <div ref={chartContainerRef}>
             <ChartContainer config={chartConfig} className="h-[200px] w-full">
               <BarChart data={chartData} margin={{ left: 0, right: 0 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
@@ -252,17 +252,15 @@ export function DailyChart({ data, loading }: DailyChartProps) {
               </BarChart>
             </ChartContainer>
             
-            {/* Touchpoint markers overlay */}
-            {touchpointsForChart.length > 0 && (
-              <TouchpointMarkers
-                touchpoints={touchpointsForChart}
-                chartDates={chartDates}
-                chartWidth={chartContainerRef.current?.clientWidth || 0}
-                chartLeftMargin={50}
-                onTouchpointClick={handleTouchpointClick}
-                onMultipleTouchpointsClick={handleMultipleTouchpointsClick}
-              />
-            )}
+            {/* Touchpoint markers row below chart */}
+            <TouchpointMarkers
+              touchpoints={touchpointsForChart}
+              chartDates={chartDates}
+              chartWidth={chartContainerRef.current?.clientWidth || 0}
+              chartLeftMargin={50}
+              onTouchpointClick={handleTouchpointClick}
+              onMultipleTouchpointsClick={handleMultipleTouchpointsClick}
+            />
           </div>
         )}
       </Card>
