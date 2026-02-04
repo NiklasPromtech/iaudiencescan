@@ -8,6 +8,7 @@ import {
   Megaphone,
   Settings,
   ChevronDown,
+  FileCode2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,6 +61,11 @@ const enrichmentItems = [
     title: "Touchpoints",
     url: "/touchpoints",
     icon: Megaphone,
+  },
+  {
+    title: "Token Contracts",
+    url: "/contracts",
+    icon: FileCode2,
   },
 ];
 

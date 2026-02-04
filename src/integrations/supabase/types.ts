@@ -597,6 +597,47 @@ export type Database = {
           },
         ]
       }
+      website_tag_contracts: {
+        Row: {
+          chain: string
+          contract_address: string
+          created_at: string
+          id: string
+          name: string
+          start_date: string | null
+          updated_at: string
+          website_id: string
+        }
+        Insert: {
+          chain: string
+          contract_address: string
+          created_at?: string
+          id: string
+          name: string
+          start_date?: string | null
+          updated_at: string
+          website_id: string
+        }
+        Update: {
+          chain?: string
+          contract_address?: string
+          created_at?: string
+          id?: string
+          name?: string
+          start_date?: string | null
+          updated_at?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_tag_contracts_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       websites: {
         Row: {
           archived_at: string | null
