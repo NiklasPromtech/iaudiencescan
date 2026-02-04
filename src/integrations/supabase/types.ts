@@ -600,6 +600,7 @@ export type Database = {
       website_tag_contracts: {
         Row: {
           chain: string
+          chain_id: string | null
           contract_address: string
           created_at: string
           id: string
@@ -610,6 +611,7 @@ export type Database = {
         }
         Insert: {
           chain: string
+          chain_id?: string | null
           contract_address: string
           created_at?: string
           id: string
@@ -620,6 +622,7 @@ export type Database = {
         }
         Update: {
           chain?: string
+          chain_id?: string | null
           contract_address?: string
           created_at?: string
           id?: string
