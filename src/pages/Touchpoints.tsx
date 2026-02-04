@@ -29,6 +29,8 @@ export interface Touchpoint {
   end_date: string | null;
   notes: string | null;
   color: string;
+  cost_amount: number | null;
+  cost_currency: string | null;
   created_at: string;
 }
 

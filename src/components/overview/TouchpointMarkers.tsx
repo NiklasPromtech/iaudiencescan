@@ -15,6 +15,8 @@ export interface TouchpointForChart {
   end_date: string | null;
   notes: string | null;
   color: string | null;
+  cost_amount?: number | null;
+  cost_currency?: string | null;
   dateKey: string; // The date this touchpoint should appear on (YYYY-MM-DD)
 }
 

@@ -139,6 +139,8 @@ export function DailyChart({ data, loading }: DailyChartProps) {
             end_date: tp.end_date,
             notes: tp.notes,
             color: tp.color,
+            cost_amount: tp.cost_amount,
+            cost_currency: tp.cost_currency,
             dateKey: tpDate,
           });
         }
@@ -161,6 +163,8 @@ export function DailyChart({ data, loading }: DailyChartProps) {
                 end_date: tp.end_date,
                 notes: tp.notes,
                 color: tp.color,
+                cost_amount: tp.cost_amount,
+                cost_currency: tp.cost_currency,
                 dateKey,
               });
             }
