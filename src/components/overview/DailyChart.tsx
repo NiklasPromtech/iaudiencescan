@@ -116,7 +116,7 @@ export function DailyChart({ data, loading }: DailyChartProps) {
   const chartDates = useMemo(() => chartData.map((d) => d.date), [chartData]);
 
   // Get touchpoints mapped to chart dates
-  // For range events, expand to all dates they cover
+  // For range events, only include once with first visible date as dateKey
   const touchpointsForChart = useMemo((): TouchpointForChart[] => {
     if (!chartData.length || !touchpoints.length) return [];
     
@@ -145,32 +145,37 @@ export function DailyChart({ data, loading }: DailyChartProps) {
           });
         }
       } else {
-        // Range events: expand to all dates they cover
-        if (tp.start_date && tp.end_date) {
+        // Range events: include once, spans calculated in TouchpointMarkers
+        if (tp.start_date) {
           const startDate = parseISO(tp.start_date);
-          const endDate = parseISO(tp.end_date);
-          let currentDate = startDate;
+          const endDate = tp.end_date ? parseISO(tp.end_date) : startDate;
+          let firstVisibleDate: string | null = null;
           
+          let currentDate = startDate;
           while (currentDate <= endDate) {
             const dateKey = format(currentDate, "yyyy-MM-dd");
-            if (chartDateSet.has(dateKey)) {
-              result.push({
-                id: tp.id,
-                name: tp.name,
-                event_type: tp.event_type,
-                timestamp: tp.timestamp,
-                start_date: tp.start_date,
-                end_date: tp.end_date,
-                notes: tp.notes,
-                color: tp.color,
-                cost_amount: tp.cost_amount,
-                cost_currency: tp.cost_currency,
-                dateKey,
-              });
+            if (chartDateSet.has(dateKey) && !firstVisibleDate) {
+              firstVisibleDate = dateKey;
+              break;
             }
-            // Move to next day
             currentDate = new Date(currentDate);
             currentDate.setDate(currentDate.getDate() + 1);
+          }
+          
+          if (firstVisibleDate) {
+            result.push({
+              id: tp.id,
+              name: tp.name,
+              event_type: tp.event_type,
+              timestamp: tp.timestamp,
+              start_date: tp.start_date,
+              end_date: tp.end_date,
+              notes: tp.notes,
+              color: tp.color,
+              cost_amount: tp.cost_amount,
+              cost_currency: tp.cost_currency,
+              dateKey: firstVisibleDate,
+            });
           }
         }
       }
