@@ -256,8 +256,6 @@ export function DailyChart({ data, loading }: DailyChartProps) {
             <TouchpointMarkers
               touchpoints={touchpointsForChart}
               chartDates={chartDates}
-              chartWidth={chartContainerRef.current?.clientWidth || 0}
-              chartLeftMargin={50}
               onTouchpointClick={handleTouchpointClick}
               onMultipleTouchpointsClick={handleMultipleTouchpointsClick}
             />
