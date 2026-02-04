@@ -159,28 +159,61 @@ export function CreateTouchpointDialog({
           {eventType === "single" ? (
             <div className="space-y-2">
               <Label>Date & Time</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !timestamp && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {timestamp ? format(timestamp, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={timestamp}
-                    onSelect={setTimestamp}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "flex-1 justify-start text-left font-normal",
+                        !timestamp && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {timestamp ? format(timestamp, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={timestamp}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Preserve the time if already set
+                          const hours = timestamp?.getHours() ?? 12;
+                          const minutes = timestamp?.getMinutes() ?? 0;
+                          date.setHours(hours, minutes, 0, 0);
+                          setTimestamp(date);
+                        } else {
+                          setTimestamp(undefined);
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Input
+                  type="time"
+                  className="w-[120px]"
+                  value={timestamp ? format(timestamp, "HH:mm") : ""}
+                  onChange={(e) => {
+                    if (e.target.value && timestamp) {
+                      const [hours, minutes] = e.target.value.split(":").map(Number);
+                      const newDate = new Date(timestamp);
+                      newDate.setHours(hours, minutes, 0, 0);
+                      setTimestamp(newDate);
+                    } else if (e.target.value && !timestamp) {
+                      // If no date selected, use today
+                      const today = new Date();
+                      const [hours, minutes] = e.target.value.split(":").map(Number);
+                      today.setHours(hours, minutes, 0, 0);
+                      setTimestamp(today);
+                    }
+                  }}
+                  placeholder="HH:MM"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Time is optional</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
