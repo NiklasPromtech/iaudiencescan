@@ -147,6 +147,8 @@ export interface FilterOptions {
   countries: string[];
   bot_status: string[];
   conversion_events: string[];
+  wallet_types?: string[];
+  wallet_chains?: string[];
 }
 
 // Active filters type for the UI
