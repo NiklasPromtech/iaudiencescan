@@ -203,6 +203,15 @@ const METRICS: MetricDefinition[] = [
     format: "currency",
     category: "costs",
   },
+  // Token Holders
+  {
+    key: "token_holders",
+    label: "Token Holders",
+    shortLabel: "Holders",
+    icon: <Users className="h-4 w-4" />,
+    getValue: (d) => d.token_holders ?? null,
+    category: "wallets",
+  },
 ];
 
 // Category labels for grouping
