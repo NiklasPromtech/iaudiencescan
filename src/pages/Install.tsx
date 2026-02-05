@@ -7,11 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown, Share2, ArrowRight, FileText } from "lucide-react";
+import { Check, Copy, RefreshCw, Users, Wallet, Tags, Coins, Plus, Globe, ChevronDown, Share2, ArrowRight, FileText, Archive, ArchiveRestore, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { listWebsites, createWebsite, verifyWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
+import { listWebsites, createWebsite, verifyWebsite, archiveWebsite, unarchiveWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
 import { WebsiteShareDialog } from "@/components/websites/WebsiteShareDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type InstallStatus = "pending" | "verified" | "failed";
 
@@ -29,6 +35,7 @@ const Install = () => {
   const [newSiteUrl, setNewSiteUrl] = useState("");
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareWebsite, setShareWebsite] = useState<Website | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -42,7 +49,7 @@ const Install = () => {
       }
 
       try {
-        const response = await listWebsites();
+        const response = await listWebsites({ include_archived: showArchived });
         if (response.websites && response.websites.length > 0) {
           setWebsites(response.websites);
           
@@ -76,7 +83,46 @@ const Install = () => {
     };
 
     fetchWebsites();
-  }, [navigate]);
+  }, [navigate, showArchived]);
+
+  const handleArchive = async (website: Website) => {
+    try {
+      await archiveWebsite(website.id);
+      setWebsites(websites.filter(w => w.id !== website.id));
+      if (selectedWebsite?.id === website.id) {
+        setSelectedWebsite(null);
+      }
+      toast({
+        title: "Website archived",
+        description: `${website.name} has been archived.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to archive",
+        description: error.message || "Could not archive website",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnarchive = async (website: Website) => {
+    try {
+      await unarchiveWebsite(website.id);
+      setWebsites(websites.map(w => 
+        w.id === website.id ? { ...w, archived_at: null } : w
+      ));
+      toast({
+        title: "Website restored",
+        description: `${website.name} has been restored.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to restore",
+        description: error.message || "Could not restore website",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleCreateSite = async () => {
     if (!newSiteName.trim()) {
@@ -268,8 +314,18 @@ const Install = () => {
     );
   }
 
+  const activeWebsites = websites.filter(w => !w.archived_at);
+  const archivedWebsites = websites.filter(w => w.archived_at);
+
   // No websites yet - show create form
-  if (websites.length === 0 || showCreateForm) {
+  if (activeWebsites.length === 0 && !showArchived && !showCreateForm) {
+    // Check if there are archived websites
+    if (archivedWebsites.length > 0 || websites.length === 0) {
+      // Fall through to show create form
+    }
+  }
+
+  if ((activeWebsites.length === 0 && archivedWebsites.length === 0) || showCreateForm) {
     return (
       <div className="min-h-screen bg-gradient-subtle">
         <div className="container max-w-lg py-12 px-4">
@@ -365,7 +421,7 @@ const Install = () => {
         </div>
 
         {/* Your Websites Section - with integrated installation instructions */}
-        {websites.length > 0 && (
+        {activeWebsites.length > 0 && (
           <Card className="border border-border shadow-elegant mb-8">
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h2 className="text-p1 font-medium text-foreground">Your Websites</h2>
@@ -379,7 +435,7 @@ const Install = () => {
               </Button>
             </div>
             <div className="divide-y divide-border">
-              {websites.map((website) => (
+              {activeWebsites.map((website) => (
                 <WebsiteListItemWithTag
                   key={website.id}
                   website={website}
@@ -407,10 +463,65 @@ const Install = () => {
                     localStorage.setItem("selectedWebsite", JSON.stringify(w));
                     navigate("/overview");
                   }}
+                  onArchive={handleArchive}
                 />
               ))}
             </div>
           </Card>
+        )}
+
+        {/* Archived Websites Section */}
+        {showArchived && archivedWebsites.length > 0 && (
+          <Card className="border border-border shadow-elegant mb-8 opacity-75">
+            <div className="p-4 border-b border-border">
+              <h2 className="text-p1 font-medium text-muted-foreground">Archived Websites</h2>
+            </div>
+            <div className="divide-y divide-border">
+              {archivedWebsites.map((website) => (
+                <div
+                  key={website.id}
+                  className="p-4 flex items-center gap-4"
+                >
+                  <div className="flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-p2 font-medium text-muted-foreground truncate">
+                      {website.name}
+                    </p>
+                    <p className="text-p4 text-muted-foreground/70 truncate">
+                      {website.base_url}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleUnarchive(website)}
+                  >
+                    <ArchiveRestore className="h-4 w-4 mr-1" />
+                    Restore
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Toggle archived websites */}
+        {(archivedWebsites.length > 0 || showArchived) && (
+          <div className="text-center mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={() => setShowArchived(!showArchived)}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              {showArchived ? "Hide archived" : `Show archived (${archivedWebsites.length})`}
+            </Button>
+          </div>
         )}
 
         {/* Do this later */}
@@ -505,6 +616,7 @@ interface WebsiteListItemWithTagProps {
   verifying: boolean;
   onShare: (website: Website) => void;
   onGoToData: (website: Website) => void;
+  onArchive: (website: Website) => void;
 }
 
 const WebsiteListItemWithTag = ({ 
@@ -518,7 +630,8 @@ const WebsiteListItemWithTag = ({
   copied,
   verifying,
   onShare,
-  onGoToData
+  onGoToData,
+  onArchive
 }: WebsiteListItemWithTagProps) => {
   const [allCopied, setAllCopied] = useState(false);
 
@@ -643,6 +756,24 @@ Need help? Contact support@audiencescan.io`;
                 <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(website); }}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform flex-shrink-0 ${isSelected ? "rotate-180" : ""}`} />
           </div>
         </div>
