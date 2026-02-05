@@ -242,6 +242,7 @@ export interface ScorecardResponse {
     wallets_not_enriched: number | null;
     wallets_enrichment_failed: number | null;
     visitors_with_wallet_extension: number | null;
+    token_holders: number | null;
   };
 }
 
