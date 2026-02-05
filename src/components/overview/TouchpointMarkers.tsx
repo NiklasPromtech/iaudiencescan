@@ -90,26 +90,26 @@ export function TouchpointMarkers({
   const totalColumns = chartDates.length;
 
   return (
-    <div className="flex border-t border-border/50 pt-3 mt-2">
-      {/* Label on the left - matches Y-axis width */}
-      <div className="w-[70px] flex-shrink-0 flex items-center justify-start pl-1">
-        <div className="flex items-center gap-0.5">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-            Touchpoints
-          </span>
-          {onAddTouchpoint && (
-            <button
-              onClick={onAddTouchpoint}
-              className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              title="Add touchpoint"
-            >
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-          )}
+      <div className="flex border-t border-border/50 pt-3 mt-2">
+        {/* Label on the left - matches Y-axis width */}
+        <div className="w-[70px] flex-shrink-0 flex items-center justify-start pl-1 relative z-10 bg-background">
+          <div className="flex items-center gap-0.5 min-w-0 w-full">
+            <span className="flex-1 min-w-0 truncate text-[10px] text-muted-foreground uppercase tracking-wide">
+              Touchpoints
+            </span>
+            {onAddTouchpoint && (
+              <button
+                onClick={onAddTouchpoint}
+                className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                title="Add touchpoint"
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
       
       {/* Markers row - with relative positioning for the spanning bars */}
       <div className="flex-1 relative h-5 overflow-hidden">
