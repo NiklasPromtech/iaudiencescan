@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { format, subDays, startOfDay, differenceInDays } from "date-fns";
-import { WalletRow, WalletListRequest, fetchWallets, RangeConfig, FilterOptions } from "@/lib/api";
+import { WalletRow, WalletListRequest, fetchWallets, RangeConfig, FilterOptions, SUPPORTED_CHAINS, WALLET_ACTION_TYPES } from "@/lib/api";
 import { WalletTable } from "./WalletTable";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,6 @@ interface DateRangeValue {
   includeToday?: boolean;
 }
 
-const WALLET_TYPES = ["connected", "staked", "purchased", "signed"];
 const PAGE_SIZE = 50;
 
 const DATE_PRESETS = [
@@ -350,6 +349,7 @@ export function WalletSelector({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [types, setTypes] = useState<string[]>([]);
+  const [chains, setChains] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"last_seen" | "first_seen" | "visit_count" | "total_balance_usd">("last_seen");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [offset, setOffset] = useState(0);
@@ -439,6 +439,10 @@ export function WalletSelector({
         request.types = types;
       }
 
+      if (chains.length > 0) {
+        request.chains = chains;
+      }
+
       // Add balance filter
       const balanceFilter: { min?: number; max?: number } = {};
       if (minBalance) balanceFilter.min = parseFloat(minBalance);
@@ -478,13 +482,13 @@ export function WalletSelector({
     } finally {
       setLoading(false);
     }
-  }, [websiteId, debouncedSearch, types, sortBy, sortDir, offset, activeFilters, buildRangeConfig, minBalance, maxBalance]);
+  }, [websiteId, debouncedSearch, types, chains, sortBy, sortDir, offset, activeFilters, buildRangeConfig, minBalance, maxBalance]);
 
   // Initial load and filter changes
   useEffect(() => {
     setOffset(0);
     loadWallets(false);
-  }, [websiteId, debouncedSearch, types, sortBy, sortDir, dateRange, activeFilters, minBalance, maxBalance]);
+  }, [websiteId, debouncedSearch, types, chains, sortBy, sortDir, dateRange, activeFilters, minBalance, maxBalance]);
 
   const handleLoadMore = () => {
     const newOffset = offset + PAGE_SIZE;
@@ -515,9 +519,18 @@ export function WalletSelector({
     setActiveFilters(newFilters);
   };
 
+  const handleChainToggle = (chain: string) => {
+    setChains(prev => 
+      prev.includes(chain) 
+        ? prev.filter(c => c !== chain)
+        : [...prev, chain]
+    );
+  };
+
   const clearAllFilters = () => {
     setActiveFilters({});
     setTypes([]);
+    setChains([]);
     setMinBalance("");
     setMaxBalance("");
   };
@@ -526,7 +539,7 @@ export function WalletSelector({
   const totalActiveFilters = Object.values(activeFilters).reduce(
     (sum, arr) => sum + (arr?.length || 0),
     0
-  ) + types.length + (hasBalanceFilter ? 1 : 0);
+  ) + types.length + chains.length + (hasBalanceFilter ? 1 : 0);
 
   const availableFilters = FILTER_CONFIGS.filter(
     (config) =>
@@ -671,7 +684,7 @@ export function WalletSelector({
             <span className="text-sm font-medium">Filters</span>
           </div>
 
-          {/* Wallet Type Filter */}
+          {/* Wallet Action Type Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
@@ -682,7 +695,7 @@ export function WalletSelector({
                   types.length > 0 && "border-primary/50 bg-primary/5"
                 )}
               >
-                Type {types.length > 0 && (
+                Action {types.length > 0 && (
                   <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
                     {types.length}
                   </Badge>
@@ -691,13 +704,45 @@ export function WalletSelector({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-popover">
-              {WALLET_TYPES.map((type) => (
+              {WALLET_ACTION_TYPES.map((type) => (
                 <DropdownMenuCheckboxItem
-                  key={type}
-                  checked={types.includes(type)}
-                  onCheckedChange={() => handleTypeToggle(type)}
+                  key={type.value}
+                  checked={types.includes(type.value)}
+                  onCheckedChange={() => handleTypeToggle(type.value)}
                 >
-                  {type}
+                  {type.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Chain Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={cn(
+                  "h-8 border-border bg-background hover:bg-muted/50",
+                  chains.length > 0 && "border-primary/50 bg-primary/5"
+                )}
+              >
+                Chain {chains.length > 0 && (
+                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
+                    {chains.length}
+                  </Badge>
+                )}
+                <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-popover">
+              {SUPPORTED_CHAINS.map((chain) => (
+                <DropdownMenuCheckboxItem
+                  key={chain.value}
+                  checked={chains.includes(chain.value)}
+                  onCheckedChange={() => handleChainToggle(chain.value)}
+                >
+                  {chain.label}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
