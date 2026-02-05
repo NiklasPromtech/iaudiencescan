@@ -62,6 +62,7 @@ import Wallets from "./pages/Wallets";
 import LandingPageV2 from "./pages/LandingPageV2";
 import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
+import Change from "./pages/Change";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/install" element={<Install />} />
           <Route path="/overview" element={<Overview />} />
+          <Route path="/change" element={<Change />} />
           <Route path="/events" element={<Events />} />
           <Route path="/audiences" element={<Audiences />} />
           <Route path="/wallets" element={<Wallets />} />
