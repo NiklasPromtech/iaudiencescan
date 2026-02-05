@@ -35,7 +35,7 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
-import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS, WALLET_ACTION_TYPES } from "@/lib/api";
+import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -59,6 +59,8 @@ export default function Wallets() {
   const [showFailed, setShowFailed] = useState(false);
   const [selectedChains, setSelectedChains] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [availableChains, setAvailableChains] = useState<string[]>([]);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleEnrichWallet = async (walletId: string) => {
@@ -165,6 +167,29 @@ export default function Wallets() {
       setWallets(response.rows);
       setSummary(response.summary || null);
       setTotalRows(response.pagination.total_rows);
+
+      // Extract unique types and chains from filter_options or derive from rows
+      if (response.filter_options?.wallet_types) {
+        setAvailableTypes(response.filter_options.wallet_types);
+      } else {
+        // Derive from rows as fallback
+        const uniqueTypes = [...new Set(response.rows.flatMap(r => r.types || []))];
+        setAvailableTypes(prev => {
+          const merged = [...new Set([...prev, ...uniqueTypes])];
+          return merged.sort();
+        });
+      }
+
+      if (response.filter_options?.wallet_chains) {
+        setAvailableChains(response.filter_options.wallet_chains);
+      } else {
+        // Derive from rows as fallback
+        const uniqueChains = [...new Set(response.rows.flatMap(r => r.chains || []))];
+        setAvailableChains(prev => {
+          const merged = [...new Set([...prev, ...uniqueChains])];
+          return merged.sort();
+        });
+      }
     } catch (error) {
       console.error("Failed to load wallets:", error);
       toast({
@@ -352,71 +377,78 @@ export default function Wallets() {
                 />
               </div>
 
-              <div className="w-40">
-                <label className="text-sm font-medium mb-1.5 block">Chain</label>
-                <Select 
-                  value={selectedChains.length === 1 ? selectedChains[0] : selectedChains.length > 1 ? "multiple" : "all"}
-                  onValueChange={(v) => {
-                    if (v === "all") {
-                      setSelectedChains([]);
-                    } else if (v !== "multiple") {
-                      setSelectedChains([v]);
-                    }
-                    setCurrentPage(0);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All chains">
-                      {selectedChains.length === 0 
-                        ? "All chains" 
-                        : selectedChains.length === 1 
-                          ? SUPPORTED_CHAINS.find(c => c.value === selectedChains[0])?.label || selectedChains[0]
-                          : `${selectedChains.length} chains`}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All chains</SelectItem>
-                    {SUPPORTED_CHAINS.map((chain) => (
-                      <SelectItem key={chain.value} value={chain.value}>
-                        {chain.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {availableChains.length > 0 && (
+                <div className="w-40">
+                  <label className="text-sm font-medium mb-1.5 block">Chain</label>
+                  <Select 
+                    value={selectedChains.length === 1 ? selectedChains[0] : selectedChains.length > 1 ? "multiple" : "all"}
+                    onValueChange={(v) => {
+                      if (v === "all") {
+                        setSelectedChains([]);
+                      } else if (v !== "multiple") {
+                        setSelectedChains([v]);
+                      }
+                      setCurrentPage(0);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All chains">
+                        {selectedChains.length === 0 
+                          ? "All chains" 
+                          : selectedChains.length === 1 
+                            ? SUPPORTED_CHAINS.find(c => c.value === selectedChains[0])?.label || selectedChains[0]
+                            : `${selectedChains.length} chains`}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All chains</SelectItem>
+                      {availableChains.map((chainValue) => {
+                        const chainInfo = SUPPORTED_CHAINS.find(c => c.value === chainValue);
+                        return (
+                          <SelectItem key={chainValue} value={chainValue}>
+                            {chainInfo?.label || chainValue}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-              <div className="w-40">
-                <label className="text-sm font-medium mb-1.5 block">Wallet Action</label>
-                <Select 
-                  value={selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length > 1 ? "multiple" : "all"}
-                  onValueChange={(v) => {
-                    if (v === "all") {
-                      setSelectedTypes([]);
-                    } else if (v !== "multiple") {
-                      setSelectedTypes([v]);
-                    }
-                    setCurrentPage(0);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All actions">
-                      {selectedTypes.length === 0 
-                        ? "All actions" 
-                        : selectedTypes.length === 1 
-                          ? WALLET_ACTION_TYPES.find(t => t.value === selectedTypes[0])?.label || selectedTypes[0]
-                          : `${selectedTypes.length} actions`}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All actions</SelectItem>
-                    {WALLET_ACTION_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {availableTypes.length > 0 && (
+                <div className="w-40">
+                  <label className="text-sm font-medium mb-1.5 block">Wallet Action</label>
+                  <Select 
+                    value={selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length > 1 ? "multiple" : "all"}
+                    onValueChange={(v) => {
+                      if (v === "all") {
+                        setSelectedTypes([]);
+                      } else if (v !== "multiple") {
+                        setSelectedTypes([v]);
+                      }
+                      setCurrentPage(0);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All actions">
+                        {selectedTypes.length === 0 
+                          ? "All actions" 
+                          : selectedTypes.length === 1 
+                            ? selectedTypes[0].charAt(0).toUpperCase() + selectedTypes[0].slice(1)
+                            : `${selectedTypes.length} actions`}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All actions</SelectItem>
+                      {availableTypes.map((typeValue) => (
+                        <SelectItem key={typeValue} value={typeValue}>
+                          {typeValue.charAt(0).toUpperCase() + typeValue.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="flex-1 min-w-[200px]">
                 <label className="text-sm font-medium mb-1.5 block">Search</label>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { format, subDays, startOfDay, differenceInDays } from "date-fns";
-import { WalletRow, WalletListRequest, fetchWallets, RangeConfig, FilterOptions, SUPPORTED_CHAINS, WALLET_ACTION_TYPES } from "@/lib/api";
+import { WalletRow, WalletListRequest, fetchWallets, RangeConfig, FilterOptions, SUPPORTED_CHAINS } from "@/lib/api";
 import { WalletTable } from "./WalletTable";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -364,6 +364,8 @@ export function WalletSelector({
     initialFilters?.filters ?? {}
   );
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  const [availableChains, setAvailableChains] = useState<string[]>([]);
   
   // Check if opened with preset filters (from overview click)
   const hasPresetFilters = !!(initialFilters?.filters && Object.keys(initialFilters.filters).length > 0);
@@ -476,6 +478,30 @@ export function WalletSelector({
       // Update filter options if available
       if (response.filter_options) {
         setFilterOptions(response.filter_options);
+        
+        // Use filter_options if available, otherwise derive from rows
+        if (response.filter_options.wallet_types) {
+          setAvailableTypes(response.filter_options.wallet_types);
+        }
+        if (response.filter_options.wallet_chains) {
+          setAvailableChains(response.filter_options.wallet_chains);
+        }
+      }
+      
+      // Derive from rows as fallback if filter_options doesn't have them
+      if (!response.filter_options?.wallet_types) {
+        const uniqueTypes = [...new Set(response.rows.flatMap(r => r.types || []))];
+        setAvailableTypes(prev => {
+          const merged = [...new Set([...prev, ...uniqueTypes])];
+          return merged.sort();
+        });
+      }
+      if (!response.filter_options?.wallet_chains) {
+        const uniqueChains = [...new Set(response.rows.flatMap(r => r.chains || []))];
+        setAvailableChains(prev => {
+          const merged = [...new Set([...prev, ...uniqueChains])];
+          return merged.sort();
+        });
       }
     } catch (error) {
       console.error("Failed to fetch wallets:", error);
@@ -685,68 +711,75 @@ export function WalletSelector({
           </div>
 
           {/* Wallet Action Type Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "h-8 border-border bg-background hover:bg-muted/50",
-                  types.length > 0 && "border-primary/50 bg-primary/5"
-                )}
-              >
-                Action {types.length > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
-                    {types.length}
-                  </Badge>
-                )}
-                <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-popover">
-              {WALLET_ACTION_TYPES.map((type) => (
-                <DropdownMenuCheckboxItem
-                  key={type.value}
-                  checked={types.includes(type.value)}
-                  onCheckedChange={() => handleTypeToggle(type.value)}
+          {availableTypes.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={cn(
+                    "h-8 border-border bg-background hover:bg-muted/50",
+                    types.length > 0 && "border-primary/50 bg-primary/5"
+                  )}
                 >
-                  {type.label}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  Action {types.length > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
+                      {types.length}
+                    </Badge>
+                  )}
+                  <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-popover">
+                {availableTypes.map((typeValue) => (
+                  <DropdownMenuCheckboxItem
+                    key={typeValue}
+                    checked={types.includes(typeValue)}
+                    onCheckedChange={() => handleTypeToggle(typeValue)}
+                  >
+                    {typeValue.charAt(0).toUpperCase() + typeValue.slice(1)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           {/* Chain Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "h-8 border-border bg-background hover:bg-muted/50",
-                  chains.length > 0 && "border-primary/50 bg-primary/5"
-                )}
-              >
-                Chain {chains.length > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
-                    {chains.length}
-                  </Badge>
-                )}
-                <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-popover">
-              {SUPPORTED_CHAINS.map((chain) => (
-                <DropdownMenuCheckboxItem
-                  key={chain.value}
-                  checked={chains.includes(chain.value)}
-                  onCheckedChange={() => handleChainToggle(chain.value)}
+          {availableChains.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={cn(
+                    "h-8 border-border bg-background hover:bg-muted/50",
+                    chains.length > 0 && "border-primary/50 bg-primary/5"
+                  )}
                 >
-                  {chain.label}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  Chain {chains.length > 0 && (
+                    <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 px-1.5 bg-primary/20 text-primary text-xs">
+                      {chains.length}
+                    </Badge>
+                  )}
+                  <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-popover">
+                {availableChains.map((chainValue) => {
+                  const chainInfo = SUPPORTED_CHAINS.find(c => c.value === chainValue);
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={chainValue}
+                      checked={chains.includes(chainValue)}
+                      onCheckedChange={() => handleChainToggle(chainValue)}
+                    >
+                      {chainInfo?.label || chainValue}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           {/* Dynamic Filters from API */}
           {availableFilters.map((config) => (
