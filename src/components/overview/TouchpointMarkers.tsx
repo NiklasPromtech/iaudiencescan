@@ -26,6 +26,7 @@ interface TouchpointMarkersProps {
   chartDates: string[]; // Array of date keys in chart order
   onTouchpointClick: (touchpoint: TouchpointForChart) => void;
   onMultipleTouchpointsClick: (touchpoints: TouchpointForChart[], dateKey: string) => void;
+  onAddTouchpoint?: () => void;
 }
 
 export function TouchpointMarkers({
@@ -33,6 +34,7 @@ export function TouchpointMarkers({
   chartDates,
   onTouchpointClick,
   onMultipleTouchpointsClick,
+  onAddTouchpoint,
 }: TouchpointMarkersProps) {
   const chartDateSet = useMemo(() => new Set(chartDates), [chartDates]);
   
@@ -91,9 +93,22 @@ export function TouchpointMarkers({
     <div className="flex border-t border-border/50 pt-3 mt-2">
       {/* Label on the left - matches Y-axis width */}
       <div className="w-[50px] flex-shrink-0 flex items-center justify-end pr-2">
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-          Events
-        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            Touchpoints
+          </span>
+          {onAddTouchpoint && (
+            <button
+              onClick={onAddTouchpoint}
+              className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              title="Add touchpoint"
+            >
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
       
       {/* Markers row - with relative positioning for the spanning bars */}
