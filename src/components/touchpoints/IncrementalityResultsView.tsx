@@ -16,7 +16,8 @@ import {
   Calendar,
   DollarSign,
   Percent,
-  Sparkles
+  Sparkles,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -116,29 +117,32 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       return {
         label: verdict === "highly_positive" ? "STRONG POSITIVE IMPACT" : "POSITIVE IMPACT",
         sublabel: "This campaign delivered measurable incremental value",
-        bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
-        borderClass: "border-emerald-200 dark:border-emerald-800",
-        textClass: "text-emerald-700 dark:text-emerald-400",
-        badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
+        bgClass: "bg-emerald-50",
+        borderClass: "border-emerald-200",
+        textClass: "text-emerald-700",
+        badgeBg: "#dcfce7",
+        badgeText: "#166534",
       };
     }
     if (verdict === "highly_negative" || verdict === "negative") {
       return {
         label: verdict === "highly_negative" ? "NEGATIVE IMPACT" : "BELOW EXPECTATIONS",
         sublabel: "Campaign did not deliver expected incremental results",
-        bgClass: "bg-red-50 dark:bg-red-950/30",
-        borderClass: "border-red-200 dark:border-red-800",
-        textClass: "text-red-700 dark:text-red-400",
-        badgeClass: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        bgClass: "bg-red-50",
+        borderClass: "border-red-200",
+        textClass: "text-red-700",
+        badgeBg: "#fee2e2",
+        badgeText: "#991b1b",
       };
     }
     return {
       label: "INCONCLUSIVE",
       sublabel: "Insufficient data to determine campaign impact",
-      bgClass: "bg-amber-50 dark:bg-amber-950/30",
-      borderClass: "border-amber-200 dark:border-amber-800",
-      textClass: "text-amber-700 dark:text-amber-400",
-      badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
+      bgClass: "bg-amber-50",
+      borderClass: "border-amber-200",
+      textClass: "text-amber-700",
+      badgeBg: "#fef3c7",
+      badgeText: "#92400e",
     };
   };
 
@@ -160,11 +164,16 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.5, 0.5, 0.5, 0.5],
+        margin: [0.4, 0.4, 0.4, 0.4],
         filename: `incrementality-report-${result.event_name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
       
       await html2pdf().set(opt).from(reportRef.current).save();
@@ -281,136 +290,209 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
         </Button>
       </div>
 
-      {/* PDF Report Container */}
+      {/* PDF Report Container - Using inline styles for PDF compatibility */}
       <div 
         ref={reportRef} 
-        className="bg-white dark:bg-zinc-900 rounded-lg border border-border overflow-hidden"
-        style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}
+        style={{ 
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+          backgroundColor: '#ffffff',
+          color: '#18181b',
+          fontSize: '12px',
+          lineHeight: '1.5',
+        }}
       >
-        {/* Report Header */}
-        <div className="bg-zinc-900 dark:bg-zinc-950 text-white px-6 py-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-xs uppercase tracking-widest text-zinc-400 mb-1">
-                Incrementality Analysis Report
+        {/* ==================== PAGE 1: COVER & EXECUTIVE SUMMARY ==================== */}
+        <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
+          {/* Header Bar */}
+          <div style={{ 
+            backgroundColor: '#18181b', 
+            color: '#ffffff', 
+            padding: '24px 32px',
+            borderRadius: '8px',
+            marginBottom: '24px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ 
+                  fontSize: '10px', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '2px', 
+                  color: '#a1a1aa',
+                  marginBottom: '4px'
+                }}>
+                  Incrementality Analysis Report
+                </div>
+                <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>
+                  {result.event_name}
+                </h1>
               </div>
-              <h1 className="text-xl font-bold">{result.event_name}</h1>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-zinc-400">Analysis Period</div>
-              <div className="text-sm font-medium">
-                {windows.event_start} – {windows.event_end}
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '10px', color: '#a1a1aa' }}>Report Generated</div>
+                <div style={{ fontSize: '13px', fontWeight: '500' }}>
+                  {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Executive Summary Section */}
-        <div className={cn("px-6 py-5 border-b", verdictConfig.bgClass, verdictConfig.borderClass)}>
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className={cn("h-5 w-5", verdictConfig.textClass)} />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
+          {/* Executive Summary Box */}
+          <div style={{ 
+            backgroundColor: verdictConfig.badgeBg, 
+            border: `2px solid ${verdictConfig.badgeText}20`,
+            borderRadius: '12px',
+            padding: '28px',
+            marginBottom: '24px'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              marginBottom: '16px',
+              fontSize: '11px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: '#52525b',
+              fontWeight: '600'
+            }}>
+              <FileText size={16} color="#52525b" />
               Executive Summary
-            </h2>
-          </div>
-          
-          <div className="flex items-start gap-6">
-            <div className="flex-1">
-              <div className={cn("inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-2", verdictConfig.badgeClass)}>
-                {verdictConfig.label}
-              </div>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                {executive_summary.headline}
-              </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                {verdictConfig.sublabel}
-              </p>
             </div>
-            <div className="text-right shrink-0">
-              <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-                {Math.round(executive_summary.confidence_score * 100)}%
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ 
+                  display: 'inline-block',
+                  backgroundColor: verdictConfig.badgeText,
+                  color: '#ffffff',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  marginBottom: '12px'
+                }}>
+                  {verdictConfig.label}
+                </div>
+                <h2 style={{ 
+                  fontSize: '20px', 
+                  fontWeight: '600', 
+                  color: '#18181b',
+                  margin: '0 0 8px 0'
+                }}>
+                  {executive_summary.headline}
+                </h2>
+                <p style={{ fontSize: '13px', color: '#71717a', margin: 0 }}>
+                  {verdictConfig.sublabel}
+                </p>
               </div>
-              <div className="text-xs text-zinc-500 uppercase tracking-wide">
-                Confidence
+              <div style={{ textAlign: 'center', marginLeft: '32px' }}>
+                <div style={{ 
+                  fontSize: '42px', 
+                  fontWeight: '700', 
+                  color: '#18181b',
+                  lineHeight: 1
+                }}>
+                  {Math.round(executive_summary.confidence_score * 100)}%
+                </div>
+                <div style={{ 
+                  fontSize: '10px', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '1px',
+                  color: '#71717a',
+                  marginTop: '4px'
+                }}>
+                  Confidence
+                </div>
               </div>
             </div>
           </div>
 
           {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-            <MetricBox
-              icon={Target}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            <MetricCard
               label="Incremental Conversions"
               value={formatNumber(executive_summary.total_incremental_conversions)}
               subvalue={formatPercent(executive_summary.conversion_uplift_percent)}
               positive={executive_summary.conversion_uplift_percent > 0}
             />
-            <MetricBox
-              icon={Wallet}
+            <MetricCard
               label="Wallet Connections"
               value={formatNumber(executive_summary.total_incremental_wallet_connections)}
               subvalue={formatPercent(executive_summary.wallet_uplift_percent)}
               positive={executive_summary.wallet_uplift_percent > 0}
             />
             {executive_summary.cost_per_incremental_conversion !== null && (
-              <MetricBox
-                icon={DollarSign}
-                label="Cost / Conversion"
+              <MetricCard
+                label="Cost per Conversion"
                 value={`$${executive_summary.cost_per_incremental_conversion.toFixed(2)}`}
               />
             )}
             {executive_summary.roi !== null && (
-              <MetricBox
-                icon={Percent}
-                label="ROI"
+              <MetricCard
+                label="Return on Investment"
                 value={`${executive_summary.roi.toFixed(0)}%`}
                 positive={executive_summary.roi > 0}
               />
             )}
           </div>
-        </div>
 
-        {/* Analysis Period */}
-        <div className="px-6 py-4 border-b border-border bg-zinc-50 dark:bg-zinc-800/50">
-          <div className="flex items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-zinc-400" />
-              <span className="text-zinc-500">Baseline:</span>
-              <span className="font-medium text-zinc-700 dark:text-zinc-200">
-                {windows.baseline_start} <ArrowRight className="inline h-3 w-3 mx-1" /> {windows.baseline_end}
-              </span>
-              {windows.baseline_days && (
-                <span className="text-zinc-400">({windows.baseline_days} days)</span>
-              )}
+          {/* Analysis Period */}
+          <div style={{ 
+            backgroundColor: '#f4f4f5', 
+            borderRadius: '8px',
+            padding: '16px 20px'
+          }}>
+            <div style={{ 
+              fontSize: '11px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px',
+              color: '#71717a',
+              fontWeight: '600',
+              marginBottom: '12px'
+            }}>
+              Analysis Period
             </div>
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-zinc-400" />
-              <span className="text-zinc-500">Event:</span>
-              <span className="font-medium text-zinc-700 dark:text-zinc-200">
-                {windows.event_start} <ArrowRight className="inline h-3 w-3 mx-1" /> {windows.event_end}
-              </span>
-              {windows.event_days && (
-                <span className="text-zinc-400">({windows.event_days} days)</span>
-              )}
+            <div style={{ display: 'flex', gap: '32px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '2px' }}>Baseline</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#18181b' }}>
+                  {windows.baseline_start} → {windows.baseline_end}
+                  <span style={{ color: '#71717a', marginLeft: '8px' }}>
+                    ({windows.baseline_days || 'N/A'} days)
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '2px' }}>Event Period</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#18181b' }}>
+                  {windows.event_start} → {windows.event_end}
+                  <span style={{ color: '#71717a', marginLeft: '8px' }}>
+                    ({windows.event_days || 'N/A'} days)
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Funnels Section */}
-        <div className="px-6 py-5 border-b border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ==================== PAGE 2: FUNNEL ANALYSIS ==================== */}
+        {(conversion_funnel.length > 0 || wallet_funnel.length > 0) && (
+          <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
+            <PageHeader title="Funnel Analysis" subtitle="Conversion and wallet activity breakdown" />
+            
             {/* Conversion Funnel */}
             {conversion_funnel.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <BarChart3 className="h-4 w-4 text-zinc-400" />
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
-                    Conversion Funnel
-                  </h3>
-                </div>
-                <div className="space-y-2">
+              <div style={{ marginBottom: '32px' }}>
+                <SectionHeader icon="📊" title="Conversion Funnel" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {conversion_funnel.map((item, idx) => (
-                    <FunnelRow
+                    <FunnelRowPDF
                       key={idx}
                       label={item.event || "Unknown"}
                       actual={item.actual}
@@ -425,16 +507,11 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
             {/* Wallet Funnel */}
             {wallet_funnel.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Wallet className="h-4 w-4 text-zinc-400" />
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
-                    Wallet Funnel
-                  </h3>
-                </div>
-                <div className="space-y-2">
+              <div style={{ marginBottom: '32px' }}>
+                <SectionHeader icon="👛" title="Wallet Funnel" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {wallet_funnel.map((item, idx) => (
-                    <FunnelRow
+                    <FunnelRowPDF
                       key={idx}
                       label={item.action || "Unknown"}
                       actual={item.actual}
@@ -447,186 +524,298 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
               </div>
             )}
           </div>
-        </div>
-
-        {/* Daily Timeline Chart */}
-        {daily_timeline.length > 0 && (
-          <div className="px-6 py-5 border-b border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="h-4 w-4 text-zinc-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
-                Daily Timeline
-              </h3>
-              <div className="ml-auto flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-zinc-300 dark:bg-zinc-600" />
-                  <span className="text-zinc-500">Baseline</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-emerald-500" />
-                  <span className="text-zinc-500">Event</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-end gap-1 h-32">
-              {daily_timeline.slice(-14).map((day, idx) => (
-                <div
-                  key={idx}
-                  className="flex-1 flex flex-col items-center gap-1"
-                >
-                  <div
-                    className={cn(
-                      "w-full rounded-t transition-all",
-                      day.period === "event" 
-                        ? "bg-emerald-500" 
-                        : "bg-zinc-300 dark:bg-zinc-600"
-                    )}
-                    style={{ height: `${(day.visitors / maxVisitors) * 100}%`, minHeight: 4 }}
-                  />
-                  <span className="text-[9px] text-zinc-400 -rotate-45 origin-center">
-                    {day.date.slice(5)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
 
-        {/* Attribution Section */}
-        {attribution.top_sources.length > 0 && (
-          <div className="px-6 py-5 border-b border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="h-4 w-4 text-zinc-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
-                Attribution
-              </h3>
-            </div>
-            <div className="space-y-2">
-              {attribution.top_sources.map((source, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="w-24 text-sm font-medium text-zinc-700 dark:text-zinc-200 truncate">
-                    {source.source}
-                  </div>
-                  <div className="flex-1 h-6 bg-zinc-100 dark:bg-zinc-800 rounded overflow-hidden">
+        {/* ==================== PAGE 3: TIMELINE & ATTRIBUTION ==================== */}
+        <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
+          <PageHeader title="Performance Timeline" subtitle="Daily activity and traffic attribution" />
+          
+          {/* Timeline Chart */}
+          {daily_timeline.length > 0 && (
+            <div style={{ marginBottom: '32px' }}>
+              <SectionHeader icon="📈" title="Daily Timeline" />
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'flex-end', 
+                gap: '4px', 
+                height: '120px',
+                padding: '16px',
+                backgroundColor: '#fafafa',
+                borderRadius: '8px'
+              }}>
+                {daily_timeline.slice(-14).map((day, idx) => (
+                  <div key={idx} style={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    height: '100%',
+                    justifyContent: 'flex-end'
+                  }}>
                     <div
-                      className="h-full bg-blue-500 rounded"
-                      style={{ width: `${source.percent_of_total}%` }}
+                      style={{ 
+                        width: '100%',
+                        backgroundColor: day.period === "event" ? '#10b981' : '#d4d4d8',
+                        borderRadius: '4px 4px 0 0',
+                        height: `${Math.max((day.visitors / maxVisitors) * 100, 5)}%`,
+                        minHeight: '4px'
+                      }}
                     />
+                    <div style={{ 
+                      fontSize: '8px', 
+                      color: '#a1a1aa',
+                      marginTop: '4px',
+                      transform: 'rotate(-45deg)',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {day.date.slice(5)}
+                    </div>
                   </div>
-                  <div className="w-20 text-right text-sm">
-                    <span className="font-semibold text-zinc-700 dark:text-zinc-200">
-                      {formatNumber(source.incremental_conversions)}
-                    </span>
-                    <span className="text-zinc-400 ml-1">
-                      ({source.percent_of_total.toFixed(0)}%)
-                    </span>
-                  </div>
+                ))}
+              </div>
+              <div style={{ 
+                display: 'flex', 
+                gap: '16px', 
+                marginTop: '12px',
+                justifyContent: 'center'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+                  <div style={{ width: '12px', height: '12px', backgroundColor: '#d4d4d8', borderRadius: '2px' }} />
+                  <span style={{ color: '#71717a' }}>Baseline</span>
                 </div>
-              ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+                  <div style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '2px' }} />
+                  <span style={{ color: '#71717a' }}>Event Period</span>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Key Insights */}
-        {insights.length > 0 && (
-          <div className="px-6 py-5 border-b border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="h-4 w-4 text-zinc-400" />
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
-                Key Insights
-              </h3>
-            </div>
-            <ul className="space-y-2">
-              {insights.map((insight, idx) => (
-                <li key={idx} className="flex gap-3 text-sm text-zinc-700 dark:text-zinc-300">
-                  <span className="text-zinc-400 font-mono">{idx + 1}.</span>
-                  <span>{insight}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Traffic Summary (Appendix) */}
-        <div className="px-6 py-5 bg-zinc-50 dark:bg-zinc-800/30">
-          <div className="flex items-center gap-2 mb-3">
-            <Users className="h-4 w-4 text-zinc-400" />
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              Appendix: Traffic Summary
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="text-zinc-500 text-xs">Baseline Daily Avg</div>
-              <div className="font-semibold text-zinc-700 dark:text-zinc-200">
-                {formatNumber(traffic_summary.baseline_daily_avg_visitors)} visitors
+          {/* Attribution */}
+          {attribution.top_sources.length > 0 && (
+            <div style={{ marginBottom: '32px' }}>
+              <SectionHeader icon="🎯" title="Attribution" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {attribution.top_sources.map((source, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ 
+                      width: '100px', 
+                      fontSize: '13px', 
+                      fontWeight: '500',
+                      color: '#18181b',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {source.source}
+                    </div>
+                    <div style={{ 
+                      flex: 1, 
+                      height: '24px', 
+                      backgroundColor: '#f4f4f5',
+                      borderRadius: '4px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{ 
+                        height: '100%',
+                        width: `${source.percent_of_total}%`,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: '4px'
+                      }} />
+                    </div>
+                    <div style={{ 
+                      width: '80px', 
+                      textAlign: 'right',
+                      fontSize: '13px'
+                    }}>
+                      <span style={{ fontWeight: '600', color: '#18181b' }}>
+                        {formatNumber(source.incremental_conversions)}
+                      </span>
+                      <span style={{ color: '#a1a1aa', marginLeft: '4px' }}>
+                        ({source.percent_of_total.toFixed(0)}%)
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div>
-              <div className="text-zinc-500 text-xs">Event Period Total</div>
-              <div className="font-semibold text-zinc-700 dark:text-zinc-200">
-                {formatNumber(traffic_summary.event_period_visitors)} visitors
-              </div>
-            </div>
-            <div>
-              <div className="text-zinc-500 text-xs">Incremental Visitors</div>
-              <div className="font-semibold text-zinc-700 dark:text-zinc-200">
-                {formatNumber(traffic_summary.incremental_visitors)} 
-                <span className={cn(
-                  "ml-1 text-xs",
-                  traffic_summary.visitor_uplift_percent > 0 ? "text-emerald-600" : "text-red-600"
-                )}>
-                  ({formatPercent(traffic_summary.visitor_uplift_percent)})
-                </span>
-              </div>
-            </div>
-            <div>
-              <div className="text-zinc-500 text-xs">Bounce Rate Change</div>
-              <div className="font-semibold text-zinc-700 dark:text-zinc-200">
-                {traffic_summary.bounce_rate_baseline.toFixed(1)}% → {traffic_summary.bounce_rate_event.toFixed(1)}%
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-3 bg-zinc-100 dark:bg-zinc-900 border-t border-border text-center">
-          <p className="text-xs text-zinc-400">
-            Generated by AudienceScan • {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+        {/* ==================== PAGE 4: INSIGHTS & APPENDIX ==================== */}
+        <div style={{ padding: '32px' }}>
+          <PageHeader title="Insights & Summary" subtitle="Key findings and traffic metrics" />
+          
+          {/* Key Insights */}
+          {insights.length > 0 && (
+            <div style={{ marginBottom: '32px' }}>
+              <SectionHeader icon="💡" title="Key Insights" />
+              <div style={{ 
+                backgroundColor: '#fafafa',
+                borderRadius: '8px',
+                padding: '20px'
+              }}>
+                {insights.map((insight, idx) => (
+                  <div key={idx} style={{ 
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '10px 0',
+                    borderBottom: idx < insights.length - 1 ? '1px solid #e4e4e7' : 'none'
+                  }}>
+                    <span style={{ 
+                      fontFamily: 'monospace',
+                      fontSize: '12px',
+                      color: '#a1a1aa',
+                      minWidth: '20px'
+                    }}>
+                      {idx + 1}.
+                    </span>
+                    <span style={{ fontSize: '13px', color: '#18181b', lineHeight: '1.5' }}>
+                      {insight}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Traffic Summary Appendix */}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ 
+              fontSize: '11px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px',
+              color: '#a1a1aa',
+              fontWeight: '600',
+              marginBottom: '16px',
+              paddingBottom: '8px',
+              borderBottom: '1px solid #e4e4e7'
+            }}>
+              Appendix: Traffic Summary
+            </div>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: '16px' 
+            }}>
+              <AppendixStat 
+                label="Baseline Daily Average" 
+                value={`${formatNumber(traffic_summary.baseline_daily_avg_visitors)} visitors`} 
+              />
+              <AppendixStat 
+                label="Event Period Total" 
+                value={`${formatNumber(traffic_summary.event_period_visitors)} visitors`} 
+              />
+              <AppendixStat 
+                label="Incremental Visitors" 
+                value={`${formatNumber(traffic_summary.incremental_visitors)}`}
+                subvalue={formatPercent(traffic_summary.visitor_uplift_percent)}
+                positive={traffic_summary.visitor_uplift_percent > 0}
+              />
+              <AppendixStat 
+                label="Bounce Rate Change" 
+                value={`${traffic_summary.bounce_rate_baseline.toFixed(1)}% → ${traffic_summary.bounce_rate_event.toFixed(1)}%`} 
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ 
+            textAlign: 'center',
+            paddingTop: '24px',
+            borderTop: '1px solid #e4e4e7'
+          }}>
+            <p style={{ fontSize: '11px', color: '#a1a1aa', margin: 0 }}>
+              Generated by AudienceScan • {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// Helper Components
-function MetricBox({ 
-  icon: Icon, 
+// ==================== HELPER COMPONENTS FOR PDF ====================
+
+function PageHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      <h2 style={{ 
+        fontSize: '20px', 
+        fontWeight: '700', 
+        color: '#18181b',
+        margin: '0 0 4px 0'
+      }}>
+        {title}
+      </h2>
+      <p style={{ fontSize: '13px', color: '#71717a', margin: 0 }}>
+        {subtitle}
+      </p>
+    </div>
+  );
+}
+
+function SectionHeader({ icon, title }: { icon: string; title: string }) {
+  return (
+    <div style={{ 
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginBottom: '12px',
+      paddingBottom: '8px',
+      borderBottom: '2px solid #18181b'
+    }}>
+      <span style={{ fontSize: '16px' }}>{icon}</span>
+      <span style={{ 
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#18181b',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px'
+      }}>
+        {title}
+      </span>
+    </div>
+  );
+}
+
+function MetricCard({ 
   label, 
   value, 
   subvalue, 
   positive 
 }: { 
-  icon: React.ElementType; 
   label: string; 
   value: string; 
   subvalue?: string;
   positive?: boolean;
 }) {
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-3">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-4 w-4 text-zinc-400" />
-        <span className="text-xs text-zinc-500 uppercase tracking-wide">{label}</span>
+    <div style={{ 
+      backgroundColor: '#ffffff',
+      border: '1px solid #e4e4e7',
+      borderRadius: '8px',
+      padding: '16px'
+    }}>
+      <div style={{ 
+        fontSize: '11px', 
+        color: '#71717a', 
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '8px'
+      }}>
+        {label}
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{value}</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+        <span style={{ fontSize: '28px', fontWeight: '700', color: '#18181b' }}>
+          {value}
+        </span>
         {subvalue && (
-          <span className={cn(
-            "text-sm font-medium",
-            positive === true ? "text-emerald-600" : positive === false ? "text-red-600" : "text-zinc-500"
-          )}>
+          <span style={{ 
+            fontSize: '14px', 
+            fontWeight: '600',
+            color: positive ? '#059669' : '#dc2626'
+          }}>
             {subvalue}
           </span>
         )}
@@ -635,7 +824,7 @@ function MetricBox({
   );
 }
 
-function FunnelRow({
+function FunnelRowPDF({
   label,
   actual,
   expected,
@@ -648,49 +837,91 @@ function FunnelRow({
   incremental: number;
   upliftPercent: number;
 }) {
-  const formatNumber = (n: number) => {
+  const formatNum = (n: number) => {
     if (Math.abs(n) >= 1000) return `${(n / 1000).toFixed(1)}K`;
     return n.toLocaleString();
   };
 
   const isPositive = incremental > 0;
-  const isNegative = incremental < 0;
 
   return (
-    <div className="flex items-center justify-between py-2 px-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm text-zinc-800 dark:text-zinc-200 truncate">{label}</div>
-        <div className="text-xs text-zinc-500">
-          {formatNumber(actual)} actual vs {formatNumber(expected)} expected
+    <div style={{ 
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: '#fafafa',
+      borderRadius: '8px',
+      padding: '14px 16px'
+    }}>
+      <div>
+        <div style={{ fontSize: '14px', fontWeight: '600', color: '#18181b', marginBottom: '2px' }}>
+          {label}
+        </div>
+        <div style={{ fontSize: '12px', color: '#71717a' }}>
+          {formatNum(actual)} actual vs {formatNum(expected)} expected
         </div>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <div className="text-right">
-          <div className={cn(
-            "font-semibold text-sm",
-            isPositive ? "text-emerald-600" : isNegative ? "text-red-600" : "text-zinc-500"
-          )}>
-            {incremental > 0 ? "+" : ""}{formatNumber(incremental)}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ 
+            fontSize: '16px', 
+            fontWeight: '700',
+            color: isPositive ? '#059669' : '#dc2626'
+          }}>
+            {incremental > 0 ? '+' : ''}{formatNum(incremental)}
           </div>
-          <div className={cn(
-            "text-xs",
-            isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-zinc-400"
-          )}>
-            {upliftPercent > 0 ? "+" : ""}{upliftPercent.toFixed(1)}%
+          <div style={{ 
+            fontSize: '12px',
+            color: isPositive ? '#10b981' : '#ef4444'
+          }}>
+            {upliftPercent > 0 ? '+' : ''}{upliftPercent.toFixed(1)}%
           </div>
         </div>
-        <div className={cn(
-          "h-8 w-8 rounded-full flex items-center justify-center",
-          isPositive ? "bg-emerald-100 dark:bg-emerald-900/30" : isNegative ? "bg-red-100 dark:bg-red-900/30" : "bg-zinc-100 dark:bg-zinc-700"
-        )}>
+        <div style={{ 
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          backgroundColor: isPositive ? '#d1fae5' : '#fee2e2',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           {isPositive ? (
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
-          ) : isNegative ? (
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <TrendingUp size={16} color="#059669" />
           ) : (
-            <Minus className="h-4 w-4 text-zinc-400" />
+            <TrendingDown size={16} color="#dc2626" />
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AppendixStat({ 
+  label, 
+  value,
+  subvalue,
+  positive
+}: { 
+  label: string; 
+  value: string;
+  subvalue?: string;
+  positive?: boolean;
+}) {
+  return (
+    <div style={{ padding: '12px', backgroundColor: '#fafafa', borderRadius: '6px' }}>
+      <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontSize: '14px', fontWeight: '600', color: '#18181b' }}>
+        {value}
+        {subvalue && (
+          <span style={{ 
+            marginLeft: '6px',
+            fontSize: '12px',
+            color: positive ? '#059669' : '#dc2626'
+          }}>
+            ({subvalue})
+          </span>
+        )}
       </div>
     </div>
   );
