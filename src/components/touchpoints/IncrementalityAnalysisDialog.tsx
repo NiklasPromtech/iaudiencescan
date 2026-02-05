@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +18,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, TrendingUp, X } from "lucide-react";
+import { Loader2, TrendingUp, X, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { IncrementalityResultsView, type IncrementalityResult } from "./IncrementalityResultsView";
+import { fetchFilterOptions, FilterOptionItem, FilterOptionsResponse } from "@/lib/api";
 
 interface TouchpointForAnalysis {
   id: string;
@@ -65,6 +73,171 @@ const BREAKDOWN_OPTIONS = [
   { value: "referrer_domain", label: "Referrer Domain" },
 ];
 
+type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries";
+
+interface FilterSection {
+  key: FilterKey;
+  label: string;
+}
+
+const INCLUDE_FILTER_SECTIONS: FilterSection[] = [
+  { key: "sources", label: "Source" },
+  { key: "utm_source", label: "UTM Source" },
+  { key: "utm_medium", label: "Medium" },
+  { key: "utm_campaign", label: "Campaign" },
+  { key: "countries", label: "Country" },
+];
+
+const EXCLUDE_FILTER_SECTIONS: FilterSection[] = [
+  { key: "sources", label: "Source" },
+  { key: "utm_source", label: "UTM Source" },
+];
+
+interface MultiSelectFilterProps {
+  label: string;
+  options: FilterOptionItem[];
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+  onSelectAll: (values: string[]) => void;
+  onClear: () => void;
+  variant?: "include" | "exclude";
+}
+
+const MultiSelectFilter = ({
+  label,
+  options,
+  selectedValues,
+  onToggle,
+  onSelectAll,
+  onClear,
+  variant = "include",
+}: MultiSelectFilterProps) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const hasSelection = selectedValues.length > 0;
+
+  const filteredOptions = useMemo(() => {
+    const sorted = [...options].sort((a, b) => b.count - a.count);
+    if (!search) return sorted.slice(0, 20);
+    return sorted.filter((opt) =>
+      opt.value.toLowerCase().includes(search.toLowerCase())
+    ).slice(0, 50);
+  }, [options, search]);
+
+  return (
+    <Popover open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) setSearch("");
+    }}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "h-7 px-2.5 gap-1 font-normal text-muted-foreground hover:text-foreground",
+            hasSelection && variant === "include" && "text-primary bg-primary/5 hover:bg-primary/10",
+            hasSelection && variant === "exclude" && "text-destructive bg-destructive/5 hover:bg-destructive/10"
+          )}
+        >
+          <span className="text-xs">{label}</span>
+          {hasSelection && (
+            <Badge
+              variant="secondary"
+              className={cn(
+                "h-4 min-w-4 px-1 text-[10px]",
+                variant === "include" && "bg-primary/20 text-primary",
+                variant === "exclude" && "bg-destructive/20 text-destructive"
+              )}
+            >
+              {selectedValues.length}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0 bg-popover z-50" align="start" sideOffset={4}>
+        <div className="p-3 border-b border-border space-y-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={`Search ${label.toLowerCase()}...`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-8 text-sm"
+              autoFocus
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {selectedValues.length} selected
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => {
+                if (selectedValues.length === options.length) {
+                  onClear();
+                } else {
+                  onSelectAll(options.map(o => o.value));
+                }
+              }}
+            >
+              {selectedValues.length === options.length ? "Deselect all" : "Select all"}
+            </Button>
+          </div>
+        </div>
+        <ScrollArea className="max-h-48">
+          <div className="p-2">
+            {filteredOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {search ? "No matches found" : "No options"}
+              </p>
+            ) : (
+              <div className="space-y-0.5">
+                {filteredOptions.map((option) => {
+                  const isSelected = selectedValues.includes(option.value);
+                  return (
+                    <label
+                      key={option.value}
+                      className={cn(
+                        "flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer transition-colors",
+                        isSelected ? "bg-primary/10" : "hover:bg-muted/50"
+                      )}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => onToggle(option.value)}
+                        className="h-4 w-4"
+                      />
+                      <span className="flex-1 text-sm truncate">{option.value}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                        {option.count.toLocaleString()}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        {hasSelection && (
+          <div className="p-2 border-t border-border">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full h-7 text-xs"
+              onClick={onClear}
+            >
+              Clear selection
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 export function IncrementalityAnalysisDialog({
   open,
   onOpenChange,
@@ -78,16 +251,53 @@ export function IncrementalityAnalysisDialog({
   const [breakdowns, setBreakdowns] = useState<string[]>([]);
   
   // Filter state
-  const [includeUtmSource, setIncludeUtmSource] = useState("");
-  const [includeUtmMedium, setIncludeUtmMedium] = useState("");
-  const [includeCountries, setIncludeCountries] = useState("");
-  const [excludeUtmSource, setExcludeUtmSource] = useState("");
+  const [includeFilters, setIncludeFilters] = useState<Record<FilterKey, string[]>>({
+    sources: [],
+    utm_source: [],
+    utm_medium: [],
+    utm_campaign: [],
+    utm_content: [],
+    utm_term: [],
+    countries: [],
+  });
+  const [excludeFilters, setExcludeFilters] = useState<Record<FilterKey, string[]>>({
+    sources: [],
+    utm_source: [],
+    utm_medium: [],
+    utm_campaign: [],
+    utm_content: [],
+    utm_term: [],
+    countries: [],
+  });
   const [excludeBots, setExcludeBots] = useState(true);
+  const [utmFree, setUtmFree] = useState(false);
   
+  // Filter options from API
+  const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
+  const [loadingFilters, setLoadingFilters] = useState(false);
+
   // Results state
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<IncrementalityResult | null>(null);
   const [showResults, setShowResults] = useState(false);
+
+  // Fetch filter options when dialog opens
+  useEffect(() => {
+    if (open && selectedWebsite?.tag_id && !filterOptions) {
+      setLoadingFilters(true);
+      fetchFilterOptions({
+        tag_id: selectedWebsite.tag_id,
+        range: {
+          type: "last_full_days",
+          days: 90,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      })
+        .then(setFilterOptions)
+        .catch(() => {})
+        .finally(() => setLoadingFilters(false));
+    }
+  }, [open, selectedWebsite?.tag_id, filterOptions]);
 
   if (!touchpoint) return null;
 
@@ -99,11 +309,40 @@ export function IncrementalityAnalysisDialog({
     );
   };
 
-  const parseCommaSeparated = (value: string): string[] => {
-    return value
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+  const handleIncludeToggle = (key: FilterKey, value: string) => {
+    setIncludeFilters(prev => {
+      const current = prev[key] || [];
+      const newValues = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: newValues };
+    });
+  };
+
+  const handleIncludeSelectAll = (key: FilterKey, values: string[]) => {
+    setIncludeFilters(prev => ({ ...prev, [key]: values }));
+  };
+
+  const handleIncludeClear = (key: FilterKey) => {
+    setIncludeFilters(prev => ({ ...prev, [key]: [] }));
+  };
+
+  const handleExcludeToggle = (key: FilterKey, value: string) => {
+    setExcludeFilters(prev => {
+      const current = prev[key] || [];
+      const newValues = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: newValues };
+    });
+  };
+
+  const handleExcludeSelectAll = (key: FilterKey, values: string[]) => {
+    setExcludeFilters(prev => ({ ...prev, [key]: values }));
+  };
+
+  const handleExcludeClear = (key: FilterKey) => {
+    setExcludeFilters(prev => ({ ...prev, [key]: [] }));
   };
 
   const handleAnalyze = async () => {
@@ -147,23 +386,41 @@ export function IncrementalityAnalysisDialog({
       }
 
       // Build filters
-      const filters: Record<string, Record<string, string[]>> = {
-        include: {},
-        exclude: {},
-      };
+      const filters: Record<string, unknown> = {};
+      const include: Record<string, string[]> = {};
+      const exclude: Record<string, string[]> = {};
 
-      const incUtmSource = parseCommaSeparated(includeUtmSource);
-      const incUtmMedium = parseCommaSeparated(includeUtmMedium);
-      const incCountries = parseCommaSeparated(includeCountries);
-      const excUtmSource = parseCommaSeparated(excludeUtmSource);
+      // Add utm_free filter
+      if (utmFree) {
+        filters.utm_free = true;
+      }
 
-      if (incUtmSource.length) filters.include.utm_source = incUtmSource;
-      if (incUtmMedium.length) filters.include.utm_medium = incUtmMedium;
-      if (incCountries.length) filters.include.countries = incCountries;
-      if (excUtmSource.length) filters.exclude.utm_source = excUtmSource;
-      if (excludeBots) filters.exclude.bot_status = ["bot"];
+      // Build include filters
+      Object.entries(includeFilters).forEach(([key, values]) => {
+        if (values.length > 0) {
+          include[key] = values;
+        }
+      });
 
-      if (Object.keys(filters.include).length || Object.keys(filters.exclude).length) {
+      // Build exclude filters
+      Object.entries(excludeFilters).forEach(([key, values]) => {
+        if (values.length > 0) {
+          exclude[key] = values;
+        }
+      });
+
+      if (excludeBots) {
+        exclude.bot_status = ["bot"];
+      }
+
+      if (Object.keys(include).length > 0) {
+        filters.include = include;
+      }
+      if (Object.keys(exclude).length > 0) {
+        filters.exclude = exclude;
+      }
+
+      if (Object.keys(filters).length > 0) {
         payload.filters = filters;
       }
 
@@ -251,13 +508,13 @@ export function IncrementalityAnalysisDialog({
             <Slider
               value={[baselineDays]}
               onValueChange={(v) => setBaselineDays(v[0])}
-              min={7}
+              min={2}
               max={90}
               step={1}
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Days before the event to establish your "normal" traffic baseline
+              Days before the event to establish your "normal" traffic baseline (min 2)
             </p>
           </div>
 
@@ -308,61 +565,74 @@ export function IncrementalityAnalysisDialog({
 
           {/* Filters */}
           <div className="space-y-4 border-t pt-4">
-            <Label className="text-sm font-medium">Filters (optional)</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Filters (optional)</Label>
+              {loadingFilters && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
             
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="inc-utm-source" className="text-xs text-muted-foreground">
-                  Include UTM Sources
-                </Label>
-                <Input
-                  id="inc-utm-source"
-                  placeholder="twitter, producthunt"
-                  value={includeUtmSource}
-                  onChange={(e) => setIncludeUtmSource(e.target.value)}
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="inc-utm-medium" className="text-xs text-muted-foreground">
-                  Include UTM Mediums
-                </Label>
-                <Input
-                  id="inc-utm-medium"
-                  placeholder="social, email"
-                  value={includeUtmMedium}
-                  onChange={(e) => setIncludeUtmMedium(e.target.value)}
-                  className="h-8 text-sm"
-                />
-              </div>
+            {/* UTM Free toggle */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="utm-free"
+                checked={utmFree}
+                onCheckedChange={(checked) => setUtmFree(!!checked)}
+              />
+              <Label htmlFor="utm-free" className="text-sm font-normal cursor-pointer">
+                Organic traffic only (no UTM parameters)
+              </Label>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="inc-countries" className="text-xs text-muted-foreground">
-                  Include Countries
-                </Label>
-                <Input
-                  id="inc-countries"
-                  placeholder="US, GB, DE"
-                  value={includeCountries}
-                  onChange={(e) => setIncludeCountries(e.target.value)}
-                  className="h-8 text-sm"
-                />
+            {/* Include Filters */}
+            {!utmFree && filterOptions && (
+              <div className="space-y-2">
+                <span className="text-xs text-muted-foreground">Include</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {INCLUDE_FILTER_SECTIONS.map((section) => {
+                    const options = (filterOptions[section.key] as FilterOptionItem[]) || [];
+                    if (options.length === 0) return null;
+                    return (
+                      <MultiSelectFilter
+                        key={`include-${section.key}`}
+                        label={section.label}
+                        options={options}
+                        selectedValues={includeFilters[section.key] || []}
+                        onToggle={(value) => handleIncludeToggle(section.key, value)}
+                        onSelectAll={(values) => handleIncludeSelectAll(section.key, values)}
+                        onClear={() => handleIncludeClear(section.key)}
+                        variant="include"
+                      />
+                    );
+                  })}
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="exc-utm-source" className="text-xs text-muted-foreground">
-                  Exclude UTM Sources
-                </Label>
-                <Input
-                  id="exc-utm-source"
-                  placeholder="spam-referrer"
-                  value={excludeUtmSource}
-                  onChange={(e) => setExcludeUtmSource(e.target.value)}
-                  className="h-8 text-sm"
-                />
+            )}
+
+            {/* Exclude Filters */}
+            {filterOptions && (
+              <div className="space-y-2">
+                <span className="text-xs text-muted-foreground">Exclude</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {EXCLUDE_FILTER_SECTIONS.map((section) => {
+                    const options = (filterOptions[section.key] as FilterOptionItem[]) || [];
+                    if (options.length === 0) return null;
+                    return (
+                      <MultiSelectFilter
+                        key={`exclude-${section.key}`}
+                        label={section.label}
+                        options={options}
+                        selectedValues={excludeFilters[section.key] || []}
+                        onToggle={(value) => handleExcludeToggle(section.key, value)}
+                        onSelectAll={(values) => handleExcludeSelectAll(section.key, values)}
+                        onClear={() => handleExcludeClear(section.key)}
+                        variant="exclude"
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex items-center gap-2">
               <Checkbox
