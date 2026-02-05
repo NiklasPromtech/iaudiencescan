@@ -3,24 +3,13 @@ import { Button } from "@/components/ui/button";
 import { 
   Copy,
   Check,
-  ArrowRight,
   Download,
   TrendingUp,
   TrendingDown,
-  Minus,
-  Users,
-  Wallet,
-  Target,
-  BarChart3,
-  Globe,
-  Calendar,
-  DollarSign,
-  Percent,
-  Sparkles,
   FileText
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import audienceScanLogo from "@/assets/audiencescan-logo-dark.png";
 
 // New VC-ready response structure
 interface FunnelItem {
@@ -117,36 +106,30 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       return {
         label: verdict === "highly_positive" ? "STRONG POSITIVE IMPACT" : "POSITIVE IMPACT",
         sublabel: "This campaign delivered measurable incremental value",
-        bgClass: "bg-emerald-50",
-        borderClass: "border-emerald-200",
-        textClass: "text-emerald-700",
-        badgeBg: "#dcfce7",
-        badgeText: "#166534",
+        badgeBg: "#166534",
+        summaryBg: "#dcfce7",
       };
     }
     if (verdict === "highly_negative" || verdict === "negative") {
       return {
         label: verdict === "highly_negative" ? "NEGATIVE IMPACT" : "BELOW EXPECTATIONS",
         sublabel: "Campaign did not deliver expected incremental results",
-        bgClass: "bg-red-50",
-        borderClass: "border-red-200",
-        textClass: "text-red-700",
-        badgeBg: "#fee2e2",
-        badgeText: "#991b1b",
+        badgeBg: "#991b1b",
+        summaryBg: "#fee2e2",
       };
     }
     return {
       label: "INCONCLUSIVE",
       sublabel: "Insufficient data to determine campaign impact",
-      bgClass: "bg-amber-50",
-      borderClass: "border-amber-200",
-      textClass: "text-amber-700",
-      badgeBg: "#fef3c7",
-      badgeText: "#92400e",
+      badgeBg: "#92400e",
+      summaryBg: "#fef3c7",
     };
   };
 
   const verdictConfig = getVerdictConfig(executive_summary.verdict);
+
+  // Build analysis period string for footer
+  const analysisPeriodText = `Baseline: ${windows.baseline_start} → ${windows.baseline_end} (${windows.baseline_days || 'N/A'} days)  |  Event: ${windows.event_start} → ${windows.event_end} (${windows.event_days || 'N/A'} days)`;
 
   const handleCopyReport = async () => {
     const reportText = generateReportText();
@@ -164,7 +147,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.4, 0.4, 0.4, 0.4],
+        margin: [0.3, 0.4, 0.5, 0.4],
         filename: `incrementality-report-${result.event_name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
@@ -256,6 +239,9 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
   // Calculate max for timeline chart
   const maxVisitors = Math.max(...daily_timeline.map(d => d.visitors), 1);
 
+  // Check if we have cost metrics to determine layout
+  const hasCostMetrics = executive_summary.cost_per_incremental_conversion !== null || executive_summary.roi !== null;
+
   return (
     <div className="space-y-1">
       {/* Export Actions - Outside the PDF area */}
@@ -290,7 +276,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
         </Button>
       </div>
 
-      {/* PDF Report Container - Using inline styles for PDF compatibility */}
+      {/* PDF Report Container */}
       <div 
         ref={reportRef} 
         style={{ 
@@ -302,16 +288,16 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
         }}
       >
         {/* ==================== PAGE 1: COVER & EXECUTIVE SUMMARY ==================== */}
-        <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
-          {/* Header Bar */}
+        <div style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
+          {/* Header Bar with Branding */}
           <div style={{ 
             backgroundColor: '#18181b', 
             color: '#ffffff', 
-            padding: '24px 32px',
+            padding: '20px 24px',
             borderRadius: '8px',
-            marginBottom: '24px'
+            marginBottom: '20px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ 
                   fontSize: '10px', 
@@ -322,14 +308,18 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                 }}>
                   Incrementality Analysis Report
                 </div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>
+                <h1 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>
                   {result.event_name}
                 </h1>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '10px', color: '#a1a1aa' }}>Report Generated</div>
-                <div style={{ fontSize: '13px', fontWeight: '500' }}>
-                  {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <img 
+                  src={audienceScanLogo} 
+                  alt="AudienceScan" 
+                  style={{ height: '24px', filter: 'brightness(0) invert(1)', marginBottom: '4px' }}
+                />
+                <div style={{ fontSize: '10px', color: '#a1a1aa' }}>
+                  {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </div>
               </div>
             </div>
@@ -337,58 +327,64 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
           {/* Executive Summary Box */}
           <div style={{ 
-            backgroundColor: verdictConfig.badgeBg, 
-            border: `2px solid ${verdictConfig.badgeText}20`,
-            borderRadius: '12px',
-            padding: '28px',
-            marginBottom: '24px'
+            backgroundColor: verdictConfig.summaryBg, 
+            borderRadius: '10px',
+            padding: '24px',
+            marginBottom: '20px'
           }}>
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
               gap: '8px', 
-              marginBottom: '16px',
-              fontSize: '11px',
+              marginBottom: '14px',
+              fontSize: '10px',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               color: '#52525b',
               fontWeight: '600'
             }}>
-              <FileText size={16} color="#52525b" />
+              <FileText size={14} color="#52525b" />
               Executive Summary
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ 
                   display: 'inline-block',
-                  backgroundColor: verdictConfig.badgeText,
+                  backgroundColor: verdictConfig.badgeBg,
                   color: '#ffffff',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '11px',
+                  padding: '5px 12px',
+                  borderRadius: '16px',
+                  fontSize: '10px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px',
-                  marginBottom: '12px'
+                  marginBottom: '10px'
                 }}>
                   {verdictConfig.label}
                 </div>
                 <h2 style={{ 
-                  fontSize: '20px', 
+                  fontSize: '18px', 
                   fontWeight: '600', 
                   color: '#18181b',
-                  margin: '0 0 8px 0'
+                  margin: '0 0 6px 0',
+                  lineHeight: '1.3'
                 }}>
                   {executive_summary.headline}
                 </h2>
-                <p style={{ fontSize: '13px', color: '#71717a', margin: 0 }}>
+                <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>
                   {verdictConfig.sublabel}
                 </p>
               </div>
-              <div style={{ textAlign: 'center', marginLeft: '32px' }}>
+              <div style={{ 
+                textAlign: 'center', 
+                marginLeft: '24px',
+                padding: '12px 16px',
+                backgroundColor: 'rgba(255,255,255,0.5)',
+                borderRadius: '8px'
+              }}>
                 <div style={{ 
-                  fontSize: '42px', 
+                  fontSize: '36px', 
                   fontWeight: '700', 
                   color: '#18181b',
                   lineHeight: 1
@@ -396,11 +392,12 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                   {Math.round(executive_summary.confidence_score * 100)}%
                 </div>
                 <div style={{ 
-                  fontSize: '10px', 
+                  fontSize: '9px', 
                   textTransform: 'uppercase', 
-                  letterSpacing: '1px',
-                  color: '#71717a',
-                  marginTop: '4px'
+                  letterSpacing: '1.5px',
+                  color: '#52525b',
+                  marginTop: '6px',
+                  fontWeight: '600'
                 }}>
                   Confidence
                 </div>
@@ -408,29 +405,32 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             </div>
           </div>
 
-          {/* Key Metrics Grid */}
+          {/* Key Metrics - Always 2 rows max with flexbox */}
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '16px',
-            marginBottom: '24px'
+            display: 'flex', 
+            flexWrap: 'wrap',
+            gap: '12px',
+            marginBottom: '20px'
           }}>
             <MetricCard
               label="Incremental Conversions"
               value={formatNumber(executive_summary.total_incremental_conversions)}
               subvalue={formatPercent(executive_summary.conversion_uplift_percent)}
               positive={executive_summary.conversion_uplift_percent > 0}
+              flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
             />
             <MetricCard
               label="Wallet Connections"
               value={formatNumber(executive_summary.total_incremental_wallet_connections)}
               subvalue={formatPercent(executive_summary.wallet_uplift_percent)}
               positive={executive_summary.wallet_uplift_percent > 0}
+              flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
             />
             {executive_summary.cost_per_incremental_conversion !== null && (
               <MetricCard
                 label="Cost per Conversion"
                 value={`$${executive_summary.cost_per_incremental_conversion.toFixed(2)}`}
+                flex="1 1 calc(50% - 6px)"
               />
             )}
             {executive_summary.roi !== null && (
@@ -438,57 +438,26 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                 label="Return on Investment"
                 value={`${executive_summary.roi.toFixed(0)}%`}
                 positive={executive_summary.roi > 0}
+                flex="1 1 calc(50% - 6px)"
               />
             )}
           </div>
 
-          {/* Analysis Period */}
-          <div style={{ 
-            backgroundColor: '#f4f4f5', 
-            borderRadius: '8px',
-            padding: '16px 20px'
-          }}>
-            <div style={{ 
-              fontSize: '11px', 
-              textTransform: 'uppercase', 
-              letterSpacing: '1px',
-              color: '#71717a',
-              fontWeight: '600',
-              marginBottom: '12px'
-            }}>
-              Analysis Period
-            </div>
-            <div style={{ display: 'flex', gap: '32px' }}>
-              <div>
-                <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '2px' }}>Baseline</div>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: '#18181b' }}>
-                  {windows.baseline_start} → {windows.baseline_end}
-                  <span style={{ color: '#71717a', marginLeft: '8px' }}>
-                    ({windows.baseline_days || 'N/A'} days)
-                  </span>
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '2px' }}>Event Period</div>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: '#18181b' }}>
-                  {windows.event_start} → {windows.event_end}
-                  <span style={{ color: '#71717a', marginLeft: '8px' }}>
-                    ({windows.event_days || 'N/A'} days)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Spacer to push footer down */}
+          <div style={{ flex: 1 }} />
+
+          {/* Page Footer */}
+          <PageFooter analysisPeriod={analysisPeriodText} />
         </div>
 
         {/* ==================== PAGE 2: FUNNEL ANALYSIS ==================== */}
         {(conversion_funnel.length > 0 || wallet_funnel.length > 0) && (
-          <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
+          <div style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
             <PageHeader title="Funnel Analysis" subtitle="Conversion and wallet activity breakdown" />
             
             {/* Conversion Funnel */}
             {conversion_funnel.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
+              <div style={{ marginBottom: '28px' }}>
                 <SectionHeader icon="📊" title="Conversion Funnel" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {conversion_funnel.map((item, idx) => (
@@ -507,7 +476,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
             {/* Wallet Funnel */}
             {wallet_funnel.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
+              <div style={{ marginBottom: '28px' }}>
                 <SectionHeader icon="👛" title="Wallet Funnel" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {wallet_funnel.map((item, idx) => (
@@ -523,69 +492,95 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                 </div>
               </div>
             )}
+
+            {/* Spacer */}
+            <div style={{ flex: 1 }} />
+
+            {/* Page Footer */}
+            <PageFooter analysisPeriod={analysisPeriodText} />
           </div>
         )}
 
         {/* ==================== PAGE 3: TIMELINE & ATTRIBUTION ==================== */}
-        <div style={{ pageBreakAfter: 'always', padding: '32px' }}>
+        <div style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
           <PageHeader title="Performance Timeline" subtitle="Daily activity and traffic attribution" />
           
           {/* Timeline Chart */}
           {daily_timeline.length > 0 && (
-            <div style={{ marginBottom: '32px' }}>
+            <div style={{ marginBottom: '28px' }}>
               <SectionHeader icon="📈" title="Daily Timeline" />
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'flex-end', 
-                gap: '4px', 
-                height: '120px',
-                padding: '16px',
+                gap: '3px', 
+                height: '140px',
+                padding: '16px 12px',
                 backgroundColor: '#fafafa',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                border: '1px solid #e4e4e7'
               }}>
-                {daily_timeline.slice(-14).map((day, idx) => (
-                  <div key={idx} style={{ 
-                    flex: 1, 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center',
-                    height: '100%',
-                    justifyContent: 'flex-end'
-                  }}>
-                    <div
-                      style={{ 
-                        width: '100%',
-                        backgroundColor: day.period === "event" ? '#10b981' : '#d4d4d8',
-                        borderRadius: '4px 4px 0 0',
-                        height: `${Math.max((day.visitors / maxVisitors) * 100, 5)}%`,
-                        minHeight: '4px'
-                      }}
-                    />
-                    <div style={{ 
-                      fontSize: '8px', 
-                      color: '#a1a1aa',
-                      marginTop: '4px',
-                      transform: 'rotate(-45deg)',
-                      whiteSpace: 'nowrap'
+                {daily_timeline.slice(-14).map((day, idx) => {
+                  const isEvent = day.period === "event";
+                  const barHeight = Math.max((day.visitors / maxVisitors) * 100, 8);
+                  
+                  return (
+                    <div key={idx} style={{ 
+                      flex: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      height: '100%',
+                      justifyContent: 'flex-end'
                     }}>
-                      {day.date.slice(5)}
+                      <div
+                        style={{ 
+                          width: '100%',
+                          maxWidth: '32px',
+                          background: isEvent 
+                            ? 'linear-gradient(180deg, #10b981 0%, #059669 100%)' 
+                            : 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
+                          borderRadius: '3px 3px 0 0',
+                          height: `${barHeight}%`,
+                          minHeight: '6px',
+                          boxShadow: isEvent ? '0 2px 4px rgba(16, 185, 129, 0.3)' : 'none'
+                        }}
+                      />
+                      <div style={{ 
+                        fontSize: '8px', 
+                        color: isEvent ? '#059669' : '#a1a1aa',
+                        fontWeight: isEvent ? '600' : '400',
+                        marginTop: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {day.date.slice(5)}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div style={{ 
                 display: 'flex', 
-                gap: '16px', 
+                gap: '20px', 
                 marginTop: '12px',
                 justifyContent: 'center'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-                  <div style={{ width: '12px', height: '12px', backgroundColor: '#d4d4d8', borderRadius: '2px' }} />
-                  <span style={{ color: '#71717a' }}>Baseline</span>
+                  <div style={{ 
+                    width: '14px', 
+                    height: '14px', 
+                    background: 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
+                    borderRadius: '3px' 
+                  }} />
+                  <span style={{ color: '#52525b', fontWeight: '500' }}>Baseline Period</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-                  <div style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '2px' }} />
-                  <span style={{ color: '#71717a' }}>Event Period</span>
+                  <div style={{ 
+                    width: '14px', 
+                    height: '14px', 
+                    background: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
+                    borderRadius: '3px' 
+                  }} />
+                  <span style={{ color: '#52525b', fontWeight: '500' }}>Event Period</span>
                 </div>
               </div>
             </div>
@@ -593,13 +588,13 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
           {/* Attribution */}
           {attribution.top_sources.length > 0 && (
-            <div style={{ marginBottom: '32px' }}>
+            <div style={{ marginBottom: '28px' }}>
               <SectionHeader icon="🎯" title="Attribution" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {attribution.top_sources.map((source, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ 
-                      width: '100px', 
+                      width: '120px', 
                       fontSize: '13px', 
                       fontWeight: '500',
                       color: '#18181b',
@@ -611,27 +606,27 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                     </div>
                     <div style={{ 
                       flex: 1, 
-                      height: '24px', 
-                      backgroundColor: '#f4f4f5',
+                      height: '20px', 
+                      backgroundColor: '#e4e4e7',
                       borderRadius: '4px',
                       overflow: 'hidden'
                     }}>
                       <div style={{ 
                         height: '100%',
-                        width: `${source.percent_of_total}%`,
-                        backgroundColor: '#3b82f6',
+                        width: `${Math.max(source.percent_of_total, 2)}%`,
+                        background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
                         borderRadius: '4px'
                       }} />
                     </div>
                     <div style={{ 
-                      width: '80px', 
+                      width: '90px', 
                       textAlign: 'right',
-                      fontSize: '13px'
+                      fontSize: '12px'
                     }}>
                       <span style={{ fontWeight: '600', color: '#18181b' }}>
                         {formatNumber(source.incremental_conversions)}
                       </span>
-                      <span style={{ color: '#a1a1aa', marginLeft: '4px' }}>
+                      <span style={{ color: '#71717a', marginLeft: '4px' }}>
                         ({source.percent_of_total.toFixed(0)}%)
                       </span>
                     </div>
@@ -640,20 +635,27 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
               </div>
             </div>
           )}
+
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Page Footer */}
+          <PageFooter analysisPeriod={analysisPeriodText} />
         </div>
 
         {/* ==================== PAGE 4: INSIGHTS & APPENDIX ==================== */}
-        <div style={{ padding: '32px' }}>
+        <div style={{ padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
           <PageHeader title="Insights & Summary" subtitle="Key findings and traffic metrics" />
           
           {/* Key Insights */}
           {insights.length > 0 && (
-            <div style={{ marginBottom: '32px' }}>
+            <div style={{ marginBottom: '28px' }}>
               <SectionHeader icon="💡" title="Key Insights" />
               <div style={{ 
                 backgroundColor: '#fafafa',
                 borderRadius: '8px',
-                padding: '20px'
+                padding: '16px 20px',
+                border: '1px solid #e4e4e7'
               }}>
                 {insights.map((insight, idx) => (
                   <div key={idx} style={{ 
@@ -664,13 +666,13 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                   }}>
                     <span style={{ 
                       fontFamily: 'monospace',
-                      fontSize: '12px',
+                      fontSize: '11px',
                       color: '#a1a1aa',
                       minWidth: '20px'
                     }}>
                       {idx + 1}.
                     </span>
-                    <span style={{ fontSize: '13px', color: '#18181b', lineHeight: '1.5' }}>
+                    <span style={{ fontSize: '12px', color: '#18181b', lineHeight: '1.5' }}>
                       {insight}
                     </span>
                   </div>
@@ -680,14 +682,14 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
           )}
 
           {/* Traffic Summary Appendix */}
-          <div style={{ marginBottom: '32px' }}>
+          <div style={{ marginBottom: '28px' }}>
             <div style={{ 
-              fontSize: '11px', 
+              fontSize: '10px', 
               textTransform: 'uppercase', 
               letterSpacing: '1px',
               color: '#a1a1aa',
               fontWeight: '600',
-              marginBottom: '16px',
+              marginBottom: '14px',
               paddingBottom: '8px',
               borderBottom: '1px solid #e4e4e7'
             }}>
@@ -696,7 +698,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(2, 1fr)', 
-              gap: '16px' 
+              gap: '12px' 
             }}>
               <AppendixStat 
                 label="Baseline Daily Average" 
@@ -719,16 +721,11 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             </div>
           </div>
 
-          {/* Footer */}
-          <div style={{ 
-            textAlign: 'center',
-            paddingTop: '24px',
-            borderTop: '1px solid #e4e4e7'
-          }}>
-            <p style={{ fontSize: '11px', color: '#a1a1aa', margin: 0 }}>
-              Generated by AudienceScan • {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Page Footer */}
+          <PageFooter analysisPeriod={analysisPeriodText} showBranding />
         </div>
       </div>
     </div>
@@ -739,18 +736,43 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
 function PageHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div style={{ marginBottom: '24px' }}>
+    <div style={{ marginBottom: '20px' }}>
       <h2 style={{ 
-        fontSize: '20px', 
+        fontSize: '18px', 
         fontWeight: '700', 
         color: '#18181b',
         margin: '0 0 4px 0'
       }}>
         {title}
       </h2>
-      <p style={{ fontSize: '13px', color: '#71717a', margin: 0 }}>
+      <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>
         {subtitle}
       </p>
+    </div>
+  );
+}
+
+function PageFooter({ analysisPeriod, showBranding = false }: { analysisPeriod: string; showBranding?: boolean }) {
+  return (
+    <div style={{ 
+      paddingTop: '16px',
+      borderTop: '1px solid #e4e4e7',
+      marginTop: '16px'
+    }}>
+      <div style={{ 
+        fontSize: '9px', 
+        color: '#a1a1aa',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <span>{analysisPeriod}</span>
+        {showBranding && (
+          <span style={{ fontWeight: '500' }}>
+            Powered by AudienceScan
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -765,9 +787,9 @@ function SectionHeader({ icon, title }: { icon: string; title: string }) {
       paddingBottom: '8px',
       borderBottom: '2px solid #18181b'
     }}>
-      <span style={{ fontSize: '16px' }}>{icon}</span>
+      <span style={{ fontSize: '14px' }}>{icon}</span>
       <span style={{ 
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: '600',
         color: '#18181b',
         textTransform: 'uppercase',
@@ -783,36 +805,39 @@ function MetricCard({
   label, 
   value, 
   subvalue, 
-  positive 
+  positive,
+  flex = '1 1 auto'
 }: { 
   label: string; 
   value: string; 
   subvalue?: string;
   positive?: boolean;
+  flex?: string;
 }) {
   return (
     <div style={{ 
       backgroundColor: '#ffffff',
       border: '1px solid #e4e4e7',
       borderRadius: '8px',
-      padding: '16px'
+      padding: '14px 16px',
+      flex
     }}>
       <div style={{ 
-        fontSize: '11px', 
+        fontSize: '10px', 
         color: '#71717a', 
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
-        marginBottom: '8px'
+        marginBottom: '6px'
       }}>
         {label}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '28px', fontWeight: '700', color: '#18181b' }}>
+        <span style={{ fontSize: '26px', fontWeight: '700', color: '#18181b', lineHeight: 1 }}>
           {value}
         </span>
         {subvalue && (
           <span style={{ 
-            fontSize: '14px', 
+            fontSize: '13px', 
             fontWeight: '600',
             color: positive ? '#059669' : '#dc2626'
           }}>
@@ -851,35 +876,38 @@ function FunnelRowPDF({
       justifyContent: 'space-between',
       backgroundColor: '#fafafa',
       borderRadius: '8px',
-      padding: '14px 16px'
+      padding: '12px 14px',
+      border: '1px solid #e4e4e7'
     }}>
-      <div>
-        <div style={{ fontSize: '14px', fontWeight: '600', color: '#18181b', marginBottom: '2px' }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b', marginBottom: '2px' }}>
           {label}
         </div>
-        <div style={{ fontSize: '12px', color: '#71717a' }}>
+        <div style={{ fontSize: '11px', color: '#71717a' }}>
           {formatNum(actual)} actual vs {formatNum(expected)} expected
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div style={{ textAlign: 'right' }}>
           <div style={{ 
-            fontSize: '16px', 
+            fontSize: '15px', 
             fontWeight: '700',
-            color: isPositive ? '#059669' : '#dc2626'
+            color: isPositive ? '#059669' : '#dc2626',
+            lineHeight: 1
           }}>
             {incremental > 0 ? '+' : ''}{formatNum(incremental)}
           </div>
           <div style={{ 
-            fontSize: '12px',
-            color: isPositive ? '#10b981' : '#ef4444'
+            fontSize: '11px',
+            color: isPositive ? '#10b981' : '#ef4444',
+            marginTop: '2px'
           }}>
             {upliftPercent > 0 ? '+' : ''}{upliftPercent.toFixed(1)}%
           </div>
         </div>
         <div style={{ 
-          width: '32px',
-          height: '32px',
+          width: '28px',
+          height: '28px',
           borderRadius: '50%',
           backgroundColor: isPositive ? '#d1fae5' : '#fee2e2',
           display: 'flex',
@@ -887,9 +915,9 @@ function FunnelRowPDF({
           justifyContent: 'center'
         }}>
           {isPositive ? (
-            <TrendingUp size={16} color="#059669" />
+            <TrendingUp size={14} color="#059669" />
           ) : (
-            <TrendingDown size={16} color="#dc2626" />
+            <TrendingDown size={14} color="#dc2626" />
           )}
         </div>
       </div>
@@ -909,14 +937,14 @@ function AppendixStat({
   positive?: boolean;
 }) {
   return (
-    <div style={{ padding: '12px', backgroundColor: '#fafafa', borderRadius: '6px' }}>
-      <div style={{ fontSize: '11px', color: '#a1a1aa', marginBottom: '4px' }}>{label}</div>
-      <div style={{ fontSize: '14px', fontWeight: '600', color: '#18181b' }}>
+    <div style={{ padding: '12px 14px', backgroundColor: '#fafafa', borderRadius: '6px', border: '1px solid #e4e4e7' }}>
+      <div style={{ fontSize: '10px', color: '#a1a1aa', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b' }}>
         {value}
         {subvalue && (
           <span style={{ 
             marginLeft: '6px',
-            fontSize: '12px',
+            fontSize: '11px',
             color: positive ? '#059669' : '#dc2626'
           }}>
             ({subvalue})
