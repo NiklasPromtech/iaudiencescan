@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Twitter, 
   MessageCircle, 
@@ -241,7 +240,7 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
       )}
 
       {/* Token List */}
-      <ScrollArea className={expanded && tokensWithPlatform.length > 5 ? "h-64" : undefined}>
+      <div className={expanded && tokensWithPlatform.length > 8 ? "max-h-96 overflow-y-auto" : undefined}>
         <div className="divide-y divide-border">
           {visibleTokens.map((token) => {
             const handle = config.getHandle(token);
@@ -295,7 +294,7 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Expand/Collapse */}
       {tokensWithPlatform.length > 5 && (
