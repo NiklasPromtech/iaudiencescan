@@ -1,5 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
+import {
+  getScanResults,
+  ScanResultsNetworkEdge,
+  ScanResultsNetworkNodeNew,
+  ScanResultsTopToken,
+} from "@/lib/api";
 import iconX from "@/assets/icon-x.jpg";
 import iconTelegram from "@/assets/icon-telegram.jpg";
 import iconReddit from "@/assets/icon-reddit.jpg";
@@ -194,7 +200,9 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
 
 const Network = () => {
   const { studyId } = useParams<{ studyId: string }>();
-  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [networkNodes, setNetworkNodes] = useState<ScanResultsNetworkNodeNew[]>([]);
+  const [networkEdges, setNetworkEdges] = useState<ScanResultsNetworkEdge[]>([]);
+  const [topTokens, setTopTokens] = useState<ScanResultsTopToken[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
@@ -202,13 +210,16 @@ const Network = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!studyId) return;
+
+      setLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch(
-          `https://token-analysis-final.nw.r.appspot.com/chart/${studyId}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const data = await response.json();
-        setTokens(data.data?.token || []);
+        const data = await getScanResults(studyId);
+        setNetworkNodes(data.network?.nodes || []);
+        setNetworkEdges(data.network?.edges || []);
+        setTopTokens(data.top_tokens || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -216,27 +227,49 @@ const Network = () => {
       }
     };
 
-    if (studyId) fetchData();
+    fetchData();
   }, [studyId]);
 
-  // Update meta tags when tokens load
+  // Update meta tags when nodes load
   useEffect(() => {
-    if (tokens.length > 0) {
-      const primaryToken = tokens[0];
-      updateMetaTags(primaryToken.ticker, tokens.length);
+    if (networkNodes.length > 0) {
+      const primary = [...networkNodes].sort(
+        (a, b) => (b.unique_wallets ?? 0) - (a.unique_wallets ?? 0)
+      )[0];
+      updateMetaTags(primary?.token_symbol || primary?.token_name || "Token", networkNodes.length);
     }
-  }, [tokens]);
+  }, [networkNodes]);
 
   // Generate network graph with collision avoidance
   const { nodes, edges } = useMemo(() => {
-    if (tokens.length === 0) return { nodes: [], edges: [] };
+    if (networkNodes.length === 0) return { nodes: [], edges: [] };
 
     const size = 1000;
     const padding = 100;
-    const maxTokens = Math.min(tokens.length, 80);
+    const maxTokens = Math.min(networkNodes.length, 80);
+
+    // Prefer a stable "center" node (highest overlap)
+    const selectedNodes = [...networkNodes]
+      .sort((a, b) => (b.unique_wallets ?? 0) - (a.unique_wallets ?? 0))
+      .slice(0, maxTokens);
+
+    const socialsByAddress = new Map(
+      topTokens.map((t) => [t.token_address.toLowerCase(), t])
+    );
+
+    const maxUniqueWallets = Math.max(
+      ...selectedNodes.map((n) => n.unique_wallets ?? 0),
+      1
+    );
+
+    const scoreFor = (n: ScanResultsNetworkNodeNew) => {
+      const v = (n.unique_wallets ?? 0) + 1;
+      const m = maxUniqueWallets + 1;
+      return Math.log10(v) / Math.log10(m);
+    };
 
     // Seeded random for consistent layout
-    const seed = studyId?.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+    const seed = studyId?.split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
     const seededRandom = (i: number) => {
       const x = Math.sin(seed * i) * 10000;
       return x - Math.floor(x);
@@ -245,34 +278,33 @@ const Network = () => {
     const generatedNodes: Node[] = [];
 
     // Place nodes with collision avoidance
-    tokens.slice(0, maxTokens).forEach((token, index) => {
-      const nodeSize = 24 + token.score * 36;
+    selectedNodes.forEach((token, index) => {
+      const score = scoreFor(token);
+      const nodeSize = 24 + score * 36;
+
       let x: number, y: number;
       let attempts = 0;
       const maxAttempts = 50;
 
-      // Try to find a non-overlapping position
       do {
         if (index === 0) {
-          // Center token in middle
           x = size / 2;
           y = size / 2;
         } else {
-          // Distribute using golden angle with jitter
           const golden = 0.618033988749895;
-          const angle = index * golden * Math.PI * 2 + seededRandom(index * 7) * 0.5;
-          const baseRadius = 80 + Math.sqrt(index / maxTokens) * (size / 2 - padding - 80);
+          const angle =
+            index * golden * Math.PI * 2 + seededRandom(index * 7) * 0.5;
+          const baseRadius =
+            80 + Math.sqrt(index / maxTokens) * (size / 2 - padding - 80);
           const jitter = (seededRandom(index * 13 + attempts) - 0.5) * 100;
-          
+
           x = size / 2 + Math.cos(angle) * (baseRadius + jitter);
           y = size / 2 + Math.sin(angle) * (baseRadius + jitter);
         }
 
-        // Clamp to bounds
         x = Math.max(padding, Math.min(size - padding, x));
         y = Math.max(padding, Math.min(size - padding, y));
 
-        // Check for overlap with existing nodes
         const hasOverlap = generatedNodes.some((other) => {
           const dx = x - other.x;
           const dy = y - other.y;
@@ -285,53 +317,50 @@ const Network = () => {
         attempts++;
       } while (true);
 
+      const social = socialsByAddress.get(token.token_address.toLowerCase());
+
       generatedNodes.push({
         id: index,
         x,
         y,
-        logo: token.logo,
-        ticker: token.ticker || '',
-        score: token.score,
+        logo: token.token_logo_url || "/placeholder.svg",
+        ticker: token.token_symbol || token.token_name || "Unknown",
+        score,
         size: nodeSize,
-        socialX: token.x || '',
-        telegram: token.telegram || '',
-        reddit: token.reddit || '',
-        youtube: token.youtube || '',
-        tags: token.tags || [],
+        socialX: social?.twitter || "",
+        telegram: social?.telegram || "",
+        reddit: social?.reddit || "",
+        youtube: "",
+        tags: [],
       });
     });
 
-    // Generate random edges
-    const generatedEdges: Edge[] = [];
-    const edgeCount = Math.floor(maxTokens * 2);
+    const addressToIndex = new Map<string, number>();
+    selectedNodes.forEach((n, i) => addressToIndex.set(n.token_address.toLowerCase(), i));
 
-    for (let i = 0; i < edgeCount; i++) {
-      const from = Math.floor(seededRandom(i * 3) * maxTokens);
-      const to = Math.floor(seededRandom(i * 3 + 1) * maxTokens);
-      
-      if (from !== to) {
-        const exists = generatedEdges.some(
-          e => (e.from === from && e.to === to) || (e.from === to && e.to === from)
-        );
-        if (!exists) {
-          const strength = (generatedNodes[from].score + generatedNodes[to].score) / 2;
-          generatedEdges.push({ from, to, strength });
-        }
-      }
-    }
-
-    // Ensure center token has connections
-    for (let i = 1; i < Math.min(6, maxTokens); i++) {
-      const exists = generatedEdges.some(e => 
-        (e.from === 0 && e.to === i) || (e.from === i && e.to === 0)
+    const normalizedEdges = (networkEdges || [])
+      .map((e) => ({
+        source: e.source.toLowerCase(),
+        target: e.target.toLowerCase(),
+        weight: e.weight ?? 0,
+      }))
+      .filter(
+        (e) =>
+          e.source !== e.target &&
+          addressToIndex.has(e.source) &&
+          addressToIndex.has(e.target)
       );
-      if (!exists) {
-        generatedEdges.push({ from: 0, to: i, strength: generatedNodes[i].score });
-      }
-    }
+
+    const maxWeight = Math.max(...normalizedEdges.map((e) => e.weight), 1);
+
+    const generatedEdges: Edge[] = normalizedEdges.map((e) => ({
+      from: addressToIndex.get(e.source)!,
+      to: addressToIndex.get(e.target)!,
+      strength: e.weight / maxWeight,
+    }));
 
     return { nodes: generatedNodes, edges: generatedEdges };
-  }, [tokens, studyId]);
+  }, [networkNodes, networkEdges, topTokens, studyId]);
 
   const handleNodeHover = (node: Node, event: React.MouseEvent) => {
     const svgEl = event.currentTarget.closest('svg');

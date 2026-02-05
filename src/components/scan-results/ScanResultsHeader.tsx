@@ -23,7 +23,7 @@ export const ScanResultsHeader = ({ scan, scanId }: ScanResultsHeaderProps) => {
         <Button
           variant="ghost"
           className="-ml-2"
-          onClick={() => navigate(`/scans/${scanId}`)}
+          onClick={() => navigate("/scans")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Scan Details
