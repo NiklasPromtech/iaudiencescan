@@ -1381,3 +1381,49 @@ export async function revokeWebsiteShare(websiteId: string, shareId: string): Pr
 export async function listAccessibleWebsites(): Promise<AccessibleWebsitesResponse> {
   return apiRequest<AccessibleWebsitesResponse>(`/websites/accessible`);
 }
+
+// Holder Analytics types
+export interface HolderDataPoint {
+  date: string;
+  holder_count: number;
+  contract_address: string;
+  chain_id: string;
+}
+
+export interface HoldersRequest {
+  tag_id: string;
+  contract_id?: string;
+  range: {
+    from: string;
+    to: string;
+  };
+}
+
+export interface HoldersResponse {
+  success: boolean;
+  data: HolderDataPoint[];
+}
+
+export async function fetchHoldersData(request: HoldersRequest): Promise<HoldersResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/holders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}

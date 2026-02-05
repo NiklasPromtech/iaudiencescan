@@ -19,6 +19,7 @@ import {
   fetchWalletExtensions,
   listCostSources,
   fetchFilterOptions,
+  fetchHoldersData,
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
@@ -31,6 +32,7 @@ import {
   FilterOptionsResponse,
   ActiveFilters,
   DIMENSION_TO_FILTER,
+  HolderDataPoint,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { FilterDialog } from "@/components/overview/FilterDialog";
@@ -76,6 +78,7 @@ const Overview = () => {
   const [walletExtensionsLoading, setWalletExtensionsLoading] = useState(true);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
+  const [holderData, setHolderData] = useState<HolderDataPoint[]>([]);
   
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
@@ -266,6 +269,25 @@ const Overview = () => {
       console.error("Failed to load wallet extensions data:", err);
     } finally {
       setWalletExtensionsLoading(false);
+    }
+
+    // Fetch holder data
+    try {
+      const rangeFrom = rangeConfig.type === "custom" 
+        ? rangeConfig.from 
+        : format(new Date(Date.now() - (rangeConfig.days * 24 * 60 * 60 * 1000)), "yyyy-MM-dd");
+      const rangeTo = rangeConfig.type === "custom"
+        ? rangeConfig.to
+        : format(new Date(), "yyyy-MM-dd");
+      
+      const holdersResponse = await fetchHoldersData({
+        tag_id: selectedWebsite.id,
+        range: { from: rangeFrom, to: rangeTo },
+      });
+      setHolderData(holdersResponse.data || []);
+    } catch (err) {
+      console.error("Failed to load holder data:", err);
+      setHolderData([]);
     }
   }, [selectedWebsite, getFiltersParam]);
 
@@ -511,7 +533,11 @@ const Overview = () => {
 
           {/* Daily Traffic Chart */}
           <div className="mb-8">
-            <DailyChart data={dailyData?.rows ?? []} loading={chartLoading} />
+            <DailyChart 
+              data={dailyData?.rows ?? []} 
+              loading={chartLoading} 
+              holderData={holderData}
+            />
           </div>
 
           <div className="mb-8">
