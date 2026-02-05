@@ -112,8 +112,8 @@ export function TouchpointMarkers({
       </div>
       
       {/* Markers row - with relative positioning for the spanning bars */}
-      <div className="flex-1 relative h-5">
-        {/* Range events - positioned within the grid flow, not absolute */}
+      <div className="flex-1 relative h-5 overflow-hidden">
+        {/* Range events - clipped to container bounds */}
         {rangeSpans.map(({ tp, startIdx, endIdx }) => {
           // Calculate position as percentage of the chart area
           const leftPercent = (startIdx / totalColumns) * 100;
