@@ -171,7 +171,7 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden h-full flex flex-col">
       {/* Header */}
       <div className={`p-4 ${config.bgColor} border-b border-border`}>
         <div className="flex items-center justify-between gap-3">
@@ -240,7 +240,7 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
       )}
 
       {/* Token List */}
-      <div className={expanded && tokensWithPlatform.length > 8 ? "max-h-96 overflow-y-auto" : undefined}>
+      <div className={`flex-1 min-h-0 ${expanded && tokensWithPlatform.length > 8 ? "overflow-y-auto" : ""}`}>
         <div className="divide-y divide-border">
           {visibleTokens.map((token) => {
             const handle = config.getHandle(token);
