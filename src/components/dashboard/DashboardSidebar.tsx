@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronDown,
   FileCode2,
+  TrendingUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,11 @@ const insightsItems = [
     title: "Overview",
     url: "/overview",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Change",
+    url: "/change",
+    icon: TrendingUp,
   },
   {
     title: "Wallet Data",
