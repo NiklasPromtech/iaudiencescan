@@ -239,15 +239,6 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
             <h3 className="text-h3 text-foreground">Daily Metrics</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              onClick={() => setCreateTouchpointOpen(true)}
-              title="Add touchpoint"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
           </div>
           <div className="flex flex-wrap gap-3">
             <MetricSelector
@@ -327,6 +318,7 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
               chartDates={chartDates}
               onTouchpointClick={handleTouchpointClick}
               onMultipleTouchpointsClick={handleMultipleTouchpointsClick}
+              onAddTouchpoint={() => setCreateTouchpointOpen(true)}
             />
           </div>
         )}
