@@ -113,8 +113,9 @@ export function TouchpointMarkers({
       
       {/* Markers row - with relative positioning for the spanning bars */}
       <div className="flex-1 relative h-5">
-        {/* Range events - absolutely positioned spanning bars */}
-        {rangeSpans.map(({ tp, startIdx, endIdx }, rangeIndex) => {
+        {/* Range events - positioned within the grid flow, not absolute */}
+        {rangeSpans.map(({ tp, startIdx, endIdx }) => {
+          // Calculate position as percentage of the chart area
           const leftPercent = (startIdx / totalColumns) * 100;
           const widthPercent = ((endIdx - startIdx + 1) / totalColumns) * 100;
           
@@ -122,15 +123,13 @@ export function TouchpointMarkers({
             <HoverCard key={tp.id} openDelay={100} closeDelay={50}>
               <HoverCardTrigger asChild>
                 <div
-                  className="absolute cursor-pointer flex items-center justify-center"
+                  className="absolute cursor-pointer flex items-center justify-center z-0"
                   style={{
-                    left: `${leftPercent}%`,
-                    width: `${widthPercent}%`,
+                    left: `calc(${leftPercent}% + 4px)`,
+                    width: `calc(${widthPercent}% - 8px)`,
                     top: '50%',
                     transform: 'translateY(-50%)',
                     height: 20,
-                    paddingLeft: 4,
-                    paddingRight: 4,
                   }}
                   onClick={() => onTouchpointClick(tp)}
                 >
