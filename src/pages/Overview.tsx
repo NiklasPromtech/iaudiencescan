@@ -443,7 +443,25 @@ const Overview = () => {
     navigate("/audiences");
   };
 
-  const data = scorecard?.data;
+  // Calculate token holders from the latest day's data (sum across all contracts)
+  const tokenHoldersTotal = (() => {
+    if (!holderData || holderData.length === 0) return null;
+    
+    // Find the most recent date in the data
+    const latestDate = holderData.reduce((latest, item) => {
+      return item.date > latest ? item.date : latest;
+    }, holderData[0].date);
+    
+    // Sum holder_count for all contracts on the latest date
+    const latestDayData = holderData.filter(item => item.date === latestDate);
+    return latestDayData.reduce((sum, item) => sum + item.holder_count, 0);
+  })();
+
+  // Merge token holders into scorecard data
+  const data = scorecard?.data ? {
+    ...scorecard.data,
+    token_holders: tokenHoldersTotal,
+  } : null;
   const conversionEvents = filterOptions?.conversion_events ?? [];
 
   const suggestedCohorts = [
