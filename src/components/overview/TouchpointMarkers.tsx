@@ -92,8 +92,8 @@ export function TouchpointMarkers({
   return (
     <div className="flex border-t border-border/50 pt-3 mt-2">
       {/* Label on the left - matches Y-axis width */}
-      <div className="w-[50px] flex-shrink-0 flex items-center justify-end pr-2">
-        <div className="flex items-center gap-1">
+      <div className="w-[70px] flex-shrink-0 flex items-center justify-start pl-1">
+        <div className="flex items-center gap-0.5">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
             Touchpoints
           </span>
@@ -122,19 +122,20 @@ export function TouchpointMarkers({
             <HoverCard key={tp.id} openDelay={100} closeDelay={50}>
               <HoverCardTrigger asChild>
                 <div
-                  className="absolute cursor-pointer flex items-center"
+                  className="absolute cursor-pointer flex items-center justify-center"
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
-                    top: 0,
-                    height: 14,
-                    paddingLeft: 2,
-                    paddingRight: 2,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    height: 20,
+                    paddingLeft: 4,
+                    paddingRight: 4,
                   }}
                   onClick={() => onTouchpointClick(tp)}
                 >
                   <div
-                    className="w-full h-full rounded-full border-2 border-background hover:scale-y-110 transition-transform"
+                    className="w-full h-3.5 rounded-full border-2 border-background hover:scale-y-110 transition-transform"
                     style={{ 
                       backgroundColor: "hsl(var(--primary) / 0.4)",
                     }}
@@ -238,7 +239,7 @@ export function TouchpointMarkers({
       </div>
       
       {/* Right side spacer - matches right Y-axis width */}
-      <div className="w-[50px] flex-shrink-0" />
+      <div className="w-[70px] flex-shrink-0" />
     </div>
   );
 }
