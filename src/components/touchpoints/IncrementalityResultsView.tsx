@@ -6,12 +6,15 @@ import {
   Download,
   TrendingUp,
   TrendingDown,
-  FileText
+  FileText,
+  Lightbulb,
+  ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
 import audienceScanLogo from "@/assets/audiencescan-logo-dark.png";
 
-// New VC-ready response structure
+// ==================== INTERFACES ====================
+
 interface FunnelItem {
   event?: string;
   action?: string;
@@ -35,6 +38,16 @@ interface AttributionSource {
   source: string;
   incremental_conversions: number;
   percent_of_total: number;
+}
+
+interface BreakdownItem {
+  key: string;
+  baseline_total: number;
+  event_total: number;
+  expected: number;
+  actual: number;
+  incremental: number;
+  uplift_percent: number;
 }
 
 export interface IncrementalityResult {
@@ -71,25 +84,43 @@ export interface IncrementalityResult {
   };
   traffic_summary: {
     baseline_daily_avg_visitors: number;
+    baseline_daily_avg_pageviews?: number;
     event_period_visitors: number;
+    event_period_pageviews?: number;
     incremental_visitors: number;
     visitor_uplift_percent: number;
     bounce_rate_baseline: number;
     bounce_rate_event: number;
   };
   insights: string[];
+  breakdowns?: {
+    country?: BreakdownItem[];
+    utm_source?: BreakdownItem[];
+    utm_medium?: BreakdownItem[];
+    utm_campaign?: BreakdownItem[];
+    utm_content?: BreakdownItem[];
+    utm_term?: BreakdownItem[];
+    region?: BreakdownItem[];
+    city?: BreakdownItem[];
+    referrer_domain?: BreakdownItem[];
+    conversion_event?: BreakdownItem[];
+    wallet_action?: BreakdownItem[];
+  };
 }
 
 interface IncrementalityResultsViewProps {
   result: IncrementalityResult;
 }
 
+// ==================== MAIN COMPONENT ====================
+
 export function IncrementalityResultsView({ result }: IncrementalityResultsViewProps) {
-  const { executive_summary, windows, conversion_funnel, wallet_funnel, daily_timeline, attribution, traffic_summary, insights } = result;
+  const { executive_summary, windows, conversion_funnel, wallet_funnel, daily_timeline, attribution, traffic_summary, insights, breakdowns } = result;
   const reportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  // Utility functions
   const formatNumber = (n: number) => {
     if (Math.abs(n) >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
     if (Math.abs(n) >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -101,35 +132,48 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
     return `${sign}${n.toFixed(1)}%`;
   };
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   const getVerdictConfig = (verdict: string) => {
     if (verdict === "highly_positive" || verdict === "positive") {
       return {
         label: verdict === "highly_positive" ? "STRONG POSITIVE IMPACT" : "POSITIVE IMPACT",
-        sublabel: "This campaign delivered measurable incremental value",
+        sublabel: "This campaign delivered measurable incremental value beyond baseline expectations",
         badgeBg: "#166534",
         summaryBg: "#dcfce7",
+        recommendation: "Repeat this campaign type. The incremental metrics demonstrate strong unit economics worth scaling."
       };
     }
     if (verdict === "highly_negative" || verdict === "negative") {
       return {
         label: verdict === "highly_negative" ? "NEGATIVE IMPACT" : "BELOW EXPECTATIONS",
-        sublabel: "Campaign did not deliver expected incremental results",
+        sublabel: "Campaign did not deliver expected incremental results above baseline",
         badgeBg: "#991b1b",
         summaryBg: "#fee2e2",
+        recommendation: "Reconsider this approach. The campaign did not generate meaningful incremental value above what would have happened naturally."
       };
     }
     return {
       label: "INCONCLUSIVE",
-      sublabel: "Insufficient data to determine campaign impact",
+      sublabel: "Insufficient data to determine if the campaign generated incremental impact",
       badgeBg: "#92400e",
       summaryBg: "#fef3c7",
+      recommendation: "Gather more data before drawing conclusions. Consider extending the analysis period or increasing baseline sample size."
     };
   };
 
   const verdictConfig = getVerdictConfig(executive_summary.verdict);
 
   // Build analysis period string for footer
-  const analysisPeriodText = `Baseline: ${windows.baseline_start} → ${windows.baseline_end} (${windows.baseline_days || 'N/A'} days)  |  Event: ${windows.event_start} → ${windows.event_end} (${windows.event_days || 'N/A'} days)`;
+  const analysisPeriodText = `Baseline: ${formatDate(windows.baseline_start)} – ${formatDate(windows.baseline_end)} (${windows.baseline_days || 'N/A'}d)  •  Event: ${formatDate(windows.event_start)} – ${formatDate(windows.event_end)} (${windows.event_days || 'N/A'}d)`;
+
+  // Count total pages for page numbers
+  const breakdownPages = breakdowns ? Object.entries(breakdowns).filter(([_, items]) => items && items.length > 0) : [];
+  const totalPages = 3 + breakdownPages.length + 1; // Cover + Funnel + Timeline + Breakdowns + Insights/Appendix
+  let currentPage = 0;
 
   const handleCopyReport = async () => {
     const reportText = generateReportText();
@@ -147,7 +191,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.3, 0.4, 0.5, 0.4],
+        margin: [0.35, 0.45, 0.5, 0.45],
         filename: `incrementality-report-${result.event_name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
@@ -241,6 +285,21 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
   // Check if we have cost metrics to determine layout
   const hasCostMetrics = executive_summary.cost_per_incremental_conversion !== null || executive_summary.roi !== null;
+
+  // Breakdown display config
+  const breakdownConfig: { key: keyof NonNullable<typeof breakdowns>; title: string; category: string }[] = [
+    { key: 'utm_source', title: 'UTM Source', category: 'Marketing Attribution' },
+    { key: 'utm_medium', title: 'UTM Medium', category: 'Marketing Attribution' },
+    { key: 'utm_campaign', title: 'UTM Campaign', category: 'Marketing Attribution' },
+    { key: 'utm_content', title: 'UTM Content', category: 'Marketing Attribution' },
+    { key: 'utm_term', title: 'UTM Term', category: 'Marketing Attribution' },
+    { key: 'country', title: 'Country', category: 'Geography' },
+    { key: 'region', title: 'Region', category: 'Geography' },
+    { key: 'city', title: 'City', category: 'Geography' },
+    { key: 'referrer_domain', title: 'Referrer Domain', category: 'Technical' },
+    { key: 'conversion_event', title: 'Conversion Event', category: 'Events' },
+    { key: 'wallet_action', title: 'Wallet Action', category: 'Events' },
+  ];
 
   return (
     <div className="space-y-1">
@@ -347,7 +406,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
               Executive Summary
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ 
                   display: 'inline-block',
@@ -376,12 +435,15 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                   {verdictConfig.sublabel}
                 </p>
               </div>
+              
+              {/* Confidence Gauge */}
               <div style={{ 
                 textAlign: 'center', 
                 marginLeft: '24px',
-                padding: '12px 16px',
-                backgroundColor: 'rgba(255,255,255,0.5)',
-                borderRadius: '8px'
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255,255,255,0.6)',
+                borderRadius: '10px',
+                minWidth: '100px'
               }}>
                 <div style={{ 
                   fontSize: '36px', 
@@ -396,10 +458,25 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                   textTransform: 'uppercase', 
                   letterSpacing: '1.5px',
                   color: '#52525b',
-                  marginTop: '6px',
+                  marginTop: '8px',
                   fontWeight: '600'
                 }}>
                   Confidence
+                </div>
+                {/* Simple visual gauge */}
+                <div style={{ 
+                  marginTop: '8px',
+                  height: '4px',
+                  backgroundColor: 'rgba(0,0,0,0.1)',
+                  borderRadius: '2px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${Math.round(executive_summary.confidence_score * 100)}%`,
+                    height: '100%',
+                    backgroundColor: executive_summary.confidence_score >= 0.7 ? '#059669' : executive_summary.confidence_score >= 0.4 ? '#f59e0b' : '#dc2626',
+                    borderRadius: '2px'
+                  }} />
                 </div>
               </div>
             </div>
@@ -414,21 +491,21 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
           }}>
             <MetricCard
               label="Incremental Conversions"
-              value={formatNumber(executive_summary.total_incremental_conversions)}
+              value={`+${formatNumber(executive_summary.total_incremental_conversions)}`}
               subvalue={formatPercent(executive_summary.conversion_uplift_percent)}
               positive={executive_summary.conversion_uplift_percent > 0}
               flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
             />
             <MetricCard
-              label="Wallet Connections"
-              value={formatNumber(executive_summary.total_incremental_wallet_connections)}
+              label="Incremental Wallets"
+              value={`+${formatNumber(executive_summary.total_incremental_wallet_connections)}`}
               subvalue={formatPercent(executive_summary.wallet_uplift_percent)}
               positive={executive_summary.wallet_uplift_percent > 0}
               flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
             />
             {executive_summary.cost_per_incremental_conversion !== null && (
               <MetricCard
-                label="Cost per Conversion"
+                label="Cost per Incremental Conversion"
                 value={`$${executive_summary.cost_per_incremental_conversion.toFixed(2)}`}
                 flex="1 1 calc(50% - 6px)"
               />
@@ -443,29 +520,130 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             )}
           </div>
 
-          {/* Spacer to push footer down */}
+          {/* Analysis Period */}
+          <div style={{ 
+            backgroundColor: '#fafafa',
+            borderRadius: '8px',
+            padding: '16px 20px',
+            border: '1px solid #e4e4e7',
+            marginBottom: '20px'
+          }}>
+            <div style={{ 
+              fontSize: '10px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px',
+              color: '#a1a1aa',
+              fontWeight: '600',
+              marginBottom: '12px'
+            }}>
+              Analysis Period
+            </div>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '2px' }}>Baseline</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b' }}>
+                  {formatDate(windows.baseline_start)} – {formatDate(windows.baseline_end)}
+                  <span style={{ fontWeight: '400', color: '#71717a', marginLeft: '6px' }}>
+                    ({windows.baseline_days} days)
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '2px' }}>Event Period</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b' }}>
+                  {formatDate(windows.event_start)} – {formatDate(windows.event_end)}
+                  <span style={{ fontWeight: '400', color: '#71717a', marginLeft: '6px' }}>
+                    ({windows.event_days} days)
+                  </span>
+                </div>
+              </div>
+              {result.cost && (
+                <div>
+                  <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '2px' }}>Investment</div>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b' }}>
+                    ${result.cost.amount.toLocaleString()} {result.cost.currency}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Spacer */}
           <div style={{ flex: 1 }} />
 
           {/* Page Footer */}
-          <PageFooter analysisPeriod={analysisPeriodText} />
+          <PageFooter analysisPeriod={analysisPeriodText} pageNumber={++currentPage} totalPages={totalPages} />
         </div>
 
-        {/* ==================== PAGE 2: FUNNEL ANALYSIS ==================== */}
+        {/* ==================== PAGE 2: THE INCREMENTAL STORY ==================== */}
         {(conversion_funnel.length > 0 || wallet_funnel.length > 0) && (
           <div style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
-            <PageHeader title="Funnel Analysis" subtitle="Conversion and wallet activity breakdown" />
+            <ReportPageHeader 
+              title="The Incremental Story" 
+              subtitle="Measuring true impact beyond baseline expectations"
+              eventName={result.event_name}
+            />
             
-            {/* Conversion Funnel */}
+            {/* Why Incremental Matters Callout */}
+            <div style={{ 
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '10px',
+              padding: '18px 20px',
+              marginBottom: '24px'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'flex-start', 
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  backgroundColor: '#3b82f6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Lightbulb size={16} color="#ffffff" />
+                </div>
+                <div>
+                  <div style={{ 
+                    fontSize: '13px', 
+                    fontWeight: '700', 
+                    color: '#1e40af',
+                    marginBottom: '6px'
+                  }}>
+                    Why Incremental Matters
+                  </div>
+                  <p style={{ 
+                    fontSize: '11px', 
+                    color: '#3b82f6', 
+                    margin: 0,
+                    lineHeight: '1.6'
+                  }}>
+                    Incremental metrics measure the <strong>TRUE</strong> impact of your campaign – the additional 
+                    conversions and wallet connections you gained <strong>BEYOND</strong> what would have happened 
+                    naturally. Raw totals include organic activity. Incremental isolates your marketing's real 
+                    contribution. <strong>This is what investors care about.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Conversion Funnel with Visual Bars */}
             {conversion_funnel.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
-                <SectionHeader icon="📊" title="Conversion Funnel" />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <SectionHeader title="Conversion Events" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {conversion_funnel.map((item, idx) => (
-                    <FunnelRowPDF
+                    <FunnelComparisonBar
                       key={idx}
                       label={item.event || "Unknown"}
-                      actual={item.actual}
                       expected={item.expected}
+                      actual={item.actual}
                       incremental={item.incremental}
                       upliftPercent={item.uplift_percent}
                     />
@@ -474,17 +652,17 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
               </div>
             )}
 
-            {/* Wallet Funnel */}
+            {/* Wallet Funnel with Visual Bars */}
             {wallet_funnel.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
-                <SectionHeader icon="👛" title="Wallet Funnel" />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <SectionHeader title="Wallet Activity" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {wallet_funnel.map((item, idx) => (
-                    <FunnelRowPDF
+                    <FunnelComparisonBar
                       key={idx}
                       label={item.action || "Unknown"}
-                      actual={item.actual}
                       expected={item.expected}
+                      actual={item.actual}
                       incremental={item.incremental}
                       upliftPercent={item.uplift_percent}
                     />
@@ -497,90 +675,127 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             <div style={{ flex: 1 }} />
 
             {/* Page Footer */}
-            <PageFooter analysisPeriod={analysisPeriodText} />
+            <PageFooter analysisPeriod={analysisPeriodText} pageNumber={++currentPage} totalPages={totalPages} />
           </div>
         )}
 
         {/* ==================== PAGE 3: TIMELINE & ATTRIBUTION ==================== */}
         <div style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
-          <PageHeader title="Performance Timeline" subtitle="Daily activity and traffic attribution" />
+          <ReportPageHeader 
+            title="Timeline & Attribution" 
+            subtitle="Daily performance and traffic source breakdown"
+            eventName={result.event_name}
+          />
           
-          {/* Timeline Chart */}
+          {/* Timeline Chart with Labels */}
           {daily_timeline.length > 0 && (
             <div style={{ marginBottom: '28px' }}>
-              <SectionHeader icon="📈" title="Daily Timeline" />
+              <SectionHeader title="Daily Performance" />
               <div style={{ 
-                display: 'flex', 
-                alignItems: 'flex-end', 
-                gap: '3px', 
-                height: '140px',
-                padding: '16px 12px',
+                padding: '20px 16px 12px',
                 backgroundColor: '#fafafa',
                 borderRadius: '8px',
                 border: '1px solid #e4e4e7'
               }}>
-                {daily_timeline.slice(-14).map((day, idx) => {
-                  const isEvent = day.period === "event";
-                  const barHeight = Math.max((day.visitors / maxVisitors) * 100, 8);
-                  
-                  return (
-                    <div key={idx} style={{ 
-                      flex: 1, 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center',
-                      height: '100%',
-                      justifyContent: 'flex-end'
-                    }}>
-                      <div
-                        style={{ 
-                          width: '100%',
-                          maxWidth: '32px',
-                          background: isEvent 
-                            ? 'linear-gradient(180deg, #10b981 0%, #059669 100%)' 
-                            : 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
-                          borderRadius: '3px 3px 0 0',
-                          height: `${barHeight}%`,
-                          minHeight: '6px',
-                          boxShadow: isEvent ? '0 2px 4px rgba(16, 185, 129, 0.3)' : 'none'
-                        }}
-                      />
-                      <div style={{ 
-                        fontSize: '8px', 
-                        color: isEvent ? '#059669' : '#a1a1aa',
-                        fontWeight: isEvent ? '600' : '400',
-                        marginTop: '6px',
-                        whiteSpace: 'nowrap'
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-end', 
+                  gap: '4px', 
+                  height: '160px',
+                  marginBottom: '8px'
+                }}>
+                  {daily_timeline.slice(-14).map((day, idx) => {
+                    const isEvent = day.period === "event";
+                    const barHeight = Math.max((day.visitors / maxVisitors) * 100, 8);
+                    
+                    return (
+                      <div key={idx} style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center',
+                        height: '100%',
+                        justifyContent: 'flex-end'
                       }}>
-                        {day.date.slice(5)}
+                        {/* Visitor count label */}
+                        <div style={{ 
+                          fontSize: '8px', 
+                          fontWeight: '600',
+                          color: isEvent ? '#059669' : '#71717a',
+                          marginBottom: '4px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {formatNumber(day.visitors)}
+                        </div>
+                        <div
+                          style={{ 
+                            width: '100%',
+                            maxWidth: '36px',
+                            background: isEvent 
+                              ? 'linear-gradient(180deg, #10b981 0%, #059669 100%)' 
+                              : 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
+                            borderRadius: '4px 4px 0 0',
+                            height: `${barHeight}%`,
+                            minHeight: '6px',
+                            boxShadow: isEvent ? '0 2px 4px rgba(16, 185, 129, 0.3)' : 'none',
+                            position: 'relative'
+                          }}
+                        >
+                          {/* Conversion count inside bar if tall enough */}
+                          {barHeight > 30 && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '6px',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              fontSize: '7px',
+                              fontWeight: '600',
+                              color: 'rgba(255,255,255,0.9)'
+                            }}>
+                              {day.conversions}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ 
+                          fontSize: '8px', 
+                          color: isEvent ? '#059669' : '#a1a1aa',
+                          fontWeight: isEvent ? '600' : '400',
+                          marginTop: '6px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {day.date.slice(5)}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                marginTop: '12px',
-                justifyContent: 'center'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-                  <div style={{ 
-                    width: '14px', 
-                    height: '14px', 
-                    background: 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
-                    borderRadius: '3px' 
-                  }} />
-                  <span style={{ color: '#52525b', fontWeight: '500' }}>Baseline Period</span>
+                    );
+                  })}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-                  <div style={{ 
-                    width: '14px', 
-                    height: '14px', 
-                    background: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
-                    borderRadius: '3px' 
-                  }} />
-                  <span style={{ color: '#52525b', fontWeight: '500' }}>Event Period</span>
+                
+                {/* Legend */}
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '24px', 
+                  justifyContent: 'center',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #e4e4e7'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+                    <div style={{ 
+                      width: '14px', 
+                      height: '14px', 
+                      background: 'linear-gradient(180deg, #a1a1aa 0%, #71717a 100%)',
+                      borderRadius: '3px' 
+                    }} />
+                    <span style={{ color: '#52525b', fontWeight: '500' }}>Baseline Period</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+                    <div style={{ 
+                      width: '14px', 
+                      height: '14px', 
+                      background: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
+                      borderRadius: '3px' 
+                    }} />
+                    <span style={{ color: '#52525b', fontWeight: '500' }}>Event Period</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -589,9 +804,9 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
           {/* Attribution */}
           {attribution.top_sources.length > 0 && (
             <div style={{ marginBottom: '28px' }}>
-              <SectionHeader icon="🎯" title="Attribution" />
+              <SectionHeader title="Traffic Attribution" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {attribution.top_sources.map((source, idx) => (
+                {attribution.top_sources.slice(0, 8).map((source, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ 
                       width: '120px', 
@@ -606,7 +821,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                     </div>
                     <div style={{ 
                       flex: 1, 
-                      height: '20px', 
+                      height: '22px', 
                       backgroundColor: '#e4e4e7',
                       borderRadius: '4px',
                       overflow: 'hidden'
@@ -615,11 +830,20 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                         height: '100%',
                         width: `${Math.max(source.percent_of_total, 2)}%`,
                         background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
-                        borderRadius: '4px'
-                      }} />
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '8px'
+                      }}>
+                        {source.percent_of_total > 15 && (
+                          <span style={{ fontSize: '10px', fontWeight: '600', color: '#fff' }}>
+                            {source.percent_of_total.toFixed(0)}%
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div style={{ 
-                      width: '90px', 
+                      width: '100px', 
                       textAlign: 'right',
                       fontSize: '12px'
                     }}>
@@ -640,17 +864,92 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
           <div style={{ flex: 1 }} />
 
           {/* Page Footer */}
-          <PageFooter analysisPeriod={analysisPeriodText} />
+          <PageFooter analysisPeriod={analysisPeriodText} pageNumber={++currentPage} totalPages={totalPages} />
         </div>
 
-        {/* ==================== PAGE 4: INSIGHTS & APPENDIX ==================== */}
+        {/* ==================== BREAKDOWN PAGES (Dynamic) ==================== */}
+        {breakdownConfig.map(({ key, title, category }) => {
+          const data = breakdowns?.[key];
+          if (!data || data.length === 0) return null;
+          
+          // Sort by incremental descending and take top 10
+          const sortedData = [...data].sort((a, b) => b.incremental - a.incremental).slice(0, 10);
+          const topPerformer = sortedData[0];
+          
+          return (
+            <div key={key} style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
+              <ReportPageHeader 
+                title={`Breakdown: ${title}`} 
+                subtitle={`Incremental performance by ${title.toLowerCase()}`}
+                eventName={result.event_name}
+              />
+              
+              {/* Category Badge */}
+              <div style={{
+                display: 'inline-block',
+                backgroundColor: '#f4f4f5',
+                color: '#52525b',
+                padding: '4px 10px',
+                borderRadius: '12px',
+                fontSize: '10px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                alignSelf: 'flex-start'
+              }}>
+                {category}
+              </div>
+              
+              {/* Top Performer Callout */}
+              {topPerformer && topPerformer.incremental > 0 && (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '14px 18px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <TrendingUp size={18} color="#059669" />
+                  <div>
+                    <span style={{ fontWeight: '600', color: '#166534' }}>
+                      {topPerformer.key}
+                    </span>
+                    <span style={{ color: '#15803d' }}>
+                      {' '}drove the most incremental traffic with{' '}
+                    </span>
+                    <span style={{ fontWeight: '700', color: '#166534' }}>
+                      +{formatNumber(topPerformer.incremental)} ({formatPercent(topPerformer.uplift_percent)})
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Breakdown Table */}
+              <BreakdownTable data={sortedData} formatNumber={formatNumber} formatPercent={formatPercent} />
+
+              {/* Spacer */}
+              <div style={{ flex: 1 }} />
+
+              {/* Page Footer */}
+              <PageFooter analysisPeriod={analysisPeriodText} pageNumber={++currentPage} totalPages={totalPages} />
+            </div>
+          );
+        })}
+
+        {/* ==================== FINAL PAGE: INSIGHTS & APPENDIX ==================== */}
         <div style={{ padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
-          <PageHeader title="Insights & Summary" subtitle="Key findings and traffic metrics" />
+          <ReportPageHeader 
+            title="Insights & Methodology" 
+            subtitle="Key findings and analysis framework"
+            eventName={result.event_name}
+          />
           
           {/* Key Insights */}
           {insights.length > 0 && (
-            <div style={{ marginBottom: '28px' }}>
-              <SectionHeader icon="💡" title="Key Insights" />
+            <div style={{ marginBottom: '24px' }}>
+              <SectionHeader title="Key Insights" />
               <div style={{ 
                 backgroundColor: '#fafafa',
                 borderRadius: '8px',
@@ -666,9 +965,10 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
                   }}>
                     <span style={{ 
                       fontFamily: 'monospace',
-                      fontSize: '11px',
-                      color: '#a1a1aa',
-                      minWidth: '20px'
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      color: '#3b82f6',
+                      minWidth: '24px'
                     }}>
                       {idx + 1}.
                     </span>
@@ -681,8 +981,37 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             </div>
           )}
 
+          {/* Recommendation Box */}
+          <div style={{ 
+            backgroundColor: verdictConfig.summaryBg,
+            borderRadius: '8px',
+            padding: '18px 20px',
+            marginBottom: '24px'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              marginBottom: '10px'
+            }}>
+              <ArrowRight size={16} color="#18181b" />
+              <span style={{ 
+                fontSize: '12px', 
+                fontWeight: '700', 
+                color: '#18181b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Recommendation
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#18181b', margin: 0, lineHeight: '1.6' }}>
+              {verdictConfig.recommendation}
+            </p>
+          </div>
+
           {/* Traffic Summary Appendix */}
-          <div style={{ marginBottom: '28px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <div style={{ 
               fontSize: '10px', 
               textTransform: 'uppercase', 
@@ -710,7 +1039,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
               />
               <AppendixStat 
                 label="Incremental Visitors" 
-                value={`${formatNumber(traffic_summary.incremental_visitors)}`}
+                value={`+${formatNumber(traffic_summary.incremental_visitors)}`}
                 subvalue={formatPercent(traffic_summary.visitor_uplift_percent)}
                 positive={traffic_summary.visitor_uplift_percent > 0}
               />
@@ -721,11 +1050,80 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
             </div>
           </div>
 
+          {/* Methodology Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ 
+              fontSize: '10px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '1px',
+              color: '#a1a1aa',
+              fontWeight: '600',
+              marginBottom: '14px',
+              paddingBottom: '8px',
+              borderBottom: '1px solid #e4e4e7'
+            }}>
+              Methodology
+            </div>
+            <div style={{ 
+              backgroundColor: '#fafafa',
+              borderRadius: '8px',
+              padding: '16px 20px',
+              border: '1px solid #e4e4e7',
+              fontSize: '11px',
+              color: '#52525b',
+              lineHeight: '1.7'
+            }}>
+              <p style={{ margin: '0 0 12px 0' }}>
+                This report uses <strong>incrementality analysis</strong> to measure the causal impact 
+                of marketing activities. We compare observed behavior during the campaign (event period) 
+                against expected behavior based on historical baseline.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                <div><strong>Baseline Period:</strong> {windows.baseline_days} days of pre-event activity</div>
+                <div><strong>Event Period:</strong> {windows.event_days} days during/after the event</div>
+                <div><strong>Incremental:</strong> Actual - Expected</div>
+                <div><strong>Confidence:</strong> Statistical significance of the observed lift</div>
+              </div>
+            </div>
+          </div>
+
           {/* Spacer */}
           <div style={{ flex: 1 }} />
 
-          {/* Page Footer */}
-          <PageFooter analysisPeriod={analysisPeriodText} showBranding />
+          {/* Final Branded Footer */}
+          <div style={{ 
+            paddingTop: '20px',
+            borderTop: '2px solid #18181b',
+            marginTop: '16px',
+            textAlign: 'center'
+          }}>
+            <img 
+              src={audienceScanLogo} 
+              alt="AudienceScan" 
+              style={{ height: '28px', marginBottom: '8px' }}
+            />
+            <div style={{ fontSize: '10px', color: '#71717a' }}>
+              Generated by AudienceScan  •  audiencescan.io
+            </div>
+            <div style={{ fontSize: '9px', color: '#a1a1aa', marginTop: '4px' }}>
+              Report generated on {new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+            <div style={{ 
+              fontSize: '9px', 
+              color: '#a1a1aa', 
+              marginTop: '12px',
+              paddingTop: '12px',
+              borderTop: '1px solid #e4e4e7'
+            }}>
+              {analysisPeriodText}  •  Page {++currentPage} of {totalPages}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -734,25 +1132,44 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
 // ==================== HELPER COMPONENTS FOR PDF ====================
 
-function PageHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function ReportPageHeader({ title, subtitle, eventName }: { title: string; subtitle: string; eventName: string }) {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h2 style={{ 
-        fontSize: '18px', 
-        fontWeight: '700', 
-        color: '#18181b',
-        margin: '0 0 4px 0'
-      }}>
-        {title}
-      </h2>
-      <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>
-        {subtitle}
-      </p>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'flex-start',
+      marginBottom: '20px',
+      paddingBottom: '16px',
+      borderBottom: '2px solid #18181b'
+    }}>
+      <div>
+        <h2 style={{ 
+          fontSize: '18px', 
+          fontWeight: '700', 
+          color: '#18181b',
+          margin: '0 0 4px 0'
+        }}>
+          {title}
+        </h2>
+        <p style={{ fontSize: '12px', color: '#71717a', margin: 0 }}>
+          {subtitle}
+        </p>
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontSize: '10px', color: '#a1a1aa', marginBottom: '2px' }}>
+          {eventName}
+        </div>
+        <img 
+          src={audienceScanLogo} 
+          alt="AudienceScan" 
+          style={{ height: '18px', opacity: 0.7 }}
+        />
+      </div>
     </div>
   );
 }
 
-function PageFooter({ analysisPeriod, showBranding = false }: { analysisPeriod: string; showBranding?: boolean }) {
+function PageFooter({ analysisPeriod, pageNumber, totalPages }: { analysisPeriod: string; pageNumber: number; totalPages: number }) {
   return (
     <div style={{ 
       paddingTop: '16px',
@@ -767,30 +1184,24 @@ function PageFooter({ analysisPeriod, showBranding = false }: { analysisPeriod: 
         alignItems: 'center'
       }}>
         <span>{analysisPeriod}</span>
-        {showBranding && (
-          <span style={{ fontWeight: '500' }}>
-            Powered by AudienceScan
-          </span>
-        )}
+        <span style={{ fontWeight: '500' }}>
+          Page {pageNumber} of {totalPages}
+        </span>
       </div>
     </div>
   );
 }
 
-function SectionHeader({ icon, title }: { icon: string; title: string }) {
+function SectionHeader({ title }: { title: string }) {
   return (
     <div style={{ 
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      marginBottom: '12px',
-      paddingBottom: '8px',
+      marginBottom: '14px',
+      paddingBottom: '10px',
       borderBottom: '2px solid #18181b'
     }}>
-      <span style={{ fontSize: '14px' }}>{icon}</span>
       <span style={{ 
         fontSize: '13px',
-        fontWeight: '600',
+        fontWeight: '700',
         color: '#18181b',
         textTransform: 'uppercase',
         letterSpacing: '0.5px'
@@ -849,16 +1260,16 @@ function MetricCard({
   );
 }
 
-function FunnelRowPDF({
+function FunnelComparisonBar({
   label,
-  actual,
   expected,
+  actual,
   incremental,
   upliftPercent,
 }: {
   label: string;
-  actual: number;
   expected: number;
+  actual: number;
   incremental: number;
   upliftPercent: number;
 }) {
@@ -868,59 +1279,190 @@ function FunnelRowPDF({
   };
 
   const isPositive = incremental > 0;
+  const maxValue = Math.max(expected, actual) || 1;
+  const expectedWidth = (expected / maxValue) * 100;
+  const actualWidth = (actual / maxValue) * 100;
 
   return (
     <div style={{ 
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
       backgroundColor: '#fafafa',
-      borderRadius: '8px',
-      padding: '12px 14px',
+      borderRadius: '10px',
+      padding: '16px 18px',
       border: '1px solid #e4e4e7'
     }}>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b', marginBottom: '2px' }}>
+      {/* Label and Incremental Value */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '12px'
+      }}>
+        <span style={{ fontSize: '14px', fontWeight: '600', color: '#18181b' }}>
           {label}
-        </div>
-        <div style={{ fontSize: '11px', color: '#71717a' }}>
-          {formatNum(actual)} actual vs {formatNum(expected)} expected
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ 
-            fontSize: '15px', 
+        </span>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          backgroundColor: isPositive ? '#dcfce7' : '#fee2e2',
+          padding: '4px 10px',
+          borderRadius: '16px'
+        }}>
+          {isPositive ? <TrendingUp size={14} color="#059669" /> : <TrendingDown size={14} color="#dc2626" />}
+          <span style={{ 
+            fontSize: '13px', 
             fontWeight: '700',
-            color: isPositive ? '#059669' : '#dc2626',
-            lineHeight: 1
+            color: isPositive ? '#166534' : '#991b1b'
           }}>
             {incremental > 0 ? '+' : ''}{formatNum(incremental)}
-          </div>
-          <div style={{ 
+          </span>
+          <span style={{ 
             fontSize: '11px',
-            color: isPositive ? '#10b981' : '#ef4444',
-            marginTop: '2px'
+            color: isPositive ? '#15803d' : '#dc2626'
           }}>
-            {upliftPercent > 0 ? '+' : ''}{upliftPercent.toFixed(1)}%
-          </div>
-        </div>
-        <div style={{ 
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          backgroundColor: isPositive ? '#d1fae5' : '#fee2e2',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {isPositive ? (
-            <TrendingUp size={14} color="#059669" />
-          ) : (
-            <TrendingDown size={14} color="#dc2626" />
-          )}
+            ({upliftPercent > 0 ? '+' : ''}{upliftPercent.toFixed(1)}%)
+          </span>
         </div>
       </div>
+      
+      {/* Expected Bar */}
+      <div style={{ marginBottom: '8px' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px',
+          marginBottom: '4px'
+        }}>
+          <span style={{ fontSize: '10px', color: '#71717a', width: '70px', fontWeight: '500' }}>EXPECTED</span>
+          <div style={{ 
+            flex: 1, 
+            height: '20px', 
+            backgroundColor: '#e4e4e7',
+            borderRadius: '4px',
+            overflow: 'hidden'
+          }}>
+            <div style={{ 
+              height: '100%',
+              width: `${expectedWidth}%`,
+              background: 'linear-gradient(90deg, #a1a1aa 0%, #71717a 100%)',
+              borderRadius: '4px'
+            }} />
+          </div>
+          <span style={{ fontSize: '12px', fontWeight: '600', color: '#52525b', width: '50px', textAlign: 'right' }}>
+            {formatNum(expected)}
+          </span>
+        </div>
+      </div>
+      
+      {/* Actual Bar */}
+      <div>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px'
+        }}>
+          <span style={{ fontSize: '10px', color: '#059669', width: '70px', fontWeight: '600' }}>ACTUAL</span>
+          <div style={{ 
+            flex: 1, 
+            height: '20px', 
+            backgroundColor: '#d1fae5',
+            borderRadius: '4px',
+            overflow: 'hidden'
+          }}>
+            <div style={{ 
+              height: '100%',
+              width: `${actualWidth}%`,
+              background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+              borderRadius: '4px'
+            }} />
+          </div>
+          <span style={{ fontSize: '12px', fontWeight: '700', color: '#059669', width: '50px', textAlign: 'right' }}>
+            {formatNum(actual)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BreakdownTable({ 
+  data, 
+  formatNumber, 
+  formatPercent 
+}: { 
+  data: BreakdownItem[]; 
+  formatNumber: (n: number) => string;
+  formatPercent: (n: number) => string;
+}) {
+  return (
+    <div style={{ 
+      border: '1px solid #e4e4e7',
+      borderRadius: '8px',
+      overflow: 'hidden'
+    }}>
+      {/* Table Header */}
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+        backgroundColor: '#f4f4f5',
+        padding: '10px 16px',
+        fontSize: '10px',
+        fontWeight: '600',
+        color: '#52525b',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px'
+      }}>
+        <div>Dimension</div>
+        <div style={{ textAlign: 'right' }}>Baseline</div>
+        <div style={{ textAlign: 'right' }}>Actual</div>
+        <div style={{ textAlign: 'right' }}>Incremental</div>
+        <div style={{ textAlign: 'right' }}>Uplift</div>
+      </div>
+      
+      {/* Table Rows */}
+      {data.map((item, idx) => (
+        <div 
+          key={idx}
+          style={{ 
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+            padding: '12px 16px',
+            fontSize: '12px',
+            borderTop: '1px solid #e4e4e7',
+            backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff'
+          }}
+        >
+          <div style={{ 
+            fontWeight: idx === 0 ? '600' : '500',
+            color: '#18181b',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {item.key || '(not set)'}
+          </div>
+          <div style={{ textAlign: 'right', color: '#71717a' }}>
+            {formatNumber(item.baseline_total)}
+          </div>
+          <div style={{ textAlign: 'right', color: '#18181b', fontWeight: '500' }}>
+            {formatNumber(item.actual)}
+          </div>
+          <div style={{ 
+            textAlign: 'right', 
+            fontWeight: '600',
+            color: item.incremental > 0 ? '#059669' : item.incremental < 0 ? '#dc2626' : '#71717a'
+          }}>
+            {item.incremental > 0 ? '+' : ''}{formatNumber(item.incremental)}
+          </div>
+          <div style={{ 
+            textAlign: 'right',
+            fontWeight: '600',
+            color: item.uplift_percent > 0 ? '#059669' : item.uplift_percent < 0 ? '#dc2626' : '#71717a'
+          }}>
+            {formatPercent(item.uplift_percent)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
