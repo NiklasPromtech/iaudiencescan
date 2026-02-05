@@ -75,7 +75,7 @@ const BREAKDOWN_OPTIONS = [
   { value: "referrer_domain", label: "Referrer Domain" },
 ];
 
-type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries";
+type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries" | "wallet_actions";
 
 interface FilterSection {
   key: FilterKey;
@@ -88,11 +88,13 @@ const INCLUDE_FILTER_SECTIONS: FilterSection[] = [
   { key: "utm_medium", label: "Medium" },
   { key: "utm_campaign", label: "Campaign" },
   { key: "countries", label: "Country" },
+  { key: "wallet_actions", label: "Wallet Action" },
 ];
 
 const EXCLUDE_FILTER_SECTIONS: FilterSection[] = [
   { key: "sources", label: "Source" },
   { key: "utm_source", label: "UTM Source" },
+  { key: "wallet_actions", label: "Wallet Action" },
 ];
 
 interface MultiSelectFilterProps {
@@ -261,6 +263,7 @@ export function IncrementalityAnalysisDialog({
     utm_content: [],
     utm_term: [],
     countries: [],
+    wallet_actions: [],
   });
   const [excludeFilters, setExcludeFilters] = useState<Record<FilterKey, string[]>>({
     sources: [],
@@ -270,6 +273,7 @@ export function IncrementalityAnalysisDialog({
     utm_content: [],
     utm_term: [],
     countries: [],
+    wallet_actions: [],
   });
   const [excludeBots, setExcludeBots] = useState(true);
   const [utmFree, setUtmFree] = useState(false);
