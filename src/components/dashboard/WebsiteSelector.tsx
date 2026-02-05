@@ -43,8 +43,8 @@ export function WebsiteSelector() {
       status: website.status,
     };
     selectWebsite(selected);
-    // Reload current page to refresh data with new website
-    window.location.reload();
+    // Navigate to overview when switching websites
+    navigate("/overview");
   };
 
   if (!selectedWebsite) {
