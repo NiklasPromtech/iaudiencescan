@@ -171,7 +171,8 @@ const Overview = () => {
     filters: ActiveFilters, 
     dimension: TableDimension, 
     rangeConfig: RangeConfig,
-    conversionEvent: string | null
+    conversionEvent: string | null,
+    walletAction: string | null
   ) => {
     if (!selectedWebsite) return;
 
@@ -185,6 +186,12 @@ const Overview = () => {
 
     const filtersParam = getFiltersParam(filters);
     const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
+    const walletActionsFilter = walletAction ? [walletAction] : undefined;
+    
+    // Merge wallet_actions into filters if set
+    const mergedFilters = walletActionsFilter 
+      ? { ...filtersParam, wallet_actions: walletActionsFilter }
+      : filtersParam;
 
     try {
       // Fetch core data in parallel - these are critical
@@ -192,7 +199,7 @@ const Overview = () => {
         fetchScorecard({
           tag_id: selectedWebsite.id,
           range: rangeConfig,
-          filters: filtersParam,
+          filters: mergedFilters,
           conversion_events: conversionEvents,
           cost: { mode: "none" },
         }),
@@ -200,7 +207,7 @@ const Overview = () => {
           tag_id: selectedWebsite.id,
           dimension: "date_day",
           range: rangeConfig,
-          filters: filtersParam,
+          filters: mergedFilters,
           conversion_events: conversionEvents,
           cost: { mode: "none" },
         }),
@@ -208,7 +215,7 @@ const Overview = () => {
           tag_id: selectedWebsite.id,
           dimension,
           range: rangeConfig,
-          filters: filtersParam,
+          filters: mergedFilters,
           conversion_events: conversionEvents,
           cost: { mode: "none" },
           pagination: { limit: 50 },
@@ -231,7 +238,7 @@ const Overview = () => {
       const eventsTableData = await fetchEventsTable({
         tag_id: selectedWebsite.id,
         range: rangeConfig,
-        filters: filtersParam,
+        filters: mergedFilters,
         sort: { by: "event_count", dir: "desc" },
         pagination: { limit: 10 },
       });
@@ -246,7 +253,7 @@ const Overview = () => {
       const walletsTableData = await fetchWalletsTable({
         tag_id: selectedWebsite.id,
         range: rangeConfig,
-        filters: filtersParam,
+        filters: mergedFilters,
         sort: { by: "action_count", dir: "desc" },
         pagination: { limit: 10 },
       });
@@ -262,7 +269,7 @@ const Overview = () => {
       const walletExtensionsTableData = await fetchWalletExtensions({
         tag_id: selectedWebsite.id,
         range: rangeConfig,
-        filters: filtersParam,
+        filters: mergedFilters,
       });
       setWalletExtensionsData(walletExtensionsTableData);
     } catch (err) {
@@ -341,12 +348,12 @@ const Overview = () => {
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent);
+      loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
       // Also load cost sources and filter options
       loadCostSources();
       loadFilterOptions();
     }
-  }, [selectedWebsite, dateRange, selectedConversionEvent]);
+  }, [selectedWebsite, dateRange, selectedConversionEvent, selectedWalletAction]);
 
   // Load cost sources
   const loadCostSources = useCallback(async () => {
@@ -384,7 +391,7 @@ const Overview = () => {
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent);
+    loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
