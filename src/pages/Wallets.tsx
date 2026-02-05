@@ -35,7 +35,7 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
-import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS } from "@/lib/api";
+import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS, WALLET_ACTION_TYPES } from "@/lib/api";
 import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -57,6 +57,8 @@ export default function Wallets() {
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 0, includeToday: true });
   const [enrichingWallets, setEnrichingWallets] = useState<Set<string>>(new Set());
   const [showFailed, setShowFailed] = useState(false);
+  const [selectedChains, setSelectedChains] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleEnrichWallet = async (walletId: string) => {
@@ -152,6 +154,8 @@ export default function Wallets() {
         range: rangeConfig,
         search: debouncedSearch || undefined,
         balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
+        types: selectedTypes.length > 0 ? selectedTypes : undefined,
+        chains: selectedChains.length > 0 ? selectedChains : undefined,
         sort_by: sortBy,
         sort_dir: sortDir,
         limit: PAGE_SIZE,
@@ -171,7 +175,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, toast]);
+  }, [debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, selectedChains, selectedTypes, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -346,6 +350,72 @@ export default function Wallets() {
                     setCurrentPage(0);
                   }}
                 />
+              </div>
+
+              <div className="w-40">
+                <label className="text-sm font-medium mb-1.5 block">Chain</label>
+                <Select 
+                  value={selectedChains.length === 1 ? selectedChains[0] : selectedChains.length > 1 ? "multiple" : "all"}
+                  onValueChange={(v) => {
+                    if (v === "all") {
+                      setSelectedChains([]);
+                    } else if (v !== "multiple") {
+                      setSelectedChains([v]);
+                    }
+                    setCurrentPage(0);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All chains">
+                      {selectedChains.length === 0 
+                        ? "All chains" 
+                        : selectedChains.length === 1 
+                          ? SUPPORTED_CHAINS.find(c => c.value === selectedChains[0])?.label || selectedChains[0]
+                          : `${selectedChains.length} chains`}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All chains</SelectItem>
+                    {SUPPORTED_CHAINS.map((chain) => (
+                      <SelectItem key={chain.value} value={chain.value}>
+                        {chain.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="w-40">
+                <label className="text-sm font-medium mb-1.5 block">Wallet Action</label>
+                <Select 
+                  value={selectedTypes.length === 1 ? selectedTypes[0] : selectedTypes.length > 1 ? "multiple" : "all"}
+                  onValueChange={(v) => {
+                    if (v === "all") {
+                      setSelectedTypes([]);
+                    } else if (v !== "multiple") {
+                      setSelectedTypes([v]);
+                    }
+                    setCurrentPage(0);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All actions">
+                      {selectedTypes.length === 0 
+                        ? "All actions" 
+                        : selectedTypes.length === 1 
+                          ? WALLET_ACTION_TYPES.find(t => t.value === selectedTypes[0])?.label || selectedTypes[0]
+                          : `${selectedTypes.length} actions`}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All actions</SelectItem>
+                    {WALLET_ACTION_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex-1 min-w-[200px]">

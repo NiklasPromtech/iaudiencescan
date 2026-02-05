@@ -656,6 +656,7 @@ export interface WalletListRequest {
   tag_id: string;
   range: RangeConfig;
   types?: string[];
+  chains?: string[];
   search?: string;
   filters?: Record<string, string[]>;
   balance?: {
@@ -667,6 +668,19 @@ export interface WalletListRequest {
   limit?: number;
   offset?: number;
 }
+
+// Common wallet action types
+export const WALLET_ACTION_TYPES = [
+  { value: "connected", label: "Connected" },
+  { value: "manual", label: "Manual" },
+  { value: "deposited", label: "Deposited" },
+  { value: "withdrew", label: "Withdrew" },
+  { value: "staked", label: "Staked" },
+  { value: "unstaked", label: "Unstaked" },
+  { value: "swapped", label: "Swapped" },
+  { value: "minted", label: "Minted" },
+  { value: "claimed", label: "Claimed" },
+] as const;
 
 export interface WalletSummary {
   total_wallets: number;
