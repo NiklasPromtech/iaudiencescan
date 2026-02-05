@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Plus } from "lucide-react";
-import { TableRow } from "@/lib/api";
+import { TableRow, HolderDataPoint } from "@/lib/api";
 import { CreateTouchpointDialog } from "@/components/touchpoints/CreateTouchpointDialog";
 import { TouchpointDetailsDialog, type TouchpointDetails } from "@/components/touchpoints/TouchpointDetailsDialog";
 import { TouchpointListDialog } from "@/components/touchpoints/TouchpointListDialog";
@@ -28,12 +28,18 @@ import { useQuery } from "@tanstack/react-query";
 import type { Touchpoint } from "@/pages/Touchpoints";
 import { format, parseISO } from "date-fns";
 
+// Extended row type that includes holder data
+interface ExtendedTableRow extends TableRow {
+  holder_count?: number | null;
+}
+
 interface DailyChartProps {
   data: TableRow[];
   loading: boolean;
+  holderData?: HolderDataPoint[];
 }
 
-type MetricKey = keyof Omit<TableRow, "dim_value">;
+type MetricKey = keyof Omit<ExtendedTableRow, "dim_value">;
 
 interface MetricOption {
   key: MetricKey;
@@ -45,6 +51,7 @@ const METRIC_OPTIONS: MetricOption[] = [
   { key: "pageviews", label: "Page Views" },
   { key: "visitors_with_wallet_extension", label: "Wallet Extensions" },
   { key: "wallet_users", label: "Wallet Users" },
+  { key: "holder_count", label: "Token Holders" },
   { key: "converted_users", label: "Converted Users" },
   { key: "conversions_total", label: "Total Conversions" },
   { key: "bounce_count", label: "Bounces" },
@@ -63,7 +70,7 @@ const METRIC_MAP = Object.fromEntries(METRIC_OPTIONS.map((m) => [m.key, m]));
 const COLOR_LEFT = "hsl(var(--primary))";
 const COLOR_RIGHT = "hsl(var(--foreground))";
 
-export function DailyChart({ data, loading }: DailyChartProps) {
+export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
   const [metricRight, setMetricRight] = useState<MetricKey>("visitors_with_wallet_extension");
   const [createTouchpointOpen, setCreateTouchpointOpen] = useState(false);
@@ -88,6 +95,24 @@ export function DailyChart({ data, loading }: DailyChartProps) {
     enabled: !!selectedWebsite?.id,
   });
 
+  // Merge holder data into daily data
+  const mergedData = useMemo((): ExtendedTableRow[] => {
+    if (!holderData.length) return data;
+    
+    // Create a map of date -> holder_count (sum if multiple contracts)
+    const holdersByDate = new Map<string, number>();
+    holderData.forEach((h) => {
+      const existing = holdersByDate.get(h.date) || 0;
+      holdersByDate.set(h.date, existing + h.holder_count);
+    });
+    
+    // Merge into data rows
+    return data.map((row) => ({
+      ...row,
+      holder_count: holdersByDate.get(row.dim_value) ?? null,
+    }));
+  }, [data, holderData]);
+
   const chartConfig = useMemo(() => {
     return {
       [metricLeft]: {
@@ -102,7 +127,7 @@ export function DailyChart({ data, loading }: DailyChartProps) {
   }, [metricLeft, metricRight]);
 
   const chartData = useMemo(() => {
-    return data
+    return mergedData
       .map((row) => ({
         date: row.dim_value,
         [metricLeft]: row[metricLeft] ?? 0,
@@ -110,7 +135,7 @@ export function DailyChart({ data, loading }: DailyChartProps) {
         label: formatDate(row.dim_value),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [data, metricLeft, metricRight]);
+  }, [mergedData, metricLeft, metricRight]);
 
   // Get chart date keys for positioning
   const chartDates = useMemo(() => chartData.map((d) => d.date), [chartData]);
