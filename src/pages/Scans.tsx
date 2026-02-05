@@ -6,10 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Search, RefreshCw, ExternalLink } from "lucide-react";
-import { listScans, Scan, SUPPORTED_CHAINS } from "@/lib/api";
+import { AlertCircle, Search, RefreshCw, ExternalLink, Archive, ArchiveRestore, MoreHorizontal } from "lucide-react";
+import { listScans, archiveScan, unarchiveScan, Scan, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -24,6 +31,8 @@ const Scans = () => {
   const [scans, setScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const { toast } = useToast();
 
   const fetchScans = useCallback(async () => {
     if (!selectedWebsite?.id) return;
@@ -31,7 +40,10 @@ const Scans = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await listScans(selectedWebsite.id);
+      const response = await listScans({ 
+        websiteId: selectedWebsite.id,
+        include_archived: showArchived 
+      });
       setScans(response.scans || []);
     } catch (err) {
       console.error("Failed to fetch scans:", err);
@@ -39,7 +51,7 @@ const Scans = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedWebsite?.id]);
+  }, [selectedWebsite?.id, showArchived]);
 
   useEffect(() => {
     if (!websiteLoading && selectedWebsite?.id) {
@@ -58,9 +70,50 @@ const Scans = () => {
     }
   }, [scans, loading, fetchScans]);
 
+  const handleArchive = async (scan: Scan, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await archiveScan(scan.id);
+      setScans(scans.filter(s => s.id !== scan.id));
+      toast({
+        title: "Scan archived",
+        description: `${scan.name || `Scan ${scan.id.slice(0, 8)}`} has been archived.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to archive",
+        description: error.message || "Could not archive scan",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnarchive = async (scan: Scan, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await unarchiveScan(scan.id);
+      setScans(scans.map(s => 
+        s.id === scan.id ? { ...s, archived_at: null } : s
+      ));
+      toast({
+        title: "Scan restored",
+        description: `${scan.name || `Scan ${scan.id.slice(0, 8)}`} has been restored.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to restore",
+        description: error.message || "Could not restore scan",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getChainLabel = (chain: string) => {
     return SUPPORTED_CHAINS.find((c) => c.value === chain)?.label || chain;
   };
+
+  const activeScans = scans.filter(s => !s.archived_at);
+  const archivedScans = scans.filter(s => s.archived_at);
 
   return (
     <DashboardLayout>
@@ -73,10 +126,23 @@ const Scans = () => {
               View and track your audience scans
             </p>
           </div>
-          <Button variant="outline" onClick={fetchScans} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            {archivedScans.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowArchived(!showArchived)}
+                className="text-muted-foreground"
+              >
+                <Archive className="h-4 w-4 mr-2" />
+                {showArchived ? "Hide archived" : `Archived (${archivedScans.length})`}
+              </Button>
+            )}
+            <Button variant="outline" onClick={fetchScans} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Error State */}
@@ -111,7 +177,7 @@ const Scans = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && scans.length === 0 && (
+        {!loading && !error && activeScans.length === 0 && !showArchived && (
           <Card className="p-12 border border-dashed border-border text-center">
             <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <Search className="h-6 w-6 text-primary" />
@@ -125,9 +191,9 @@ const Scans = () => {
         )}
 
         {/* Scan List */}
-        {!loading && !error && scans.length > 0 && (
+        {!loading && !error && activeScans.length > 0 && (
           <div className="space-y-3">
-            {scans.map((scan) => (
+            {activeScans.map((scan) => (
               <Card
                 key={scan.id}
                 className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
@@ -153,6 +219,24 @@ const Scans = () => {
                       <Badge variant="outline" className={statusColors[scan.status] || ""}>
                         {scan.status}
                       </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => handleArchive(scan, e)}>
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archive
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
@@ -166,6 +250,44 @@ const Scans = () => {
                       <Progress value={(scan.progress || 0) * 100} className="h-1" />
                     </div>
                   )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Archived Scans */}
+        {!loading && !error && showArchived && archivedScans.length > 0 && (
+          <div className="space-y-3 mt-8">
+            <h2 className="text-lg font-medium text-muted-foreground mb-4">Archived Scans</h2>
+            {archivedScans.map((scan) => (
+              <Card
+                key={scan.id}
+                className="p-4 opacity-60 hover:opacity-80 transition-opacity"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <Search className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-muted-foreground">
+                        {scan.name || `Scan ${scan.id.slice(0, 8)}`}
+                      </h3>
+                      <p className="text-sm text-muted-foreground/70">
+                        {scan.wallet_count} wallets · {getChainLabel(scan.chain)} ·{" "}
+                        {formatDistanceToNow(new Date(scan.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => handleUnarchive(scan, e)}
+                  >
+                    <ArchiveRestore className="h-4 w-4 mr-2" />
+                    Restore
+                  </Button>
                 </div>
               </Card>
             ))}
