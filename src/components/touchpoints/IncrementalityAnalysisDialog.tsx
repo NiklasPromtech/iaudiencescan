@@ -62,6 +62,8 @@ const LOOK_WINDOW_OPTIONS = [
 ];
 
 const BREAKDOWN_OPTIONS = [
+  { value: "conversion_event", label: "Conversion Event" },
+  { value: "wallet_action", label: "Wallet Action" },
   { value: "utm_source", label: "UTM Source" },
   { value: "utm_medium", label: "UTM Medium" },
   { value: "utm_campaign", label: "UTM Campaign" },
@@ -248,7 +250,7 @@ export function IncrementalityAnalysisDialog({
   // Configuration state
   const [baselineDays, setBaselineDays] = useState(21);
   const [lookWindow, setLookWindow] = useState("24h");
-  const [breakdowns, setBreakdowns] = useState<string[]>([]);
+  const [breakdowns, setBreakdowns] = useState<string[]>(["conversion_event", "wallet_action"]);
   
   // Filter state
   const [includeFilters, setIncludeFilters] = useState<Record<FilterKey, string[]>>({
