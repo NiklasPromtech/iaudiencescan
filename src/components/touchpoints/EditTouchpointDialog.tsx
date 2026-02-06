@@ -18,7 +18,7 @@ import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Touchpoint } from "@/pages/Touchpoints";
+import type { Touchpoint } from "@/hooks/use-dashboard-queries";
 
 interface EditTouchpointDialogProps {
   open: boolean;

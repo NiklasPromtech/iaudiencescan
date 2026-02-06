@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Plus, FileCode2, Trash2, Pencil, BarChart3 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -18,26 +17,19 @@ import { CreateContractDialog } from "@/components/contracts/CreateContractDialo
 import { EditContractDialog } from "@/components/contracts/EditContractDialog";
 import { DeleteContractDialog } from "@/components/contracts/DeleteContractDialog";
 import { HolderChartDialog } from "@/components/contracts/HolderChartDialog";
-
-export interface TokenContract {
-  id: string;
-  website_id: string;
-  name: string;
-  contract_address: string;
-  chain: string;
-  chain_id: string | null;
-  start_date: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { useContracts, useInvalidateContracts, TokenContract } from "@/hooks/use-dashboard-queries";
 
 const Contracts = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [contracts, setContracts] = useState<TokenContract[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedWebsiteId, setSelectedWebsiteId] = useState<string | null>(null);
-  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const { selectedWebsite } = useSelectedWebsite();
+  const invalidateContracts = useInvalidateContracts();
+  
+  const {
+    data: contracts = [],
+    isLoading: loading,
+  } = useContracts(selectedWebsite?.id);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -45,43 +37,9 @@ const Contracts = () => {
   const [holderDialogOpen, setHolderDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<TokenContract | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("selectedWebsite");
-    if (stored) {
-      const website = JSON.parse(stored);
-      setSelectedWebsiteId(website.id);
-      setSelectedTagId(website.tag_id);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedWebsiteId) {
-      fetchContracts();
-    }
-  }, [selectedWebsiteId]);
-
-  const fetchContracts = async () => {
-    if (!selectedWebsiteId) return;
-    
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("website_tag_contracts")
-        .select("*")
-        .eq("website_id", selectedWebsiteId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setContracts(data || []);
-    } catch (error) {
-      console.error("Failed to fetch contracts:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load token contracts",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  const handleSuccess = () => {
+    if (selectedWebsite?.id) {
+      invalidateContracts(selectedWebsite.id);
     }
   };
 
@@ -100,7 +58,7 @@ const Contracts = () => {
     setHolderDialogOpen(true);
   };
 
-  if (!selectedWebsiteId) {
+  if (!selectedWebsite) {
     return (
       <DashboardLayout>
         <div className="p-6 flex flex-col items-center justify-center h-[60vh] text-center">
@@ -215,8 +173,8 @@ const Contracts = () => {
       <CreateContractDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        websiteId={selectedWebsiteId}
-        onSuccess={fetchContracts}
+        websiteId={selectedWebsite.id}
+        onSuccess={handleSuccess}
       />
 
       {selectedContract && (
@@ -225,20 +183,20 @@ const Contracts = () => {
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
             contract={selectedContract}
-            onSuccess={fetchContracts}
+            onSuccess={handleSuccess}
           />
           <DeleteContractDialog
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
             contract={selectedContract}
-            onSuccess={fetchContracts}
+            onSuccess={handleSuccess}
           />
-          {selectedTagId && (
+          {selectedWebsite.tag_id && (
             <HolderChartDialog
               open={holderDialogOpen}
               onOpenChange={setHolderDialogOpen}
               contract={selectedContract}
-              tagId={selectedTagId}
+              tagId={selectedWebsite.tag_id}
             />
           )}
         </>

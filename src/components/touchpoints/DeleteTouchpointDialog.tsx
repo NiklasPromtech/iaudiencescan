@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Touchpoint } from "@/pages/Touchpoints";
+import type { Touchpoint } from "@/hooks/use-dashboard-queries";
 
 interface DeleteTouchpointDialogProps {
   open: boolean;

@@ -64,7 +64,15 @@ import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
 import Change from "./pages/Change";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000, // 2 minutes - data is fresh for this long
+      gcTime: 10 * 60 * 1000, // 10 minutes - cache kept after unmount
+      refetchOnWindowFocus: false, // Don't refetch when tab regains focus
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
