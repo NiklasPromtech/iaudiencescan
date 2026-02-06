@@ -1,157 +1,105 @@
 
-# Adding Authentication Guards to Dashboard Pages
 
-## Overview
-Implement authentication protection across all dashboard pages so unauthenticated users are redirected to the sign-up/login page with a friendly message explaining they need to sign in.
+# News Source Domains: PR Opportunities Feature
 
----
+## The Idea
 
-## Current State Analysis
-
-**Pages WITH auth protection:**
-- `/install` - Checks `supabase.auth.getUser()` and redirects to `/auth` if not logged in
-
-**Pages WITHOUT auth protection (need to be fixed):**
-- `/overview` - Only checks for `selectedWebsite`
-- `/scans` - No auth check
-- `/scans/:scanId` - No auth check  
-- `/scans/:scanId/results` - No auth check
-- `/audiences` - No auth check
-- `/wallets` - No auth check
-- `/touchpoints` - No auth check
-- `/contracts` - No auth check
-- `/costs` - No auth check
-- `/events` - No auth check
-- `/settings` - No auth check
-- `/bots` - No auth check
+Aggregate all unique news source domains from the news feed and present them as **PR Opportunities** - media outlets that are already covering tokens your audience holds. The positioning: *"These publications cover projects your audience invests in. If they're writing about these tokens, they might write about you too."*
 
 ---
 
-## Solution: Create a `RequireAuth` Wrapper Component
+## What We'll Build
 
-### Approach
-Create a reusable component that wraps protected routes and handles:
-1. Checking authentication state via Supabase
-2. Showing a loading spinner while checking
-3. Redirecting to `/auth` with a message if not authenticated
-4. Rendering children if authenticated
+### 1. PR Outlets Section in News Feed Tab
+
+Add a collapsible/expandable section at the top of the News Feed tab showing:
+
+```text
++------------------------------------------------------------------+
+|  PR Opportunities                                                 |
+|  12 media outlets covering these communities        [Copy] [CSV]  |
++------------------------------------------------------------------+
+|  These outlets write about projects your audience invests in.     |
+|  If they're here, maybe you should be too.                       |
++------------------------------------------------------------------+
+|                                                                    |
+|  coinspeaker.com        | 23 articles  | [Visit Site]            |
+|  benzinga.com           | 18 articles  | [Visit Site]            |
+|  seekingalpha.com       | 12 articles  | [Visit Site]            |
+|  banklesstimes.com      |  8 articles  | [Visit Site]            |
+|  (sorted by article count)                                        |
++------------------------------------------------------------------+
+```
+
+### 2. PR Outlets Card in Export Center
+
+Add a new export card in the URLs section:
+
+```text
++-------------------+
+| PR Outlets        |
+| 12 domains        |
+| [Copy] [CSV]      |
++-------------------+
+```
+
+### 3. PR Outlets Badge in Summary
+
+Add a count badge: **"12 PR Outlets"** alongside the existing badges
 
 ---
 
 ## Technical Implementation
 
-### 1. Create `RequireAuth` Component
+### New Utility Functions (`src/lib/export-utils.ts`)
 
-**File: `src/components/auth/RequireAuth.tsx`**
+```typescript
+// Aggregate news sources with article counts
+export interface NewsSourceAggregate {
+  domain: string;
+  article_count: number;
+  latest_article: string; // date
+  sample_url: string; // one article URL to visit
+}
 
-```text
-+--------------------------------------------+
-|              RequireAuth                    |
-+--------------------------------------------+
-| - Checks supabase.auth.getSession()        |
-| - Shows loading state while checking       |
-| - Redirects to /auth?message=... if no user|
-| - Renders {children} if authenticated      |
-+--------------------------------------------+
+export function aggregateNewsSources(tokens: ScanResultsTopToken[]): NewsSourceAggregate[]
+
+// Get unique domain list for export
+export function formatNewsSourceDomains(tokens: ScanResultsTopToken[]): string[]
 ```
 
-The component will:
-- Use `supabase.auth.getSession()` for initial check
-- Listen to `onAuthStateChange` for real-time updates
-- Pass a URL parameter `?message=signin_required` to the auth page
-- The auth page will display a friendly message based on this parameter
+### New Component: `PROutletsSection.tsx`
 
-### 2. Update Auth Page to Show Message
+A section component showing:
+- Header with count and export buttons
+- Value proposition copy ("These outlets...")
+- Sortable list of domains with article counts
+- Visit site button for each domain
 
-**File: `src/pages/Auth.tsx`**
+### Updates to Existing Components
 
-Add logic to check for the `message` URL parameter and display an appropriate alert:
-- `signin_required` -> "Please sign in to access the dashboard"
-
-### 3. Wrap Protected Routes
-
-**File: `src/App.tsx`**
-
-Wrap all dashboard routes with the `RequireAuth` component:
-
-```tsx
-<Route path="/overview" element={
-  <RequireAuth>
-    <Overview />
-  </RequireAuth>
-} />
-```
-
-Routes to protect:
-- `/overview`
-- `/install`
-- `/scans`
-- `/scans/:scanId`
-- `/scans/:scanId/results`
-- `/audiences`
-- `/wallets`
-- `/touchpoints`
-- `/contracts`
-- `/costs`
-- `/events`
-- `/settings`
-- `/bots`
-
-### 4. Remove Redundant Auth Check from Install.tsx
-
-Since `RequireAuth` will handle authentication, the manual auth check in `Install.tsx` can be removed (simplifies code and avoids double-checking).
-
----
-
-## User Experience Flow
-
-```text
-User visits /overview (not logged in)
-         |
-         v
-   RequireAuth checks session
-         |
-         v
-   No session found
-         |
-         v
-   Redirect to /auth?message=signin_required
-         |
-         v
-   Auth page shows:
-   "Please sign in to access the dashboard"
-```
+| Component | Change |
+|-----------|--------|
+| `NewsFeedTab.tsx` | Add PROutletsSection at the top |
+| `ExportCenterTab.tsx` | Add PR Outlets export card |
+| `SummaryBadges.tsx` | Add PR Outlets badge |
+| `export-utils.ts` | Add aggregation functions |
 
 ---
 
 ## Files to Create/Modify
 
-1. **Create** `src/components/auth/RequireAuth.tsx` - Auth guard wrapper
-2. **Modify** `src/pages/Auth.tsx` - Display message from URL params
-3. **Modify** `src/App.tsx` - Wrap protected routes with RequireAuth
-4. **Modify** `src/pages/Install.tsx` - Remove redundant auth check (optional cleanup)
+1. **Modify** `src/lib/export-utils.ts` - Add news source aggregation utilities
+2. **Create** `src/components/scan-results/PROutletsSection.tsx` - PR opportunities display
+3. **Modify** `src/components/scan-results/NewsFeedTab.tsx` - Integrate PROutletsSection
+4. **Modify** `src/components/scan-results/ExportCenterTab.tsx` - Add PR Outlets export card
+5. **Modify** `src/components/scan-results/SummaryBadges.tsx` - Add PR outlets badge
 
 ---
 
-## Message Display on Auth Page
+## User Value
 
-When redirected with `?message=signin_required`, the Auth page will show:
+- **Instant PR outreach list**: One-click export of media outlets covering your audience's investments
+- **Prioritized targets**: Sorted by article count (more articles = more likely to cover similar projects)
+- **Actionable insight**: Clear messaging that frames this as "where your competitors get coverage"
 
-```text
-+------------------------------------------+
-|  [Info Icon]                              |
-|  Sign in required                         |
-|  Please sign in to access your dashboard  |
-+------------------------------------------+
-```
-
-This appears as a styled alert above the login form.
-
----
-
-## Security Considerations
-
-- Auth check happens on every route load (not just initial)
-- Uses Supabase's session management (handles token refresh automatically)
-- No sensitive data exposed if user manipulates URL
-- Backend API calls still require valid auth tokens (defense in depth)
