@@ -140,9 +140,9 @@ const LandingPageV3 = () => {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
             {/* Scorecard row */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border">
-              {mockScorecard.map((s, i) => (
-                <div key={s.label} className={`px-5 py-4 border-border ${i < mockScorecard.length - 1 ? "sm:border-r" : ""} ${i % 2 === 0 ? "max-sm:border-r" : ""}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border [&>*:not(:last-child)]:border-r [&>*:not(:last-child)]:border-border max-sm:[&>*:nth-child(2)]:border-r-0 max-sm:[&>*:nth-child(4)]:border-r-0">
+              {mockScorecard.map((s) => (
+                <div key={s.label} className="px-5 py-4">
                   <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
                   <p className={`text-lg font-bold tabular-nums ${s.highlight ? "text-destructive" : "text-foreground"}`}>{s.value}</p>
                 </div>
