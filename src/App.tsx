@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RequireAuth from "./components/auth/RequireAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Sample1 from "./pages/Sample1";
@@ -126,20 +127,20 @@ const App = () => (
           <Route path="/placeholder/confidence" element={<PlaceholderConfidence />} />
           <Route path="/placeholder/ai" element={<PlaceholderAI />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/install" element={<Install />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/change" element={<Change />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/audiences" element={<Audiences />} />
-          <Route path="/wallets" element={<Wallets />} />
-          <Route path="/scans" element={<Scans />} />
-          <Route path="/scans/:scanId" element={<ScanDetail />} />
-          <Route path="/scans/:scanId/results" element={<ScanResults />} />
-          <Route path="/costs" element={<Costs />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/bots" element={<Bots />} />
-          <Route path="/touchpoints" element={<Touchpoints />} />
-          <Route path="/contracts" element={<Contracts />} />
+          <Route path="/install" element={<RequireAuth><Install /></RequireAuth>} />
+          <Route path="/overview" element={<RequireAuth><Overview /></RequireAuth>} />
+          <Route path="/change" element={<RequireAuth><Change /></RequireAuth>} />
+          <Route path="/events" element={<RequireAuth><Events /></RequireAuth>} />
+          <Route path="/audiences" element={<RequireAuth><Audiences /></RequireAuth>} />
+          <Route path="/wallets" element={<RequireAuth><Wallets /></RequireAuth>} />
+          <Route path="/scans" element={<RequireAuth><Scans /></RequireAuth>} />
+          <Route path="/scans/:scanId" element={<RequireAuth><ScanDetail /></RequireAuth>} />
+          <Route path="/scans/:scanId/results" element={<RequireAuth><ScanResults /></RequireAuth>} />
+          <Route path="/costs" element={<RequireAuth><Costs /></RequireAuth>} />
+          <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+          <Route path="/bots" element={<RequireAuth><Bots /></RequireAuth>} />
+          <Route path="/touchpoints" element={<RequireAuth><Touchpoints /></RequireAuth>} />
+          <Route path="/contracts" element={<RequireAuth><Contracts /></RequireAuth>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

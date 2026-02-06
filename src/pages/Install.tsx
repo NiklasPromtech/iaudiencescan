@@ -43,10 +43,8 @@ const Install = () => {
   useEffect(() => {
     const fetchWebsites = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+      // Auth is now handled by RequireAuth wrapper, but we still need user for queries
+      if (!user) return;
 
       try {
         const response = await listWebsites({ include_archived: showArchived });
