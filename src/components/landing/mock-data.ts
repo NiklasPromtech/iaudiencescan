@@ -71,10 +71,10 @@ export const mockPlatformTokens = {
     count: 7,
     color: "bg-sky-500/10 text-sky-500 border-sky-500/20",
     tokens: [
-      { symbol: "LINK", name: "Chainlink", handle: "@chainlink", marketCap: "$5.8B" },
-      { symbol: "ONDO", name: "Ondo Finance", handle: "@OndoFinance", marketCap: "$1.1B" },
-      { symbol: "XAUT", name: "Tether Gold", handle: "@tethergold", marketCap: "$2.5B" },
-      { symbol: "PAXG", name: "Paxos Gold", handle: "@paxosglobal", marketCap: "$2.2B" },
+      { symbol: "LINK", name: "Chainlink", handle: "@chainlink", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "@OndoFinance", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
+      { symbol: "XAUT", name: "Tether Gold", handle: "@tethergold", marketCap: "$2.5B", logo: "https://assets.coingecko.com/coins/images/10481/small/Tether_Gold.png" },
+      { symbol: "PAXG", name: "Paxos Gold", handle: "@paxosglobal", marketCap: "$2.2B", logo: "https://assets.coingecko.com/coins/images/9519/small/paxg.PNG" },
     ],
   },
   telegram: {
@@ -82,8 +82,8 @@ export const mockPlatformTokens = {
     count: 5,
     color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     tokens: [
-      { symbol: "LINK", name: "Chainlink", handle: "chainlinkofficial", marketCap: "$5.8B" },
-      { symbol: "ONDO", name: "Ondo Finance", handle: "ondofinance", marketCap: "$1.1B" },
+      { symbol: "LINK", name: "Chainlink", handle: "chainlinkofficial", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "ondofinance", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
       { symbol: "NUSD", name: "Neutrl USD", handle: "NeutrlOfficial", marketCap: "$226M" },
     ],
   },
@@ -92,9 +92,9 @@ export const mockPlatformTokens = {
     count: 4,
     color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
     tokens: [
-      { symbol: "ONDO", name: "Ondo Finance", handle: "Ondo DAO", marketCap: "$1.1B" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "Ondo DAO", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
       { symbol: "RESOLV", name: "Resolv", handle: "resolvcommunity", marketCap: "$28M" },
-      { symbol: "EUL", name: "Euler Finance", handle: "euler.finance", marketCap: "$16.5M" },
+      { symbol: "EUL", name: "Euler Finance", handle: "euler.finance", marketCap: "$16.5M", logo: "https://assets.coingecko.com/coins/images/26149/small/YCvKDfl8_400x400.jpeg" },
     ],
   },
   reddit: {
@@ -102,7 +102,7 @@ export const mockPlatformTokens = {
     count: 1,
     color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
     tokens: [
-      { symbol: "LINK", name: "Chainlink", handle: "r/Chainlink", marketCap: "$5.8B" },
+      { symbol: "LINK", name: "Chainlink", handle: "r/Chainlink", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
     ],
   },
 };
