@@ -68,52 +68,50 @@ export const mockHolderTrend = Array.from({ length: 30 }, (_, i) => {
 export const mockPlatformTokens = {
   twitter: {
     label: "X / Twitter",
-    count: 8,
+    count: 7,
     color: "bg-sky-500/10 text-sky-500 border-sky-500/20",
     tokens: [
-      { symbol: "LINK", name: "Chainlink", handle: "@chainlink", marketCap: "$8.2B" },
-      { symbol: "AAVE", name: "Aave", handle: "@aabornyakov", marketCap: "$1.4B" },
-      { symbol: "UNI", name: "Uniswap", handle: "@uniswap", marketCap: "$5.8B" },
-      { symbol: "ARB", name: "Arbitrum", handle: "@arbitrum", marketCap: "$2.1B" },
+      { symbol: "LINK", name: "Chainlink", handle: "@chainlink", marketCap: "$5.8B" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "@OndoFinance", marketCap: "$1.1B" },
+      { symbol: "XAUT", name: "Tether Gold", handle: "@tethergold", marketCap: "$2.5B" },
+      { symbol: "PAXG", name: "Paxos Gold", handle: "@paxosglobal", marketCap: "$2.2B" },
     ],
   },
   telegram: {
     label: "Telegram",
-    count: 6,
+    count: 5,
     color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     tokens: [
-      { symbol: "RNDR", name: "Render", handle: "render_network", marketCap: "$3.2B" },
-      { symbol: "OP", name: "Optimism", handle: "optimism", marketCap: "$1.8B" },
-      { symbol: "MATIC", name: "Polygon", handle: "polygonofficial", marketCap: "$4.1B" },
-    ],
-  },
-  reddit: {
-    label: "Reddit",
-    count: 4,
-    color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-    tokens: [
-      { symbol: "ETH", name: "Ethereum", handle: "r/ethereum", marketCap: "$280B" },
-      { symbol: "SOL", name: "Solana", handle: "r/solana", marketCap: "$62B" },
-      { symbol: "ATOM", name: "Cosmos", handle: "r/cosmosnetwork", marketCap: "$2.8B" },
+      { symbol: "LINK", name: "Chainlink", handle: "chainlinkofficial", marketCap: "$5.8B" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "ondofinance", marketCap: "$1.1B" },
+      { symbol: "NUSD", name: "Neutrl USD", handle: "NeutrlOfficial", marketCap: "$226M" },
     ],
   },
   discord: {
     label: "Discord",
-    count: 3,
+    count: 4,
     color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
     tokens: [
-      { symbol: "LDO", name: "Lido", handle: "Lido DAO", marketCap: "$1.6B" },
-      { symbol: "MKR", name: "Maker", handle: "MakerDAO", marketCap: "$1.2B" },
-      { symbol: "CRV", name: "Curve", handle: "Curve Finance", marketCap: "$0.5B" },
+      { symbol: "ONDO", name: "Ondo Finance", handle: "Ondo DAO", marketCap: "$1.1B" },
+      { symbol: "RESOLV", name: "Resolv", handle: "resolvcommunity", marketCap: "$28M" },
+      { symbol: "EUL", name: "Euler Finance", handle: "euler.finance", marketCap: "$16.5M" },
+    ],
+  },
+  reddit: {
+    label: "Reddit",
+    count: 1,
+    color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+    tokens: [
+      { symbol: "LINK", name: "Chainlink", handle: "r/Chainlink", marketCap: "$5.8B" },
     ],
   },
 };
-
 export const mockNewsArticles = [
-  { symbol: "LINK", token: "Chainlink", title: "Chainlink Expands Cross-Chain Services to Base Network", source: "CoinDesk", timeAgo: "2h ago" },
-  { symbol: "UNI", token: "Uniswap", title: "Uniswap Labs Proposes New Fee Structure for V4", source: "The Block", timeAgo: "6h ago" },
-  { symbol: "ARB", token: "Arbitrum", title: "Arbitrum DAO Approves $50M Gaming Catalyst Fund", source: "Decrypt", timeAgo: "1d ago" },
-  { symbol: "AAVE", token: "Aave", title: "Aave Deploys Lending Markets on zkSync Era", source: "CryptoSlate", timeAgo: "2d ago" },
+  { symbol: "USDC", token: "USD Coin", title: "Circle Partners Polymarket to Integrate Native USDC, Eliminating Bridge Risk", source: "CoinSpeaker", timeAgo: "1h ago" },
+  { symbol: "XAUT", token: "Tether Gold", title: "$150M Investment in Tether Gold.com: XAUt Integration", source: "COINOTAG", timeAgo: "3h ago" },
+  { symbol: "ONDO", token: "Ondo Finance", title: "MetaMask Partners Ondo Finance to Integrate Tokenized US Stocks, ETFs", source: "CoinSpeaker", timeAgo: "1d ago" },
+  { symbol: "LINK", token: "Chainlink", title: "Morph Integrates Chainlink CCIP As Exclusive Cross-Chain Standard", source: "Blockchain Reporter", timeAgo: "1d ago" },
+  { symbol: "PAXG", token: "Paxos Gold", title: "Paxos Gold (PAXG) sees record $248 million inflow in January", source: "CoinDesk", timeAgo: "1w ago" },
 ];
 
 export const mockBotSummary = [
@@ -123,7 +121,9 @@ export const mockBotSummary = [
 ];
 
 export const mockPROutlets = [
-  { name: "CoinDesk", articles: 14 },
-  { name: "The Block", articles: 9 },
-  { name: "Decrypt", articles: 7 },
+  { name: "CoinSpeaker", articles: 6 },
+  { name: "CoinDesk", articles: 4 },
+  { name: "Blockchain Reporter", articles: 3 },
+  { name: "Seeking Alpha", articles: 2 },
+  { name: "Benzinga", articles: 2 },
 ];
