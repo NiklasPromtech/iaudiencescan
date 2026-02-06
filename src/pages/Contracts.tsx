@@ -94,7 +94,7 @@ const Contracts = () => {
   if (!selectedWebsiteId) {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+        <div className="p-6 flex flex-col items-center justify-center h-[60vh] text-center">
           <FileCode2 className="h-16 w-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No Website Selected</h2>
           <p className="text-muted-foreground mb-4">
@@ -108,7 +108,7 @@ const Contracts = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Token Contracts</h1>
