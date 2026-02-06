@@ -26,6 +26,7 @@ interface PlatformConfig {
   color: string;
   bgColor: string;
   tip: string;
+  tipLink?: { url: string; label: string };
   getHandle: (token: ScanResultsTopToken) => string | null | undefined;
   getUrl: (handle: string) => string;
   adPlatformUrl?: string;
@@ -51,7 +52,11 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
     label: "Telegram",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
-    tip: "Use the TG Ads Assistant extension to bulk-add these communities to your Telegram Ads targeting.",
+    tip: "Use the TG Ads Assistant extension to bulk-add these communities.",
+    tipLink: {
+      url: "https://chromewebstore.google.com/detail/tg-ads-assistant/mkeadhmjcphanpkfflgogkgpdbkogodp",
+      label: "Install extension"
+    },
     getHandle: (t) => t.telegram,
     getUrl: (handle) => `https://t.me/${handle}`,
     adPlatformUrl: "https://ads.telegram.org",
@@ -221,23 +226,20 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
       {/* Tip */}
       <div className="px-4 py-3 bg-muted/30 border-b border-border flex gap-2 text-sm">
         <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-        <span className="text-muted-foreground">{config.tip}</span>
+        <span className="text-muted-foreground">
+          {config.tip}
+          {config.tipLink && (
+            <a
+              href={config.tipLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline ml-1"
+            >
+              {config.tipLink.label} →
+            </a>
+          )}
+        </span>
       </div>
-
-      {/* Telegram Extension CTA */}
-      {platform === "telegram" && (
-        <div className="px-4 py-3 bg-blue-500/5 border-b border-border">
-          <a
-            href="https://chromewebstore.google.com/detail/tg-ads-assistant/mkeadhmjcphanpkfflgogkgpdbkogodp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Install TG Ads Assistant to bulk-add communities →
-          </a>
-        </div>
-      )}
 
       {/* Token List */}
       <div className={`flex-1 min-h-0 ${expanded && tokensWithPlatform.length > 8 ? "overflow-y-auto" : ""}`}>
