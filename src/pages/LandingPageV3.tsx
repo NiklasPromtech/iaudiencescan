@@ -3,12 +3,20 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import {
   Eye, Wallet, BarChart3, Shield, Bot, TrendingUp, DollarSign, Activity,
   Mail, Layers, Search, Megaphone, Check, X as XIcon, Newspaper,
   ArrowRight, Zap, Clock, CreditCard, Users, Target, Globe, Hash
 } from "lucide-react";
+import { InvestmentGradeBadge } from "@/components/overview/InvestmentGrade";
+import { MockDailyChart } from "@/components/landing/MockDailyChart";
+import { MockHolderTrend } from "@/components/landing/MockHolderTrend";
+import { MockBotSummary } from "@/components/landing/MockBotSummary";
+import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
+import { MockNewsFeed } from "@/components/landing/MockNewsFeed";
+import {
+  mockScorecard, mockDimensionRows, mockCostRows,
+} from "@/components/landing/mock-data";
 
 import bitmex from "@/assets/client-logos/bitmex.png";
 import flare from "@/assets/client-logos/flare.png";
@@ -79,52 +87,7 @@ const howItWorksSteps = [
   { num: "04", title: "Find More Like Them", desc: "Scan the chain. Get X handles, Telegram groups, PR outlets." },
 ];
 
-// ── Mock data for dashboard previews ──
-const mockScorecard = [
-  { label: "Visitors", value: "12,847" },
-  { label: "With Extension", value: "4,231" },
-  { label: "Wallets Connected", value: "892" },
-  { label: "Median Balance", value: "$2,400" },
-  { label: "Bot Rate", value: "23%", highlight: true },
-];
-
-const mockDimensionRows = [
-  { source: "twitter_ads", visitors: "3,412", extensions: "1,204", wallets: "312", avgBalance: "$3,800", botRate: "8%" },
-  { source: "telegram_promo", visitors: "2,891", extensions: "987", wallets: "241", avgBalance: "$1,900", botRate: "12%" },
-  { source: "kol_campaign", visitors: "2,134", extensions: "402", wallets: "89", avgBalance: "$6,200", botRate: "41%" },
-  { source: "organic", visitors: "2,508", extensions: "1,102", wallets: "198", avgBalance: "$4,100", botRate: "3%" },
-  { source: "coindesk_banner", visitors: "1,902", extensions: "536", wallets: "52", avgBalance: "$820", botRate: "67%" },
-];
-
-const mockCostRows = [
-  { source: "twitter_ads", spend: "$2,500", wallets: "34", cpa: "$73.52", cpb: "$12.40" },
-  { source: "kol_campaign", spend: "$1,000", wallets: "8", cpa: "$125.00", cpb: "$45.20" },
-  { source: "telegram_promo", spend: "$500", wallets: "22", cpa: "$22.72", cpb: "$8.10" },
-];
-
-const mockScanResults = {
-  xHandles: [
-    { handle: "@whale_trader", followers: "142K" },
-    { handle: "@defi_degen", followers: "89K" },
-    { handle: "@nft_collector", followers: "67K" },
-    { handle: "@eth_maxi", followers: "54K" },
-  ],
-  telegram: [
-    { name: "DeFi Alpha Chat", members: "12.4K" },
-    { name: "Whale Alerts", members: "8.2K" },
-    { name: "Token Traders Hub", members: "6.1K" },
-  ],
-  prOutlets: [
-    { name: "CoinDesk", type: "Tier 1" },
-    { name: "The Block", type: "Tier 1" },
-    { name: "Decrypt", type: "Tier 2" },
-    { name: "CryptoSlate", type: "Tier 2" },
-  ],
-};
-
 const LandingPageV3 = () => {
-  const [scanTab, setScanTab] = useState<"x" | "telegram" | "pr">("x");
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -173,7 +136,7 @@ const LandingPageV3 = () => {
       </section>
 
       {/* Mock Dashboard Preview */}
-      <section className="pb-20 -mt-4">
+      <section className="pb-10 -mt-4">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
             {/* Scorecard row */}
@@ -185,12 +148,13 @@ const LandingPageV3 = () => {
                 </div>
               ))}
             </div>
-            {/* Mini dimension table */}
+            {/* Mini dimension table with Investment Grades */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground">Source</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-muted-foreground">Grade</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Visitors</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Extensions</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground">Wallets</th>
@@ -202,6 +166,7 @@ const LandingPageV3 = () => {
                   {mockDimensionRows.map((r) => (
                     <tr key={r.source} className="border-b border-border last:border-0 hover:bg-muted/30">
                       <td className="px-5 py-3 font-medium text-foreground">{r.source}</td>
+                      <td className="text-center px-3 py-3"><InvestmentGradeBadge grade={r.grade} /></td>
                       <td className="text-right px-4 py-3 tabular-nums text-foreground">{r.visitors}</td>
                       <td className="text-right px-4 py-3 tabular-nums text-muted-foreground">{r.extensions}</td>
                       <td className="text-right px-4 py-3 tabular-nums text-foreground">{r.wallets}</td>
@@ -214,6 +179,13 @@ const LandingPageV3 = () => {
             </div>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-3">Live dashboard preview — sample data</p>
+        </div>
+      </section>
+
+      {/* Daily Metrics Chart */}
+      <section className="pb-20">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <MockDailyChart />
         </div>
       </section>
 
@@ -247,7 +219,7 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* Section 3: Bot Detection */}
+      {/* Section 3: Bot Detection with Summary Cards */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
@@ -258,6 +230,10 @@ const LandingPageV3 = () => {
               No vague filtering. Explicit bot detection with 12+ signals per visitor.
             </p>
           </div>
+
+          {/* Bot Summary Cards */}
+          <MockBotSummary />
+
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div className="rounded-xl border border-border bg-card overflow-hidden">
               <div className="px-5 py-3 border-b border-border bg-muted/50">
@@ -341,15 +317,19 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* Section 5: CPB "Aha" — With vs Without */}
+      {/* Section 5: CPB "Aha" — With vs Without + Token Holder Trend */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-foreground">
             See Wallet Value — Not Just Wallet Count
           </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
+          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
             Did your last campaign bring whales or dust wallets? Know instantly.
           </p>
+
+          {/* Token Holder Trend Chart */}
+          <MockHolderTrend />
+
           <div className="grid md:grid-cols-2 gap-6">
             <div className="rounded-xl border border-border bg-muted/50 p-8">
               <h3 className="font-semibold text-muted-foreground mb-4 uppercase text-sm tracking-wide">Without AudienceScan</h3>
@@ -373,9 +353,9 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* Section 6: Audience Intelligence + Scan Results Mock */}
+      {/* Section 6: Audience Intelligence + Rich Platform Cards */}
       <section className="py-20 bg-card">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
+        <div className="container mx-auto px-4 max-w-5xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Find More of Your Best Users
           </h2>
@@ -395,55 +375,17 @@ const LandingPageV3 = () => {
             ))}
           </div>
 
-          {/* Tabbed Scan Results Mock */}
-          <div className="rounded-xl border border-border bg-background max-w-lg mx-auto overflow-hidden text-left">
-            <div className="flex border-b border-border">
-              {([
-                { key: "x" as const, label: "X Handles", icon: Hash },
-                { key: "telegram" as const, label: "Telegram", icon: Users },
-                { key: "pr" as const, label: "PR Outlets", icon: Newspaper },
-              ]).map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setScanTab(tab.key)}
-                  className={`flex-1 px-4 py-3 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                    scanTab === tab.key
-                      ? "text-primary border-b-2 border-primary bg-primary/5"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            <div className="p-4">
-              {scanTab === "x" && mockScanResults.xHandles.map((h) => (
-                <div key={h.handle} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                  <span className="text-sm font-medium text-foreground">{h.handle}</span>
-                  <span className="text-xs text-muted-foreground">{h.followers} followers</span>
-                </div>
-              ))}
-              {scanTab === "telegram" && mockScanResults.telegram.map((t) => (
-                <div key={t.name} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                  <span className="text-sm font-medium text-foreground">{t.name}</span>
-                  <span className="text-xs text-muted-foreground">{t.members} members</span>
-                </div>
-              ))}
-              {scanTab === "pr" && mockScanResults.prOutlets.map((p) => (
-                <div key={p.name} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
-                  <span className="text-sm font-medium text-foreground">{p.name}</span>
-                  <Badge variant="secondary" className="text-xs">{p.type}</Badge>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Rich Platform Targeting Cards */}
+          <MockPlatformCards />
 
           <p className="mt-8 text-sm text-muted-foreground italic max-w-lg mx-auto">
             From analytics to action. We don't just show you data — we give you the outreach lists to act on it.
           </p>
         </div>
       </section>
+
+      {/* News Feed Preview */}
+      <MockNewsFeed />
 
       {/* Section 7: Social Proof */}
       <section className="py-16 overflow-hidden">
