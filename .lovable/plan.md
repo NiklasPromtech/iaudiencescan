@@ -1,83 +1,52 @@
 
-# Fix Platform Card Height Alignment Issue
+# Fix Code Snippet Styling on /install Page
 
-## Problem Analysis
-The X/Twitter and Telegram cards are displayed side-by-side in a grid with equal heights. The Telegram card includes an extra "Install TG Ads Assistant" CTA link that X/Twitter doesn't have. This causes:
-- Telegram card to be taller due to the extra ~44px CTA row
-- X/Twitter card stretches to match (due to `h-full` on both)
-- X/Twitter's token list area has visible empty white space below the 5th community
+## Problem
+The main tracking script (Step 1) has inconsistent styling compared to Steps 2 and 3:
+1. The `// Main tracking tag` comment has a grey/muted color, while other code blocks have consistent green-ish primary foreground colors for comments
+2. The script tag text is still getting cut off behind the copy button
+3. The copy button positioning is inconsistent across steps
 
-## Solution Options
-
-### Option A: Move Telegram CTA into the Tip Section (Recommended)
-Integrate the TG Ads Assistant link directly into the tip text for Telegram, eliminating the separate CTA row entirely. This keeps all cards structurally identical.
-
-**Before:**
-- Tip: "Use the TG Ads Assistant extension..."
-- Separate CTA: "Install TG Ads Assistant to bulk-add communities"
-
-**After (combined):**
-- Tip: "Use the TG Ads Assistant extension to bulk-add these communities. [Install extension]"
-
-### Option B: Add Placeholder Rows for Non-Telegram Cards
-Add invisible or minimal-height spacer elements to other platforms to balance the height, but this feels hacky.
-
-### Option C: Remove Equal Heights and Allow Cards to Size Naturally
-Remove `h-full` from cards and let each card be its own height. However, this looks less polished in a grid layout.
+## Solution
+Unify the styling approach by embedding the comment directly in the snippet string (like Steps 2 and 3) and fixing the padding/positioning.
 
 ---
 
-## Recommended Implementation (Option A)
+## Technical Changes
 
-### File: `src/components/scan-results/PlatformTargetingCard.tsx`
+### File: `src/pages/Install.tsx`
 
-1. **Update the Telegram tip config** to include the extension link inline
-   - Modify the `tip` property for Telegram to include the CTA text
-   - Add a new optional `tipLink` property to the config for platforms that need a linked action in their tip
+**1. Update the tracking snippet to include the comment inline**
 
-2. **Remove the separate Telegram Extension CTA section** (lines 227-240)
-   - Delete the conditional block that renders only for Telegram
-
-3. **Update the Tip section rendering** to support an optional link
-   - If `tipLink` exists in config, render the tip with an inline link at the end
-
-### Code Changes Summary
-
-```text
-PLATFORM_CONFIGS.telegram.tip
-  FROM: "Use the TG Ads Assistant extension to bulk-add these communities to your Telegram Ads targeting."
-  TO: "Use the TG Ads Assistant extension to bulk-add these communities."
-
-Add new property:
-  tipLink: {
-    url: "https://chromewebstore.google.com/detail/tg-ads-assistant/...",
-    label: "Install extension"
-  }
+Change the `trackingSnippet` state to include the comment:
+```tsx
+setTrackingSnippet(
+  `// Main tracking tag\n<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`
+);
 ```
 
-**Tip section rendering:**
+**2. Fix the Step 1 code block styling to match Steps 2 and 3**
+
+Remove the separate comment `<code>` block and use the same structure as other steps:
 ```tsx
-<div className="px-4 py-3 bg-muted/30 border-b border-border flex gap-2 text-sm">
-  <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-  <span className="text-muted-foreground">
-    {config.tip}
-    {config.tipLink && (
-      <>
-        {" "}
-        <a href={config.tipLink.url} target="_blank" className="text-blue-600 hover:underline">
-          {config.tipLink.label} →
-        </a>
-      </>
-    )}
-  </span>
+<div className="relative">
+  <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+    <code>{trackingSnippet}</code>
+  </pre>
+  <Button
+    size="sm"
+    variant="secondary"
+    className="absolute top-2 right-2"
+    onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
+  >
+    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+  </Button>
 </div>
 ```
 
-**Delete the standalone Telegram CTA block (lines 227-240)**
-
----
-
-## Visual Result
-- All platform cards will have the same structural sections: Header, Tip, Token List, Expand Button
-- The Telegram-specific extension link is preserved but embedded in the tip
-- Cards align perfectly at the bottom with no empty white space
+This ensures:
+- Comments render in the same color as Steps 2 and 3
+- Consistent padding (`p-3 pr-12`)
+- Consistent copy button positioning (`top-2 right-2`)
+- `whitespace-pre-wrap` to handle the multi-line snippet properly
+- The `pr-12` padding ensures the script text doesn't go behind the copy button
