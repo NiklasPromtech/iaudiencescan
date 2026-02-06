@@ -179,15 +179,7 @@ const Install = () => {
 
   const tagId = selectedWebsite?.tag_id || "";
 
-  // GTM snippet using the tag_id
-  const gtmSnippet = `<script>
-  window.asLayer = window.asLayer || [];
-  window.asLayer.push({
-    'as.siteId': '${selectedWebsite?.id || ""}',
-    'as.tagId': '${tagId}',
-    'as.start': new Date().getTime()
-  });
-</script>`;
+  // Removed old GTM snippet - no longer supported
 
   const handleSelectWebsite = async (website: Website) => {
     // Toggle: if clicking the already-selected website, collapse it
@@ -217,7 +209,7 @@ const Install = () => {
     setSelectedWebsite(website);
     setStatus(website.status);
     setTrackingSnippet(
-      `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${website.id}" defer></script>`
+      `<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`
     );
   };
 
@@ -441,15 +433,7 @@ const Install = () => {
                   website={website}
                   isSelected={selectedWebsite?.id === website.id}
                   onSelect={handleSelectWebsite}
-                  trackingSnippet={website.id === selectedWebsite?.id ? trackingSnippet : `<script src="https://cdn.audiencescan.io/track.js" data-site-id="${website.id}" defer></script>`}
-                  gtmSnippet={`<script>
-  window.asLayer = window.asLayer || [];
-  window.asLayer.push({
-    'as.siteId': '${website.id}',
-    'as.tagId': '${website.tag_id}',
-    'as.start': new Date().getTime()
-  });
-</script>`}
+                  trackingSnippet={website.id === selectedWebsite?.id ? trackingSnippet : `<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`}
                   onCopy={handleCopy}
                   onVerify={handleVerify}
                   copied={copied}
@@ -609,7 +593,6 @@ interface WebsiteListItemWithTagProps {
   isSelected: boolean;
   onSelect: (website: Website) => void;
   trackingSnippet: string;
-  gtmSnippet: string;
   onCopy: (text: string) => void;
   onVerify: () => void;
   copied: boolean;
@@ -624,7 +607,6 @@ const WebsiteListItemWithTag = ({
   isSelected, 
   onSelect, 
   trackingSnippet, 
-  gtmSnippet, 
   onCopy, 
   onVerify,
   copied,
@@ -663,9 +645,6 @@ STEP 1: Install Main Tracking Script
 Add this before </head> in your HTML:
 
 ${trackingSnippet}
-
-(If using GTM, create a Custom HTML tag instead:)
-${gtmSnippet}
 
 
 STEP 2: Track Wallet Events (Recommended)
@@ -790,56 +769,24 @@ Need help? Contact support@audiencescan.io`;
                   Install main tracking script
                 </p>
               </div>
-              <Tabs defaultValue="website" className="w-full">
-                <TabsList className="w-full grid grid-cols-2 bg-muted/50">
-                  <TabsTrigger value="website" className="data-[state=active]:bg-background text-sm">
-                    Website
-                  </TabsTrigger>
-                  <TabsTrigger value="gtm" className="data-[state=active]:bg-background text-sm">
-                    GTM
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="website" className="pt-3">
-                  <div className="space-y-2">
-                    <p className="text-p4 text-muted-foreground">
-                      Paste before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
-                    </p>
-                    <div className="relative">
-                      <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto">
-                        <code className="break-all">{trackingSnippet}</code>
-                      </pre>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="absolute top-2 right-2"
-                        onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
-                      >
-                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="gtm" className="pt-3">
-                  <div className="space-y-2">
-                    <p className="text-p4 text-muted-foreground">Create a Custom HTML tag, trigger on All Pages</p>
-                    <div className="relative">
-                      <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto">
-                        <code className="break-all">{gtmSnippet}</code>
-                      </pre>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="absolute top-2 right-2"
-                        onClick={(e) => { e.stopPropagation(); onCopy(gtmSnippet); }}
-                      >
-                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-2">
+                <p className="text-p4 text-muted-foreground">
+                  Paste before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
+                </p>
+                <div className="relative">
+                  <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto">
+                    <code className="break-all">{trackingSnippet}</code>
+                  </pre>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2"
+                    onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
+                  >
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Step 2: Wallet Tracking - IMPORTANT */}
