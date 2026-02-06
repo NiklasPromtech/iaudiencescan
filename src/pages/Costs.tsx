@@ -1,21 +1,27 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Plus } from "lucide-react";
-import { CostSource, listCostSources, Website } from "@/lib/api";
+import { CostSource } from "@/lib/api";
 import { CostSourceList } from "@/components/costs/CostSourceList";
 import { CreateCostSourceDialog } from "@/components/costs/CreateCostSourceDialog";
 import { EditCostSourceDialog } from "@/components/costs/EditCostSourceDialog";
 import { DeleteCostSourceDialog } from "@/components/costs/DeleteCostSourceDialog";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { useCostSources, useInvalidateCostSources } from "@/hooks/use-dashboard-queries";
 
 const Costs = () => {
   const navigate = useNavigate();
-  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
-  const [costSources, setCostSources] = useState<CostSource[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
+  const invalidateCostSources = useInvalidateCostSources();
+
+  const {
+    data: costSources = [],
+    isLoading: loading,
+    error,
+  } = useCostSources(selectedWebsite?.id);
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -23,40 +29,11 @@ const Costs = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCostSource, setSelectedCostSource] = useState<CostSource | null>(null);
 
-  useEffect(() => {
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (storedWebsite) {
-      try {
-        const website = JSON.parse(storedWebsite) as Website;
-        setSelectedWebsite(website);
-      } catch {
-        navigate("/install");
-      }
-    } else {
-      navigate("/install");
+  const handleSuccess = () => {
+    if (selectedWebsite?.id) {
+      invalidateCostSources(selectedWebsite.id);
     }
-  }, [navigate]);
-
-  const loadCostSources = useCallback(async () => {
-    if (!selectedWebsite) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await listCostSources(selectedWebsite.id);
-      setCostSources(response.cost_sources);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load cost sources");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedWebsite]);
-
-  useEffect(() => {
-    if (selectedWebsite) {
-      loadCostSources();
-    }
-  }, [selectedWebsite, loadCostSources]);
+  };
 
   const handleEdit = (costSource: CostSource) => {
     setSelectedCostSource(costSource);
@@ -69,6 +46,12 @@ const Costs = () => {
   };
 
   const hasData = costSources.length > 0;
+
+  // Redirect to install if no website after loading
+  if (!websiteLoading && !selectedWebsite) {
+    navigate("/install");
+    return null;
+  }
 
   return (
     <DashboardLayout>
@@ -91,7 +74,9 @@ const Costs = () => {
 
         {error && (
           <Card className="p-4 mb-8 border-destructive bg-destructive/10">
-            <p className="text-destructive text-sm">{error}</p>
+            <p className="text-destructive text-sm">
+              {error instanceof Error ? error.message : "Failed to load cost sources"}
+            </p>
           </Card>
         )}
 
@@ -161,21 +146,21 @@ const Costs = () => {
               open={createDialogOpen}
               onOpenChange={setCreateDialogOpen}
               websiteId={selectedWebsite.id}
-              onSuccess={loadCostSources}
+              onSuccess={handleSuccess}
             />
             <EditCostSourceDialog
               open={editDialogOpen}
               onOpenChange={setEditDialogOpen}
               costSource={selectedCostSource}
               websiteId={selectedWebsite.id}
-              onSuccess={loadCostSources}
+              onSuccess={handleSuccess}
             />
             <DeleteCostSourceDialog
               open={deleteDialogOpen}
               onOpenChange={setDeleteDialogOpen}
               costSource={selectedCostSource}
               websiteId={selectedWebsite.id}
-              onSuccess={loadCostSources}
+              onSuccess={handleSuccess}
             />
           </>
         )}

@@ -25,7 +25,7 @@ import { TouchpointMarkers, type TouchpointForChart } from "@/components/overvie
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import type { Touchpoint } from "@/pages/Touchpoints";
+import type { Touchpoint } from "@/hooks/use-dashboard-queries";
 import { format, parseISO } from "date-fns";
 
 // Extended row type that includes holder data

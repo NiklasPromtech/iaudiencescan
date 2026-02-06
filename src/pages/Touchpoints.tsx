@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,57 +11,31 @@ import {
   Trash2,
   Megaphone,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { format } from "date-fns";
 import { CreateTouchpointDialog } from "@/components/touchpoints/CreateTouchpointDialog";
 import { EditTouchpointDialog } from "@/components/touchpoints/EditTouchpointDialog";
 import { DeleteTouchpointDialog } from "@/components/touchpoints/DeleteTouchpointDialog";
-
-export interface Touchpoint {
-  id: string;
-  website_id: string;
-  user_id: string;
-  name: string;
-  event_type: "single" | "range";
-  timestamp: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  notes: string | null;
-  color: string;
-  cost_amount: number | null;
-  cost_currency: string | null;
-  created_at: string;
-}
+import { useTouchpoints, useInvalidateTouchpoints, Touchpoint } from "@/hooks/use-dashboard-queries";
 
 const Touchpoints = () => {
-  const [touchpoints, setTouchpoints] = useState<Touchpoint[]>([]);
-  const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingTouchpoint, setEditingTouchpoint] = useState<Touchpoint | null>(null);
   const [deletingTouchpoint, setDeletingTouchpoint] = useState<Touchpoint | null>(null);
   
   const { selectedWebsite } = useSelectedWebsite();
+  const invalidateTouchpoints = useInvalidateTouchpoints();
 
-  const fetchTouchpoints = async () => {
-    if (!selectedWebsite?.id) return;
-    
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("touchpoints")
-      .select("*")
-      .eq("website_id", selectedWebsite.id)
-      .order("timestamp", { ascending: false, nullsFirst: false });
+  const {
+    data: touchpoints = [],
+    isLoading: loading,
+  } = useTouchpoints(selectedWebsite?.id);
 
-    if (!error && data) {
-      setTouchpoints(data as Touchpoint[]);
+  const handleSuccess = () => {
+    if (selectedWebsite?.id) {
+      invalidateTouchpoints(selectedWebsite.id);
     }
-    setLoading(false);
   };
-
-  useEffect(() => {
-    fetchTouchpoints();
-  }, [selectedWebsite?.id]);
 
   const formatTouchpointDate = (tp: Touchpoint) => {
     if (tp.event_type === "single" && tp.timestamp) {
@@ -171,7 +145,7 @@ const Touchpoints = () => {
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           websiteId={selectedWebsite?.id}
-          onSuccess={fetchTouchpoints}
+          onSuccess={handleSuccess}
         />
 
         {editingTouchpoint && (
@@ -179,7 +153,7 @@ const Touchpoints = () => {
             open={!!editingTouchpoint}
             onOpenChange={(open) => !open && setEditingTouchpoint(null)}
             touchpoint={editingTouchpoint}
-            onSuccess={fetchTouchpoints}
+            onSuccess={handleSuccess}
           />
         )}
 
@@ -188,7 +162,7 @@ const Touchpoints = () => {
             open={!!deletingTouchpoint}
             onOpenChange={(open) => !open && setDeletingTouchpoint(null)}
             touchpoint={deletingTouchpoint}
-            onSuccess={fetchTouchpoints}
+            onSuccess={handleSuccess}
           />
         )}
       </div>

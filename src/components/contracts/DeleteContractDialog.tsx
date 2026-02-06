@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { TokenContract } from "@/pages/Contracts";
+import type { TokenContract } from "@/hooks/use-dashboard-queries";
 import { useState } from "react";
 
 interface DeleteContractDialogProps {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
@@ -7,10 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Search, RefreshCw, ExternalLink, Archive, ArchiveRestore, MoreHorizontal } from "lucide-react";
-import { listScans, archiveScan, unarchiveScan, Scan, SUPPORTED_CHAINS } from "@/lib/api";
+import { archiveScan, unarchiveScan, Scan, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useToast } from "@/hooks/use-toast";
+import { useScans, useInvalidateScans } from "@/hooks/use-dashboard-queries";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,53 +29,24 @@ const statusColors: Record<string, string> = {
 const Scans = () => {
   const navigate = useNavigate();
   const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
-  const [scans, setScans] = useState<Scan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
+  const invalidateScans = useInvalidateScans();
 
-  const fetchScans = useCallback(async () => {
-    if (!selectedWebsite?.id) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await listScans({ 
-        websiteId: selectedWebsite.id,
-        include_archived: showArchived 
-      });
-      setScans(response.scans || []);
-    } catch (err) {
-      console.error("Failed to fetch scans:", err);
-      setError(err instanceof Error ? err.message : "Failed to load scans");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedWebsite?.id, showArchived]);
-
-  useEffect(() => {
-    if (!websiteLoading && selectedWebsite?.id) {
-      fetchScans();
-    }
-  }, [fetchScans, websiteLoading, selectedWebsite?.id]);
-
-  // Auto-refresh when any scan is processing
-  useEffect(() => {
-    const hasActiveScans = scans.some(
-      (s) => s.status === "PENDING" || s.status === "PROCESSING"
-    );
-    if (hasActiveScans && !loading) {
-      const interval = setInterval(fetchScans, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [scans, loading, fetchScans]);
+  const { 
+    data: scans = [], 
+    isLoading: loading, 
+    error,
+    refetch 
+  } = useScans(selectedWebsite?.id, showArchived);
 
   const handleArchive = async (scan: Scan, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await archiveScan(scan.id);
-      setScans(scans.filter(s => s.id !== scan.id));
+      if (selectedWebsite?.id) {
+        invalidateScans(selectedWebsite.id);
+      }
       toast({
         title: "Scan archived",
         description: `${scan.name || `Scan ${scan.id.slice(0, 8)}`} has been archived.`,
@@ -92,9 +64,9 @@ const Scans = () => {
     e.stopPropagation();
     try {
       await unarchiveScan(scan.id);
-      setScans(scans.map(s => 
-        s.id === scan.id ? { ...s, archived_at: null } : s
-      ));
+      if (selectedWebsite?.id) {
+        invalidateScans(selectedWebsite.id);
+      }
       toast({
         title: "Scan restored",
         description: `${scan.name || `Scan ${scan.id.slice(0, 8)}`} has been restored.`,
@@ -138,7 +110,7 @@ const Scans = () => {
                 {showArchived ? "Hide archived" : `Archived (${archivedScans.length})`}
               </Button>
             )}
-            <Button variant="outline" onClick={fetchScans} disabled={loading}>
+            <Button variant="outline" onClick={() => refetch()} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
@@ -153,9 +125,9 @@ const Scans = () => {
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">Failed to load scans</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              {error}
+              {error instanceof Error ? error.message : "Unknown error"}
             </p>
-            <Button onClick={fetchScans}>Try Again</Button>
+            <Button onClick={() => refetch()}>Try Again</Button>
           </Card>
         )}
 

@@ -1,21 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Plus, AlertCircle } from "lucide-react";
-import { Audience, Website, listAudiences } from "@/lib/api";
+import { Audience, Website } from "@/lib/api";
 import { AudienceList } from "@/components/audiences/AudienceList";
 import { AudienceDialog } from "@/components/audiences/AudienceDialog";
 import { AudienceDetailDialog } from "@/components/audiences/AudienceDetailDialog";
 import { DeleteAudienceDialog } from "@/components/audiences/DeleteAudienceDialog";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { useAudiences, useInvalidateAudiences } from "@/hooks/use-dashboard-queries";
 
 const Audiences = () => {
   const navigate = useNavigate();
-  const [audiences, setAudiences] = useState<Audience[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
+  const invalidateAudiences = useInvalidateAudiences();
+
+  const {
+    data: audiences = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useAudiences(selectedWebsite?.id);
 
   // Dialog states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -26,41 +33,6 @@ const Audiences = () => {
   // Detail dialog states (replaces scan dialog)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<Audience | null>(null);
-
-  // Load selected website from localStorage
-  useEffect(() => {
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (storedWebsite) {
-      try {
-        setSelectedWebsite(JSON.parse(storedWebsite));
-      } catch {
-        setSelectedWebsite(null);
-      }
-    }
-  }, []);
-
-  const fetchAudiences = useCallback(async () => {
-    if (!selectedWebsite) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await listAudiences(selectedWebsite.id);
-      setAudiences(response.audiences);
-    } catch (err) {
-      console.error("Failed to fetch audiences:", err);
-      setError(err instanceof Error ? err.message : "Failed to load audiences");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedWebsite]);
-
-  useEffect(() => {
-    fetchAudiences();
-  }, [fetchAudiences]);
 
   const handleCreateClick = () => {
     setEditingAudience(null);
@@ -78,7 +50,9 @@ const Audiences = () => {
   };
 
   const handleDialogSuccess = () => {
-    fetchAudiences();
+    if (selectedWebsite?.id) {
+      invalidateAudiences(selectedWebsite.id);
+    }
   };
 
   const handleViewClick = (audience: Audience) => {
@@ -91,7 +65,7 @@ const Audiences = () => {
   };
 
   // No website selected state
-  if (!selectedWebsite) {
+  if (!selectedWebsite && !websiteLoading) {
     return (
       <DashboardLayout>
         <div className="container max-w-5xl py-8 px-4">
@@ -137,9 +111,9 @@ const Audiences = () => {
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">Failed to load audiences</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              {error}
+              {error instanceof Error ? error.message : "Unknown error"}
             </p>
-            <Button onClick={fetchAudiences}>
+            <Button onClick={() => refetch()}>
               Try Again
             </Button>
           </Card>
@@ -156,7 +130,7 @@ const Audiences = () => {
           <div>
             <h1 className="text-2xl font-semibold text-foreground mb-2">Audiences</h1>
             <p className="text-muted-foreground">
-              Create and manage audience segments for {selectedWebsite.name}
+              Create and manage audience segments for {selectedWebsite?.name}
             </p>
           </div>
           <Button onClick={handleCreateClick}>
@@ -221,7 +195,13 @@ const Audiences = () => {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           audience={editingAudience}
-          website={selectedWebsite}
+          website={{
+            ...selectedWebsite,
+            status: selectedWebsite.status as "pending" | "verified" | "failed",
+            verified_at: null,
+            created_at: "",
+            archived_at: null,
+          }}
           onSuccess={handleDialogSuccess}
         />
       )}
