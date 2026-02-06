@@ -8,8 +8,8 @@ const TokenAvatar = ({ symbol }: { symbol: string }) => (
 );
 
 export const MockNewsFeed = () => (
-  <section className="py-20">
-    <div className="container mx-auto px-4 max-w-5xl">
+  <div className="pt-10">
+    <div className="max-w-5xl mx-auto">
       <div className="text-center mb-10">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
           Aggregated News Intelligence
@@ -61,5 +61,5 @@ export const MockNewsFeed = () => (
       </div>
       <p className="text-center text-xs text-muted-foreground mt-4">Aggregated news feed — filter by recency, search, or export for PR outreach</p>
     </div>
-  </section>
+  </div>
 );

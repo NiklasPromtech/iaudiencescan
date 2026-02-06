@@ -34,6 +34,5 @@ export const MockDailyChart = () => (
         Jan 30: <span className="text-foreground font-medium">KOL Campaign Launch</span> — touchpoint marker
       </span>
     </div>
-    <p className="text-center text-xs text-muted-foreground mt-2">Daily Metrics — dual axis comparison with touchpoint markers</p>
   </div>
 );

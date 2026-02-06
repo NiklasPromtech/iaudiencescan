@@ -33,6 +33,5 @@ export const MockHolderTrend = () => (
         Day 21: <span className="text-foreground font-medium">Exchange Listing</span> — visible uptick in holder growth
       </span>
     </div>
-    <p className="text-center text-xs text-muted-foreground mt-2">Token holders across all tracked contracts — 30 day trend</p>
   </div>
 );
