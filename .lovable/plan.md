@@ -1,79 +1,154 @@
 
 
-# Make LandingPageV3 the Homepage + Header Update + Mock Dashboard Previews
+# Landing Page V3: Visual Expansion -- Talk With Visuals, Sell With Words
 
-## Changes Overview
+## Overview
 
-Three things need to happen:
-1. Make V3 the default landing page at `/`
-2. Update the Header to remove dead links and align the CTA
-3. Add mock dashboard previews with dummy data to the landing page sections so visitors can see the actual product
+Major content expansion of `src/pages/LandingPageV3.tsx` to add rich, interactive mock UI elements that replicate the actual platform experience. Every section gets a visual companion that shows the product in action with realistic dummy data.
 
 ---
 
-## 1. Route Change (`src/App.tsx`)
+## New Visual Elements (6 additions)
 
-- Change `path="/"` from `<WizardV2 />` to `<LandingPageV3 />`
-- Move WizardV2 to `/wizard/v2` (already exists there as a duplicate, so just update the `/` route)
-- Keep `/v3/landingpage` route as well for now (or remove it -- either way)
+### 1. Daily Metrics Bar Chart (After Dashboard Preview, ~line 217)
 
-## 2. Header Update (`src/components/Header.tsx`)
+A mock recreation of the real `DailyChart` component using recharts `BarChart`. Shows 7 days of dual-axis data:
+- Purple bars: Page Views (left axis)
+- Dark bars: Wallet Extensions (right axis)
+- Proper axis labels, formatted dates
 
-- **Remove** the Case Studies and Pricing nav links (they don't exist yet)
-- **Change CTA** from "Book a demo" (Calendly link) to "Get Started Free" linking to `/auth` -- matching the landing page CTAs
-- Keep the purple gradient button style but align the text
-- Optionally add a secondary "Book a Demo" text link (not button) for those who prefer a call
+Mock data (7 days):
 
-Updated header will have:
-- Logo (left)
-- "Get Started Free" button (right) -- links to `/auth`, same style as landing page CTAs
+```
+Mon Jan 27: 1,842 views / 612 extensions
+Tue Jan 28: 2,105 views / 734 extensions
+Wed Jan 29: 1,678 views / 589 extensions
+Thu Jan 30: 3,412 views / 1,204 extensions  (spike day)
+Fri Jan 31: 2,891 views / 987 extensions
+Sat Feb 1:  1,456 views / 498 extensions
+Sun Feb 2:  1,203 views / 421 extensions
+```
 
-## 3. Mock Dashboard Previews on Landing Page (`src/pages/LandingPageV3.tsx`)
+A subtle "Touchpoint" marker on Thu Jan 30 labeled "KOL Campaign Launch" to demo the incrementality feature. Styled as a small diamond marker with a tooltip-style label.
 
-Add inline mock UI components using dummy data to illustrate the product visually. These are **not** imported from the real dashboard -- they are lightweight, self-contained mock-ups built with the same UI primitives (Card, Table, Badge).
+Caption below: "Daily Metrics -- dual axis comparison with touchpoint markers"
 
-### Mock 1: Analytics Dashboard Preview (after Hero section)
-A styled card showing a mini scorecard row with dummy data:
-- 12,847 Visitors | 4,231 With Wallet Extension | 892 Wallets Connected | $2,400 Median Balance | 23% Bot Rate
-- Below: A mini dimension table showing 4-5 rows of dummy referrer data with columns: Source, Visitors, Extensions, Wallets, Avg Balance, Bot %
+### 2. Token Holder Trend Chart (Inside Section 5, the CPB section)
 
-### Mock 2: Bot Signal Card (in Section 3)
-Already exists as the signal table -- keep as-is. It's already a good mock.
+A mock `LineChart` showing 30 days of token holder growth. Visualizes the "See Wallet Value" narrative with a real chart instead of just text.
 
-### Mock 3: Cost Attribution Preview (in Section 4, near capability #7)
-A small inline table showing:
-- utm_source | Spend | Wallets | CPA | Cost per $1K Balance
-- "twitter_ads" | $2,500 | 34 | $73.52 | $12.40
-- "kol_campaign" | $1,000 | 8 | $125.00 | $45.20
-- "telegram_promo" | $500 | 22 | $22.72 | $8.10
+Mock data: 30 points from ~8,200 holders trending up to ~9,450 with a visible uptick around day 20 (labeled "Exchange Listing").
 
-### Mock 4: Scan Results Preview (in Section 6, replace the simple number cards)
-Expand the current "42 X handles / 28 Telegram communities / 12 PR outlets" into a richer mock showing sample results:
-- A mini card with tabs: "X Handles" | "Telegram" | "PR Outlets"
-- Under X Handles: 3-4 sample rows like "@whale_trader (142K followers)", "@defi_degen (89K)"
-- Under Telegram: "DeFi Alpha Chat (12.4K members)", "Whale Alerts (8.2K)"
-- Under PR Outlets: "CoinDesk", "The Block", "Decrypt"
+Placed between the section headline and the With/Without comparison cards. Uses the same recharts `LineChart` with a smooth monotone curve, purple stroke, and subtle gradient fill area.
+
+Caption: "Token holders across all tracked contracts -- 30 day trend"
+
+### 3. Investment Grade Badges (Inside Dashboard Preview table, ~line 202)
+
+Add a "Grade" column to the existing mock dimension table. Each source row gets a letter grade (A+, A, B, C, D, F) using color-coded badges matching the real `InvestmentGradeBadge` styles:
+
+- twitter_ads: A (green)
+- telegram_promo: B (blue)
+- kol_campaign: D (orange) -- high bot rate
+- organic: A+ (bright green) -- best quality
+- coindesk_banner: F (red) -- 67% bots
+
+This instantly communicates the "investment quality" concept.
+
+### 4. Rich Platform Targeting Cards (Replace simple scan results tabs in Section 6)
+
+Replace the current minimal tabbed list with a richer 2x2 grid of platform cards that mirrors the real `PlatformTargetingCard` component. Each card has:
+
+- Platform icon + color header (X = sky, Telegram = blue, Reddit = orange, Discord = indigo)
+- "N communities found" subtitle
+- 3-4 sample token rows with: token symbol avatar (2-letter circle), token name, handle, and a market cap badge
+- "Copy All" and "Create Campaign" button placeholders (disabled, for visual effect)
+
+Mock tokens per platform (realistic Web3 names):
+
+**X / Twitter (8 communities)**:
+- Chainlink (LINK) -- @chainlink -- $8.2B
+- Aave (AAVE) -- @aabornyakov -- $1.4B  
+- Uniswap (UNI) -- @uniswap -- $5.8B
+- Arbitrum (ARB) -- @arbitrum -- $2.1B
+
+**Telegram (6 communities)**:
+- Render (RNDR) -- render_network -- $3.2B
+- Optimism (OP) -- optimism -- $1.8B
+- Polygon (MATIC) -- polygonofficial -- $4.1B
+
+**Reddit (4 communities)**:
+- Ethereum (ETH) -- r/ethereum
+- Solana (SOL) -- r/solana
+- Cosmos (ATOM) -- r/cosmosnetwork
+
+**Discord (3 communities)**:
+- Lido (LDO) -- Lido DAO
+- Maker (MKR) -- MakerDAO
+- Curve (CRV) -- Curve Finance
+
+### 5. News Feed Preview (New section between Section 6 and Social Proof)
+
+A compact mock of the `NewsFeedTab` showing 4-5 recent articles. Each article card has:
+- Token logo (2-letter circle), token name
+- Article title (realistic headlines)
+- Source domain + relative time ("2h ago", "1d ago")
+- A small "PR Outlets" sidebar showing 3 source domains with article counts
+
+Mock articles:
+- "Chainlink Expands Cross-Chain Services to Base Network" -- CoinDesk -- 2h ago
+- "Uniswap Labs Proposes New Fee Structure for V4" -- The Block -- 6h ago
+- "Arbitrum DAO Approves $50M Gaming Catalyst Fund" -- Decrypt -- 1d ago
+- "Aave Deploys Lending Markets on zkSync Era" -- CryptoSlate -- 2d ago
+
+Caption: "Aggregated news feed -- filter by recency, search, or export for PR outreach"
+
+### 6. Bot Detection Expansion (Enhance Section 3)
+
+Add a mock "Bot Summary" row above the existing signal table, mirroring `BotSummaryCards`:
+
+Three cards side by side:
+- Bots: 2,847 (23.1%) -- red icon
+- Humans: 8,934 (72.5%) -- purple icon  
+- Unknown: 546 (4.4%) -- gray icon
+
+This gives instant visual impact before the detailed signal breakdown.
 
 ---
 
 ## Technical Details
 
-### Files to Modify
+### File Modified
 
-1. **`src/App.tsx`** -- Change route `/` to use `LandingPageV3`
-2. **`src/components/Header.tsx`** -- Remove Case Studies/Pricing links, change CTA to "Get Started Free" linking to `/auth`
-3. **`src/pages/LandingPageV3.tsx`** -- Add 3 mock dashboard preview sections with hardcoded dummy data
+`src/pages/LandingPageV3.tsx` -- Single file, all changes inline
 
-### No New Dependencies
+### New Imports Needed
 
-All mocks use existing UI components: `Card`, `Table`, `Badge`, and basic HTML/Tailwind.
+From `recharts` (already installed):
+- `BarChart`, `Bar`, `LineChart`, `Line`, `XAxis`, `YAxis`, `CartesianGrid`, `Tooltip`, `ResponsiveContainer`, `Area`, `AreaChart`
 
-### Mock Data (Hardcoded Arrays)
+From `lucide-react` (already installed):
+- `User`, `HelpCircle`, `MessageCircle`, `ExternalLink`, `Copy`, `Rocket`, `Diamond`
 
-All dummy data lives inline in `LandingPageV3.tsx` as simple arrays -- no API calls, no imports from the real dashboard.
+### New Mock Data Arrays
+
+All hardcoded inline in the file:
+
+- `mockDailyChart` -- 7 objects with date/views/extensions
+- `mockHolderTrend` -- 30 objects with date/holders
+- `mockPlatformTokens` -- object with twitter/telegram/reddit/discord arrays, each token having name/symbol/handle/marketCap
+- `mockNewsArticles` -- 4-5 objects with token/title/source/timeAgo
+- `mockBotSummary` -- 3 values for bots/humans/unknown
+- Add `grade` field to existing `mockDimensionRows`
 
 ### What Stays the Same
 
-- Footer (unchanged)
-- All 10 existing sections (content stays, mocks get added within them)
-- All other routes (blog, auth, dashboard, etc.)
+- All existing sections (structure preserved, visuals added within)
+- Header, Footer, route
+- All existing mock data (scorecard, cost table, scan tabs are enhanced not replaced)
+- The GA comparison table, With/Without cards, How It Works, CTAs
+
+### Recharts Usage
+
+Uses `ResponsiveContainer` wrapping `BarChart` and `AreaChart` with basic styling matching the platform's chart colors (purple primary, foreground secondary). No `ChartContainer` wrapper needed for the landing page mocks -- simpler inline approach.
+
