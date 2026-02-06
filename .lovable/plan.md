@@ -1,52 +1,119 @@
 
-# Fix Code Snippet Styling on /install Page
+# Smart Data Caching for Dashboard Pages
 
-## Problem
-The main tracking script (Step 1) has inconsistent styling compared to Steps 2 and 3:
-1. The `// Main tracking tag` comment has a grey/muted color, while other code blocks have consistent green-ish primary foreground colors for comments
-2. The script tag text is still getting cut off behind the copy button
-3. The copy button positioning is inconsistent across steps
+## Overview
+Implement React Query caching across all dashboard pages to eliminate unnecessary reloads when navigating between pages. Data will be cached and shown instantly, with background refreshes when needed.
 
-## Solution
-Unify the styling approach by embedding the comment directly in the snippet string (like Steps 2 and 3) and fixing the padding/positioning.
+## What This Fixes
+- No more loading spinners when navigating back to a page you just visited
+- Instant page loads during demos
+- Data still updates when it actually changes (create, edit, delete operations)
+- Active scans still poll for updates
 
 ---
 
 ## Technical Changes
 
-### File: `src/pages/Install.tsx`
+### 1. Configure QueryClient with Smart Defaults
 
-**1. Update the tracking snippet to include the comment inline**
+**File: `src/App.tsx`**
 
-Change the `trackingSnippet` state to include the comment:
-```tsx
-setTrackingSnippet(
-  `// Main tracking tag\n<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`
-);
+Update the QueryClient with caching settings:
+- `staleTime: 2 minutes` - Data is fresh for 2 minutes (no refetch on navigation)
+- `gcTime: 10 minutes` - Cached data kept for 10 minutes after unmount
+- `refetchOnWindowFocus: false` - Prevent refetch when switching browser tabs
+
+### 2. Create Custom Hooks for Each Data Type
+
+Create a new file `src/hooks/use-dashboard-queries.ts` with React Query hooks:
+
+```text
++-------------------------------+
+|   use-dashboard-queries.ts    |
++-------------------------------+
+| useScans(websiteId)           |
+| useAudiences(websiteId)       |
+| useTouchpoints(websiteId)     |
+| useContracts(websiteId)       |
+| useCostSources(websiteId)     |
++-------------------------------+
 ```
 
-**2. Fix the Step 1 code block styling to match Steps 2 and 3**
+Each hook will:
+- Return cached data instantly if available
+- Provide `refetch()` for manual refresh
+- Provide mutation helpers that invalidate cache after create/edit/delete
 
-Remove the separate comment `<code>` block and use the same structure as other steps:
+### 3. Update Dashboard Pages
+
+**Pages to update:**
+- `Scans.tsx` - Replace `useState` + `useEffect` with `useScans()`
+- `Audiences.tsx` - Replace with `useAudiences()`
+- `Touchpoints.tsx` - Replace with `useTouchpoints()`
+- `Contracts.tsx` - Replace with `useContracts()`
+- `Costs.tsx` - Replace with `useCostSources()`
+
+**For each page:**
+- Remove local `useState` for data and loading
+- Remove `useEffect` that fetches on mount
+- Replace `fetchX()` callback with the hook
+- Pass `refetch` to dialogs instead of custom callbacks
+
+### 4. Handle Mutations (Create/Edit/Delete)
+
+When data is modified (create, edit, delete), the cache must be invalidated:
+
 ```tsx
-<div className="relative">
-  <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
-    <code>{trackingSnippet}</code>
-  </pre>
-  <Button
-    size="sm"
-    variant="secondary"
-    className="absolute top-2 right-2"
-    onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
-  >
-    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-  </Button>
-</div>
+// In dialog components after successful save:
+queryClient.invalidateQueries({ queryKey: ["scans", websiteId] });
 ```
 
-This ensures:
-- Comments render in the same color as Steps 2 and 3
-- Consistent padding (`p-3 pr-12`)
-- Consistent copy button positioning (`top-2 right-2`)
-- `whitespace-pre-wrap` to handle the multi-line snippet properly
-- The `pr-12` padding ensures the script text doesn't go behind the copy button
+This triggers an immediate refetch so the list updates.
+
+### 5. Special Case: Active Scans Polling
+
+For the Scans page, maintain polling when scans are processing:
+
+```tsx
+const { data: scans } = useScans(websiteId, {
+  // Poll every 5 seconds if any scan is active
+  refetchInterval: scans?.some(s => s.status === "PROCESSING") ? 5000 : false,
+});
+```
+
+---
+
+## Cache Behavior Summary
+
+| Action | Behavior |
+|--------|----------|
+| Navigate to page | Show cached data instantly, no loader |
+| Data older than 2 min | Background refetch (no loader) |
+| Create/Edit/Delete | Cache invalidated, fresh fetch |
+| Manual refresh button | Force refetch |
+| Processing scan | Poll every 5 seconds |
+| Website switch | New query key, fresh fetch |
+
+---
+
+## Files to Create/Modify
+
+1. **Create** `src/hooks/use-dashboard-queries.ts` - All query hooks
+2. **Modify** `src/App.tsx` - QueryClient defaults
+3. **Modify** `src/pages/Scans.tsx` - Use `useScans` hook
+4. **Modify** `src/pages/Audiences.tsx` - Use `useAudiences` hook
+5. **Modify** `src/pages/Touchpoints.tsx` - Use `useTouchpoints` hook
+6. **Modify** `src/pages/Contracts.tsx` - Use `useContracts` hook
+7. **Modify** `src/pages/Costs.tsx` - Use `useCostSources` hook
+8. **Modify** Dialog components - Add cache invalidation after mutations
+
+---
+
+## User Experience After Changes
+
+1. First visit to Scans page: Normal load with skeleton
+2. Navigate to Audiences: Normal load (first visit)
+3. Navigate back to Scans: **Instant** - shows cached data
+4. Create new scan: List updates immediately
+5. Switch websites: Fresh fetch (different cache key)
+6. Leave page for 10+ minutes: Fresh fetch on return
