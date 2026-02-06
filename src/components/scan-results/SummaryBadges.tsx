@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Twitter, MessageCircle, Globe, Newspaper } from "lucide-react";
+import { Twitter, MessageCircle, Globe, Newspaper, Megaphone } from "lucide-react";
 
 interface SummaryBadgesProps {
   counts: {
@@ -9,6 +9,7 @@ interface SummaryBadgesProps {
     discord: number;
     websites: number;
     news: number;
+    prOutlets?: number;
   };
   onBadgeClick?: (type: string) => void;
 }
@@ -49,6 +50,13 @@ export const SummaryBadges = ({ counts, onBadgeClick }: SummaryBadgesProps) => {
       count: counts.news,
       icon: <Newspaper className="h-3 w-3" />,
       color: "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20",
+    },
+    {
+      key: "prOutlets",
+      label: "PR Outlets",
+      count: counts.prOutlets || 0,
+      icon: <Megaphone className="h-3 w-3" />,
+      color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20",
     },
   ];
 

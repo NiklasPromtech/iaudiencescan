@@ -11,6 +11,7 @@ import {
   Download,
   Copy,
   Check,
+  Megaphone,
 } from "lucide-react";
 import { ScanResultsTopToken } from "@/lib/api";
 import { ExportCard } from "./ExportCard";
@@ -21,6 +22,7 @@ import {
   formatAllSocialURLs,
   formatFullExportCSV,
   formatFullExportJSON,
+  formatNewsSourceDomains,
   downloadCSV,
   copyToClipboard,
   getPlatformCounts,
@@ -38,6 +40,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
   const websiteURLs = useMemo(() => formatWebsiteURLs(tokens), [tokens]);
   const newsURLs = useMemo(() => formatNewsURLs(tokens), [tokens]);
   const socialURLs = useMemo(() => formatAllSocialURLs(tokens), [tokens]);
+  const prOutlets = useMemo(() => formatNewsSourceDomains(tokens), [tokens]);
 
   const handleFullCSVExport = () => {
     const data = formatFullExportCSV(tokens);
@@ -134,6 +137,14 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
             icon={<Link className="h-5 w-5" />}
             getData={() => socialURLs}
             filename="social-profiles"
+          />
+          <ExportCard
+            title="PR Outlets"
+            subtitle="domains"
+            count={prOutlets.length}
+            icon={<Megaphone className="h-5 w-5" />}
+            getData={() => prOutlets}
+            filename="pr-outlets"
           />
         </div>
       </div>
