@@ -140,9 +140,9 @@ const LandingPageV3 = () => {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
             {/* Scorecard row */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border">
-              {mockScorecard.map((s) => (
-                <div key={s.label} className="px-5 py-4 border-r border-border last:border-r-0">
+            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border divide-x divide-border">
+              {mockScorecard.map((s, i) => (
+                <div key={s.label} className={`px-5 py-4 ${i % 2 === 1 ? "max-sm:border-r-0" : ""}`}>
                   <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
                   <p className={`text-lg font-bold tabular-nums ${s.highlight ? "text-destructive" : "text-foreground"}`}>{s.value}</p>
                 </div>
@@ -179,13 +179,9 @@ const LandingPageV3 = () => {
             </div>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-3">Live dashboard preview — sample data</p>
-        </div>
-      </section>
-
-      {/* Daily Metrics Chart */}
-      <section className="pb-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <MockDailyChart />
+          <div className="mt-6">
+            <MockDailyChart />
+          </div>
         </div>
       </section>
 
@@ -281,6 +277,8 @@ const LandingPageV3 = () => {
               </div>
             ))}
           </div>
+
+          <hr className="border-border my-10" />
 
           {/* Cost Attribution Mock */}
           <div className="max-w-3xl mx-auto rounded-xl border border-border bg-background overflow-hidden">
@@ -381,11 +379,13 @@ const LandingPageV3 = () => {
           <p className="mt-8 text-sm text-muted-foreground italic max-w-lg mx-auto">
             From analytics to action. We don't just show you data — we give you the outreach lists to act on it.
           </p>
+
+          {/* News Intelligence — part of the same scan results story */}
+          <div className="mt-12 text-left">
+            <MockNewsFeed />
+          </div>
         </div>
       </section>
-
-      {/* News Feed Preview */}
-      <MockNewsFeed />
 
       {/* Section 7: Social Proof */}
       <section className="py-16 overflow-hidden">
@@ -403,31 +403,8 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* Section 8: Alpha CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <div className="rounded-2xl border border-primary/20 bg-primary/[0.03] p-12">
-            <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
-              EARLY ACCESS
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              We're in Alpha. Everything is Free.
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              Get full access to every feature while we're building. No credit card. No commitment. Just install and start seeing what GA can't.
-            </p>
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg shadow-[var(--shadow-elegant)]">
-              <Link to="/auth">
-                Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 9: How It Works */}
-      <section className="py-20 bg-card">
+      {/* How It Works + Alpha CTA merged */}
+      <section id="how-it-works" className="py-20 bg-card">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
             How It Works
@@ -440,6 +417,25 @@ const LandingPageV3 = () => {
                 <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* Alpha CTA */}
+          <div className="mt-14 text-center rounded-2xl border border-primary/20 bg-primary/[0.03] p-10 max-w-2xl mx-auto">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+              EARLY ACCESS
+            </Badge>
+            <h3 className="text-2xl font-bold mb-3 text-foreground">
+              We're in Alpha. Everything is Free.
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm">
+              Full access to every feature while we're building. No credit card. No commitment.
+            </p>
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-lg shadow-[var(--shadow-elegant)]">
+              <Link to="/auth">
+                Get Started Free
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
