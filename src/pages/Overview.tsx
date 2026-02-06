@@ -48,11 +48,13 @@ import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRange
 import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audiences/AudienceDialog";
 import { ScorecardChips } from "@/components/overview/ScorecardChips";
 import { useStarredMetrics } from "@/hooks/use-starred-metrics";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 
 const Overview = () => {
   const navigate = useNavigate();
   const { starredMetrics, toggleMetric } = useStarredMetrics();
-  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
+  
   const [scorecard, setScorecard] = useState<ScorecardResponse | null>(null);
   const [dailyData, setDailyData] = useState<TableResponse | null>(null);
   const [tableData, setTableData] = useState<TableResponse | null>(null);
@@ -84,20 +86,12 @@ const Overview = () => {
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
   const [audienceDialogFilters, setAudienceDialogFilters] = useState<AudienceDialogInitialFilters | undefined>(undefined);
 
+  // Redirect to install if no website selected
   useEffect(() => {
-    // Load selected website from localStorage
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (storedWebsite) {
-      try {
-        const website = JSON.parse(storedWebsite) as Website;
-        setSelectedWebsite(website);
-      } catch {
-        navigate("/install");
-      }
-    } else {
+    if (!websiteLoading && !selectedWebsite) {
       navigate("/install");
     }
-  }, [navigate]);
+  }, [websiteLoading, selectedWebsite, navigate]);
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -652,7 +646,7 @@ const Overview = () => {
               open={audienceDialogOpen}
               onOpenChange={setAudienceDialogOpen}
               audience={null}
-              website={selectedWebsite}
+              website={selectedWebsite as Website}
               onSuccess={handleAudienceDialogSuccess}
               initialFilters={audienceDialogFilters}
             />
