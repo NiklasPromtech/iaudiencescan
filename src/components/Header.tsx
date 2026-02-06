@@ -21,7 +21,7 @@ const Header = () => {
             Book a Demo
           </a>
           <Link to="/auth">
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] text-sm md:text-base px-3 sm:px-4 md:px-6">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm md:text-base px-3 sm:px-4 md:px-6">
               Get Started Free
             </Button>
           </Link>
