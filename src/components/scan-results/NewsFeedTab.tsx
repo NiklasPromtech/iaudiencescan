@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Copy, Download, Search, Newspaper } from "lucide-react";
 import { ScanResultsTopToken } from "@/lib/api";
 import { NewsArticleCard } from "./NewsArticleCard";
+import { PROutletsSection } from "./PROutletsSection";
 import {
   aggregateNewsArticles,
+  aggregateNewsSources,
   filterNewsByRecency,
   copyToClipboard,
   downloadCSV,
@@ -23,6 +25,9 @@ export const NewsFeedTab = ({ tokens }: NewsFeedTabProps) => {
   const [recency, setRecency] = useState<"all" | "24h" | "7d" | "30d">("all");
   const [search, setSearch] = useState("");
   const [groupByToken, setGroupByToken] = useState(false);
+
+  // Aggregate news sources for PR section
+  const newsSources = useMemo(() => aggregateNewsSources(tokens), [tokens]);
 
   // Aggregate and filter news
   const allArticles = useMemo(() => aggregateNewsArticles(tokens), [tokens]);
@@ -80,6 +85,8 @@ export const NewsFeedTab = ({ tokens }: NewsFeedTabProps) => {
 
   return (
     <div className="space-y-6">
+      {/* PR Opportunities Section */}
+      <PROutletsSection sources={newsSources} />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>

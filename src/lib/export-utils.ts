@@ -271,3 +271,57 @@ export function formatMarketCap(cap: number | null | undefined): string | null {
   if (cap >= 1e3) return `$${(cap / 1e3).toFixed(0)}K`;
   return `$${cap.toFixed(0)}`;
 }
+
+/**
+ * Aggregated news source with article counts
+ */
+export interface NewsSourceAggregate {
+  domain: string;
+  article_count: number;
+  latest_article: string;
+  sample_url: string;
+}
+
+/**
+ * Aggregate news sources from tokens with article counts
+ */
+export function aggregateNewsSources(tokens: ScanResultsTopToken[]): NewsSourceAggregate[] {
+  const domainMap = new Map<string, { count: number; latestDate: string; sampleUrl: string }>();
+
+  tokens.forEach((token) => {
+    token.news_articles?.forEach((article) => {
+      const domain = article.source_domain;
+      const existing = domainMap.get(domain);
+
+      if (!existing) {
+        domainMap.set(domain, {
+          count: 1,
+          latestDate: article.published_at,
+          sampleUrl: article.url,
+        });
+      } else {
+        existing.count++;
+        if (new Date(article.published_at) > new Date(existing.latestDate)) {
+          existing.latestDate = article.published_at;
+          existing.sampleUrl = article.url;
+        }
+      }
+    });
+  });
+
+  return Array.from(domainMap.entries())
+    .map(([domain, data]) => ({
+      domain,
+      article_count: data.count,
+      latest_article: data.latestDate,
+      sample_url: data.sampleUrl,
+    }))
+    .sort((a, b) => b.article_count - a.article_count);
+}
+
+/**
+ * Get unique news source domains for export
+ */
+export function formatNewsSourceDomains(tokens: ScanResultsTopToken[]): string[] {
+  return aggregateNewsSources(tokens).map((source) => source.domain);
+}
