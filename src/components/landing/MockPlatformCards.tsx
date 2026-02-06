@@ -1,13 +1,20 @@
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy, Megaphone } from "lucide-react";
 import { mockPlatformTokens } from "./mock-data";
 
-const TokenAvatar = ({ symbol }: { symbol: string }) => (
-  <span className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
-    {symbol.slice(0, 2)}
-  </span>
-);
+const TokenAvatar = ({ symbol, logo }: { symbol: string; logo?: string }) => {
+  const [imgError, setImgError] = React.useState(false);
+  if (logo && !imgError) {
+    return <img src={logo} alt={symbol} className="w-8 h-8 rounded-full shrink-0 object-cover" onError={() => setImgError(true)} />;
+  }
+  return (
+    <span className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+      {symbol.slice(0, 2)}
+    </span>
+  );
+};
 
 export const MockPlatformCards = () => (
   <div className="grid sm:grid-cols-2 gap-5 text-left">
@@ -25,7 +32,7 @@ export const MockPlatformCards = () => (
         <div className="divide-y divide-border">
           {platform.tokens.map((token) => (
             <div key={token.symbol} className="flex items-center gap-3 px-5 py-3">
-              <TokenAvatar symbol={token.symbol} />
+              <TokenAvatar symbol={token.symbol} logo={token.logo} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{token.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{token.handle}</p>
