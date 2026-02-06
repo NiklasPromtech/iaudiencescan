@@ -1,11 +1,18 @@
+import React from "react";
 import { Newspaper, ExternalLink } from "lucide-react";
 import { mockNewsArticles, mockPROutlets } from "./mock-data";
 
-const TokenAvatar = ({ symbol }: { symbol: string }) => (
-  <span className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
-    {symbol.slice(0, 2)}
-  </span>
-);
+const TokenAvatar = ({ symbol, logo }: { symbol: string; logo?: string }) => {
+  const [imgError, setImgError] = React.useState(false);
+  if (logo && !imgError) {
+    return <img src={logo} alt={symbol} className="w-8 h-8 rounded-full shrink-0 object-cover" onError={() => setImgError(true)} />;
+  }
+  return (
+    <span className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+      {symbol.slice(0, 2)}
+    </span>
+  );
+};
 
 export const MockNewsFeed = () => (
   <div className="pt-10">
@@ -24,7 +31,7 @@ export const MockNewsFeed = () => (
         <div className="space-y-3">
           {mockNewsArticles.map((article) => (
             <div key={article.title} className="rounded-xl border border-border bg-card p-4 flex items-start gap-4 hover:shadow-sm transition-shadow">
-              <TokenAvatar symbol={article.symbol} />
+              <TokenAvatar symbol={article.symbol} logo={article.logo} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground leading-snug mb-1">{article.title}</p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">

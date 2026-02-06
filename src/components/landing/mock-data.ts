@@ -107,11 +107,11 @@ export const mockPlatformTokens = {
   },
 };
 export const mockNewsArticles = [
-  { symbol: "USDC", token: "USD Coin", title: "Circle Partners Polymarket to Integrate Native USDC, Eliminating Bridge Risk", source: "CoinSpeaker", timeAgo: "1h ago" },
-  { symbol: "XAUT", token: "Tether Gold", title: "$150M Investment in Tether Gold.com: XAUt Integration", source: "COINOTAG", timeAgo: "3h ago" },
-  { symbol: "ONDO", token: "Ondo Finance", title: "MetaMask Partners Ondo Finance to Integrate Tokenized US Stocks, ETFs", source: "CoinSpeaker", timeAgo: "1d ago" },
-  { symbol: "LINK", token: "Chainlink", title: "Morph Integrates Chainlink CCIP As Exclusive Cross-Chain Standard", source: "Blockchain Reporter", timeAgo: "1d ago" },
-  { symbol: "PAXG", token: "Paxos Gold", title: "Paxos Gold (PAXG) sees record $248 million inflow in January", source: "CoinDesk", timeAgo: "1w ago" },
+  { symbol: "USDC", token: "USD Coin", title: "Circle Partners Polymarket to Integrate Native USDC, Eliminating Bridge Risk", source: "CoinSpeaker", timeAgo: "1h ago", logo: "https://assets.coingecko.com/coins/images/6319/small/usdc.png" },
+  { symbol: "XAUT", token: "Tether Gold", title: "$150M Investment in Tether Gold.com: XAUt Integration", source: "COINOTAG", timeAgo: "3h ago", logo: "https://assets.coingecko.com/coins/images/10481/small/Tether_Gold.png" },
+  { symbol: "ONDO", token: "Ondo Finance", title: "MetaMask Partners Ondo Finance to Integrate Tokenized US Stocks, ETFs", source: "CoinSpeaker", timeAgo: "1d ago", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
+  { symbol: "LINK", token: "Chainlink", title: "Morph Integrates Chainlink CCIP As Exclusive Cross-Chain Standard", source: "Blockchain Reporter", timeAgo: "1d ago", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
+  { symbol: "PAXG", token: "Paxos Gold", title: "Paxos Gold (PAXG) sees record $248 million inflow in January", source: "CoinDesk", timeAgo: "1w ago", logo: "https://assets.coingecko.com/coins/images/9519/small/paxg.PNG" },
 ];
 
 export const mockBotSummary = [
