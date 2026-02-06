@@ -1,276 +1,157 @@
 
+# Adding Authentication Guards to Dashboard Pages
 
-# Scan Results Page Redesign: Outreach Command Center
-
-## Vision
-
-Transform the Scan Results page from a simple "list of platform handles" into a strategic **Outreach Command Center** that a world-class growth marketer would use to plan, prioritize, and execute multi-channel campaigns. The page should answer: "What are my highest-value opportunities, and how do I act on them right now?"
+## Overview
+Implement authentication protection across all dashboard pages so unauthenticated users are redirected to the sign-up/login page with a friendly message explaining they need to sign in.
 
 ---
 
-## New Data Available
+## Current State Analysis
 
-The API now returns:
-- `news_articles[]` - Recent news for tokens (title, url, source, published_at, description, image_url)
-- `news_count` - Number of news articles per token
-- `website` - Project website URL
-- `description` - Token/project description
-- `outgoing_count` / `incoming_count` - Transaction flow direction
+**Pages WITH auth protection:**
+- `/install` - Checks `supabase.auth.getUser()` and redirects to `/auth` if not logged in
 
----
-
-## Page Architecture
-
-```text
-+------------------------------------------------------------------+
-|  Header: Scan Name + Stats + Export All Button                    |
-+------------------------------------------------------------------+
-|  Tab Navigation: [Communities] [News] [Websites] [Export]         |
-+------------------------------------------------------------------+
-|                                                                    |
-|  Tab Content Area (changes based on selected tab)                  |
-|                                                                    |
-+------------------------------------------------------------------+
-```
+**Pages WITHOUT auth protection (need to be fixed):**
+- `/overview` - Only checks for `selectedWebsite`
+- `/scans` - No auth check
+- `/scans/:scanId` - No auth check  
+- `/scans/:scanId/results` - No auth check
+- `/audiences` - No auth check
+- `/wallets` - No auth check
+- `/touchpoints` - No auth check
+- `/contracts` - No auth check
+- `/costs` - No auth check
+- `/events` - No auth check
+- `/settings` - No auth check
+- `/bots` - No auth check
 
 ---
 
-## Tab 1: Communities (Default View)
+## Solution: Create a `RequireAuth` Wrapper Component
 
-**Purpose**: Platform-specific targeting with improved hierarchy
-
-### Layout Changes
-
-1. **Summary Row at Top**
-   - Quick count badges: "42 X handles | 28 Telegram | 15 Reddit | 8 Discord | 156 News Articles"
-   - Each clickable to scroll/filter to that section
-
-2. **Platform Cards (Improved)**
-   - Keep the current 2x2 grid layout
-   - Add a "news indicator" badge on tokens with recent news (e.g., flame icon + "5 articles")
-   - Add inline token description (truncated) on hover or as subtitle
-   - Show website link icon next to each token
-
-3. **Filters Section (Enhanced)**
-   - Current: Min Market Cap, Min Transactions, Sort By
-   - Add: "Has News" toggle, "Has Website" toggle
-   - Add: Platform filter (show only tokens with X, only with Telegram, etc.)
-
----
-
-## Tab 2: News Feed
-
-**Purpose**: All news articles aggregated for outreach inspiration and PR opportunities
-
-### Layout
-
-```text
-+------------------------------------------------------------------+
-|  News Feed                                          [Export URLs] |
-|  156 articles from 42 communities                                 |
-+------------------------------------------------------------------+
-|  Filters: [All Sources] [Last 24h / 7d / 30d] [Search...]        |
-+------------------------------------------------------------------+
-|                                                                    |
-|  +--------------------------------------------------------------+ |
-|  | [Token Logo] TokenName                           2 hours ago | |
-|  | Article Title (clickable link)                               | |
-|  | Source: coinspeaker.com                                      | |
-|  | Description preview text...                                  | |
-|  +--------------------------------------------------------------+ |
-|  | (repeat for each article)                                    | |
-+------------------------------------------------------------------+
-```
-
-### Features
-
-- Group by token or show as flat chronological feed (toggle)
-- Filter by recency (last 24h, 7 days, 30 days, all)
-- Search articles by keyword
-- Export all news URLs to clipboard or CSV
-- Click article to open in new tab
-
----
-
-## Tab 3: Websites & Outreach List
-
-**Purpose**: Master list of all project websites for partnership outreach
-
-### Layout
-
-```text
-+------------------------------------------------------------------+
-|  Websites                                           [Export CSV]  |
-|  38 project websites found                                        |
-+------------------------------------------------------------------+
-|  Search: [............................]                           |
-+------------------------------------------------------------------+
-|                                                                    |
-|  Token Name      | Website                 | Twitter | News | Mcap |
-|  ---------------------------------------------------------------- |
-|  USD Coin        | circle.com              | @circle | 5    | $2B  |
-|  Ethereum        | ethereum.org            | @ethe.. | 12   | $200B|
-|  (sortable columns, filterable)                                   |
-+------------------------------------------------------------------+
-```
-
-### Features
-
-- Sortable by: name, market cap, news count, transaction count
-- Export as CSV with all columns
-- Copy all website URLs with one click
-
----
-
-## Tab 4: Export Center
-
-**Purpose**: One-stop shop for all export options
-
-### Layout
-
-```text
-+------------------------------------------------------------------+
-|  Export Center                                                    |
-|  Download your outreach data in multiple formats                  |
-+------------------------------------------------------------------+
-|                                                                    |
-|  PLATFORM HANDLES                                                 |
-|  +-------------------+  +-------------------+  +------------------+|
-|  | X / Twitter       |  | Telegram          |  | Reddit           ||
-|  | 42 handles        |  | 28 handles        |  | 15 subreddits    ||
-|  | [Copy] [CSV]      |  | [Copy] [CSV]      |  | [Copy] [CSV]     ||
-|  +-------------------+  +-------------------+  +------------------+|
-|                                                                    |
-|  URLS                                                             |
-|  +-------------------+  +-------------------+  +------------------+|
-|  | Project Websites  |  | News Article URLs |  | Social Profiles  ||
-|  | 38 URLs           |  | 156 URLs          |  | 93 URLs          ||
-|  | [Copy] [CSV]      |  | [Copy] [CSV]      |  | [Copy] [CSV]     ||
-|  +-------------------+  +-------------------+  +------------------+|
-|                                                                    |
-|  FULL EXPORT                                                      |
-|  +--------------------------------------------------------------+ |
-|  | Download Complete Dataset                                     | |
-|  | All tokens with metadata, socials, news, and URLs            | |
-|  | [Download CSV]  [Copy as JSON]                               | |
-|  +--------------------------------------------------------------+ |
-|                                                                    |
-+------------------------------------------------------------------+
-```
+### Approach
+Create a reusable component that wraps protected routes and handles:
+1. Checking authentication state via Supabase
+2. Showing a loading spinner while checking
+3. Redirecting to `/auth` with a message if not authenticated
+4. Rendering children if authenticated
 
 ---
 
 ## Technical Implementation
 
-### 1. Update API Types
+### 1. Create `RequireAuth` Component
 
-**File: `src/lib/api.ts`**
+**File: `src/components/auth/RequireAuth.tsx`**
 
-Add `news_articles` to `ScanResultsTopToken`:
-
-```typescript
-export interface NewsArticle {
-  title: string;
-  url: string;
-  source_name: string;
-  source_domain: string;
-  published_at: string;
-  description: string | null;
-  image_url: string | null;
-}
-
-export interface ScanResultsTopToken {
-  // ... existing fields ...
-  news_articles?: NewsArticle[];
-}
+```text
++--------------------------------------------+
+|              RequireAuth                    |
++--------------------------------------------+
+| - Checks supabase.auth.getSession()        |
+| - Shows loading state while checking       |
+| - Redirects to /auth?message=... if no user|
+| - Renders {children} if authenticated      |
++--------------------------------------------+
 ```
 
-### 2. Create New Components
+The component will:
+- Use `supabase.auth.getSession()` for initial check
+- Listen to `onAuthStateChange` for real-time updates
+- Pass a URL parameter `?message=signin_required` to the auth page
+- The auth page will display a friendly message based on this parameter
 
-**Files to create:**
+### 2. Update Auth Page to Show Message
 
-| Component | Purpose |
-|-----------|---------|
-| `ScanResultsTabs.tsx` | Tab navigation container |
-| `CommunitiesTab.tsx` | Enhanced version of current view |
-| `NewsFeedTab.tsx` | Chronological news articles list |
-| `WebsitesTab.tsx` | Table of all project websites |
-| `ExportCenterTab.tsx` | All export options in one place |
-| `NewsArticleCard.tsx` | Individual news article display |
-| `ExportCard.tsx` | Reusable export action card |
+**File: `src/pages/Auth.tsx`**
 
-### 3. Refactor ScanResults.tsx
+Add logic to check for the `message` URL parameter and display an appropriate alert:
+- `signin_required` -> "Please sign in to access the dashboard"
 
-- Replace current flat layout with tab-based navigation
-- Add useMemo for aggregated news articles across all tokens
-- Add useMemo for unique websites list
-- Update state for active tab and tab-specific filters
+### 3. Wrap Protected Routes
 
-### 4. Export Utilities
+**File: `src/App.tsx`**
 
-**Create utility functions:**
+Wrap all dashboard routes with the `RequireAuth` component:
 
-```typescript
-// Download as CSV
-const downloadCSV = (data: string[][], filename: string) => { ... }
-
-// Copy to clipboard with toast feedback
-const copyToClipboard = (text: string, successMessage: string) => { ... }
-
-// Format data for different export types
-const formatPlatformHandles = (tokens, platform) => { ... }
-const formatNewsURLs = (tokens) => { ... }
-const formatWebsites = (tokens) => { ... }
-const formatFullExport = (tokens) => { ... }
+```tsx
+<Route path="/overview" element={
+  <RequireAuth>
+    <Overview />
+  </RequireAuth>
+} />
 ```
 
-### 5. Enhanced Filtering
+Routes to protect:
+- `/overview`
+- `/install`
+- `/scans`
+- `/scans/:scanId`
+- `/scans/:scanId/results`
+- `/audiences`
+- `/wallets`
+- `/touchpoints`
+- `/contracts`
+- `/costs`
+- `/events`
+- `/settings`
+- `/bots`
 
-Add new filter state:
-- `hasNews: boolean | null`
-- `hasWebsite: boolean | null`
-- `platformFilter: "all" | "twitter" | "telegram" | "reddit" | "discord"`
-- `newsRecency: "all" | "24h" | "7d" | "30d"`
+### 4. Remove Redundant Auth Check from Install.tsx
 
----
-
-## Files to Create/Modify
-
-1. **Modify** `src/lib/api.ts` - Add NewsArticle interface
-2. **Create** `src/components/scan-results/ScanResultsTabs.tsx`
-3. **Create** `src/components/scan-results/CommunitiesTab.tsx`
-4. **Create** `src/components/scan-results/NewsFeedTab.tsx`
-5. **Create** `src/components/scan-results/WebsitesTab.tsx`
-6. **Create** `src/components/scan-results/ExportCenterTab.tsx`
-7. **Create** `src/components/scan-results/NewsArticleCard.tsx`
-8. **Create** `src/components/scan-results/ExportCard.tsx`
-9. **Create** `src/lib/export-utils.ts` - CSV/clipboard utilities
-10. **Modify** `src/pages/ScanResults.tsx` - Integrate new tab structure
-11. **Modify** `src/components/scan-results/PlatformTargetingCard.tsx` - Add news badges
-12. **Modify** `src/components/scan-results/TargetingFilters.tsx` - Add new filter options
+Since `RequireAuth` will handle authentication, the manual auth check in `Install.tsx` can be removed (simplifies code and avoids double-checking).
 
 ---
 
 ## User Experience Flow
 
-1. **First Load**: Communities tab shows platform cards with enhanced data
-2. **Explore News**: Click "News" tab to see all articles, filter by recency
-3. **Build Outreach List**: Click "Websites" tab for sortable master list
-4. **Export Everything**: Click "Export" tab for one-click export of any data type
-5. **Quick Actions**: Each tab has its own "Copy All" / "Export" button for immediate action
+```text
+User visits /overview (not logged in)
+         |
+         v
+   RequireAuth checks session
+         |
+         v
+   No session found
+         |
+         v
+   Redirect to /auth?message=signin_required
+         |
+         v
+   Auth page shows:
+   "Please sign in to access the dashboard"
+```
 
 ---
 
-## Export Options Summary
+## Files to Create/Modify
 
-| Data Type | Format Options | Description |
-|-----------|----------------|-------------|
-| X Handles | Copy, CSV | @handle format for X Ads |
-| Telegram Handles | Copy, CSV | Channel names for TG Ads |
-| Reddit Subreddits | Copy, CSV | r/subreddit format |
-| Discord Servers | Copy, CSV | Server invite codes |
-| Project Websites | Copy, CSV | All unique project URLs |
-| News URLs | Copy, CSV | All news article URLs |
-| Social Profile URLs | Copy, CSV | Full URLs to all social profiles |
-| Full Dataset | CSV, JSON | Complete token data with all fields |
+1. **Create** `src/components/auth/RequireAuth.tsx` - Auth guard wrapper
+2. **Modify** `src/pages/Auth.tsx` - Display message from URL params
+3. **Modify** `src/App.tsx` - Wrap protected routes with RequireAuth
+4. **Modify** `src/pages/Install.tsx` - Remove redundant auth check (optional cleanup)
 
+---
+
+## Message Display on Auth Page
+
+When redirected with `?message=signin_required`, the Auth page will show:
+
+```text
++------------------------------------------+
+|  [Info Icon]                              |
+|  Sign in required                         |
+|  Please sign in to access your dashboard  |
++------------------------------------------+
+```
+
+This appears as a styled alert above the login form.
+
+---
+
+## Security Considerations
+
+- Auth check happens on every route load (not just initial)
+- Uses Supabase's session management (handles token refresh automatically)
+- No sensitive data exposed if user manipulates URL
+- Backend API calls still require valid auth tokens (defense in depth)
