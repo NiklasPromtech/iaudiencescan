@@ -64,6 +64,7 @@ import LandingPageV2 from "./pages/LandingPageV2";
 import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
 import Change from "./pages/Change";
+import LandingPageV3 from "./pages/LandingPageV3";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -119,6 +120,7 @@ const App = () => (
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           <Route path="/wizard/v2" element={<WizardV2 />} />
           <Route path="/v2/landingPage" element={<LandingPageV2 />} />
+          <Route path="/v3/landingpage" element={<LandingPageV3 />} />
           <Route path="/no-niche" element={<NoNiche />} />
           <Route path="/no-niche/v2" element={<NoNicheV2 />} />
           <Route path="/no-niche/v3" element={<NoNicheV3 />} />
