@@ -26,19 +26,19 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Product</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/proposed-features" className="text-muted-foreground hover:text-primary transition-smooth">Proposed Features</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">API docs (Coming soon)</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-smooth">Integrations (Coming soon)</a></li>
+              <li><a href="/auth" className="text-muted-foreground hover:text-primary transition-smooth">Get Started Free</a></li>
+              <li><a href="/blog" className="text-muted-foreground hover:text-primary transition-smooth">Blog</a></li>
+              <li><a href="mailto:hello@audiencescan.io" className="text-muted-foreground hover:text-primary transition-smooth">Book a Demo</a></li>
             </ul>
           </div>
           
-          {/* Company */}
+          {/* Resources */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Company</h3>
+            <h3 className="font-semibold text-foreground mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/blog" className="text-muted-foreground hover:text-primary transition-smooth">Blog</a></li>
-              <li><a href="/case-studies" className="text-muted-foreground hover:text-primary transition-smooth">Case Studies</a></li>
-              <li><a href="/pricing" className="text-muted-foreground hover:text-primary transition-smooth">Pricing</a></li>
+              <li><a href="/#how-it-works" className="text-muted-foreground hover:text-primary transition-smooth">How It Works</a></li>
+              <li><a href="/dm-assistant" className="text-muted-foreground hover:text-primary transition-smooth">DM Assistant</a></li>
+              <li><a href="/strategy-playbook" className="text-muted-foreground hover:text-primary transition-smooth">Strategy Playbook</a></li>
             </ul>
           </div>
           
@@ -77,7 +77,7 @@ const Footer = () => {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 AudienceScan. All rights reserved.
+            © 2025 AudienceScan. All rights reserved.
           </p>
           <div className="flex gap-6 mt-4 sm:mt-0">
             <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-smooth">Privacy</a>
