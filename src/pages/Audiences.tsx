@@ -7,8 +7,8 @@ import { Users, Plus, AlertCircle } from "lucide-react";
 import { Audience, Website, listAudiences } from "@/lib/api";
 import { AudienceList } from "@/components/audiences/AudienceList";
 import { AudienceDialog } from "@/components/audiences/AudienceDialog";
+import { AudienceDetailDialog } from "@/components/audiences/AudienceDetailDialog";
 import { DeleteAudienceDialog } from "@/components/audiences/DeleteAudienceDialog";
-import { CreateScanDialog } from "@/components/audiences/CreateScanDialog";
 
 const Audiences = () => {
   const navigate = useNavigate();
@@ -23,9 +23,9 @@ const Audiences = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [audienceToDelete, setAudienceToDelete] = useState<Audience | null>(null);
   
-  // Scan dialog states
-  const [scanDialogOpen, setScanDialogOpen] = useState(false);
-  const [audienceForScan, setAudienceForScan] = useState<Audience | null>(null);
+  // Detail dialog states (replaces scan dialog)
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedAudience, setSelectedAudience] = useState<Audience | null>(null);
 
   // Load selected website from localStorage
   useEffect(() => {
@@ -81,9 +81,9 @@ const Audiences = () => {
     fetchAudiences();
   };
 
-  const handleFindMoreClick = (audience: Audience) => {
-    setAudienceForScan(audience);
-    setScanDialogOpen(true);
+  const handleViewClick = (audience: Audience) => {
+    setSelectedAudience(audience);
+    setDetailDialogOpen(true);
   };
 
   const handleScanSuccess = (scanId: string) => {
@@ -184,9 +184,9 @@ const Audiences = () => {
           <AudienceList
             audiences={audiences}
             loading={loading}
+            onView={handleViewClick}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
-            onFindMore={handleFindMoreClick}
           />
         )}
 
@@ -234,12 +234,12 @@ const Audiences = () => {
         onSuccess={handleDialogSuccess}
       />
 
-      {/* Create Scan Dialog */}
-      <CreateScanDialog
-        open={scanDialogOpen}
-        onOpenChange={setScanDialogOpen}
-        audience={audienceForScan}
-        onSuccess={handleScanSuccess}
+      {/* Audience Detail Dialog */}
+      <AudienceDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        audience={selectedAudience}
+        onScanSuccess={handleScanSuccess}
       />
     </DashboardLayout>
   );

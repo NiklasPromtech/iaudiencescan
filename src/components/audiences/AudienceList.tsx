@@ -2,23 +2,23 @@ import { Audience } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pencil, Trash2, Users, Search } from "lucide-react";
+import { Pencil, Trash2, Users, Search, ChevronRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface AudienceListProps {
   audiences: Audience[];
   loading: boolean;
+  onView: (audience: Audience) => void;
   onEdit: (audience: Audience) => void;
   onDelete: (audience: Audience) => void;
-  onFindMore: (audience: Audience) => void;
 }
 
 export function AudienceList({
   audiences,
   loading,
+  onView,
   onEdit,
   onDelete,
-  onFindMore,
 }: AudienceListProps) {
   if (loading) {
     return (
@@ -48,7 +48,11 @@ export function AudienceList({
   return (
     <div className="space-y-3">
       {audiences.map((audience) => (
-        <Card key={audience.id} className="p-4">
+        <Card
+          key={audience.id}
+          className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+          onClick={() => onView(audience)}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -62,39 +66,28 @@ export function AudienceList({
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onFindMore(audience)}
-                className="hidden sm:flex"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Find More Users
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onFindMore(audience)}
-                className="sm:hidden"
-                title="Find More Users"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onEdit(audience)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(audience);
+                }}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onDelete(audience)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(audience);
+                }}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </div>
         </Card>
