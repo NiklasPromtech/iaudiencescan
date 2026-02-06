@@ -20,6 +20,10 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
+  // Check for signin_required message
+  const message = searchParams.get("message");
+  const showSignInRequired = message === "signin_required";
+
   useEffect(() => {
     // Check for email verification success
     const verified = searchParams.get("verified");
@@ -131,6 +135,17 @@ const Auth = () => {
                 : "Sign up to get started with AudienceScan"}
             </p>
           </div>
+
+          {/* Sign In Required Alert */}
+          {showSignInRequired && !emailVerified && (
+            <Alert className="border-muted bg-muted/50">
+              <Lock className="h-4 w-4 text-foreground" />
+              <AlertTitle className="text-foreground">Sign in required</AlertTitle>
+              <AlertDescription className="text-muted-foreground">
+                Please sign in to access your dashboard.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Email Verified Alert */}
           {emailVerified && (
