@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface TargetingFiltersProps {
   minMarketCap: number | null;
@@ -9,6 +10,13 @@ interface TargetingFiltersProps {
   setMinTransactions: (value: number | null) => void;
   sortBy: "wallets" | "market_cap" | "transactions";
   setSortBy: (value: "wallets" | "market_cap" | "transactions") => void;
+  // New filter options
+  hasNews?: boolean | null;
+  setHasNews?: (value: boolean | null) => void;
+  hasWebsite?: boolean | null;
+  setHasWebsite?: (value: boolean | null) => void;
+  platformFilter?: "all" | "twitter" | "telegram" | "reddit" | "discord";
+  setPlatformFilter?: (value: "all" | "twitter" | "telegram" | "reddit" | "discord") => void;
 }
 
 export const TargetingFilters = ({
@@ -18,6 +26,12 @@ export const TargetingFilters = ({
   setMinTransactions,
   sortBy,
   setSortBy,
+  hasNews,
+  setHasNews,
+  hasWebsite,
+  setHasWebsite,
+  platformFilter,
+  setPlatformFilter,
 }: TargetingFiltersProps) => {
   return (
     <div className="flex flex-wrap gap-4 items-end">
@@ -54,6 +68,54 @@ export const TargetingFilters = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* New filters - only show if props are provided */}
+      {setPlatformFilter && (
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Platform</Label>
+          <Select 
+            value={platformFilter || "all"} 
+            onValueChange={(v) => setPlatformFilter(v as typeof platformFilter)}
+          >
+            <SelectTrigger className="w-32 h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border z-50">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="twitter">X / Twitter</SelectItem>
+              <SelectItem value="telegram">Telegram</SelectItem>
+              <SelectItem value="reddit">Reddit</SelectItem>
+              <SelectItem value="discord">Discord</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {setHasNews && (
+        <div className="flex items-center gap-2 h-9 pb-0.5">
+          <Switch
+            id="has-news"
+            checked={hasNews === true}
+            onCheckedChange={(checked) => setHasNews(checked ? true : null)}
+          />
+          <Label htmlFor="has-news" className="text-xs text-muted-foreground cursor-pointer">
+            Has News
+          </Label>
+        </div>
+      )}
+
+      {setHasWebsite && (
+        <div className="flex items-center gap-2 h-9 pb-0.5">
+          <Switch
+            id="has-website"
+            checked={hasWebsite === true}
+            onCheckedChange={(checked) => setHasWebsite(checked ? true : null)}
+          />
+          <Label htmlFor="has-website" className="text-xs text-muted-foreground cursor-pointer">
+            Has Website
+          </Label>
+        </div>
+      )}
     </div>
   );
 };

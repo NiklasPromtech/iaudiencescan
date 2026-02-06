@@ -855,6 +855,17 @@ export interface ScanResultsNetworkEdge {
   weight: number;
 }
 
+// News article type for scan results
+export interface NewsArticle {
+  title: string;
+  url: string;
+  source_name: string;
+  source_domain: string;
+  published_at: string;
+  description: string | null;
+  image_url: string | null;
+}
+
 export interface ScanResultsTopToken {
   token_address: string;
   token_name: string;
@@ -863,6 +874,8 @@ export interface ScanResultsTopToken {
   chain_name: string;
   transaction_count: number;
   unique_wallets: number;
+  outgoing_count?: number;
+  incoming_count?: number;
   // Social/targeting fields
   website?: string | null;
   twitter?: string | null;
@@ -873,6 +886,10 @@ export interface ScanResultsTopToken {
   current_price_usd?: number | null;
   market_cap_usd?: number | null;
   news_count?: number;
+  news_articles?: NewsArticle[];
+  // Data source flags
+  found_on_cg?: boolean;
+  found_on_cmc?: boolean;
 }
 
 export interface ScanResultsNetworkNodeNew {
