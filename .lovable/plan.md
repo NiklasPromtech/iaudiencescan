@@ -1,116 +1,79 @@
 
 
-# Landing Page V3: White Theme, Outcome-First Rewrite
+# Make LandingPageV3 the Homepage + Header Update + Mock Dashboard Previews
 
-## Overview
+## Changes Overview
 
-Create a new page at `/v3/landingpage` with the **white/light platform theme** (not dark like V2). Uses the existing `Header` and `Footer` components. All the agreed positioning and content from previous discussions, adapted for the light aesthetic.
-
----
-
-## New File: `src/pages/LandingPageV3.tsx`
-
-A single new page component (~700-800 lines) structured as follows:
-
-### Section 1: Hero
-
-- **Headline**: "Web3 Analytics That Actually Understand Wallets"
-- **Subtitle**: "Track visitors. Detect wallets. Enrich balances. Remove bots. Attribute real revenue."
-- **CTA**: "See What Google Analytics Can't" (links to /auth)
-- Badge: "FREE ALPHA ACCESS"
-- Trust signals: No credit card, 5-minute setup
-- 3 micro-steps below CTA: "Add one tag" / "See visitors + wallets" / "Find more like them"
-- Light purple gradient accents instead of dark glows
-
-### Section 2: "Google Analytics Can't See This"
-
-Two-column contrast table with X/Check icons:
-
-| Google Analytics (gray, faded) | AudienceScan (purple accented) |
-|---|---|
-| Tracks pageviews | Tracks wallets |
-| Sees sessions | Sees token holders |
-| Cookie-based | Wallet-based |
-| Blind to balance | Knows wallet value |
-| No bot clarity | Explicit bot detection |
-| Guesses attribution | Measures incrementality |
-| No outreach data | PR, X, Telegram, Reddit lists |
-
-### Section 3: Bot Detection
-
-- Same signal table mock-up, adapted for light theme (light card backgrounds, subtle borders)
-- Updated testimonial: "Our bot detection data is currently the foundation of a $25K+ legal claim against a fraudulent marketing provider. Analytics you can defend in court."
-
-### Section 4: "8 Things You Can Do Today"
-
-Numbered 2x4 grid with icons:
-
-1. Track Every Visit
-2. Detect Wallet Extensions
-3. Capture Wallet IDs
-4. Enrich Wallet Balances
-5. Filter Out Bots
-6. Get Daily Change Reports
-7. Attribute Costs to Campaigns
-8. Measure Touchpoint Impact
-
-### Section 5: CPB "Aha" Moment
-
-With vs Without comparison cards. Light theme adaptation: "Without" card gets a gray/muted background, "With" card gets a purple-accented border and subtle purple shadow.
-
-### Section 6: "Find More of Your Best Users"
-
-3-step pipeline:
-- Step 1: "Group" -- Segment your best wallets
-- Step 2: "Scan" -- Analyze on-chain activity to find communities
-- Step 3: "Act" -- Get targeting lists for X, Telegram, Reddit, PR outlets
-
-Results preview showing sample outputs (42 X handles, 28 Telegram communities, 12 PR outlets).
-
-Callout: "From analytics to action. We don't just show you data -- we give you the outreach lists to act on it."
-
-### Section 7: Social Proof
-
-Logo marquee (same client logos). Light gradient fade masks instead of black. Testimonial card with subtle border.
-
-### Section 8: Alpha CTA
-
-"We're in Alpha. Everything is Free." -- light background with a subtle purple gradient behind CTA.
-
-### Section 9: How It Works (4 Steps)
-
-1. Install the Tag
-2. See Everything
-3. Group Your Best Users
-4. Find More Like Them
-
-### Section 10: Final CTA
-
-"Stop Optimizing for Clicks. Start Optimizing for Wallets."
+Three things need to happen:
+1. Make V3 the default landing page at `/`
+2. Update the Header to remove dead links and align the CTA
+3. Add mock dashboard previews with dummy data to the landing page sections so visitors can see the actual product
 
 ---
 
-## Theme Adaptation Details
+## 1. Route Change (`src/App.tsx`)
 
-All styling shifts from V2's dark theme to the platform's light theme:
+- Change `path="/"` from `<WizardV2 />` to `<LandingPageV3 />`
+- Move WizardV2 to `/wizard/v2` (already exists there as a duplicate, so just update the `/` route)
+- Keep `/v3/landingpage` route as well for now (or remove it -- either way)
 
-| V2 (Dark) | V3 (Light) |
-|---|---|
-| `bg-black text-white` | `bg-background text-foreground` |
-| `bg-white/[0.02]` glass cards | `bg-card border-border` cards |
-| `text-white/60` | `text-muted-foreground` |
-| `border-white/[0.08]` | `border-border` |
-| Purple glow shadows | Subtle `shadow-elegant` and purple borders |
-| Black gradient fade masks (marquee) | White/background gradient fades |
-| Dark header/footer | Existing `Header` and `Footer` components |
+## 2. Header Update (`src/components/Header.tsx`)
 
-Purple accents (gradients, badges, CTA buttons) remain consistent with the design system.
+- **Remove** the Case Studies and Pricing nav links (they don't exist yet)
+- **Change CTA** from "Book a demo" (Calendly link) to "Get Started Free" linking to `/auth` -- matching the landing page CTAs
+- Keep the purple gradient button style but align the text
+- Optionally add a secondary "Book a Demo" text link (not button) for those who prefer a call
+
+Updated header will have:
+- Logo (left)
+- "Get Started Free" button (right) -- links to `/auth`, same style as landing page CTAs
+
+## 3. Mock Dashboard Previews on Landing Page (`src/pages/LandingPageV3.tsx`)
+
+Add inline mock UI components using dummy data to illustrate the product visually. These are **not** imported from the real dashboard -- they are lightweight, self-contained mock-ups built with the same UI primitives (Card, Table, Badge).
+
+### Mock 1: Analytics Dashboard Preview (after Hero section)
+A styled card showing a mini scorecard row with dummy data:
+- 12,847 Visitors | 4,231 With Wallet Extension | 892 Wallets Connected | $2,400 Median Balance | 23% Bot Rate
+- Below: A mini dimension table showing 4-5 rows of dummy referrer data with columns: Source, Visitors, Extensions, Wallets, Avg Balance, Bot %
+
+### Mock 2: Bot Signal Card (in Section 3)
+Already exists as the signal table -- keep as-is. It's already a good mock.
+
+### Mock 3: Cost Attribution Preview (in Section 4, near capability #7)
+A small inline table showing:
+- utm_source | Spend | Wallets | CPA | Cost per $1K Balance
+- "twitter_ads" | $2,500 | 34 | $73.52 | $12.40
+- "kol_campaign" | $1,000 | 8 | $125.00 | $45.20
+- "telegram_promo" | $500 | 22 | $22.72 | $8.10
+
+### Mock 4: Scan Results Preview (in Section 6, replace the simple number cards)
+Expand the current "42 X handles / 28 Telegram communities / 12 PR outlets" into a richer mock showing sample results:
+- A mini card with tabs: "X Handles" | "Telegram" | "PR Outlets"
+- Under X Handles: 3-4 sample rows like "@whale_trader (142K followers)", "@defi_degen (89K)"
+- Under Telegram: "DeFi Alpha Chat (12.4K members)", "Whale Alerts (8.2K)"
+- Under PR Outlets: "CoinDesk", "The Block", "Decrypt"
 
 ---
 
-## Files to Create/Modify
+## Technical Details
 
-1. **Create** `src/pages/LandingPageV3.tsx` -- New page with all 10 sections
-2. **Modify** `src/App.tsx` -- Add route: `<Route path="/v3/landingpage" element={<LandingPageV3 />} />`
+### Files to Modify
 
-No new dependencies. Reuses existing `Header`, `Footer`, `Button`, `Badge` components and existing client logo assets.
+1. **`src/App.tsx`** -- Change route `/` to use `LandingPageV3`
+2. **`src/components/Header.tsx`** -- Remove Case Studies/Pricing links, change CTA to "Get Started Free" linking to `/auth`
+3. **`src/pages/LandingPageV3.tsx`** -- Add 3 mock dashboard preview sections with hardcoded dummy data
+
+### No New Dependencies
+
+All mocks use existing UI components: `Card`, `Table`, `Badge`, and basic HTML/Tailwind.
+
+### Mock Data (Hardcoded Arrays)
+
+All dummy data lives inline in `LandingPageV3.tsx` as simple arrays -- no API calls, no imports from the real dashboard.
+
+### What Stays the Same
+
+- Footer (unchanged)
+- All 10 existing sections (content stays, mocks get added within them)
+- All other routes (blog, auth, dashboard, etc.)
