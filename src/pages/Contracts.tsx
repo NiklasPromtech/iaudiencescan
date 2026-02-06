@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Plus, FileCode2, Trash2, Pencil } from "lucide-react";
+import { Plus, FileCode2, Trash2, Pencil, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { CreateContractDialog } from "@/components/contracts/CreateContractDialog";
 import { EditContractDialog } from "@/components/contracts/EditContractDialog";
 import { DeleteContractDialog } from "@/components/contracts/DeleteContractDialog";
+import { HolderChartDialog } from "@/components/contracts/HolderChartDialog";
 
 export interface TokenContract {
   id: string;
@@ -36,10 +37,12 @@ const Contracts = () => {
   const [contracts, setContracts] = useState<TokenContract[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedWebsiteId, setSelectedWebsiteId] = useState<string | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [holderDialogOpen, setHolderDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<TokenContract | null>(null);
 
   useEffect(() => {
@@ -47,6 +50,7 @@ const Contracts = () => {
     if (stored) {
       const website = JSON.parse(stored);
       setSelectedWebsiteId(website.id);
+      setSelectedTagId(website.tag_id);
     }
   }, []);
 
@@ -89,6 +93,11 @@ const Contracts = () => {
   const handleDelete = (contract: TokenContract) => {
     setSelectedContract(contract);
     setDeleteDialogOpen(true);
+  };
+
+  const handleViewHolders = (contract: TokenContract) => {
+    setSelectedContract(contract);
+    setHolderDialogOpen(true);
   };
 
   if (!selectedWebsiteId) {
@@ -145,7 +154,7 @@ const Contracts = () => {
                   <TableHead>Chain</TableHead>
                   <TableHead>Start Date</TableHead>
                   <TableHead>Added</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead className="w-[130px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -168,11 +177,20 @@ const Contracts = () => {
                       {format(new Date(contract.created_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewHolders(contract)}
+                          title="View holder chart"
+                        >
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(contract)}
+                          title="Edit contract"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -180,6 +198,7 @@ const Contracts = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(contract)}
+                          title="Delete contract"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -214,6 +233,14 @@ const Contracts = () => {
             contract={selectedContract}
             onSuccess={fetchContracts}
           />
+          {selectedTagId && (
+            <HolderChartDialog
+              open={holderDialogOpen}
+              onOpenChange={setHolderDialogOpen}
+              contract={selectedContract}
+              tagId={selectedTagId}
+            />
+          )}
         </>
       )}
     </DashboardLayout>
