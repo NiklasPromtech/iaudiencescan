@@ -136,7 +136,7 @@ const LandingPageV3 = () => {
       </section>
 
       {/* Mock Dashboard Preview */}
-      <section className="pb-10 -mt-4">
+      <section className="pb-10 -mt-4 relative z-10">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
             {/* Scorecard row */}
