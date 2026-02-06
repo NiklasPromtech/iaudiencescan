@@ -209,7 +209,7 @@ const Install = () => {
     setSelectedWebsite(website);
     setStatus(website.status);
     setTrackingSnippet(
-      `<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`
+      `// Main tracking tag\n<script src="https://cdn.audiencescan.io/track.js?id=${website.id}" defer></script>`
     );
   };
 
@@ -774,14 +774,13 @@ Need help? Contact support@audiencescan.io`;
                   Paste before <code className="bg-muted px-1.5 py-0.5 rounded text-p4">&lt;/head&gt;</code>
                 </p>
                 <div className="relative">
-                  <pre className="bg-foreground text-primary-foreground p-4 pb-4 rounded-lg text-p4 overflow-x-auto">
-                    <code className="block text-muted-foreground/60 mb-2">{`// Main tracking tag`}</code>
-                    <code className="block pr-12">{trackingSnippet}</code>
+                  <pre className="bg-foreground text-primary-foreground p-3 pr-12 rounded-lg text-p4 overflow-x-auto whitespace-pre-wrap">
+                    <code>{trackingSnippet}</code>
                   </pre>
                   <Button
                     size="sm"
                     variant="secondary"
-                    className="absolute top-3 right-3"
+                    className="absolute top-2 right-2"
                     onClick={(e) => { e.stopPropagation(); onCopy(trackingSnippet); }}
                   >
                     {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
