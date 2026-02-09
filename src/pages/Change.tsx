@@ -371,7 +371,7 @@ const Change = () => {
           end_date: format(basicEndDate, "yyyy-MM-dd"),
         },
         baseline_days: basicRange![0],
-        breakdowns: ["conversion_event", "wallet_action", "country", "referrer_domain"],
+        breakdowns: ["conversion_event", "wallet_action", "utm_source", "country", "referrer_domain"],
         filters: basicExcludeBots ? { exclude: { bot_status: ["bot"] } } : undefined,
       };
 
