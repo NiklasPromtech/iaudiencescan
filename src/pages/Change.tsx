@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,10 @@ import {
   Sparkles,
   ArrowRight,
   Trophy,
+  Copy,
+  Check,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, subDays } from "date-fns";
@@ -37,7 +41,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { fetchFilterOptions, fetchTrackingStatus, FilterOptionItem, FilterOptionsResponse, TrackingStatusResponse, DailyBreakdownItem } from "@/lib/api";
-import { IncrementalityResultsView, type IncrementalityResult } from "@/components/touchpoints/IncrementalityResultsView";
+import { IncrementalityResultsView, type IncrementalityResult, type IncrementalityResultsViewHandle } from "@/components/touchpoints/IncrementalityResultsView";
 import { addDays, differenceInDays, parseISO } from "date-fns";
 import { TimelineRangeChart } from "@/components/overview/TimelineRangeChart";
 
@@ -277,6 +281,7 @@ const Change = () => {
   // Results state
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<IncrementalityResult | null>(null);
+  const resultsRef = useRef<IncrementalityResultsViewHandle>(null);
 
   // Basic view state
   const [trackingStatus, setTrackingStatus] = useState<TrackingStatusResponse | null>(null);
@@ -581,54 +586,82 @@ const Change = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-4xl py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <Badge variant="outline" className="border-primary/30 text-primary mb-3">
-            <Sparkles className="h-3 w-3 mr-1.5" />
-            Insights
-          </Badge>
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-semibold text-foreground">
-              Measure Change
-            </h1>
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-              <Button
-                variant={viewMode === "basic" ? "default" : "ghost"}
-                size="sm"
-                className="h-7 px-3 text-xs"
-                onClick={() => setViewMode("basic")}
-              >
-                Basic
-              </Button>
-              <Button
-                variant={viewMode === "advanced" ? "default" : "ghost"}
-                size="sm"
-                className="h-7 px-3 text-xs"
-                onClick={() => setViewMode("advanced")}
-              >
-                Advanced
-              </Button>
+        {/* Header - hidden when results are showing */}
+        {!results && (
+          <div className="mb-8">
+            <Badge variant="outline" className="border-primary/30 text-primary mb-3">
+              <Sparkles className="h-3 w-3 mr-1.5" />
+              Insights
+            </Badge>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl font-semibold text-foreground">
+                Measure Change
+              </h1>
+              <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                <Button
+                  variant={viewMode === "basic" ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 px-3 text-xs"
+                  onClick={() => setViewMode("basic")}
+                >
+                  Basic
+                </Button>
+                <Button
+                  variant={viewMode === "advanced" ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 px-3 text-xs"
+                  onClick={() => setViewMode("advanced")}
+                >
+                  Advanced
+                </Button>
+              </div>
             </div>
+            <p className="text-muted-foreground max-w-2xl">
+              Quantify the incremental impact of any date or period. Compare performance against a baseline 
+              to discover what actually moved the needle — because incremental is the only thing that matters.
+            </p>
           </div>
-          <p className="text-muted-foreground max-w-2xl">
-            Quantify the incremental impact of any date or period. Compare performance against a baseline 
-            to discover what actually moved the needle — because incremental is the only thing that matters.
-          </p>
-        </div>
+        )}
 
         {/* Results View */}
         {results ? (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium flex items-center gap-2">
+            {/* Polished Results Toolbar */}
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card px-5 py-3.5 shadow-sm">
+              <h2 className="text-lg font-semibold flex items-center gap-2.5 text-foreground">
                 <Trophy className="h-5 w-5 text-primary" />
                 Analysis Results
               </h2>
-              <Button variant="outline" onClick={() => setResults(null)}>
-                New Analysis
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => resultsRef.current?.handleCopyReport()}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy Text
+                </Button>
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => resultsRef.current?.handleExportPDF()}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setResults(null)}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  New Analysis
+                </Button>
+              </div>
             </div>
-            <IncrementalityResultsView result={results} />
+            <IncrementalityResultsView ref={resultsRef} result={results} hideActions />
           </div>
         ) : (
           <div className="space-y-6">
