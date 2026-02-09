@@ -1,50 +1,60 @@
 
 
-# Replace "Campaign" with "Period" + Add World Map for Country Breakdown
+# Improve Report Clarity -- 4 Fixes
 
-## 1. Replace "Campaign" wording with "Period"
+## 1. Confidence score: add a reason line
 
-All references to "campaign" in the results view will be changed to "period" so it feels neutral -- whether the user is analyzing a specific event, a campaign, or just a time window.
+Below the confidence gauge (the 50% number + progress bar), add a one-line explanation based on the score and available data:
 
-**Changes in `src/components/touchpoints/IncrementalityResultsView.tsx`:**
+- If confidence < 0.5 and baseline_days < 7: "Limited by short baseline period ({N} days)"
+- If confidence < 0.5 and baseline_days >= 7: "Limited by high variance in baseline data"
+- If confidence 0.5-0.7: "Moderate -- consider extending analysis period for stronger signal"
+- If confidence >= 0.7: "Strong statistical signal detected"
 
-| Current text | New text |
-|---|---|
-| "This campaign delivered measurable incremental value beyond baseline expectations" | "This period delivered measurable incremental value beyond baseline expectations" |
-| "Repeat this campaign type. The incremental metrics demonstrate strong unit economics worth scaling." | "Repeat this approach. The incremental metrics demonstrate strong unit economics worth scaling." |
-| "Campaign did not deliver expected incremental results above baseline" | "This period did not deliver expected incremental results above baseline" |
-| "Reconsider this approach. The campaign did not generate meaningful incremental value..." | "Reconsider this approach. The period did not generate meaningful incremental value..." |
-| "Insufficient data to determine if the campaign generated incremental impact" | "Insufficient data to determine if the period generated incremental impact" |
-| Copy text: `Campaign: ${result.event_name}` | `Period: ${result.event_name}` |
-| "Incremental metrics measure the TRUE impact of your campaign" | "...impact of your period" |
-| "We compare observed behavior during the campaign (event period)" | "We compare observed behavior during the selected period" |
+This goes in the Confidence Gauge section (around line 460-493) and also in the copy-text output.
 
-Approximately 8-10 string replacements, all in the same file.
+## 2. "NEW" label for zero-baseline items
 
-## 2. World Map for Country Breakdown
+In the `BreakdownTable` and `FunnelComparisonBar` components, when `baseline_total` (or `expected`) is 0 but `actual` > 0, display "NEW" instead of "0.0% uplift" in the uplift column.
 
-Instead of showing country data as a plain table, render an SVG world map with countries colored by incremental performance. The table stays below as a detail view.
+Also in the `formatPercent` helper and the top-performer callout -- if expected is 0, show "NEW" badge instead of a percentage.
 
-**New file: `src/components/touchpoints/CountryMapChart.tsx`**
+**Affected spots:**
+- `BreakdownTable` uplift column (line 1475-1481): check `item.baseline_total === 0 && item.actual > 0`, render a styled "NEW" badge
+- `FunnelComparisonBar` uplift badge (line 1341): same check on `expected === 0`
+- Top performer callout (line 936): handle zero-baseline case
 
-- A lightweight SVG world map component using inline path data for major countries (or a small JSON map data file)
-- Countries with data get colored on a gradient scale (green for positive incremental, red for negative, gray for no data)
-- Hover tooltip showing country name, incremental value, and uplift percent
-- Compact design that fits within the existing report page layout
-- Falls back gracefully in PDF export (static colored SVG)
+## 3. Fix ">100% conversion" phrasing in insights
 
-**Approach**: Use a simplified world map SVG with ~50 country paths (covering the most common countries). Each path gets a `data-country` attribute matching the breakdown key. The component maps breakdown data to fill colors.
+The insights array comes from the backend, but we can post-process it on the frontend. Scan each insight string for patterns like "X% of new wallet connections converted" where X > 100, and rephrase to "X conversions per new wallet connection" (dividing by 100).
 
-**Modified file: `src/components/touchpoints/IncrementalityResultsView.tsx`**
+Add a small `cleanInsight()` function that uses a regex to detect and rewrite these cases before rendering.
 
-- For the `country` breakdown specifically, render the `CountryMapChart` above the existing `BreakdownTable`
-- Other breakdowns (utm_source, etc.) keep the table-only layout
+## 4. Fix "Event Period" methodology wording
+
+Change the methodology text on lines 1100-1101:
+- Current: `{windows.event_days} days during/after the event`
+- New: `{windows.event_days} days (selected period: {formatDate(windows.event_start)} - {formatDate(windows.event_end)})`
+
+Also update the Analysis Period label on line 565 from "Event Period" to "Selected Period" for consistency.
+
+And update the timeline legend on line 810 from "Event Period" to "Selected Period".
+
+---
 
 ## Technical details
 
-**Files to create:**
-- `src/components/touchpoints/CountryMapChart.tsx` -- SVG map component with country paths, color scaling, and tooltips
+**File to modify:** `src/components/touchpoints/IncrementalityResultsView.tsx`
 
-**Files to modify:**
-- `src/components/touchpoints/IncrementalityResultsView.tsx` -- replace "campaign" wording (~10 spots), import and render `CountryMapChart` for country breakdowns
+All four fixes are in a single file with these changes:
 
+| Fix | Location (approx lines) | Change |
+|---|---|---|
+| Confidence reason | 460-493 | Add explanatory text div below the gauge bar |
+| Confidence in copy text | 244 | Append reason to confidence line |
+| NEW label in BreakdownTable | 1475-1481 | Conditional render "NEW" badge vs percentage |
+| NEW label in FunnelComparisonBar | 1335-1342 | Conditional render for zero-baseline |
+| NEW in top performer callout | 930-938 | Handle zero-baseline |
+| Insight post-processing | 977-995 | Add `cleanInsight()` wrapper |
+| Methodology wording | 1100-1101 | Remove "during/after the event" |
+| "Event Period" to "Selected Period" | 565, 810 | Label text changes |
