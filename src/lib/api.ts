@@ -334,6 +334,14 @@ export interface TableResponse {
 const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
 
 // Tracking status types
+export interface DailyBreakdownItem {
+  date: string;
+  pageviews: number;
+  events: number;
+  wallets: number;
+  total: number;
+}
+
 export interface TrackingStatusResponse {
   success: boolean;
   tag_id: string;
@@ -341,6 +349,8 @@ export interface TrackingStatusResponse {
   first_tracked_at: string;
   last_tracked_at: string;
   days_active: number;
+  total_tracked?: number;
+  daily_breakdown?: DailyBreakdownItem[];
 }
 
 export async function fetchTrackingStatus(tagId: string): Promise<TrackingStatusResponse> {
