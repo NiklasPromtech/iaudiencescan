@@ -36,8 +36,9 @@ import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
-import { fetchFilterOptions, FilterOptionItem, FilterOptionsResponse } from "@/lib/api";
+import { fetchFilterOptions, fetchTrackingStatus, FilterOptionItem, FilterOptionsResponse, TrackingStatusResponse } from "@/lib/api";
 import { IncrementalityResultsView, type IncrementalityResult } from "@/components/touchpoints/IncrementalityResultsView";
+import { addDays, differenceInDays, parseISO } from "date-fns";
 
 const LOOK_WINDOW_OPTIONS = [
   { value: "6h", label: "6 hours" },
@@ -276,6 +277,12 @@ const Change = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<IncrementalityResult | null>(null);
 
+  // Basic view state
+  const [trackingStatus, setTrackingStatus] = useState<TrackingStatusResponse | null>(null);
+  const [loadingTracking, setLoadingTracking] = useState(false);
+  const [basicRange, setBasicRange] = useState<[number, number] | null>(null);
+  const [basicExcludeBots, setBasicExcludeBots] = useState(true);
+
   // Fetch filter options
   useEffect(() => {
     if (selectedWebsite?.tag_id && !filterOptions) {
@@ -293,6 +300,70 @@ const Change = () => {
         .finally(() => setLoadingFilters(false));
     }
   }, [selectedWebsite?.tag_id, filterOptions]);
+
+  // Fetch tracking status for basic mode
+  useEffect(() => {
+    if (selectedWebsite?.tag_id) {
+      setLoadingTracking(true);
+      fetchTrackingStatus(selectedWebsite.tag_id)
+        .then((data) => {
+          setTrackingStatus(data);
+          const first = parseISO(data.first_tracked_at);
+          const last = parseISO(data.last_tracked_at);
+          const maxOffset = differenceInDays(last, first);
+          const minStart = 7;
+          setBasicRange([minStart, maxOffset]);
+        })
+        .catch((err) => console.error("Failed to fetch tracking status:", err))
+        .finally(() => setLoadingTracking(false));
+    }
+  }, [selectedWebsite?.tag_id]);
+
+  // Basic mode computed values
+  const basicFirstDate = trackingStatus ? parseISO(trackingStatus.first_tracked_at) : null;
+  const basicLastDate = trackingStatus ? parseISO(trackingStatus.last_tracked_at) : null;
+  const basicMaxOffset = basicFirstDate && basicLastDate ? differenceInDays(basicLastDate, basicFirstDate) : 0;
+  const basicStartDate = basicFirstDate && basicRange ? addDays(basicFirstDate, basicRange[0]) : null;
+  const basicEndDate = basicFirstDate && basicRange ? addDays(basicFirstDate, basicRange[1]) : null;
+
+  const handleBasicAnalyze = async () => {
+    if (!selectedWebsite?.tag_id || !basicStartDate || !basicEndDate || !basicFirstDate) {
+      toast.error("No website or date range selected");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) { toast.error("You must be logged in"); setLoading(false); return; }
+
+      const payload = {
+        tag_id: selectedWebsite.tag_id,
+        event_name: `${format(basicStartDate, "MMM d")} – ${format(basicEndDate, "MMM d, yyyy")}`,
+        event_type: "range",
+        time: {
+          start_date: format(basicStartDate, "yyyy-MM-dd"),
+          end_date: format(basicEndDate, "yyyy-MM-dd"),
+        },
+        baseline_days: basicRange![0],
+        breakdowns: ["conversion_event", "wallet_action", "country", "referrer_domain"],
+        filters: basicExcludeBots ? { exclude: { bot_status: ["bot"] } } : undefined,
+      };
+
+      const response = await fetch("https://cdn.audiencescan.io/api/analytics/incrementality/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error(await response.text() || "Failed to generate report");
+      setResults(await response.json());
+    } catch (error) {
+      console.error("Basic analysis error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate report");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleBreakdown = (value: string) => {
     setBreakdowns((prev) =>
@@ -537,8 +608,89 @@ const Change = () => {
         ) : (
           <div className="space-y-6">
             {viewMode === "basic" && (
-              <Card className="bg-black min-h-[400px] flex items-center justify-center border-border/50">
-                <p className="text-muted-foreground text-sm">Basic setup coming soon</p>
+              <Card className="p-6 border-border/50">
+                {loadingTracking ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ) : !trackingStatus ? (
+                  <p className="text-muted-foreground text-sm text-center py-8">
+                    Unable to load tracking data. Make sure your website is set up and tracking.
+                  </p>
+                ) : basicRange && basicFirstDate && basicLastDate ? (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground mb-1">Select Date Range</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Drag the handles to choose the period you want to analyze. The baseline is auto-calculated from the start of tracking to your selected start date.
+                      </p>
+                    </div>
+
+                    {/* Slider */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{format(basicFirstDate, "MMM d, yyyy")}</span>
+                        <span>{format(basicLastDate, "MMM d, yyyy")}</span>
+                      </div>
+                      <Slider
+                        value={basicRange}
+                        onValueChange={(val) => setBasicRange(val as [number, number])}
+                        min={7}
+                        max={basicMaxOffset}
+                        step={1}
+                        minStepsBetweenThumbs={1}
+                      />
+                      <div className="flex justify-center gap-6 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Start: </span>
+                          <span className="font-medium text-foreground">
+                            {basicStartDate ? format(basicStartDate, "MMM d, yyyy") : "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">End: </span>
+                          <span className="font-medium text-foreground">
+                            {basicEndDate ? format(basicEndDate, "MMM d, yyyy") : "—"}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center">
+                        Baseline: {basicRange[0]} days before start date
+                      </p>
+                    </div>
+
+                    {/* Exclude bots */}
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <Checkbox
+                        checked={basicExcludeBots}
+                        onCheckedChange={(checked) => setBasicExcludeBots(!!checked)}
+                      />
+                      <span className="text-sm">Exclude bot traffic</span>
+                    </label>
+
+                    {/* Get Insights button */}
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      onClick={handleBasicAnalyze}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          Get Insights
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : null}
               </Card>
             )}
 
