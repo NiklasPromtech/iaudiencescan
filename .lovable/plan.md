@@ -1,41 +1,72 @@
 
-# Add Basic / Advanced View Toggle to the Change Page
+# Basic View: Date Range Slider with Tracking Status
 
 ## What it does
 
-When users visit `/change`, they will now see a **Basic** view by default -- a clean, empty canvas (black background card) where we will build a simplified setup later. A toggle button in the header lets them switch to the **Advanced** view, which contains all the current functionality (filters, breakdowns, date pickers, results, etc.) exactly as it is today.
+When users land on `/change` in Basic mode, the app fetches the tracking status for the selected website to get the available date range (`first_tracked_at` / `last_tracked_at`). It then displays a visual date timeline slider where users drag two handles to select a **start** and **end** date. Pressing "Get Insights" fires the same incrementality report endpoint with sensible defaults (exclude bots, breakdowns: conversion_event, wallet_action, country, referrer_domain).
 
 ## How it works
 
-**File: `src/pages/Change.tsx`**
+1. **Fetch tracking status** on mount (when `viewMode === "basic"` and website is selected)
+   - `GET https://cdn.audiencescan.io/api/analytics/tracking-status/{tagId}`
+   - Store `first_tracked_at` and `last_tracked_at`
 
-1. Add a `viewMode` state: `"basic" | "advanced"`, defaulting to `"basic"`
-2. In the page header area, add a toggle button (e.g., a segmented control or simple button) to switch between "Basic" and "Advanced"
-3. Wrap all existing form/config UI in a conditional that only renders when `viewMode === "advanced"`
-4. When `viewMode === "basic"`, render a placeholder card with a dark/black background -- ready for future content
-5. Results view remains shared between both modes (visible regardless of mode when results exist)
+2. **Date range slider**
+   - Uses a dual-handle `Slider` component mapped to day indices
+   - Minimum start = `first_tracked_at + 7 days` (need baseline)
+   - Maximum end = `last_tracked_at`
+   - Show formatted date labels for start and end below the slider
+   - The full range label (first date to last date) shown at edges
+
+3. **"Get Insights" button**
+   - Sends to the same `/api/analytics/incrementality/report` endpoint
+   - Payload built with:
+     - `event_type: "range"`
+     - `time.start_date` = selected start
+     - `time.end_date` = selected end
+     - `baseline_days` = number of days between `first_tracked_at` and selected start (auto-calculated)
+     - `event_name` = auto-generated from dates
+     - `breakdowns: ["conversion_event", "wallet_action", "country", "referrer_domain"]`
+     - `filters.exclude.bot_status: ["bot"]`
+   - Results shown using the existing `IncrementalityResultsView` component
 
 ## Visual layout
 
 ```text
-+------------------------------------------+
-|  Measure Change                          |
-|  [Basic]  [Advanced]    <-- toggle       |
-+------------------------------------------+
-|                                          |
-|  (Basic mode: dark placeholder card)     |
-|  or                                      |
-|  (Advanced mode: all current controls)   |
-|                                          |
-+------------------------------------------+
-|  Results (if any)                        |
-+------------------------------------------+
++--------------------------------------------------+
+|  Measure Change          [Basic] [Advanced]       |
+|  Description text...                              |
++--------------------------------------------------+
+|                                                   |
+|  Loading tracking data... (skeleton while loading)|
+|                                                   |
+|  Jan 15          [====|=======|====]       Feb 9  |
+|                  Start: Jan 22  End: Feb 9        |
+|                                                   |
+|  [x] Exclude bot traffic                          |
+|                                                   |
+|         [ Get Insights ]                          |
+|                                                   |
++--------------------------------------------------+
+|  Results (shared with advanced)                   |
++--------------------------------------------------+
 ```
 
 ## Technical details
 
-- Single state variable `useState<"basic" | "advanced">("basic")` added to the `Change` component
-- The toggle will use two `Button` components styled as a segmented control (one highlighted, one ghost)
-- All existing JSX from the config section gets wrapped in `{viewMode === "advanced" && ( ... )}`
-- Basic view renders a simple `Card` with `bg-black min-h-[400px]` as the empty canvas
-- No other files need to change
+**File: `src/lib/api.ts`**
+- Add `fetchTrackingStatus(tagId: string)` function
+- Uses `ANALYTICS_API_URL` base with `GET /analytics/tracking-status/{tagId}`
+- Returns `{ success, tag_id, is_tracking, first_tracked_at, last_tracked_at, days_active }`
+
+**File: `src/pages/Change.tsx`**
+- Add state: `trackingStatus` (stores API response), `loadingTracking` (boolean)
+- Add state: `basicRange` as `[number, number]` for the slider (day offsets from first_tracked_at)
+- Add `useEffect` to fetch tracking status when basic mode is active and website changes
+- Compute `minStartOffset = 7` (first_tracked_at + 7 days minimum)
+- Compute `maxOffset` = total days between first and last tracked
+- Slider `min={minStartOffset}`, `max={maxOffset}`, two handles
+- Display start/end as formatted dates derived from `first_tracked_at + offset days`
+- Add `handleBasicAnalyze` function that builds the payload with defaults and calls the same report endpoint
+- Replace the black placeholder card with the actual slider UI
+- Include an "Exclude bot traffic" checkbox (default checked), same as advanced
