@@ -139,10 +139,39 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
     return n.toLocaleString();
   };
 
-  const formatPercent = (n: number) => {
+  const formatPercent = (n: number, baselineZero?: boolean) => {
+    if (baselineZero) return "NEW";
     const sign = n > 0 ? "+" : "";
     return `${sign}${n.toFixed(1)}%`;
   };
+
+  const getConfidenceReason = (score: number, baselineDays?: number) => {
+    if (score < 0.5 && baselineDays !== undefined && baselineDays < 7) {
+      return `Confidence is limited due to short baseline period (${baselineDays} days)`;
+    }
+    if (score < 0.5) {
+      return "Confidence is limited due to high variance in baseline data";
+    }
+    if (score < 0.7) {
+      return "Moderate — consider extending analysis period for stronger signal";
+    }
+    return "Strong statistical signal detected";
+  };
+
+  const cleanInsight = (insight: string): string => {
+    return insight.replace(
+      /(\d+(?:\.\d+)?)% of (new wallet connections|wallets?) converted/gi,
+      (_, pct) => {
+        const num = parseFloat(pct);
+        if (num > 100) {
+          return `${(num / 100).toFixed(1)} conversions per new wallet connection`;
+        }
+        return `${pct}% of new wallet connections converted`;
+      }
+    );
+  };
+
+  const confidenceReason = getConfidenceReason(executive_summary.confidence_score, windows.baseline_days);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -241,7 +270,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
       `• Incremental Wallet Connections: ${formatNumber(executive_summary.total_incremental_wallet_connections)} (${formatPercent(executive_summary.wallet_uplift_percent)} uplift)`,
       executive_summary.cost_per_incremental_conversion !== null ? `• Cost per Incremental Conversion: $${executive_summary.cost_per_incremental_conversion.toFixed(2)}` : "",
       executive_summary.roi !== null ? `• ROI: ${executive_summary.roi.toFixed(1)}%` : "",
-      `• Confidence Score: ${Math.round(executive_summary.confidence_score * 100)}%`,
+      `• Confidence Score: ${Math.round(executive_summary.confidence_score * 100)}% — ${confidenceReason}`,
       ``,
       `ANALYSIS PERIOD`,
       `${"-".repeat(40)}`,
@@ -491,6 +520,15 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                     borderRadius: '2px'
                   }} />
                 </div>
+                <div style={{
+                  fontSize: '9px',
+                  color: '#52525b',
+                  marginTop: '8px',
+                  lineHeight: '1.4',
+                  maxWidth: '140px'
+                }}>
+                  {confidenceReason}
+                </div>
               </div>
             </div>
           </div>
@@ -562,7 +600,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '2px' }}>Event Period</div>
+                <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '2px' }}>Selected Period</div>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#18181b' }}>
                   {formatDate(windows.event_start)} – {formatDate(windows.event_end)}
                   <span style={{ fontWeight: '400', color: '#71717a', marginLeft: '6px' }}>
@@ -807,7 +845,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                       background: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
                       borderRadius: '3px' 
                     }} />
-                    <span style={{ color: '#52525b', fontWeight: '500' }}>Event Period</span>
+                    <span style={{ color: '#52525b', fontWeight: '500' }}>Selected Period</span>
                   </div>
                 </div>
               </div>
@@ -933,7 +971,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                       {' '}drove the most incremental traffic with{' '}
                     </span>
                     <span style={{ fontWeight: '700', color: '#166534' }}>
-                      +{formatNumber(topPerformer.incremental)} ({formatPercent(topPerformer.uplift_percent)})
+                      +{formatNumber(topPerformer.incremental)} ({formatPercent(topPerformer.uplift_percent, topPerformer.baseline_total === 0 && topPerformer.actual > 0)})
                     </span>
                   </div>
                 </div>
@@ -991,7 +1029,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                       {idx + 1}.
                     </span>
                     <span style={{ fontSize: '12px', color: '#18181b', lineHeight: '1.5' }}>
-                      {insight}
+                      {cleanInsight(insight)}
                     </span>
                   </div>
                 ))}
@@ -1097,8 +1135,8 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                 against expected behavior based on historical baseline.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                <div><strong>Baseline Period:</strong> {windows.baseline_days} days of pre-event activity</div>
-                <div><strong>Event Period:</strong> {windows.event_days} days during/after the event</div>
+                <div><strong>Baseline Period:</strong> {windows.baseline_days} days of pre-event activity ({formatDate(windows.baseline_start)} – {formatDate(windows.baseline_end)})</div>
+                <div><strong>Selected Period:</strong> {windows.event_days} days ({formatDate(windows.event_start)} – {formatDate(windows.event_end)})</div>
                 <div><strong>Incremental:</strong> Actual - Expected</div>
                 <div><strong>Confidence:</strong> Statistical significance of the observed lift</div>
               </div>
@@ -1338,7 +1376,7 @@ function FunnelComparisonBar({
             fontSize: '11px',
             color: isPositive ? '#15803d' : '#dc2626'
           }}>
-            ({upliftPercent > 0 ? '+' : ''}{upliftPercent.toFixed(1)}%)
+            ({expected === 0 && actual > 0 ? 'NEW' : `${upliftPercent > 0 ? '+' : ''}${upliftPercent.toFixed(1)}%`})
           </span>
         </div>
       </div>
@@ -1475,9 +1513,20 @@ function BreakdownTable({
           <div style={{ 
             textAlign: 'right',
             fontWeight: '600',
-            color: item.uplift_percent > 0 ? '#059669' : item.uplift_percent < 0 ? '#dc2626' : '#71717a'
+            color: item.baseline_total === 0 && item.actual > 0 ? '#2563eb' : item.uplift_percent > 0 ? '#059669' : item.uplift_percent < 0 ? '#dc2626' : '#71717a'
           }}>
-            {formatPercent(item.uplift_percent)}
+            {item.baseline_total === 0 && item.actual > 0 ? (
+              <span style={{ 
+                backgroundColor: '#dbeafe',
+                color: '#1d4ed8',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                fontSize: '10px',
+                fontWeight: '700'
+              }}>
+                NEW
+              </span>
+            ) : formatPercent(item.uplift_percent)}
           </div>
         </div>
       ))}
