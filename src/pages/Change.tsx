@@ -36,9 +36,10 @@ import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
-import { fetchFilterOptions, fetchTrackingStatus, FilterOptionItem, FilterOptionsResponse, TrackingStatusResponse } from "@/lib/api";
+import { fetchFilterOptions, fetchTrackingStatus, FilterOptionItem, FilterOptionsResponse, TrackingStatusResponse, DailyBreakdownItem } from "@/lib/api";
 import { IncrementalityResultsView, type IncrementalityResult } from "@/components/touchpoints/IncrementalityResultsView";
 import { addDays, differenceInDays, parseISO } from "date-fns";
+import { TimelineRangeChart } from "@/components/overview/TimelineRangeChart";
 
 const LOOK_WINDOW_OPTIONS = [
   { value: "6h", label: "6 hours" },
@@ -308,11 +309,18 @@ const Change = () => {
       fetchTrackingStatus(selectedWebsite.tag_id)
         .then((data) => {
           setTrackingStatus(data);
-          const first = parseISO(data.first_tracked_at);
-          const last = parseISO(data.last_tracked_at);
-          const maxOffset = differenceInDays(last, first);
-          const minStart = 7;
-          setBasicRange([minStart, maxOffset]);
+          // Use daily_breakdown length if available, otherwise fall back to date diff
+          const breakdownLen = data.daily_breakdown?.length ?? 0;
+          if (breakdownLen > 1) {
+            const minStart = Math.min(7, breakdownLen - 1);
+            setBasicRange([minStart, breakdownLen - 1]);
+          } else {
+            const first = parseISO(data.first_tracked_at);
+            const last = parseISO(data.last_tracked_at);
+            const maxOffset = differenceInDays(last, first);
+            const minStart = Math.min(7, maxOffset);
+            setBasicRange([minStart, maxOffset]);
+          }
         })
         .catch((err) => console.error("Failed to fetch tracking status:", err))
         .finally(() => setLoadingTracking(false));
@@ -322,9 +330,26 @@ const Change = () => {
   // Basic mode computed values
   const basicFirstDate = trackingStatus ? parseISO(trackingStatus.first_tracked_at) : null;
   const basicLastDate = trackingStatus ? parseISO(trackingStatus.last_tracked_at) : null;
-  const basicMaxOffset = basicFirstDate && basicLastDate ? differenceInDays(basicLastDate, basicFirstDate) : 0;
-  const basicStartDate = basicFirstDate && basicRange ? addDays(basicFirstDate, basicRange[0]) : null;
-  const basicEndDate = basicFirstDate && basicRange ? addDays(basicFirstDate, basicRange[1]) : null;
+  const basicMaxOffset = trackingStatus?.daily_breakdown?.length
+    ? trackingStatus.daily_breakdown.length - 1
+    : basicFirstDate && basicLastDate ? differenceInDays(basicLastDate, basicFirstDate) : 0;
+  
+  // When daily_breakdown exists, use its dates directly; otherwise fall back to offset math
+  const basicStartDate = useMemo(() => {
+    if (!basicRange) return null;
+    if (trackingStatus?.daily_breakdown?.[basicRange[0]]) {
+      return parseISO(trackingStatus.daily_breakdown[basicRange[0]].date);
+    }
+    return basicFirstDate ? addDays(basicFirstDate, basicRange[0]) : null;
+  }, [basicRange, trackingStatus, basicFirstDate]);
+  
+  const basicEndDate = useMemo(() => {
+    if (!basicRange) return null;
+    if (trackingStatus?.daily_breakdown?.[basicRange[1]]) {
+      return parseISO(trackingStatus.daily_breakdown[basicRange[1]].date);
+    }
+    return basicFirstDate ? addDays(basicFirstDate, basicRange[1]) : null;
+  }, [basicRange, trackingStatus, basicFirstDate]);
 
   const handleBasicAnalyze = async () => {
     if (!selectedWebsite?.tag_id || !basicStartDate || !basicEndDate || !basicFirstDate) {
@@ -621,45 +646,55 @@ const Change = () => {
                   </p>
                 ) : basicRange && basicFirstDate && basicLastDate ? (
                   <div className="space-y-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-foreground mb-1">Select Date Range</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Drag the handles to choose the period you want to analyze. The baseline is auto-calculated from the start of tracking to your selected start date.
-                      </p>
-                    </div>
-
-                    {/* Slider */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{format(basicFirstDate, "MMM d, yyyy")}</span>
-                        <span>{format(basicLastDate, "MMM d, yyyy")}</span>
-                      </div>
-                      <Slider
-                        value={basicRange}
-                        onValueChange={(val) => setBasicRange(val as [number, number])}
-                        min={7}
-                        max={basicMaxOffset}
-                        step={1}
-                        minStepsBetweenThumbs={1}
+                    {trackingStatus?.daily_breakdown && trackingStatus.daily_breakdown.length > 1 ? (
+                      <TimelineRangeChart
+                        dailyBreakdown={trackingStatus.daily_breakdown}
+                        range={basicRange}
+                        onRangeChange={(val) => setBasicRange(val)}
+                        maxOffset={trackingStatus.daily_breakdown.length - 1}
+                        firstDate={basicFirstDate!}
                       />
-                      <div className="flex justify-center gap-6 text-sm">
+                    ) : (
+                      <>
                         <div>
-                          <span className="text-muted-foreground">Start: </span>
-                          <span className="font-medium text-foreground">
-                            {basicStartDate ? format(basicStartDate, "MMM d, yyyy") : "—"}
-                          </span>
+                          <h3 className="text-sm font-medium text-foreground mb-1">Select Date Range</h3>
+                          <p className="text-xs text-muted-foreground">
+                            Drag the handles to choose the period you want to analyze. The baseline is auto-calculated from the start of tracking to your selected start date.
+                          </p>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">End: </span>
-                          <span className="font-medium text-foreground">
-                            {basicEndDate ? format(basicEndDate, "MMM d, yyyy") : "—"}
-                          </span>
+                        <div className="space-y-3">
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{format(basicFirstDate!, "MMM d, yyyy")}</span>
+                            <span>{format(basicLastDate!, "MMM d, yyyy")}</span>
+                          </div>
+                          <Slider
+                            value={basicRange}
+                            onValueChange={(val) => setBasicRange(val as [number, number])}
+                            min={0}
+                            max={basicMaxOffset}
+                            step={1}
+                            minStepsBetweenThumbs={1}
+                          />
+                          <div className="flex justify-center gap-6 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Start: </span>
+                              <span className="font-medium text-foreground">
+                                {basicStartDate ? format(basicStartDate, "MMM d, yyyy") : "—"}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">End: </span>
+                              <span className="font-medium text-foreground">
+                                {basicEndDate ? format(basicEndDate, "MMM d, yyyy") : "—"}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Baseline: {basicRange[0]} days before start date
+                          </p>
                         </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground text-center">
-                        Baseline: {basicRange[0]} days before start date
-                      </p>
-                    </div>
+                      </>
+                    )}
 
                     {/* Exclude bots */}
                     <label className="flex items-center gap-2 cursor-pointer">
