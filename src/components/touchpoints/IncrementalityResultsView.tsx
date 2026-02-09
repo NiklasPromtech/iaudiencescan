@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import audienceScanLogo from "@/assets/audiencescan-logo-dark.png";
+import { CountryMapChart } from "./CountryMapChart";
 
 // ==================== INTERFACES ====================
 
@@ -152,24 +153,24 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
     if (verdict === "highly_positive" || verdict === "positive") {
       return {
         label: verdict === "highly_positive" ? "STRONG POSITIVE IMPACT" : "POSITIVE IMPACT",
-        sublabel: "This campaign delivered measurable incremental value beyond baseline expectations",
+        sublabel: "This period delivered measurable incremental value beyond baseline expectations",
         badgeBg: "#166534",
         summaryBg: "#dcfce7",
-        recommendation: "Repeat this campaign type. The incremental metrics demonstrate strong unit economics worth scaling."
+        recommendation: "Repeat this approach. The incremental metrics demonstrate strong unit economics worth scaling."
       };
     }
     if (verdict === "highly_negative" || verdict === "negative") {
       return {
         label: verdict === "highly_negative" ? "NEGATIVE IMPACT" : "BELOW EXPECTATIONS",
-        sublabel: "Campaign did not deliver expected incremental results above baseline",
+        sublabel: "This period did not deliver expected incremental results above baseline",
         badgeBg: "#991b1b",
         summaryBg: "#fee2e2",
-        recommendation: "Reconsider this approach. The campaign did not generate meaningful incremental value above what would have happened naturally."
+        recommendation: "Reconsider this approach. The period did not generate meaningful incremental value above what would have happened naturally."
       };
     }
     return {
       label: "INCONCLUSIVE",
-      sublabel: "Insufficient data to determine if the campaign generated incremental impact",
+      sublabel: "Insufficient data to determine if the period generated incremental impact",
       badgeBg: "#92400e",
       summaryBg: "#fef3c7",
       recommendation: "Gather more data before drawing conclusions. Consider extending the analysis period or increasing baseline sample size."
@@ -227,7 +228,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
   const generateReportText = () => {
     const lines = [
       `INCREMENTALITY ANALYSIS REPORT`,
-      `Campaign: ${result.event_name}`,
+      `Period: ${result.event_name}`,
       `${"=".repeat(60)}`,
       ``,
       `EXECUTIVE SUMMARY`,
@@ -636,7 +637,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                     margin: 0,
                     lineHeight: '1.6'
                   }}>
-                    Incremental metrics measure the <strong>TRUE</strong> impact of your campaign – the additional 
+                    Incremental metrics measure the <strong>TRUE</strong> impact of your period – the additional 
                     conversions and wallet connections you gained <strong>BEYOND</strong> what would have happened 
                     naturally. Raw totals include organic activity. Incremental isolates your marketing's real 
                     contribution. <strong>This is what investors care about.</strong>
@@ -938,6 +939,11 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                 </div>
               )}
               
+              {/* Country Map (only for country breakdown) */}
+              {key === 'country' && (
+                <CountryMapChart data={sortedData} formatNumber={formatNumber} formatPercent={formatPercent} />
+              )}
+              
               {/* Breakdown Table */}
               <BreakdownTable data={sortedData} formatNumber={formatNumber} formatPercent={formatPercent} />
 
@@ -1085,9 +1091,9 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
               color: '#52525b',
               lineHeight: '1.7'
             }}>
-              <p style={{ margin: '0 0 12px 0' }}>
+               <p style={{ margin: '0 0 12px 0' }}>
                 This report uses <strong>incrementality analysis</strong> to measure the causal impact 
-                of marketing activities. We compare observed behavior during the campaign (event period) 
+                of marketing activities. We compare observed behavior during the selected period 
                 against expected behavior based on historical baseline.
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
