@@ -503,14 +503,14 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
           }}>
             <MetricCard
               label="Incremental Conversions"
-              value={`+${formatNumber(executive_summary.total_incremental_conversions)}`}
+              value={`${executive_summary.total_incremental_conversions >= 0 ? '+' : ''}${formatNumber(executive_summary.total_incremental_conversions)}`}
               subvalue={formatPercent(executive_summary.conversion_uplift_percent)}
               positive={executive_summary.conversion_uplift_percent > 0}
               flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
             />
             <MetricCard
               label="Incremental Wallets"
-              value={`+${formatNumber(executive_summary.total_incremental_wallet_connections)}`}
+              value={`${executive_summary.total_incremental_wallet_connections >= 0 ? '+' : ''}${formatNumber(executive_summary.total_incremental_wallet_connections)}`}
               subvalue={formatPercent(executive_summary.wallet_uplift_percent)}
               positive={executive_summary.wallet_uplift_percent > 0}
               flex={hasCostMetrics ? '1 1 calc(50% - 6px)' : '1 1 calc(50% - 6px)'}
