@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Copy,
@@ -110,15 +110,26 @@ export interface IncrementalityResult {
 
 interface IncrementalityResultsViewProps {
   result: IncrementalityResult;
+  hideActions?: boolean;
+}
+
+export interface IncrementalityResultsViewHandle {
+  handleCopyReport: () => Promise<void>;
+  handleExportPDF: () => Promise<void>;
 }
 
 // ==================== MAIN COMPONENT ====================
 
-export function IncrementalityResultsView({ result }: IncrementalityResultsViewProps) {
+export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHandle, IncrementalityResultsViewProps>(function IncrementalityResultsView({ result, hideActions }, ref) {
   const { executive_summary, windows, conversion_funnel, wallet_funnel, daily_timeline, attribution, traffic_summary, insights, breakdowns } = result;
   const reportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    handleCopyReport,
+    handleExportPDF,
+  }));
 
   // Utility functions
   const formatNumber = (n: number) => {
@@ -303,37 +314,38 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
 
   return (
     <div className="space-y-1">
-      {/* Export Actions - Outside the PDF area */}
-      <div className="flex justify-end gap-2 mb-4 print:hidden">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCopyReport}
-          className="gap-2"
-        >
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          {copied ? "Copied" : "Copy Text"}
-        </Button>
-        <Button
-          variant="default"
-          size="sm"
-          onClick={handleExportPDF}
-          disabled={exporting}
-          className="gap-2"
-        >
-          {exporting ? (
-            <>
-              <Download className="h-4 w-4 animate-pulse" />
-              Exporting...
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4" />
-              Export PDF
-            </>
-          )}
-        </Button>
-      </div>
+      {!hideActions && (
+        <div className="flex justify-end gap-2 mb-4 print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyReport}
+            className="gap-2"
+          >
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copied ? "Copied" : "Copy Text"}
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="gap-2"
+          >
+            {exporting ? (
+              <>
+                <Download className="h-4 w-4 animate-pulse" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Export PDF
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       {/* PDF Report Container */}
       <div 
@@ -1128,7 +1140,7 @@ export function IncrementalityResultsView({ result }: IncrementalityResultsViewP
       </div>
     </div>
   );
-}
+});
 
 // ==================== HELPER COMPONENTS FOR PDF ====================
 
