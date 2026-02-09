@@ -333,6 +333,32 @@ export interface TableResponse {
 
 const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
 
+// Tracking status types
+export interface TrackingStatusResponse {
+  success: boolean;
+  tag_id: string;
+  is_tracking: boolean;
+  first_tracked_at: string;
+  last_tracked_at: string;
+  days_active: number;
+}
+
+export async function fetchTrackingStatus(tagId: string): Promise<TrackingStatusResponse> {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/tracking-status/${tagId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function fetchScorecard(request: ScorecardRequest): Promise<ScorecardResponse> {
   const token = await getAuthToken();
   
