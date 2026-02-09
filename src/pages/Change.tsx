@@ -465,6 +465,8 @@ const Change = () => {
     }
   };
 
+  const [viewMode, setViewMode] = useState<"basic" | "advanced">("basic");
+
   const totalIncludeFilters = Object.values(includeFilters).flat().length;
   const totalExcludeFilters = Object.values(excludeFilters).flat().length;
 
@@ -489,9 +491,29 @@ const Change = () => {
             <Sparkles className="h-3 w-3 mr-1.5" />
             Insights
           </Badge>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Measure Change
-          </h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-semibold text-foreground">
+              Measure Change
+            </h1>
+            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+              <Button
+                variant={viewMode === "basic" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-3 text-xs"
+                onClick={() => setViewMode("basic")}
+              >
+                Basic
+              </Button>
+              <Button
+                variant={viewMode === "advanced" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-3 text-xs"
+                onClick={() => setViewMode("advanced")}
+              >
+                Advanced
+              </Button>
+            </div>
+          </div>
           <p className="text-muted-foreground max-w-2xl">
             Quantify the incremental impact of any date or period. Compare performance against a baseline 
             to discover what actually moved the needle — because incremental is the only thing that matters.
@@ -514,6 +536,13 @@ const Change = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {viewMode === "basic" && (
+              <Card className="bg-black min-h-[400px] flex items-center justify-center border-border/50">
+                <p className="text-muted-foreground text-sm">Basic setup coming soon</p>
+              </Card>
+            )}
+
+            {viewMode === "advanced" && <>
             {/* Hero Card - Date Selection */}
             <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
               <div className="flex items-start gap-4 mb-6">
@@ -794,6 +823,7 @@ const Change = () => {
                 </div>
               </div>
             </Card>
+            </>}
           </div>
         )}
       </div>
