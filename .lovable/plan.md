@@ -1,31 +1,50 @@
 
 
-# Clean Up Results Header
+# Replace "Campaign" with "Period" + Add World Map for Country Breakdown
 
-## What changes
+## 1. Replace "Campaign" wording with "Period"
 
-When analysis results are displayed, the top of the page currently shows the full "Measure Change" header (badge, title, description, Basic/Advanced toggle) plus a separate "Analysis Results" row and then the Copy/Export buttons inside the results component. It looks cluttered and redundant.
+All references to "campaign" in the results view will be changed to "period" so it feels neutral -- whether the user is analyzing a specific event, a campaign, or just a time window.
 
-## The fix
+**Changes in `src/components/touchpoints/IncrementalityResultsView.tsx`:**
 
-1. **Hide the page header when results are showing** -- wrap the existing header block (Insights badge, "Measure Change" title, description, mode toggle) in a condition so it only renders when there are no results.
+| Current text | New text |
+|---|---|
+| "This campaign delivered measurable incremental value beyond baseline expectations" | "This period delivered measurable incremental value beyond baseline expectations" |
+| "Repeat this campaign type. The incremental metrics demonstrate strong unit economics worth scaling." | "Repeat this approach. The incremental metrics demonstrate strong unit economics worth scaling." |
+| "Campaign did not deliver expected incremental results above baseline" | "This period did not deliver expected incremental results above baseline" |
+| "Reconsider this approach. The campaign did not generate meaningful incremental value..." | "Reconsider this approach. The period did not generate meaningful incremental value..." |
+| "Insufficient data to determine if the campaign generated incremental impact" | "Insufficient data to determine if the period generated incremental impact" |
+| Copy text: `Campaign: ${result.event_name}` | `Period: ${result.event_name}` |
+| "Incremental metrics measure the TRUE impact of your campaign" | "...impact of your period" |
+| "We compare observed behavior during the campaign (event period)" | "We compare observed behavior during the selected period" |
 
-2. **Create a clean, polished results toolbar** -- replace the current "Analysis Results" heading + "New Analysis" button block and move the Copy Text / Export PDF buttons up into a single unified bar:
-   - Left side: a clean "Analysis Results" title with the trophy icon
-   - Right side: three buttons in a row -- Copy Text (outline), Export PDF (primary/purple), New Analysis (outline)
-   - Styled as a subtle card/bar with proper spacing and alignment
+Approximately 8-10 string replacements, all in the same file.
 
-3. **Remove the duplicate Copy Text / Export PDF buttons** from inside `IncrementalityResultsView` since they'll now live in the parent toolbar. This will be done by either passing a prop to hide them or removing the block from the component (with a check so other consumers still get them).
+## 2. World Map for Country Breakdown
+
+Instead of showing country data as a plain table, render an SVG world map with countries colored by incremental performance. The table stays below as a detail view.
+
+**New file: `src/components/touchpoints/CountryMapChart.tsx`**
+
+- A lightweight SVG world map component using inline path data for major countries (or a small JSON map data file)
+- Countries with data get colored on a gradient scale (green for positive incremental, red for negative, gray for no data)
+- Hover tooltip showing country name, incremental value, and uplift percent
+- Compact design that fits within the existing report page layout
+- Falls back gracefully in PDF export (static colored SVG)
+
+**Approach**: Use a simplified world map SVG with ~50 country paths (covering the most common countries). Each path gets a `data-country` attribute matching the breakdown key. The component maps breakdown data to fill colors.
+
+**Modified file: `src/components/touchpoints/IncrementalityResultsView.tsx`**
+
+- For the `country` breakdown specifically, render the `CountryMapChart` above the existing `BreakdownTable`
+- Other breakdowns (utm_source, etc.) keep the table-only layout
 
 ## Technical details
 
-**File: `src/pages/Change.tsx`**
-- Wrap the header `div` (lines 585-617) with `{!results && ( ... )}` so it hides when results are present
-- Replace the results header block (lines 621-630) with a polished toolbar containing all three actions (New Analysis, Copy Text, Export PDF). The copy/export logic will be lifted from `IncrementalityResultsView` or triggered via a ref/callback.
+**Files to create:**
+- `src/components/touchpoints/CountryMapChart.tsx` -- SVG map component with country paths, color scaling, and tooltips
 
-**File: `src/components/touchpoints/IncrementalityResultsView.tsx`**
-- Add an optional `hideActions?: boolean` prop
-- When `hideActions` is true, skip rendering the export actions bar (lines 307-336)
-- Pass `hideActions={true}` from `Change.tsx`
-- Expose `handleCopyReport` and `handleExportPDF` via `React.forwardRef` + `useImperativeHandle` so the parent can trigger them from its toolbar buttons
+**Files to modify:**
+- `src/components/touchpoints/IncrementalityResultsView.tsx` -- replace "campaign" wording (~10 spots), import and render `CountryMapChart` for country breakdowns
 
