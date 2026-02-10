@@ -41,14 +41,24 @@ interface AttributionSource {
   percent_of_total: number;
 }
 
+interface BreakdownMetric {
+  baseline_daily_avg: number;
+  event_daily_avg: number;
+  uplift_percent: number;
+}
+
 interface BreakdownItem {
   key: string;
-  baseline_total: number;
-  event_total: number;
-  expected: number;
-  actual: number;
-  incremental: number;
-  uplift_percent: number;
+  visitors?: BreakdownMetric;
+  conversions?: BreakdownMetric;
+  wallets?: BreakdownMetric;
+  // Legacy flat fields (backward compat)
+  baseline_total?: number;
+  event_total?: number;
+  expected?: number;
+  actual?: number;
+  incremental?: number;
+  uplift_percent?: number;
 }
 
 export interface IncrementalityResult {
@@ -92,6 +102,14 @@ export interface IncrementalityResult {
     visitor_uplift_percent: number;
     bounce_rate_baseline: number;
     bounce_rate_event: number;
+  };
+  token_holders?: {
+    has_data: boolean;
+    total_baseline_holders: number;
+    total_event_holders: number;
+    total_holder_change: number;
+    total_holder_change_percent: number;
+    contracts: any[];
   };
   insights: string[];
   breakdowns?: {
@@ -923,9 +941,15 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
           const data = breakdowns?.[key];
           if (!data || data.length === 0) return null;
           
-          // Sort by incremental descending and take top 10
-          const sortedData = [...data].sort((a, b) => b.incremental - a.incremental).slice(0, 10);
+          // Sort by visitors uplift descending and take top 10
+          const sortedData = [...data].sort((a, b) => {
+            const aUplift = a.visitors?.uplift_percent ?? a.uplift_percent ?? 0;
+            const bUplift = b.visitors?.uplift_percent ?? b.uplift_percent ?? 0;
+            return bUplift - aUplift;
+          }).slice(0, 10);
           const topPerformer = sortedData[0];
+          const topVisitorUplift = topPerformer?.visitors?.uplift_percent ?? topPerformer?.uplift_percent ?? 0;
+          const topVisitorEventAvg = topPerformer?.visitors?.event_daily_avg ?? 0;
           
           return (
             <div key={key} style={{ pageBreakAfter: 'always', padding: '24px 28px', minHeight: '9.5in', display: 'flex', flexDirection: 'column' }}>
@@ -951,7 +975,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
               </div>
               
               {/* Top Performer Callout */}
-              {topPerformer && topPerformer.incremental > 0 && (
+              {topPerformer && topVisitorUplift > 0 && (
                 <div style={{
                   backgroundColor: '#f0fdf4',
                   border: '1px solid #bbf7d0',
@@ -971,7 +995,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                       {' '}drove the most incremental traffic with{' '}
                     </span>
                     <span style={{ fontWeight: '700', color: '#166534' }}>
-                      +{formatNumber(topPerformer.incremental)} ({formatPercent(topPerformer.uplift_percent, topPerformer.baseline_total === 0 && topPerformer.actual > 0)})
+                      {topVisitorEventAvg.toFixed(1)}/day avg ({topPerformer.visitors?.baseline_daily_avg === 0 ? 'NEW' : `+${topVisitorUplift.toFixed(1)}%`})
                     </span>
                   </div>
                 </div>
@@ -979,7 +1003,13 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
               
               {/* Country Map (only for country breakdown) */}
               {key === 'country' && (
-                <CountryMapChart data={sortedData} formatNumber={formatNumber} formatPercent={formatPercent} />
+                <CountryMapChart data={sortedData.map(d => ({
+                  key: d.key,
+                  incremental: Math.round((d.visitors?.event_daily_avg ?? 0) - (d.visitors?.baseline_daily_avg ?? 0)),
+                  uplift_percent: d.visitors?.uplift_percent ?? 0,
+                  baseline_total: Math.round(d.visitors?.baseline_daily_avg ?? 0),
+                  actual: Math.round(d.visitors?.event_daily_avg ?? 0),
+                }))} formatNumber={formatNumber} formatPercent={formatPercent} />
               )}
               
               {/* Breakdown Table */}
@@ -1448,88 +1478,119 @@ function BreakdownTable({
 }: { 
   data: BreakdownItem[]; 
   formatNumber: (n: number) => string;
-  formatPercent: (n: number) => string;
+  formatPercent: (n: number, baselineZero?: boolean) => string;
 }) {
+  const hasNewFormat = data.length > 0 && data[0].visitors !== undefined;
+
+  if (!hasNewFormat) {
+    // Legacy flat format
+    return (
+      <div style={{ border: '1px solid #e4e4e7', borderRadius: '8px', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', backgroundColor: '#f4f4f5', padding: '10px 16px', fontSize: '10px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div>Dimension</div>
+          <div style={{ textAlign: 'right' }}>Baseline</div>
+          <div style={{ textAlign: 'right' }}>Actual</div>
+          <div style={{ textAlign: 'right' }}>Incremental</div>
+          <div style={{ textAlign: 'right' }}>Uplift</div>
+        </div>
+        {data.map((item, idx) => (
+          <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '12px 16px', fontSize: '12px', borderTop: '1px solid #e4e4e7', backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff' }}>
+            <div style={{ fontWeight: idx === 0 ? '600' : '500', color: '#18181b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.key || '(not set)'}</div>
+            <div style={{ textAlign: 'right', color: '#71717a' }}>{formatNumber(item.baseline_total ?? 0)}</div>
+            <div style={{ textAlign: 'right', color: '#18181b', fontWeight: '500' }}>{formatNumber(item.actual ?? 0)}</div>
+            <div style={{ textAlign: 'right', fontWeight: '600', color: (item.incremental ?? 0) > 0 ? '#059669' : (item.incremental ?? 0) < 0 ? '#dc2626' : '#71717a' }}>{(item.incremental ?? 0) > 0 ? '+' : ''}{formatNumber(item.incremental ?? 0)}</div>
+            <div style={{ textAlign: 'right', fontWeight: '600', color: (item.uplift_percent ?? 0) > 0 ? '#059669' : (item.uplift_percent ?? 0) < 0 ? '#dc2626' : '#71717a' }}>{formatPercent(item.uplift_percent ?? 0)}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // New multi-metric format
   return (
-    <div style={{ 
-      border: '1px solid #e4e4e7',
-      borderRadius: '8px',
-      overflow: 'hidden'
-    }}>
-      {/* Table Header */}
+    <div style={{ border: '1px solid #e4e4e7', borderRadius: '8px', overflow: 'hidden' }}>
+      {/* Header */}
       <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
-        backgroundColor: '#f4f4f5',
-        padding: '10px 16px',
-        fontSize: '10px',
-        fontWeight: '600',
-        color: '#52525b',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px'
+        display: 'grid', 
+        gridTemplateColumns: '1.5fr repeat(3, 1fr 0.8fr)', 
+        backgroundColor: '#f4f4f5', 
+        padding: '10px 16px', 
+        fontSize: '10px', 
+        fontWeight: '600', 
+        color: '#52525b', 
+        textTransform: 'uppercase', 
+        letterSpacing: '0.5px',
+        gap: '4px'
       }}>
         <div>Dimension</div>
-        <div style={{ textAlign: 'right' }}>Baseline</div>
-        <div style={{ textAlign: 'right' }}>Actual</div>
-        <div style={{ textAlign: 'right' }}>Incremental</div>
+        <div style={{ textAlign: 'right' }}>Visitors/day</div>
+        <div style={{ textAlign: 'right' }}>Uplift</div>
+        <div style={{ textAlign: 'right' }}>Conv/day</div>
+        <div style={{ textAlign: 'right' }}>Uplift</div>
+        <div style={{ textAlign: 'right' }}>Wallets/day</div>
         <div style={{ textAlign: 'right' }}>Uplift</div>
       </div>
       
-      {/* Table Rows */}
-      {data.map((item, idx) => (
-        <div 
-          key={idx}
-          style={{ 
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
-            padding: '12px 16px',
-            fontSize: '12px',
-            borderTop: '1px solid #e4e4e7',
-            backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff'
-          }}
-        >
-          <div style={{ 
-            fontWeight: idx === 0 ? '600' : '500',
-            color: '#18181b',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
+      {/* Rows */}
+      {data.map((item, idx) => {
+        const zero = { baseline_daily_avg: 0, event_daily_avg: 0, uplift_percent: 0 };
+        const v = item.visitors ?? zero;
+        const c = item.conversions ?? zero;
+        const w = item.wallets ?? zero;
+        
+        return (
+          <div key={idx} style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1.5fr repeat(3, 1fr 0.8fr)', 
+            padding: '10px 16px', 
+            fontSize: '11px', 
+            borderTop: '1px solid #e4e4e7', 
+            backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff',
+            gap: '4px',
+            alignItems: 'center'
           }}>
-            {item.key || '(not set)'}
+            <div style={{ fontWeight: idx === 0 ? '600' : '500', color: '#18181b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.key || '(not set)'}
+            </div>
+            {/* Visitors */}
+            <div style={{ textAlign: 'right', color: '#18181b' }}>
+              <span style={{ fontWeight: '500' }}>{v.event_daily_avg.toFixed(1)}</span>
+              <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({v.baseline_daily_avg.toFixed(1)})</span>
+            </div>
+            <UpliftCell value={v.uplift_percent} isNew={v.baseline_daily_avg === 0 && v.event_daily_avg > 0} />
+            {/* Conversions */}
+            <div style={{ textAlign: 'right', color: '#18181b' }}>
+              <span style={{ fontWeight: '500' }}>{c.event_daily_avg.toFixed(1)}</span>
+              <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({c.baseline_daily_avg.toFixed(1)})</span>
+            </div>
+            <UpliftCell value={c.uplift_percent} isNew={c.baseline_daily_avg === 0 && c.event_daily_avg > 0} />
+            {/* Wallets */}
+            <div style={{ textAlign: 'right', color: '#18181b' }}>
+              <span style={{ fontWeight: '500' }}>{w.event_daily_avg.toFixed(1)}</span>
+              <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({w.baseline_daily_avg.toFixed(1)})</span>
+            </div>
+            <UpliftCell value={w.uplift_percent} isNew={w.baseline_daily_avg === 0 && w.event_daily_avg > 0} />
           </div>
-          <div style={{ textAlign: 'right', color: '#71717a' }}>
-            {formatNumber(item.baseline_total)}
-          </div>
-          <div style={{ textAlign: 'right', color: '#18181b', fontWeight: '500' }}>
-            {formatNumber(item.actual)}
-          </div>
-          <div style={{ 
-            textAlign: 'right', 
-            fontWeight: '600',
-            color: item.incremental > 0 ? '#059669' : item.incremental < 0 ? '#dc2626' : '#71717a'
-          }}>
-            {item.incremental > 0 ? '+' : ''}{formatNumber(item.incremental)}
-          </div>
-          <div style={{ 
-            textAlign: 'right',
-            fontWeight: '600',
-            color: item.baseline_total === 0 && item.actual > 0 ? '#2563eb' : item.uplift_percent > 0 ? '#059669' : item.uplift_percent < 0 ? '#dc2626' : '#71717a'
-          }}>
-            {item.baseline_total === 0 && item.actual > 0 ? (
-              <span style={{ 
-                backgroundColor: '#dbeafe',
-                color: '#1d4ed8',
-                padding: '2px 8px',
-                borderRadius: '10px',
-                fontSize: '10px',
-                fontWeight: '700'
-              }}>
-                NEW
-              </span>
-            ) : formatPercent(item.uplift_percent)}
-          </div>
-        </div>
-      ))}
+        );
+      })}
+    </div>
+  );
+}
+
+function UpliftCell({ value, isNew }: { value: number; isNew: boolean }) {
+  if (isNew) {
+    return (
+      <div style={{ textAlign: 'right' }}>
+        <span style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '10px', fontSize: '9px', fontWeight: '700' }}>NEW</span>
+      </div>
+    );
+  }
+  if (value === 0) {
+    return <div style={{ textAlign: 'right', color: '#a1a1aa', fontSize: '10px' }}>—</div>;
+  }
+  return (
+    <div style={{ textAlign: 'right', fontSize: '10px', fontWeight: '600', color: value > 0 ? '#059669' : '#dc2626' }}>
+      {value > 0 ? '+' : ''}{value.toFixed(1)}%
     </div>
   );
 }
