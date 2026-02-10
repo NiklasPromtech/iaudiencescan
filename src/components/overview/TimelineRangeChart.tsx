@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -56,6 +56,8 @@ export const TimelineRangeChart = ({
   maxOffset,
   firstDate,
 }: TimelineRangeChartProps) => {
+  const [activeMetric, setActiveMetric] = useState<"pageviews" | "events" | "wallets">("pageviews");
+
   // Enrich data with index for reference area matching
   const chartData = useMemo(
     () => dailyBreakdown.map((d, i) => ({ ...d, idx: i })),
@@ -97,6 +99,28 @@ export const TimelineRangeChart = ({
         </p>
       </div>
 
+      {/* Metric switcher */}
+      <div className="flex gap-1">
+        {([
+          { key: "pageviews", label: "Pageviews", icon: Eye },
+          { key: "events", label: "Events", icon: Zap },
+          { key: "wallets", label: "Wallets", icon: Wallet },
+        ] as const).map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveMetric(key)}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              activeMetric === key
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Icon className="h-3 w-3" />
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Area chart */}
       <div className="w-full h-[140px] -mb-2">
         <ResponsiveContainer width="100%" height="100%">
@@ -130,7 +154,7 @@ export const TimelineRangeChart = ({
             {/* Muted base area */}
             <Area
               type="monotone"
-              dataKey="pageviews"
+              dataKey={activeMetric}
               stroke="hsl(var(--muted-foreground) / 0.3)"
               strokeWidth={1.5}
               fill="url(#pageviewGradient)"
