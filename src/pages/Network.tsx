@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import {
   getScanResults,
@@ -200,6 +200,7 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
 
 const Network = () => {
   const { studyId } = useParams<{ studyId: string }>();
+  const navigate = useNavigate();
   const [networkNodes, setNetworkNodes] = useState<ScanResultsNetworkNodeNew[]>([]);
   const [networkEdges, setNetworkEdges] = useState<ScanResultsNetworkEdge[]>([]);
   const [topTokens, setTopTokens] = useState<ScanResultsTopToken[]>([]);
@@ -403,6 +404,15 @@ const Network = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center overflow-hidden">
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="fixed top-4 left-4 z-50 flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-white/80 backdrop-blur border border-border rounded-md transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Back
+      </button>
+
       {/* Static ambient glow */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-orange-400/10 rounded-full blur-[200px]" />
