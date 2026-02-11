@@ -2,6 +2,8 @@ interface BreakdownMetric {
   baseline_daily_avg: number;
   event_daily_avg: number;
   uplift_percent: number;
+  absolute_delta?: number;
+  low_confidence?: boolean;
 }
 
 interface BreakdownItem {
@@ -38,11 +40,11 @@ export function FocusedBreakdownTable({
 }: FocusedBreakdownTableProps) {
   const zero: BreakdownMetric = { baseline_daily_avg: 0, event_daily_avg: 0, uplift_percent: 0 };
 
-  // Sort by event_daily_avg descending
+  // Sort by |absolute_delta| descending
   const sorted = [...data].sort((a, b) => {
     const aM = a[metricKey] ?? zero;
     const bM = b[metricKey] ?? zero;
-    return bM.event_daily_avg - aM.event_daily_avg;
+    return Math.abs(bM.absolute_delta ?? 0) - Math.abs(aM.absolute_delta ?? 0);
   });
 
   const maxVal = Math.max(
@@ -56,8 +58,9 @@ export function FocusedBreakdownTable({
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       {/* Header */}
-      <div className="grid grid-cols-[1.5fr_2fr_0.8fr] bg-muted/50 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="grid grid-cols-[1.5fr_0.7fr_2fr_0.8fr] bg-muted/50 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <div>Dimension</div>
+        <div className="text-right">Δ/day</div>
         <div>{metricLabel}</div>
         <div className="text-right">Uplift</div>
       </div>
@@ -67,17 +70,28 @@ export function FocusedBreakdownTable({
         const metric = item[metricKey] ?? zero;
         const isNew = metric.baseline_daily_avg === 0 && metric.event_daily_avg > 0;
         const isPositive = metric.uplift_percent > 0;
+        const isLowConf = metric.low_confidence === true;
+        const delta = metric.absolute_delta ?? (metric.event_daily_avg - metric.baseline_daily_avg);
         const baselineW = maxVal > 0 ? (metric.baseline_daily_avg / maxVal) * 100 : 0;
         const actualW = maxVal > 0 ? (metric.event_daily_avg / maxVal) * 100 : 0;
 
         return (
           <div
             key={idx}
-            className={`grid grid-cols-[1.5fr_2fr_0.8fr] items-center px-4 py-3 border-t border-border ${idx === 0 ? "bg-emerald-50/50 dark:bg-emerald-950/10" : "bg-card"}`}
+            className={`grid grid-cols-[1.5fr_0.7fr_2fr_0.8fr] items-center px-4 py-3 border-t border-border ${idx === 0 ? "bg-emerald-50/50 dark:bg-emerald-950/10" : "bg-card"}`}
+            style={{ opacity: isLowConf ? 0.5 : 1 }}
           >
             {/* Dimension */}
             <div className="text-sm font-medium text-foreground truncate pr-3">
               {toTitleCase(item.key || "(not set)")}
+              {isLowConf && <span className="text-[9px] text-muted-foreground ml-1">(uncertain)</span>}
+            </div>
+
+            {/* Absolute delta */}
+            <div className="text-right">
+              <span className={`text-xs font-bold tabular-nums ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-muted-foreground"}`}>
+                {isNew ? "NEW" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}`}
+              </span>
             </div>
 
             {/* Metric bars */}
