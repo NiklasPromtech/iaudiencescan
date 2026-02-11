@@ -543,7 +543,7 @@ const Overview = () => {
           </div>
 
           {/* Compact Scorecard Chips */}
-          <div className="mb-8">
+          <div className="mb-6">
             <ScorecardChips
               data={data ?? null}
               loading={loading}
@@ -555,15 +555,15 @@ const Overview = () => {
           </div>
 
           {/* Daily Traffic Chart */}
-          <div className="mb-8">
-            <DailyChart 
+          <div className="mb-6">
+            <DailyChart
               data={dailyData?.rows ?? []} 
               loading={chartLoading} 
               holderData={holderData}
             />
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <DimensionTable
               data={tableData?.rows ?? []}
               loading={tableLoading}
@@ -582,7 +582,7 @@ const Overview = () => {
           </div>
 
           {/* Events, Wallets & Extensions Tables */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
             <EventsTable
               data={eventsData?.rows ?? []}
               loading={eventsLoading}
@@ -601,7 +601,7 @@ const Overview = () => {
           </div>
 
           {/* Cohort Suggestions */}
-          <Card className="p-6 border border-border mb-6">
+          <div className="py-4 border-t border-border mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-5 w-5 text-primary" />
               <h3 className="text-h3 text-foreground">Suggested Cohorts</h3>
@@ -630,7 +630,7 @@ const Overview = () => {
               Create your first audience
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Card>
+          </div>
 
           {/* Setup Dialogs */}
           <TrackingSetupDialog

@@ -360,7 +360,7 @@ const SolutionScene = () => (
         ].map((item, i) => (
           <div 
             key={i} 
-            className="p-8 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up"
+            className="p-8 bg-white rounded-lg shadow-sm border border-violet-100 animate-fade-in-up"
             style={{ animationDelay: `${0.3 + i * 0.15}s`, opacity: 0 }}
           >
             <div className="w-16 h-16 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 mb-6">

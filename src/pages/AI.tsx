@@ -303,7 +303,7 @@ const AI = () => {
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      className={`max-w-[80%] rounded-lg px-4 py-3 ${
                         message.role === "user"
                           ? "bg-violet-600 text-white"
                           : "bg-white/5 border border-white/10 text-white/90"
@@ -325,7 +325,7 @@ const AI = () => {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                       <Bot className="w-4 h-4 text-white" />
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                    <div className="bg-white/5 border border-white/10 rounded-lg px-4 py-3">
                       <div className="flex gap-1">
                         <div className="w-2 h-2 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "0ms" }} />
                         <div className="w-2 h-2 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "150ms" }} />

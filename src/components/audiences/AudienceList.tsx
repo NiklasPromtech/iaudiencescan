@@ -48,9 +48,9 @@ export function AudienceList({
   return (
     <div className="space-y-3">
       {audiences.map((audience) => (
-        <Card
+        <div
           key={audience.id}
-          className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+          className="px-4 py-3 border-b border-border cursor-pointer hover:bg-muted/30 transition-colors"
           onClick={() => onView(audience)}
         >
           <div className="flex items-center justify-between">
@@ -90,7 +90,7 @@ export function AudienceList({
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );

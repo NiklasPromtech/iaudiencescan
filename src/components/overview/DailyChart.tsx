@@ -1,5 +1,4 @@
 import { useMemo, useState, useRef } from "react";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -220,7 +219,7 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
 
   if (loading) {
     return (
-      <Card className="p-6 border border-border">
+      <div className="py-4 border-t border-border">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-6 w-32" />
           <div className="flex gap-2">
@@ -229,13 +228,13 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
           </div>
         </div>
         <Skeleton className="h-[200px] w-full" />
-      </Card>
+      </div>
     );
   }
 
   return (
     <>
-      <Card className="p-6 border border-border">
+      <div className="py-4 border-t border-border">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
             <h3 className="text-h3 text-foreground">Daily Metrics</h3>
@@ -322,7 +321,7 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
             />
           </div>
         )}
-      </Card>
+      </div>
 
       <CreateTouchpointDialog
         open={createTouchpointOpen}

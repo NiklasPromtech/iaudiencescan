@@ -761,7 +761,7 @@ const Wizard = () => {
                         key={option.id}
                         onClick={() => handleSelect(option, index)}
                         disabled={isFalling}
-                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-purple-500/40 rounded-2xl p-5 text-left transition-all duration-300 overflow-hidden ${
+                        className={`group relative bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-primary/40 rounded-lg p-5 text-left transition-all duration-300 overflow-hidden ${
                           isFalling ? 'pointer-events-none' : ''
                         } ${hasShimmer ? 'shimmer-active' : ''}`}
                         style={{
@@ -770,7 +770,7 @@ const Wizard = () => {
                             : `fadeInUp 0.5s ${index * 0.05}s ease-out backwards`,
                         }}
                       >
-                        <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className={`absolute inset-0 rounded-lg bg-gradient-to-br ${option.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                         
                         <div className="relative">
                           <div className="text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300">

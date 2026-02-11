@@ -118,7 +118,7 @@ const CaseStudies = () => {
 
                     {/* Right Section - Large Purple Result Box */}
                     <div className="lg:col-span-1 flex flex-col justify-center">
-                      <div className="bg-gradient-to-br from-primary to-primary/80 p-8 rounded-2xl text-center text-white shadow-lg">
+                      <div className="bg-gradient-to-br from-primary to-primary/80 p-8 rounded-lg text-center text-white shadow-lg">
                         <Check className="w-8 h-8 mx-auto mb-4 opacity-90" />
                         <h3 className="text-h4 font-bold mb-3">Key Result</h3>
                         <p className="text-lg font-semibold leading-relaxed">

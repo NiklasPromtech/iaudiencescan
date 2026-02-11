@@ -62,7 +62,7 @@ export function CostSourceList({
   }
 
   return (
-    <Card className="border border-border overflow-hidden">
+    <div className="border-t border-border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -112,6 +112,6 @@ export function CostSourceList({
           ))}
         </TableBody>
       </Table>
-    </Card>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,7 @@ export const WalletsOverviewTable = ({
 
   if (loading) {
     return (
-      <Card className="p-6 border border-border">
+      <div className="py-4">
         <div className="flex items-center gap-2 mb-4">
           <Wallet className="h-5 w-5 text-primary" />
           <Skeleton className="h-6 w-32" />
@@ -58,13 +57,13 @@ export const WalletsOverviewTable = ({
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <Card className="p-6 border border-border">
+      <div className="py-4">
         <div className="flex items-center gap-2 mb-4">
           <Wallet className="h-5 w-5 text-primary" />
           <h3 className="text-h3 text-foreground">Wallet Actions</h3>
@@ -72,12 +71,12 @@ export const WalletsOverviewTable = ({
         <p className="text-p2 text-muted-foreground">
           No wallet action data available yet. Track wallet connections to see data here.
         </p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6 border border-border">
+    <div className="py-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-primary" />
@@ -150,6 +149,6 @@ export const WalletsOverviewTable = ({
           </Button>
         </div>
       )}
-    </Card>
+    </div>
   );
 };

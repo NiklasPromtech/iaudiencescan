@@ -176,9 +176,9 @@ const Scans = () => {
         {!loading && !error && activeScans.length > 0 && (
           <div className="space-y-3">
             {activeScans.map((scan) => (
-              <Card
+              <div
                 key={scan.id}
-                className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                className="px-4 py-3 border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
                 onClick={() => navigate(`/scans/${scan.id}`)}
               >
                 <div>
@@ -233,7 +233,7 @@ const Scans = () => {
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}
@@ -243,9 +243,9 @@ const Scans = () => {
           <div className="space-y-3 mt-8">
             <h2 className="text-lg font-medium text-muted-foreground mb-4">Archived Scans</h2>
             {archivedScans.map((scan) => (
-              <Card
+              <div
                 key={scan.id}
-                className="p-4 opacity-60 hover:opacity-80 transition-opacity"
+                className="px-4 py-3 border-b border-border opacity-60 hover:opacity-80 transition-opacity"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -271,7 +271,7 @@ const Scans = () => {
                     Restore
                   </Button>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}
