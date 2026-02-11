@@ -42,10 +42,10 @@ const PlaybookFloatingCTA = () => {
       <Link to="/strategy-playbook" className="block group">
         <div className="relative">
           {/* Pulsing glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-xl md:rounded-2xl blur-xl opacity-50 group-hover:opacity-75 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg md:rounded-lg blur-xl opacity-50 group-hover:opacity-75 animate-pulse" />
           
           {/* Main card */}
-          <div className="relative bg-card border-2 border-primary/30 rounded-xl md:rounded-2xl p-2.5 md:p-4 shadow-2xl backdrop-blur-sm hover:scale-105 transition-all duration-300 max-w-[200px] md:max-w-xs">
+          <div className="relative bg-card border-2 border-primary/30 rounded-lg md:rounded-lg p-2.5 md:p-4 shadow-2xl backdrop-blur-sm hover:scale-105 transition-all duration-300 max-w-[200px] md:max-w-xs">
             {/* Dismiss button */}
             <button
               onClick={handleDismiss}

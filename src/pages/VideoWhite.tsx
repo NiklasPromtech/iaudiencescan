@@ -272,7 +272,7 @@ const ProblemSolutionScene = ({ isActive }: SceneProps) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
       {/* Problem */}
       <div 
-        className={`bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        className={`bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-lg p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center">
@@ -297,7 +297,7 @@ const ProblemSolutionScene = ({ isActive }: SceneProps) => (
       
       {/* Solution */}
       <div 
-        className={`bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-2xl p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+        className={`bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-lg p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
         style={{ animationDelay: '0.15s' }}
       >
         <div className="flex items-center gap-3 mb-4">
@@ -344,7 +344,7 @@ const AhaOverlapScene = ({ isActive }: SceneProps) => (
       Discover the communities and tokens your audience already engages with
     </p>
     <div 
-      className={`rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+      className={`rounded-lg overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/50 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
       style={{ animationDelay: '0.3s' }}
     >
       <img 
@@ -398,7 +398,7 @@ const HowItWorksScene = ({ isActive }: SceneProps) => (
       ].map((item, i) => (
         <div
           key={i}
-          className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
+          className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-lg p-6 sm:p-8 anim-base ${isActive ? 'anim-fade-in-up' : ''}`}
           style={{ animationDelay: `${0.2 + i * 0.1}s` }}
         >
           <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${item.color} mb-4`}>
@@ -434,13 +434,13 @@ const SocialProofScene = ({ isActive }: SceneProps) => {
         className={`grid grid-cols-2 gap-4 sm:gap-6 mb-10 anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
         style={{ animationDelay: '0.2s' }}
       >
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg">
+         <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 shadow-lg">
           <div className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-1">
             $8M+
           </div>
           <div className="text-slate-600 text-sm sm:text-base">Ad budget deployed</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg">
+        <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 shadow-lg">
           <div className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-1">
             314
           </div>
@@ -469,7 +469,7 @@ const SocialProofScene = ({ isActive }: SceneProps) => {
 const CTAScene = ({ isActive }: SceneProps) => (
   <div className="max-w-3xl mx-auto text-center px-5 sm:px-6">
     <div 
-      className={`bg-gradient-to-br from-violet-600 to-purple-600 rounded-3xl p-8 sm:p-14 text-white anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
+      className={`bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl p-8 sm:p-14 text-white anim-base ${isActive ? 'anim-fade-in-scale' : ''}`}
     >
       <h2 className="text-3xl sm:text-5xl font-bold mb-4">
         Ready to find your audience?

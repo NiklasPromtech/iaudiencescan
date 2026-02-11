@@ -233,7 +233,7 @@ const Confidence = () => {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center"
+                  className="bg-white/5 border border-white/10 rounded-lg p-6 text-center"
                 >
                   <span className="material-icons-outlined text-purple-400 text-3xl mb-3">
                     {item.icon}
@@ -560,7 +560,7 @@ const Confidence = () => {
             <span className="material-icons-outlined text-purple-400">link</span>
             Chain Distribution
           </h2>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-6">
             <div className="space-y-4">
               {topChains.map((chain) => {
                 const percentage = (chain.c / maxChainCount) * 100;
@@ -618,7 +618,7 @@ const Confidence = () => {
 
         {/* Stats */}
         <section className="text-center">
-          <div className="inline-flex gap-8 bg-white/5 border border-white/10 rounded-2xl px-8 py-4">
+          <div className="inline-flex gap-8 bg-white/5 border border-white/10 rounded-lg px-8 py-4">
             <div>
               <p className="text-2xl font-bold text-purple-400">{data.token?.length || 0}</p>
               <p className="text-white/50 text-sm">Tokens Analyzed</p>
