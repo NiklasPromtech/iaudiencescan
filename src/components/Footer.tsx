@@ -55,7 +55,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-9 h-9 bg-muted hover:bg-primary rounded-full flex items-center justify-center transition-colors group"
               >
-                <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 group-hover:brightness-0 group-hover:invert transition-all" />
+                <img src="/lovable-uploads/1df0ea7a-b66d-48b6-9c07-db35b36a8798.png" alt="LinkedIn" className="w-4 h-4 grayscale brightness-75 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
               <a
                 href="https://t.me/audienceScan"
@@ -63,7 +63,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-9 h-9 bg-muted hover:bg-primary rounded-full flex items-center justify-center transition-colors group"
               >
-                <img src={telegramLogo} alt="Telegram" className="w-4 h-4 group-hover:brightness-0 group-hover:invert transition-all" />
+                <img src={telegramLogo} alt="Telegram" className="w-4 h-4 grayscale brightness-75 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
               <a
                 href="https://x.com/AudienceScanIO"
@@ -71,7 +71,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-9 h-9 bg-muted hover:bg-primary rounded-full flex items-center justify-center transition-colors group"
               >
-                <img src={xLogo} alt="X" className="w-4 h-4 group-hover:brightness-0 group-hover:invert transition-all" />
+                <img src={xLogo} alt="X" className="w-4 h-4 grayscale brightness-75 group-hover:brightness-0 group-hover:invert transition-all" />
               </a>
             </div>
           </div>
