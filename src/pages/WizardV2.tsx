@@ -85,7 +85,7 @@ const wizardOptions: WizardOption[] = [
     title: "Validate your client's market",
     subline: "Use on-chain behavior to build pitches backed by real data.",
     cta: "Validate your client's market",
-    gradient: "from-violet-600 to-purple-600",
+    gradient: "from-orange-600 to-amber-600",
     scanOptions: [], // Agency uses custom flow
     explanationA: "On-chain audience overlap for [Token Name]",
     explanationB: "On-chain audience overlap for competing tokens in [Category]",
@@ -98,7 +98,7 @@ const wizardOptions: WizardOption[] = [
     title: "Show token teams you already understand their audience",
     subline: "Prove demand with real on-chain data.",
     cta: "Show audience demand to token teams",
-    gradient: "from-violet-600 to-purple-600",
+    gradient: "from-orange-600 to-amber-600",
     scanOptions: [
       {
         id: "category-scan",
@@ -128,7 +128,7 @@ const wizardOptions: WizardOption[] = [
     title: "Find the communities your users are already part of — and reach more like them",
     subline: "Your holders' wallets reveal your next audience.",
     cta: "Find where your next users are",
-    gradient: "from-violet-600 to-purple-600",
+    gradient: "from-orange-600 to-amber-600",
     scanOptions: [
       {
         id: "own-token",
@@ -158,7 +158,7 @@ const wizardOptions: WizardOption[] = [
     title: "Use your existing users' wallets to find where similar users already are",
     subline: "Your user base is your targeting blueprint.",
     cta: "Upload wallets to find more users",
-    gradient: "from-violet-600 to-purple-600",
+    gradient: "from-orange-600 to-amber-600",
     scanOptions: [
       {
         id: "upload-wallets",
@@ -188,7 +188,7 @@ const wizardOptions: WizardOption[] = [
     title: "Identify high-signal tokens by analyzing where users of other CEXs transact",
     subline: "On-chain behavior reveals listing opportunities.",
     cta: "Discover listing opportunities",
-    gradient: "from-violet-600 to-purple-600",
+    gradient: "from-orange-600 to-amber-600",
     scanOptions: [
       {
         id: "deposit-analysis",
@@ -262,7 +262,7 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
 
   return (
     <div
-      className="fixed z-[100] bg-black/95 backdrop-blur-md border border-purple-500/40 rounded-xl p-4 shadow-2xl shadow-purple-900/30 pointer-events-none"
+      className="fixed z-[100] bg-black/95 backdrop-blur-md border border-orange-500/40 rounded-xl p-4 shadow-2xl shadow-orange-900/30 pointer-events-none"
       style={{
         left: position.x,
         top: position.y,
@@ -273,18 +273,18 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
       }}
     >
       <div className="flex items-center gap-3 mb-3">
-        <img src={node.logo} alt={node.ticker} className="w-10 h-10 rounded-full border border-purple-500/30" />
+        <img src={node.logo} alt={node.ticker} className="w-10 h-10 rounded-full border border-orange-500/30" />
         <div>
           <div className="text-white font-bold text-base">{node.ticker || 'Unknown'}</div>
           <div className="text-white/40 text-[10px]">Derived from on-chain wallet overlap</div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-3 py-2 border-t border-b border-purple-500/20">
+      <div className="flex items-center justify-between mb-3 py-2 border-t border-b border-orange-500/20">
         <span className="text-white/60 text-xs">Overlap strength</span>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={`w-2 h-2 rounded-full ${i <= scoreDots ? 'bg-purple-500' : 'bg-purple-500/20'}`} />
+            <div key={i} className={`w-2 h-2 rounded-full ${i <= scoreDots ? 'bg-orange-500' : 'bg-orange-500/20'}`} />
           ))}
         </div>
       </div>
@@ -304,10 +304,10 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
           <div className="text-white/40 text-[10px] mb-2">Paid targeting signals</div>
           <div className="flex flex-wrap gap-1">
             {displayTags.map((tag, i) => (
-              <span key={i} className="text-[10px] px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full">{tag}</span>
+              <span key={i} className="text-[10px] px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded-full">{tag}</span>
             ))}
             {remainingTags > 0 && (
-              <span className="text-[10px] px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded-full">+{remainingTags} more</span>
+              <span className="text-[10px] px-2 py-0.5 bg-orange-500/10 text-orange-400 rounded-full">+{remainingTags} more</span>
             )}
           </div>
         </div>
@@ -469,7 +469,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-2 border-orange-500/30 border-t-orange-500 animate-spin" />
           <p className="text-white/40 text-sm animate-pulse">Loading network data...</p>
         </div>
       </div>
@@ -502,7 +502,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
             y1={fromNode.y}
             x2={toNode.x}
             y2={toNode.y}
-            stroke="#a855f7"
+            stroke="#f97316"
             strokeWidth={0.5 + edge.strength}
             strokeOpacity={0.15 + edge.strength * 0.3}
           />
@@ -535,7 +535,7 @@ const NetworkGraph = ({ studyId, onNodeHover, onNodeLeave, onLoadingChange, skip
               cy={node.y}
               r={node.size / 2 + 1}
               fill="none"
-              stroke="#a855f7"
+              stroke="#f97316"
               strokeWidth={isCentralNode ? 2 : 1.5}
               strokeOpacity={0.4 + node.score * 0.4}
             />
@@ -761,7 +761,7 @@ const WizardV2 = () => {
           href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
           target="_blank"
           rel="nofollow noopener noreferrer"
-          className="relative p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)]"
+          className="relative p-[2px] rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_20px_rgba(249,115,22,0.5),0_0_40px_rgba(245,158,11,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(249,115,22,0.6),0_0_50px_rgba(245,158,11,0.4)]"
         >
           <span className="block px-3 py-1.5 md:px-5 md:py-2 bg-black rounded-[6px] text-xs md:text-sm">
             Book a demo
@@ -792,7 +792,7 @@ const WizardV2 = () => {
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <p 
-                      className="text-purple-400 text-sm tracking-widest uppercase font-medium"
+                      className="text-orange-400 text-sm tracking-widest uppercase font-medium"
                       style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                     >
                       Web3 audience research at your fingertips
@@ -808,9 +808,9 @@ const WizardV2 = () => {
                       <span className="whitespace-nowrap">
                         <span style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}>audience </span>
                         <span 
-                          className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline-block pb-2"
+                          className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400 relative inline-block pb-2"
                           style={{
-                            filter: isMobile ? 'none' : `drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 30}px rgba(168, 85, 247, ${Math.min(heroScrollProgress * 4, 1)})) drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 60}px rgba(236, 72, 153, ${Math.min(heroScrollProgress * 4, 1) * 0.7}))`,
+                            filter: isMobile ? 'none' : `drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 30}px rgba(249, 115, 22, ${Math.min(heroScrollProgress * 4, 1)})) drop-shadow(0 0 ${Math.min(heroScrollProgress * 4, 1) * 60}px rgba(245, 158, 11, ${Math.min(heroScrollProgress * 4, 1) * 0.7}))`,
                           }}
                         >
                           instantly
@@ -829,7 +829,7 @@ const WizardV2 = () => {
                     href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
                     target="_blank"
                     rel="nofollow noopener noreferrer"
-                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5),0_0_40px_rgba(236,72,153,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.6),0_0_50px_rgba(236,72,153,0.4)] mt-8"
+                    className="relative inline-block p-[2px] rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_20px_rgba(249,115,22,0.5),0_0_40px_rgba(245,158,11,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(249,115,22,0.6),0_0_50px_rgba(245,158,11,0.4)] mt-8"
                     style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                   >
                     <span className="block px-5 py-2 bg-black rounded-[6px] text-sm">
@@ -843,7 +843,7 @@ const WizardV2 = () => {
                   className="relative aspect-square max-w-[650px] mx-auto w-full lg:scale-110 lg:-mr-12"
                   style={{ opacity: isMobile ? 1 : 1 - Math.min(heroScrollProgress * 4, 1) }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/10 rounded-full blur-3xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-transparent to-amber-600/10 rounded-full blur-3xl" />
                   <NetworkGraph studyId="FnBmNZv2Ik2x8xJwHjRf" skipMinLoadTime enableBreathing />
                 </div>
               </div>
@@ -1106,8 +1106,8 @@ const WizardV2 = () => {
                       }}
                       className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
                         agencyHasToken === true
-                          ? 'bg-purple-500/20 border-purple-500/60 text-white'
-                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                          ? 'bg-orange-500/20 border-orange-500/60 text-white'
+                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-orange-500/40 hover:bg-white/[0.04]'
                       }`}
                     >
                       Yes, they have a token
@@ -1119,8 +1119,8 @@ const WizardV2 = () => {
                       }}
                       className={`flex-1 py-3 px-4 rounded-xl border text-sm font-medium transition-all duration-300 ${
                         agencyHasToken === false
-                          ? 'bg-purple-500/20 border-purple-500/60 text-white'
-                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                          ? 'bg-orange-500/20 border-orange-500/60 text-white'
+                          : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-orange-500/40 hover:bg-white/[0.04]'
                       }`}
                     >
                       No, they don't
@@ -1147,8 +1147,8 @@ const WizardV2 = () => {
                           onClick={() => setAgencySelectedOption(option.id)}
                           className={`py-2.5 px-4 rounded-lg border text-sm transition-all duration-300 ${
                             agencySelectedOption === option.id
-                              ? 'bg-purple-500/20 border-purple-500/60 text-white'
-                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                              ? 'bg-orange-500/20 border-orange-500/60 text-white'
+                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-orange-500/40 hover:bg-white/[0.04]'
                           }`}
                         >
                           {option.title}
@@ -1176,8 +1176,8 @@ const WizardV2 = () => {
                           onClick={() => setAgencySelectedOption(option.id)}
                           className={`py-2.5 px-4 rounded-lg border text-sm transition-all duration-300 ${
                             agencySelectedOption === option.id
-                              ? 'bg-purple-500/20 border-purple-500/60 text-white'
-                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-purple-500/40 hover:bg-white/[0.04]'
+                              ? 'bg-orange-500/20 border-orange-500/60 text-white'
+                              : 'bg-white/[0.02] border-white/[0.08] text-white/70 hover:border-orange-500/40 hover:bg-white/[0.04]'
                           }`}
                         >
                           {option.title}
@@ -1236,7 +1236,7 @@ const WizardV2 = () => {
                   disabled={!agencySelectedOption}
                   className={`inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r ${selectedOption.gradient} rounded-xl text-white font-semibold transition-all duration-300 ${
                     agencySelectedOption 
-                      ? 'hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 opacity-100' 
+                      ? 'hover:scale-105 hover:shadow-xl hover:shadow-orange-500/20 opacity-100' 
                       : 'opacity-40 cursor-not-allowed'
                   }`}
                 >
@@ -1254,7 +1254,7 @@ const WizardV2 = () => {
             <div className="hidden lg:flex flex-1 items-center justify-center relative min-h-screen">
               {/* Background glow */}
               <div className={`absolute inset-0 bg-gradient-to-br ${selectedOption.gradient} opacity-10`} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-600/20 via-transparent to-transparent rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-orange-600/20 via-transparent to-transparent rounded-full blur-3xl" />
               
               {/* Chart - oversized */}
               <div className={`relative w-[110%] h-[110%] max-w-[900px] max-h-[900px] transition-opacity duration-500 ${!agencySelectedOption ? 'opacity-50' : 'opacity-100'}`}>
@@ -1272,7 +1272,7 @@ const WizardV2 = () => {
                 {chartLoading && agencySelectedOption && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="w-12 h-12 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+                      <div className="w-12 h-12 rounded-full border-2 border-orange-500/30 border-t-orange-500 animate-spin" />
                       <p className="text-white/60 text-sm">Loading scan data...</p>
                     </div>
                   </div>
@@ -1293,14 +1293,14 @@ const WizardV2 = () => {
               {/* Info box when option selected - dismissable */}
               {agencySelectedOption && showInfoBox && (
                 <div className="absolute bottom-24 right-8 max-w-[280px] animate-fade-in">
-                  <div className="bg-black/70 backdrop-blur-md px-5 py-4 rounded-xl border border-purple-500/20 relative">
+                  <div className="bg-black/70 backdrop-blur-md px-5 py-4 rounded-xl border border-orange-500/20 relative">
                     <button
                       onClick={() => setShowInfoBox(false)}
                       className="absolute top-2 right-2 text-white/40 hover:text-white transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
-                    <p className="text-purple-400 text-xs font-medium uppercase tracking-wider mb-2 pr-4">
+                    <p className="text-orange-400 text-xs font-medium uppercase tracking-wider mb-2 pr-4">
                       How this data is used
                     </p>
                     <p className="text-white/70 text-sm leading-relaxed">
