@@ -1,21 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Search, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import audienceScanIcon from "@/assets/audiencescan-icon.png";
 
 const Header = () => {
   return (
     <header className="w-full sticky top-0 z-50 py-4 px-4">
       <nav className="max-w-5xl mx-auto bg-card/90 backdrop-blur-md border border-border rounded-full px-6 py-3 flex items-center justify-between shadow-sm">
-        {/* Logo pill */}
-        <Link to="/" className="flex items-center gap-2 shrink-0 bg-foreground rounded-full px-3 py-1.5 hover:bg-foreground/90 transition-colors">
+        {/* Logo: icon + text wordmark */}
+        <Link to="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
           <img
-            src="/lovable-uploads/27797bc6-b602-4720-b128-d641d006c8a7.png"
+            src={audienceScanIcon}
             alt="AudienceScan"
-            className="h-4 brightness-0 invert"
+            className="h-6 w-6 rounded-md"
           />
+          <span className="font-semibold text-foreground text-sm tracking-tight">AudienceScan</span>
         </Link>
 
-        {/* Center nav links with dropdown arrows */}
+        {/* Center nav links */}
         <div className="hidden md:flex items-center gap-6">
           <a href="/#how-it-works" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             How It Works
@@ -35,11 +37,8 @@ const Header = () => {
           </a>
         </div>
 
-        {/* Right: search + auth buttons */}
+        {/* Right: auth buttons */}
         <div className="flex items-center gap-3">
-          <button className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-            <Search className="w-4 h-4" />
-          </button>
           <Link to="/auth">
             <span className="hidden sm:inline font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               Log In
