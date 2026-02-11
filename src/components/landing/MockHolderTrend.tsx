@@ -2,9 +2,9 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { mockHolderTrend } from "./mock-data";
 
 export const MockHolderTrend = () => (
-  <div className="rounded-xl border border-border bg-card p-6 mb-10">
+  <div className="rounded-2xl border border-border bg-card p-6 mb-10">
     <div className="flex items-center justify-between mb-4">
-      <h4 className="text-sm font-semibold text-foreground">Token Holders — 30 Day Trend</h4>
+      <h4 className="text-sm font-semibold text-foreground font-mono uppercase tracking-wider">Token Holders — 30d</h4>
       <span className="text-xs text-muted-foreground">All tracked contracts</span>
     </div>
     <div className="h-[200px]">

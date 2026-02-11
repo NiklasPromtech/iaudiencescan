@@ -18,9 +18,11 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				'bai': ['Bai Jamjuree', 'sans-serif'],
-			},
+		fontFamily: {
+			'bai': ['Bai Jamjuree', 'sans-serif'],
+			'serif': ['DM Serif Display', 'serif'],
+			'mono': ['Space Mono', 'monospace'],
+		},
 			fontSize: {
 				'h1': ['50px', { lineHeight: '1.2', fontWeight: '700' }],
 				'h2': ['35px', { lineHeight: '1.3', fontWeight: '600' }],
@@ -82,10 +84,11 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
-			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-subtle': 'var(--gradient-subtle)'
-			},
+		backgroundImage: {
+			'gradient-primary': 'var(--gradient-primary)',
+			'gradient-hero': 'var(--gradient-hero)',
+			'gradient-subtle': 'var(--gradient-subtle)'
+		},
 			boxShadow: {
 				'elegant': 'var(--shadow-elegant)',
 				'glow': 'var(--shadow-glow)'

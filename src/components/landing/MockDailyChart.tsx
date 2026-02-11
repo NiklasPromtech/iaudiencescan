@@ -3,9 +3,9 @@ import { mockDailyChart } from "./mock-data";
 import { Diamond } from "lucide-react";
 
 export const MockDailyChart = () => (
-  <div className="rounded-xl border border-border bg-card p-6">
+  <div className="rounded-2xl border border-border bg-card p-6">
     <div className="flex items-center justify-between mb-4">
-      <h4 className="text-sm font-semibold text-foreground">Daily Metrics</h4>
+      <h4 className="text-sm font-semibold text-foreground font-mono uppercase tracking-wider">Daily Metrics</h4>
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-primary" /> Page Views</span>
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-foreground" /> Wallet Extensions</span>
