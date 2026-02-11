@@ -30,7 +30,7 @@ export const MockNewsFeed = () => (
         {/* Articles */}
         <div className="space-y-3">
           {mockNewsArticles.map((article) => (
-            <div key={article.title} className="rounded-xl border border-border bg-card p-4 flex items-start gap-4 hover:shadow-sm transition-shadow">
+            <div key={article.title} className="rounded-lg border border-border bg-card p-4 flex items-start gap-4 hover:bg-muted/30 transition-colors">
               <TokenAvatar symbol={article.symbol} logo={article.logo} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground leading-snug mb-1">{article.title}</p>
@@ -48,7 +48,7 @@ export const MockNewsFeed = () => (
         </div>
 
         {/* PR Outlets sidebar */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <Newspaper className="w-4 h-4 text-primary" />
             PR Outlets

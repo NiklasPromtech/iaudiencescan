@@ -451,7 +451,7 @@ const Step2Scene = () => (
               defaultValue="USDC"
             />
           </div>
-          <div className="mt-6 p-4 bg-slate-50 rounded-xl flex items-center gap-4">
+          <div className="mt-6 p-4 bg-slate-50 rounded-lg flex items-center gap-4">
             <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png" alt="USDC" className="w-12 h-12 rounded-full" />
             <div className="flex-1">
               <div className="font-bold text-lg">USD Coin</div>
@@ -488,7 +488,7 @@ const Step3Scene = () => (
             className="p-6 bg-white rounded-lg border border-slate-200 flex gap-4 animate-fade-in-left"
             style={{ animationDelay: `${0.2 + i * 0.1}s`, opacity: 0 }}
           >
-            <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
               {item.icon}
             </div>
             <div className="flex-1">
@@ -546,7 +546,7 @@ const WidgetDemoScene = () => (
         ].map((option, i) => (
           <div 
             key={i}
-            className={`p-8 rounded-xl border-2 text-center cursor-pointer transition-all ${
+            className={`p-8 rounded-lg border-2 text-center cursor-pointer transition-all ${
               i === 0 ? 'border-violet-500 bg-violet-50 shadow-lg shadow-violet-200/50' : 'border-slate-200 bg-white hover:border-violet-300'
             }`}
           >
@@ -724,12 +724,12 @@ const SocialProofStatsScene = () => (
         </h2>
       </div>
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="text-center p-10 bg-white rounded-xl shadow-sm border border-violet-100 animate-fade-in-up delay-300">
+        <div className="text-center p-10 bg-white rounded-lg shadow-sm border border-violet-100 animate-fade-in-up delay-300">
           <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">$8M+</div>
           <h3 className="text-2xl font-bold mb-2">Ad Budget Powered</h3>
           <p className="text-slate-600">In marketing spend managed using AudienceScan data</p>
         </div>
-        <div className="text-center p-10 bg-white rounded-xl shadow-sm border border-violet-100 animate-fade-in-up delay-500">
+        <div className="text-center p-10 bg-white rounded-lg shadow-sm border border-violet-100 animate-fade-in-up delay-500">
           <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">314</div>
           <h3 className="text-2xl font-bold mb-2">Campaigns Activated</h3>
           <p className="text-slate-600">Successful campaigns launched with our targeting data</p>
@@ -767,7 +767,7 @@ const ClientLogosScene = () => {
             {tier1.map((client, i) => (
               <div 
                 key={i}
-                className="px-5 py-2.5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl border border-yellow-200 font-semibold text-slate-800"
+                className="px-5 py-2.5 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg border border-yellow-200 font-semibold text-slate-800"
               >
                 {client}
               </div>

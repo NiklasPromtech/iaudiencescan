@@ -34,187 +34,35 @@ interface MetricDefinition {
 // All available metrics
 const METRICS: MetricDefinition[] = [
   // Traffic
-  {
-    key: "unique_visitors",
-    label: "Unique Visitors",
-    shortLabel: "Visitors",
-    icon: <Users className="h-4 w-4" />,
-    getValue: (d) => d.unique_visitors,
-    category: "traffic",
-  },
-  {
-    key: "pageviews",
-    label: "Page Views",
-    shortLabel: "Views",
-    icon: <FileText className="h-4 w-4" />,
-    getValue: (d) => d.pageviews,
-    category: "traffic",
-  },
-  {
-    key: "bounce_rate",
-    label: "Bounce Rate",
-    shortLabel: "Bounce",
-    icon: <TrendingDown className="h-4 w-4" />,
-    getValue: (d) => d.unique_visitors > 0 ? Math.round((d.bounce_count / d.unique_visitors) * 100) : null,
-    format: "percent",
-    category: "traffic",
-  },
-  {
-    key: "visitors_with_wallet_extension",
-    label: "Wallet Extensions",
-    shortLabel: "Extensions",
-    icon: <Puzzle className="h-4 w-4" />,
-    getValue: (d) => d.visitors_with_wallet_extension ?? null,
-    category: "traffic",
-  },
+  { key: "unique_visitors", label: "Unique Visitors", shortLabel: "Visitors", icon: <Users className="h-3.5 w-3.5" />, getValue: (d) => d.unique_visitors, category: "traffic" },
+  { key: "pageviews", label: "Page Views", shortLabel: "Views", icon: <FileText className="h-3.5 w-3.5" />, getValue: (d) => d.pageviews, category: "traffic" },
+  { key: "bounce_rate", label: "Bounce Rate", shortLabel: "Bounce", icon: <TrendingDown className="h-3.5 w-3.5" />, getValue: (d) => d.unique_visitors > 0 ? Math.round((d.bounce_count / d.unique_visitors) * 100) : null, format: "percent", category: "traffic" },
+  { key: "visitors_with_wallet_extension", label: "Wallet Extensions", shortLabel: "Extensions", icon: <Puzzle className="h-3.5 w-3.5" />, getValue: (d) => d.visitors_with_wallet_extension ?? null, category: "traffic" },
   // Engagement
-  {
-    key: "stayed_10s",
-    label: "Stayed 10s+",
-    shortLabel: "10s+",
-    icon: <Timer className="h-4 w-4" />,
-    getValue: (d) => d.stayed_10s,
-    category: "engagement",
-  },
-  {
-    key: "stayed_30s",
-    label: "Stayed 30s+",
-    shortLabel: "30s+",
-    icon: <Timer className="h-4 w-4" />,
-    getValue: (d) => d.stayed_30s,
-    category: "engagement",
-  },
-  {
-    key: "stayed_60s",
-    label: "Stayed 60s+",
-    shortLabel: "60s+",
-    icon: <Timer className="h-4 w-4" />,
-    getValue: (d) => d.stayed_60s,
-    category: "engagement",
-  },
-  {
-    key: "stayed_5m",
-    label: "Stayed 5m+",
-    shortLabel: "5m+",
-    icon: <Timer className="h-4 w-4" />,
-    getValue: (d) => d.stayed_5m,
-    category: "engagement",
-  },
-  {
-    key: "engagement_rate_10s",
-    label: "10s Rate",
-    icon: <Percent className="h-4 w-4" />,
-    getValue: (d) => d.unique_visitors > 0 ? Math.round((d.stayed_10s / d.unique_visitors) * 100) : null,
-    format: "percent",
-    category: "engagement",
-  },
-  {
-    key: "engagement_rate_30s",
-    label: "30s Rate",
-    icon: <Percent className="h-4 w-4" />,
-    getValue: (d) => d.unique_visitors > 0 ? Math.round((d.stayed_30s / d.unique_visitors) * 100) : null,
-    format: "percent",
-    category: "engagement",
-  },
+  { key: "stayed_10s", label: "Stayed 10s+", shortLabel: "10s+", icon: <Timer className="h-3.5 w-3.5" />, getValue: (d) => d.stayed_10s, category: "engagement" },
+  { key: "stayed_30s", label: "Stayed 30s+", shortLabel: "30s+", icon: <Timer className="h-3.5 w-3.5" />, getValue: (d) => d.stayed_30s, category: "engagement" },
+  { key: "stayed_60s", label: "Stayed 60s+", shortLabel: "60s+", icon: <Timer className="h-3.5 w-3.5" />, getValue: (d) => d.stayed_60s, category: "engagement" },
+  { key: "stayed_5m", label: "Stayed 5m+", shortLabel: "5m+", icon: <Timer className="h-3.5 w-3.5" />, getValue: (d) => d.stayed_5m, category: "engagement" },
+  { key: "engagement_rate_10s", label: "10s Rate", icon: <Percent className="h-3.5 w-3.5" />, getValue: (d) => d.unique_visitors > 0 ? Math.round((d.stayed_10s / d.unique_visitors) * 100) : null, format: "percent", category: "engagement" },
+  { key: "engagement_rate_30s", label: "30s Rate", icon: <Percent className="h-3.5 w-3.5" />, getValue: (d) => d.unique_visitors > 0 ? Math.round((d.stayed_30s / d.unique_visitors) * 100) : null, format: "percent", category: "engagement" },
   // Wallets
-  {
-    key: "wallet_users",
-    label: "Wallets Tracked",
-    shortLabel: "Wallets",
-    icon: <Wallet className="h-4 w-4" />,
-    getValue: (d) => d.wallet_users,
-    category: "wallets",
-  },
-  {
-    key: "wallets_enriched",
-    label: "Wallets Enriched",
-    shortLabel: "Enriched",
-    icon: <Wallet className="h-4 w-4" />,
-    getValue: (d) => d.wallets_enriched ?? null,
-    category: "wallets",
-  },
-  {
-    key: "percent_enriched",
-    label: "Enriched %",
-    shortLabel: "Enrich %",
-    icon: <PieChart className="h-4 w-4" />,
-    getValue: (d) => d.percent_enriched ?? null,
-    format: "percent",
-    category: "wallets",
-  },
-  {
-    key: "total_balance_usd",
-    label: "Total Balance",
-    shortLabel: "Balance",
-    icon: <DollarSign className="h-4 w-4" />,
-    getValue: (d) => d.total_balance_usd ?? null,
-    format: "currency",
-    category: "wallets",
-  },
-  {
-    key: "median_balance_usd",
-    label: "Median Balance",
-    shortLabel: "Median",
-    icon: <DollarSign className="h-4 w-4" />,
-    getValue: (d) => d.median_balance_usd ?? null,
-    format: "currency",
-    category: "wallets",
-  },
+  { key: "wallet_users", label: "Wallets Tracked", shortLabel: "Wallets", icon: <Wallet className="h-3.5 w-3.5" />, getValue: (d) => d.wallet_users, category: "wallets" },
+  { key: "wallets_enriched", label: "Wallets Enriched", shortLabel: "Enriched", icon: <Wallet className="h-3.5 w-3.5" />, getValue: (d) => d.wallets_enriched ?? null, category: "wallets" },
+  { key: "percent_enriched", label: "Enriched %", shortLabel: "Enrich %", icon: <PieChart className="h-3.5 w-3.5" />, getValue: (d) => d.percent_enriched ?? null, format: "percent", category: "wallets" },
+  { key: "total_balance_usd", label: "Total Balance", shortLabel: "Balance", icon: <DollarSign className="h-3.5 w-3.5" />, getValue: (d) => d.total_balance_usd ?? null, format: "currency", category: "wallets" },
+  { key: "median_balance_usd", label: "Median Balance", shortLabel: "Median", icon: <DollarSign className="h-3.5 w-3.5" />, getValue: (d) => d.median_balance_usd ?? null, format: "currency", category: "wallets" },
   // Conversions
-  {
-    key: "converted_users",
-    label: "Conversions",
-    icon: <Target className="h-4 w-4" />,
-    getValue: (d) => d.converted_users,
-    category: "conversions",
-  },
-  {
-    key: "conversions_total",
-    label: "Total Conversions",
-    shortLabel: "Conv Total",
-    icon: <Target className="h-4 w-4" />,
-    getValue: (d) => d.conversions_total,
-    category: "conversions",
-  },
+  { key: "converted_users", label: "Conversions", icon: <Target className="h-3.5 w-3.5" />, getValue: (d) => d.converted_users, category: "conversions" },
+  { key: "conversions_total", label: "Total Conversions", shortLabel: "Conv Total", icon: <Target className="h-3.5 w-3.5" />, getValue: (d) => d.conversions_total, category: "conversions" },
   // Bots
-  {
-    key: "bot_rate",
-    label: "Bot Rate",
-    shortLabel: "Bots",
-    icon: <Bot className="h-4 w-4" />,
-    getValue: (d) => d.bot_checked && d.bot_checked > 0 ? Math.round(((d.bot_visitors ?? 0) / d.bot_checked) * 100) : null,
-    format: "percent",
-    category: "bots",
-  },
-  {
-    key: "bot_visitors",
-    label: "Bot Visitors",
-    icon: <Bot className="h-4 w-4" />,
-    getValue: (d) => d.bot_visitors,
-    category: "bots",
-  },
+  { key: "bot_rate", label: "Bot Rate", shortLabel: "Bots", icon: <Bot className="h-3.5 w-3.5" />, getValue: (d) => d.bot_checked && d.bot_checked > 0 ? Math.round(((d.bot_visitors ?? 0) / d.bot_checked) * 100) : null, format: "percent", category: "bots" },
+  { key: "bot_visitors", label: "Bot Visitors", icon: <Bot className="h-3.5 w-3.5" />, getValue: (d) => d.bot_visitors, category: "bots" },
   // Costs
-  {
-    key: "cost_total",
-    label: "Total Cost",
-    shortLabel: "Cost",
-    icon: <DollarSign className="h-4 w-4" />,
-    getValue: (d) => d.cost_total ?? null,
-    format: "currency",
-    category: "costs",
-  },
+  { key: "cost_total", label: "Total Cost", shortLabel: "Cost", icon: <DollarSign className="h-3.5 w-3.5" />, getValue: (d) => d.cost_total ?? null, format: "currency", category: "costs" },
   // Token Holders
-  {
-    key: "token_holders",
-    label: "Token Holders",
-    shortLabel: "Holders",
-    icon: <Users className="h-4 w-4" />,
-    getValue: (d) => d.token_holders ?? null,
-    category: "wallets",
-  },
+  { key: "token_holders", label: "Token Holders", shortLabel: "Holders", icon: <Users className="h-3.5 w-3.5" />, getValue: (d) => d.token_holders ?? null, category: "wallets" },
 ];
 
-// Category labels for grouping
 const CATEGORY_LABELS: Record<string, string> = {
   traffic: "Traffic",
   engagement: "Time on Site",
@@ -245,109 +93,110 @@ export function ScorecardChips({
 
   const formatValue = (value: number | null, format?: "number" | "percent" | "currency"): string => {
     if (value === null) return "—";
-    
     switch (format) {
       case "percent":
         return `${value}%`;
       case "currency":
-        if (value >= 1000000) {
-          return `$${(value / 1000000).toFixed(1)}M`;
-        }
-        if (value >= 1000) {
-          return `$${(value / 1000).toFixed(1)}K`;
-        }
+        if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+        if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
         return `$${value.toFixed(2)}`;
       default:
         return value.toLocaleString();
     }
   };
 
-  // Filter metrics into starred and unstarred
   const starredMetricsList = METRICS.filter((m) => starredMetrics.includes(m.key));
-  const unstarredMetricsList = METRICS.filter((m) => !starredMetrics.includes(m.key));
+  const allItems = [
+    // Realtime is always first
+    { type: "realtime" as const },
+    ...starredMetricsList.map((m) => ({ type: "metric" as const, metric: m })),
+  ];
 
   return (
-    <div className="space-y-4">
-      {/* Main grid - starred metrics as pill cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {/* Realtime pill - always visible */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/20">
-          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <Radio className="h-4 w-4 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-lg font-semibold text-foreground leading-tight">
-              {realtimeVisitors !== null ? realtimeVisitors : "—"}
-            </p>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Active now</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            </div>
-          </div>
-        </div>
-
-        {/* Starred metrics as pill cards */}
+    <div className="space-y-3">
+      {/* Flat stat row — no card borders, vertical dividers */}
+      <div className="flex items-stretch flex-wrap">
         {loading ? (
-          <>
-            <Skeleton className="h-[62px] rounded-lg" />
-            <Skeleton className="h-[62px] rounded-lg" />
-            <Skeleton className="h-[62px] rounded-lg" />
-            <Skeleton className="h-[62px] rounded-lg" />
-          </>
+          <div className="flex items-center gap-6 py-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-24" />
+            ))}
+          </div>
         ) : (
-          starredMetricsList.map((metric) => (
-            <MetricPill
-              key={metric.key}
-              metric={metric}
-              value={data ? metric.getValue(data) : null}
-              formatValue={formatValue}
-              isStarred={true}
-              onToggleStar={() => onToggleStar(metric.key)}
-            />
-          ))
-        )}
+          <>
+            {allItems.map((item, idx) => (
+              <div
+                key={item.type === "realtime" ? "rt" : item.metric.key}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2",
+                  idx < allItems.length - 1 && "border-r border-border"
+                )}
+              >
+                {item.type === "realtime" ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-lg font-semibold text-foreground tabular-nums">
+                      {realtimeVisitors !== null ? realtimeVisitors : "—"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">live</span>
+                  </>
+                ) : (
+                  <FlatMetric
+                    metric={item.metric}
+                    value={data ? item.metric.getValue(data) : null}
+                    formatValue={formatValue}
+                    isStarred={true}
+                    onToggleStar={() => onToggleStar(item.metric.key)}
+                  />
+                )}
+              </div>
+            ))}
 
-        {/* Show more toggle as a pill */}
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/30 transition-colors text-muted-foreground hover:text-foreground"
-        >
-          {showAll ? (
-            <>
-              <span className="text-sm">Less</span>
-              <ChevronUp className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              <span className="text-sm">More</span>
-              <ChevronDown className="h-4 w-4" />
-            </>
-          )}
-        </button>
+            {/* More/Less toggle — flat inline */}
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="flex items-center gap-1 px-4 py-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+            >
+              {showAll ? (
+                <>Less <ChevronUp className="h-3.5 w-3.5" /></>
+              ) : (
+                <>More <ChevronDown className="h-3.5 w-3.5" /></>
+              )}
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Expanded section - ALL metrics grouped by category, starred ones highlighted */}
+      {/* Expanded section — grouped by category, flat rows */}
       {showAll && !loading && (
-        <div className="space-y-4 pt-3 border-t border-border/50">
+        <div className="space-y-3 pt-3 border-t border-border/50">
           {Object.entries(CATEGORY_LABELS).map(([category, label]) => {
             const categoryMetrics = METRICS.filter((m) => m.category === category);
             if (categoryMetrics.length === 0) return null;
-            
+
             return (
               <div key={category}>
-                <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+                <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">
                   {label}
                 </p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                  {categoryMetrics.map((metric) => (
-                    <MetricPillSmall
+                <div className="flex items-stretch flex-wrap">
+                  {categoryMetrics.map((metric, idx) => (
+                    <div
                       key={metric.key}
-                      metric={metric}
-                      value={data ? metric.getValue(data) : null}
-                      formatValue={formatValue}
-                      isStarred={starredMetrics.includes(metric.key)}
-                      onToggleStar={() => onToggleStar(metric.key)}
-                    />
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-1.5",
+                        idx < categoryMetrics.length - 1 && "border-r border-border/50"
+                      )}
+                    >
+                      <FlatMetric
+                        metric={metric}
+                        value={data ? metric.getValue(data) : null}
+                        formatValue={formatValue}
+                        isStarred={starredMetrics.includes(metric.key)}
+                        onToggleStar={() => onToggleStar(metric.key)}
+                        compact
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -356,7 +205,7 @@ export function ScorecardChips({
         </div>
       )}
 
-      {/* Subtle date range indicator */}
+      {/* Date range label */}
       <p className="text-xs text-muted-foreground">
         Showing data for {dateRangeLabel}
       </p>
@@ -364,78 +213,17 @@ export function ScorecardChips({
   );
 }
 
-interface MetricPillProps {
+// Flat inline metric — no card, no circle icon, just icon + value + label
+interface FlatMetricProps {
   metric: MetricDefinition;
   value: number | null;
   formatValue: (value: number | null, format?: "number" | "percent" | "currency") => string;
   isStarred: boolean;
   onToggleStar: () => void;
+  compact?: boolean;
 }
 
-function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: MetricPillProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const isUnconfigured = value === null;
-  const displayValue = formatValue(value, metric.format);
-
-  return (
-    <div
-      className={cn(
-        "group relative flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-150",
-        isStarred
-          ? "bg-background border-border hover:border-primary/50"
-          : "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
-        isUnconfigured && "opacity-60"
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className={cn(
-        "flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center",
-        isStarred ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-      )}>
-        {metric.icon}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className={cn(
-          "text-lg font-semibold leading-tight truncate",
-          isStarred ? "text-foreground" : "text-muted-foreground"
-        )}>
-          {displayValue}
-        </p>
-        <p className="text-xs text-muted-foreground truncate">
-          {metric.shortLabel || metric.label}
-        </p>
-      </div>
-
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleStar();
-        }}
-        className={cn(
-          "absolute -right-1.5 -top-1.5 p-1 rounded-full bg-background border shadow-sm transition-all duration-150",
-          isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75",
-          isStarred ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-primary hover:border-primary"
-        )}
-      >
-        <Star className={cn("h-3 w-3", isStarred && "fill-primary")} />
-      </button>
-    </div>
-  );
-}
-
-// Smaller pill for metrics in expanded section - highlights starred ones
-interface MetricPillSmallProps {
-  metric: MetricDefinition;
-  value: number | null;
-  formatValue: (value: number | null, format?: "number" | "percent" | "currency") => string;
-  isStarred: boolean;
-  onToggleStar: () => void;
-}
-
-function MetricPillSmall({ metric, value, formatValue, isStarred, onToggleStar }: MetricPillSmallProps) {
+function FlatMetric({ metric, value, formatValue, isStarred, onToggleStar, compact }: FlatMetricProps) {
   const [isHovered, setIsHovered] = useState(false);
   const isUnconfigured = value === null;
   const displayValue = formatValue(value, metric.format);
@@ -443,48 +231,48 @@ function MetricPillSmall({ metric, value, formatValue, isStarred, onToggleStar }
   return (
     <div
       className={cn(
-        "group relative flex items-center gap-2 px-2.5 py-2 rounded-lg border transition-all duration-150",
-        isStarred
-          ? "bg-primary/10 border-primary/30 hover:border-primary/50"
-          : "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
+        "group relative flex items-center gap-2 transition-colors",
         isUnconfigured && "opacity-50"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={cn(
-        "flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center",
-        isStarred ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+      <span className={cn(
+        "text-muted-foreground",
+        isStarred && "text-primary"
       )}>
-        {React.cloneElement(metric.icon as React.ReactElement, { className: "h-3 w-3" })}
-      </div>
+        {metric.icon}
+      </span>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <p className={cn(
-          "text-sm font-medium leading-tight truncate",
+          "font-semibold leading-tight tabular-nums",
+          compact ? "text-sm" : "text-lg",
           isStarred ? "text-foreground" : "text-muted-foreground"
         )}>
           {displayValue}
         </p>
-        <p className="text-[10px] text-muted-foreground/70 truncate">
+        <p className={cn(
+          "text-muted-foreground truncate",
+          compact ? "text-[10px]" : "text-xs"
+        )}>
           {metric.shortLabel || metric.label}
         </p>
       </div>
 
+      {/* Star toggle — inline, no shadow, no rounded-full badge */}
       <button
         onClick={(e) => {
           e.stopPropagation();
           onToggleStar();
         }}
         className={cn(
-          "absolute -right-1 -top-1 p-0.5 rounded-full bg-background border shadow-sm transition-all duration-150",
-          isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75",
-          isStarred 
-            ? "border-primary text-primary" 
-            : "border-border text-muted-foreground hover:text-primary hover:border-primary"
+          "p-0.5 transition-opacity",
+          isHovered ? "opacity-100" : "opacity-0",
+          isStarred ? "text-primary" : "text-muted-foreground hover:text-primary"
         )}
       >
-        <Star className={cn("h-2.5 w-2.5", isStarred && "fill-primary")} />
+        <Star className={cn("h-3 w-3", isStarred && "fill-primary")} />
       </button>
     </div>
   );

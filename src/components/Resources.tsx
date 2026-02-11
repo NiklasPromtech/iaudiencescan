@@ -37,7 +37,7 @@ const Resources = () => {
               <Card key={index} className="border-2 border-primary/10 hover:border-primary/30 transition-smooth hover:shadow-elegant group">
                 <CardContent className="p-8 text-center">
                   <div className="mb-6 flex justify-center">
-                    <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center group-hover:animate-float">
+                    <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center group-hover:animate-float">
                       <resource.icon className="w-8 h-8 text-primary-foreground" />
                     </div>
                   </div>

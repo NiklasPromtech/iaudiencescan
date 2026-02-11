@@ -443,7 +443,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
       <div className="print:hidden space-y-4">
         
         {/* HERO CARD */}
-        <div className={`rounded-xl border-2 ${verdictConfig.heroBorderClass} ${verdictConfig.heroBgClass} p-5`}>
+        <div className={`rounded-lg border-2 ${verdictConfig.heroBorderClass} ${verdictConfig.heroBgClass} p-5`}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${verdictConfig.badgeClass}`}>

@@ -228,7 +228,7 @@ const ConfidenceAnimation = ({ className = "", isInView = true }: ConfidenceAnim
           {/* Confidence card */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
             <div 
-              className={`bg-white/[0.08] border rounded-xl px-6 py-4 text-center backdrop-blur-sm transition-all duration-500 ${
+              className={`bg-white/[0.08] border rounded-lg px-6 py-4 text-center backdrop-blur-sm transition-all duration-500 ${
                 isComplete 
                   ? "border-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.12)]" 
                   : "border-white/10"

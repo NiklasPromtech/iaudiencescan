@@ -19,7 +19,7 @@ const TokenAvatar = ({ symbol, logo }: { symbol: string; logo?: string }) => {
 export const MockPlatformCards = () => (
   <div className="grid sm:grid-cols-2 gap-5 text-left">
     {Object.values(mockPlatformTokens).map((platform) => (
-      <div key={platform.label} className="rounded-xl border border-border bg-background overflow-hidden">
+      <div key={platform.label} className="rounded-lg border border-border bg-background overflow-hidden">
         <div className={`px-5 py-3 border-b border-border flex items-center justify-between`}>
           <div>
             <h4 className="text-sm font-semibold text-foreground">{platform.label}</h4>

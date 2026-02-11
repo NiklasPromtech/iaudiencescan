@@ -67,7 +67,7 @@ const AgencyHowPanel = ({ open, onClose }: AgencyHowPanelProps) => {
 
             <Accordion type="single" collapsible className="space-y-2">
               {/* Find the right KOLs */}
-              <AccordionItem value="kols" className="border-white/10 bg-white/[0.02] rounded-xl px-4">
+              <AccordionItem value="kols" className="border-white/10 bg-white/[0.02] rounded-lg px-4">
                 <AccordionTrigger className="text-white hover:no-underline py-4">
                   <span className="text-left text-sm font-medium">Find the right KOLs</span>
                 </AccordionTrigger>
@@ -82,7 +82,7 @@ const AgencyHowPanel = ({ open, onClose }: AgencyHowPanelProps) => {
               </AccordionItem>
 
               {/* Support paid ads */}
-              <AccordionItem value="ads" className="border-white/10 bg-white/[0.02] rounded-xl px-4">
+              <AccordionItem value="ads" className="border-white/10 bg-white/[0.02] rounded-lg px-4">
                 <AccordionTrigger className="text-white hover:no-underline py-4">
                   <span className="text-left text-sm font-medium">Support paid ads</span>
                 </AccordionTrigger>
@@ -110,7 +110,7 @@ const AgencyHowPanel = ({ open, onClose }: AgencyHowPanelProps) => {
               </AccordionItem>
 
               {/* Build a full strategy */}
-              <AccordionItem value="strategy" className="border-white/10 bg-white/[0.02] rounded-xl px-4">
+              <AccordionItem value="strategy" className="border-white/10 bg-white/[0.02] rounded-lg px-4">
                 <AccordionTrigger className="text-white hover:no-underline py-4">
                   <span className="text-left text-sm font-medium">Build a full strategy</span>
                 </AccordionTrigger>
@@ -146,7 +146,7 @@ const AgencyHowPanel = ({ open, onClose }: AgencyHowPanelProps) => {
             </p>
             
             {/* Video */}
-            <div className="rounded-xl overflow-hidden border border-white/10 bg-black">
+            <div className="rounded-lg overflow-hidden border border-white/10 bg-black">
               <video 
                 autoPlay 
                 muted 

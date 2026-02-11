@@ -41,7 +41,7 @@ const Partnerships = () => {
           {partnershipStrategies.map((strategy, index) => (
             <Card key={index} className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm hover:border-primary/40 transition-smooth hover:shadow-elegant group">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:animate-float">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center mx-auto mb-6 group-hover:animate-float">
                   <strategy.icon className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="text-h3 font-semibold mb-4 text-foreground">
