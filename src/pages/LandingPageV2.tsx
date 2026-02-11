@@ -34,6 +34,7 @@ import ventLogo from "@/assets/client-logos/vent.png";
 import xLogo from "@/assets/x-logo.png";
 import telegramLogo from "@/assets/telegram-logo.png";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
+import audienceScanIcon from "@/assets/audiencescan-icon.png";
 
 // Animated Counter Component
 const AnimatedCounter = ({ 
@@ -129,9 +130,9 @@ const DarkFooter = () => {
           <div className="max-w-xs">
             <div className="flex items-center gap-3 mb-4">
               <img 
-                src="/lovable-uploads/7badbb3e-0d49-4228-97e2-42ebc92a02e0.png" 
+                src={audienceScanIcon} 
                 alt="AudienceScan Logo" 
-                className="h-8 w-8"
+                className="h-8 w-8 rounded-md"
               />
               <span className="text-h3 font-bold text-white">AudienceScan</span>
             </div>

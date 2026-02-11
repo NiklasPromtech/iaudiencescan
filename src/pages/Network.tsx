@@ -104,7 +104,7 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
 
   return (
     <div
-      className="absolute z-50 bg-white/95 backdrop-blur-md border border-purple-500/40 rounded-xl p-4 shadow-2xl shadow-purple-900/20 pointer-events-none"
+      className="absolute z-50 bg-white/95 backdrop-blur-md border border-orange-500/40 rounded-xl p-4 shadow-2xl shadow-orange-900/20 pointer-events-none"
       style={{
         left: position.x,
         top: position.y,
@@ -119,7 +119,7 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
         <img
           src={node.logo}
           alt={node.ticker}
-          className="w-10 h-10 rounded-full border border-purple-500/30"
+          className="w-10 h-10 rounded-full border border-orange-500/30"
         />
         <div>
           <div className="text-foreground font-bold text-base">{node.ticker || 'Unknown'}</div>
@@ -128,14 +128,14 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
       </div>
 
       {/* Score row */}
-      <div className="flex items-center justify-between mb-3 py-2 border-t border-b border-purple-500/20">
+      <div className="flex items-center justify-between mb-3 py-2 border-t border-b border-orange-500/20">
         <span className="text-muted-foreground text-xs">Overlap strength</span>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
               className={`w-2 h-2 rounded-full ${
-                i <= scoreDots ? 'bg-purple-500' : 'bg-purple-500/20'
+                i <= scoreDots ? 'bg-orange-500' : 'bg-orange-500/20'
               }`}
             />
           ))}
@@ -181,13 +181,13 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
             {displayTags.map((tag, i) => (
               <span
                 key={i}
-                className="text-[10px] px-2 py-0.5 bg-purple-500/20 text-purple-600 rounded-full"
+                className="text-[10px] px-2 py-0.5 bg-slate-700/20 text-slate-700 rounded-full"
               >
                 {tag}
               </span>
             ))}
             {remainingTags > 0 && (
-              <span className="text-[10px] px-2 py-0.5 bg-purple-500/10 text-purple-500 rounded-full">
+              <span className="text-[10px] px-2 py-0.5 bg-slate-700/10 text-slate-600 rounded-full">
                 +{remainingTags} more
               </span>
             )}
@@ -405,8 +405,8 @@ const Network = () => {
     <div className="min-h-screen bg-white flex items-center justify-center overflow-hidden">
       {/* Static ambient glow */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-purple-400/10 rounded-full blur-[200px]" />
-        <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-purple-300/10 rounded-full blur-[180px]" />
+        <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-orange-400/10 rounded-full blur-[200px]" />
+        <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-orange-300/10 rounded-full blur-[180px]" />
       </div>
 
       {/* Hover Panel */}
@@ -446,7 +446,7 @@ const Network = () => {
                   y1={fromNode.y}
                   x2={toNode.x}
                   y2={toNode.y}
-                  stroke="#a855f7"
+                  stroke="#f97316"
                   strokeWidth={strokeWidth}
                   strokeOpacity={opacity}
                   strokeLinecap="round"
@@ -473,7 +473,7 @@ const Network = () => {
                     cy={node.y}
                     r={node.size / 2 + 2}
                     fill="none"
-                    stroke="#a855f7"
+                    stroke={node.score > 0.5 ? "#f97316" : "#334155"}
                     strokeWidth={isCenter ? 3 : 2}
                     strokeOpacity={0.4 + node.score * 0.5}
                   />
@@ -503,18 +503,18 @@ const Network = () => {
         </svg>
 
         {/* Stats */}
-        <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-md border border-purple-500/30 rounded-xl px-5 py-3 shadow-lg">
+        <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-md border border-orange-500/30 rounded-xl px-5 py-3 shadow-lg">
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-purple-500" />
+              <div className="w-3 h-3 rounded-full bg-orange-500" />
               <span className="text-muted-foreground">
-                <span className="text-purple-600 font-semibold">{nodes.length}</span> tokens
+                <span className="text-orange-600 font-semibold">{nodes.length}</span> tokens
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-purple-500/60 rounded" />
+              <div className="w-6 h-0.5 bg-orange-500/60 rounded" />
               <span className="text-muted-foreground">
-                <span className="text-purple-600 font-semibold">{edges.length}</span> connections
+                <span className="text-orange-600 font-semibold">{edges.length}</span> connections
               </span>
             </div>
           </div>

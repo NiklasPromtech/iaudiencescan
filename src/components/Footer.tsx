@@ -1,3 +1,4 @@
+import audienceScanIcon from "@/assets/audiencescan-icon.png";
 import xLogo from "@/assets/x-logo.png";
 import telegramLogo from "@/assets/telegram-logo.png";
 
@@ -37,9 +38,9 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <img
-                src="/lovable-uploads/7badbb3e-0d49-4228-97e2-42ebc92a02e0.png"
+                src={audienceScanIcon}
                 alt="AudienceScan Logo"
-                className="h-8 w-8"
+                className="h-8 w-8 rounded-md"
               />
               <span className="text-lg font-bold text-foreground">AudienceScan</span>
             </div>
