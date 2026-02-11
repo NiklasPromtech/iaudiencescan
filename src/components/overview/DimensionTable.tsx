@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -51,7 +50,7 @@ function TrackingBadge({ source, className }: TrackingBadgeProps) {
       icon: Wallet,
       label: "Wallet Script",
       tooltip: "Requires trackWallet() implementation",
-      color: "text-purple-500",
+      color: "text-primary",
     },
     conversion: {
       icon: MousePointerClick,
@@ -341,7 +340,7 @@ export function DimensionTable({
 
   if (loading) {
     return (
-      <Card className="p-6 border border-border">
+      <div className="py-4 border-t border-border">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-9 w-40" />
@@ -351,12 +350,12 @@ export function DimensionTable({
             <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6 border border-border">
+    <div className="py-4 border-t border-border">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
@@ -766,6 +765,6 @@ export function DimensionTable({
           )}
         </>
       )}
-    </Card>
+    </div>
   );
 }

@@ -283,14 +283,14 @@ const PlaceholderConfidence = () => {
           {/* Confidence card */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-scale-in">
             <div 
-              className={`bg-white/[0.06] border rounded-2xl px-12 py-10 text-center backdrop-blur-sm transition-all duration-700 ${
+              className={`bg-white/[0.06] border rounded-lg px-12 py-10 text-center backdrop-blur-sm transition-all duration-700 ${
                 isComplete 
-                  ? "border-purple-500/40 shadow-[0_0_40px_rgba(168,85,247,0.15)]" 
+                  ? "border-primary/40 shadow-[0_0_40px_rgba(249,115,22,0.15)]" 
                   : "border-white/10"
               }`}
             >
               <div className={`text-6xl font-bold mb-2 tabular-nums transition-colors duration-500 ${
-                isComplete ? "text-purple-300" : "text-white"
+                isComplete ? "text-primary" : "text-white"
               }`}>
                 {confidenceScore}%
               </div>

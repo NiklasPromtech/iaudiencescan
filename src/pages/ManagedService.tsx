@@ -28,7 +28,7 @@ const ManagedService = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow animate-pulse-glow">
+              <div className="w-20 h-20 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow animate-pulse-glow">
                 <Target className="w-10 h-10 text-primary-foreground" />
               </div>
             </div>
@@ -86,7 +86,7 @@ const ManagedService = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <Users className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
@@ -240,7 +240,7 @@ const ManagedService = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <Award className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
@@ -321,7 +321,7 @@ const ManagedService = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <DollarSign className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
@@ -477,7 +477,7 @@ const ManagedService = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm animate-float">
+              <div className="w-20 h-20 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm animate-float">
                 <Globe className="w-10 h-10 text-white" />
               </div>
             </div>

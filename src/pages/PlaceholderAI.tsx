@@ -251,7 +251,7 @@ const PlaceholderAI = () => {
           {(phase !== "typing" || typedText) && (
             <div className="flex justify-end animate-fade-in">
               <div className="flex items-start gap-3 max-w-[85%]">
-                <div className="bg-purple-500/20 border border-purple-500/30 rounded-2xl rounded-tr-sm px-4 py-3 backdrop-blur-sm">
+                <div className="bg-primary/20 border border-primary/30 rounded-lg rounded-tr-sm px-4 py-3 backdrop-blur-sm">
                   <p className="text-white/90 text-sm">
                     {typedText}
                     {phase === "typing" && (
@@ -280,7 +280,7 @@ const PlaceholderAI = () => {
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               </div>
-              <div className="relative bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 min-w-[120px] h-10 overflow-hidden flex items-center">
+              <div className="relative bg-white/[0.06] border border-white/10 rounded-lg rounded-tl-sm px-4 min-w-[120px] h-10 overflow-hidden flex items-center">
                 {/* Particles inside thinking bubble */}
                 {particles.map(p => (
                   <div
@@ -316,7 +316,7 @@ const PlaceholderAI = () => {
               </div>
               <div className="flex-1 space-y-3">
                 {/* Response text */}
-                <div className="bg-white/[0.06] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 backdrop-blur-sm">
+                <div className="bg-white/[0.06] border border-white/10 rounded-lg rounded-tl-sm px-4 py-3 backdrop-blur-sm">
                   <p className="text-white/80 text-sm">
                     {responseText}
                     {phase === "responding" && (

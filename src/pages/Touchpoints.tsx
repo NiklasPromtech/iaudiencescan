@@ -97,9 +97,9 @@ const Touchpoints = () => {
         ) : (
           <div className="space-y-3">
             {touchpoints.map((tp) => (
-              <Card
+              <div
                 key={tp.id}
-                className="p-4 border border-border hover:border-primary/30 transition-colors"
+                className="px-4 py-3 border-b border-border hover:bg-muted/30 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
@@ -144,7 +144,7 @@ const Touchpoints = () => {
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}

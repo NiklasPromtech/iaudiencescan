@@ -224,9 +224,9 @@ const ProblemScene = () => (
         ].map((item, i) => (
           <div
             key={i}
-            className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 animate-fade-in-up delay-${400 + i * 200}`}
+            className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8 animate-fade-in-up delay-${400 + i * 200}`}
           >
-            <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-4">
               <span className="material-icons-outlined text-white/60" style={{ fontSize: '32px' }}>{item.icon}</span>
             </div>
             <p className="text-white/70">{item.text}</p>
@@ -251,7 +251,7 @@ const SolutionScene = () => (
       </p>
       <div className="relative animate-fade-in-scale delay-600">
         <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-violet-500/20 blur-3xl" />
-        <div className="relative bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-3xl p-12">
+        <div className="relative bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-lg p-12">
           <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap md:flex-nowrap">
             <div className="text-center">
               <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-violet-500/20 border border-violet-500/50 flex items-center justify-center mb-4 mx-auto">
@@ -316,7 +316,7 @@ const HowItWorksScene = () => (
         ].map((item, i) => (
           <div
             key={i}
-            className="relative bg-gradient-to-br from-violet-500/20 to-purple-600/10 border border-violet-500/30 rounded-3xl p-8 overflow-hidden animate-fade-in-up"
+            className="relative bg-gradient-to-br from-violet-500/20 to-purple-600/10 border border-violet-500/30 rounded-lg p-8 overflow-hidden animate-fade-in-up"
             style={{ animationDelay: `${0.4 + i * 0.2}s`, opacity: 0 }}
           >
             <div className={`absolute top-4 right-4 text-7xl font-black text-violet-400 ${item.opacity}`}>
@@ -357,7 +357,7 @@ const ResultsScene = () => (
             style={{ animationDelay: `${0.4 + i * 0.15}s`, opacity: 0 }}
           >
             <div className="absolute inset-0 bg-violet-500/20 blur-3xl rounded-full" />
-            <div className="relative bg-white/5 border border-white/10 rounded-3xl p-10">
+            <div className="relative bg-white/5 border border-white/10 rounded-lg p-10">
               <div className="text-5xl md:text-6xl font-bold text-violet-400 mb-2">
                 {stat.value}
               </div>
@@ -390,7 +390,7 @@ const UseCasesScene = () => (
         ].map((item, i) => (
           <div
             key={i}
-            className={`bg-violet-500/10 border border-violet-500/20 rounded-2xl p-6 hover:bg-violet-500/20 transition-colors ${i % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
+            className={`bg-violet-500/10 border border-violet-500/20 rounded-lg p-6 hover:bg-violet-500/20 transition-colors ${i % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
             style={{ animationDelay: `${0.3 + i * 0.1}s`, opacity: 0 }}
           >
             <div className="w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mb-3">

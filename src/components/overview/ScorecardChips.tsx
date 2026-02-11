@@ -271,7 +271,7 @@ export function ScorecardChips({
       {/* Main grid - starred metrics as pill cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {/* Realtime pill - always visible */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/20">
           <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
             <Radio className="h-4 w-4 text-primary" />
           </div>
@@ -289,10 +289,10 @@ export function ScorecardChips({
         {/* Starred metrics as pill cards */}
         {loading ? (
           <>
-            <Skeleton className="h-[62px] rounded-xl" />
-            <Skeleton className="h-[62px] rounded-xl" />
-            <Skeleton className="h-[62px] rounded-xl" />
-            <Skeleton className="h-[62px] rounded-xl" />
+            <Skeleton className="h-[62px] rounded-lg" />
+            <Skeleton className="h-[62px] rounded-lg" />
+            <Skeleton className="h-[62px] rounded-lg" />
+            <Skeleton className="h-[62px] rounded-lg" />
           </>
         ) : (
           starredMetricsList.map((metric) => (
@@ -310,7 +310,7 @@ export function ScorecardChips({
         {/* Show more toggle as a pill */}
         <button
           onClick={() => setShowAll(!showAll)}
-          className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border hover:border-primary/50 hover:bg-muted/30 transition-colors text-muted-foreground hover:text-foreground"
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/30 transition-colors text-muted-foreground hover:text-foreground"
         >
           {showAll ? (
             <>
@@ -381,9 +381,9 @@ function MetricPill({ metric, value, formatValue, isStarred, onToggleStar }: Met
   return (
     <div
       className={cn(
-        "group relative flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-150",
+        "group relative flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-150",
         isStarred
-          ? "bg-background border-border hover:border-primary/50 hover:shadow-sm"
+          ? "bg-background border-border hover:border-primary/50"
           : "bg-muted/20 border-border/50 hover:bg-muted/40 hover:border-border",
         isUnconfigured && "opacity-60"
       )}
