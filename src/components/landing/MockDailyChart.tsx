@@ -3,7 +3,7 @@ import { mockDailyChart } from "./mock-data";
 import { Diamond } from "lucide-react";
 
 export const MockDailyChart = () => (
-  <div className="rounded-2xl border border-border bg-card p-6 relative">
+  <div className="bg-card p-6 relative">
     {/* Watermark */}
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
       <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/10 text-lg font-bold select-none">AudienceScan</span>
