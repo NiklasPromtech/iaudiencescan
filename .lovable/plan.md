@@ -1,70 +1,90 @@
 
 
-## Align Border Radius to Dune Aesthetic
+## Dune-Style UI Overhaul: Flat, Tight, Data-Dense
 
-### The Problem
-Dune.com uses tight, subtle border-radius on cards and containers (~8px / `rounded-lg`), while the AudienceScan codebase is littered with `rounded-2xl` (16px) and `rounded-3xl` (24px), giving everything an overly bubbly, app-like feel that clashes with the sharp data-dashboard aesthetic.
+### What Dune Gets Right (from the reference image)
 
-### Dune's Radius Rules (from screenshots)
-- **Cards / containers**: `rounded-lg` (8px) -- subtle, almost flat
-- **Tags / pills / avatars**: `rounded-full` -- stays pill-shaped (no change needed)
-- **Buttons**: `rounded-md` (6px) -- already correct in the `Button` component
-- **Tables**: No rounding or very subtle (`rounded-lg` on outer container)
-- **Dialogs / modals**: `rounded-lg`
-- **Icon containers**: `rounded-lg` (not `rounded-xl` or `rounded-2xl`)
-- **Charts inside cards**: Card gets `rounded-lg`, chart itself has no extra rounding
+The Dune "Discover" page is aggressively flat and data-dense:
 
-### What Changes
+1. **No card wrappers around list items** -- rows are separated only by a thin `border-b`, no card backgrounds, no shadows, no rounded containers wrapping each item
+2. **Zero border-radius on data rows** -- items are flat horizontal bands
+3. **Tight vertical spacing** -- rows are compact (~56-64px height), no extra padding bloat
+4. **No decorative shadows** -- the entire page is flat, shadow-free
+5. **Minimal chrome** -- the header/tabs are simple inline text, no pill-shaped wrappers with backgrounds
+6. **Monospace numbers** -- data values are right-aligned in tabular style
+7. **Tags as tiny rounded-full pills** -- the only rounded elements are small hashtag badges
 
-**Global mapping:**
-- `rounded-3xl` --> `rounded-xl` (max rounding for hero/CTA accent cards)
-- `rounded-2xl` --> `rounded-lg` (standard cards, containers, frames)
-- `rounded-xl` on icon boxes --> `rounded-lg`
-- Keep `rounded-full` on pills, avatars, social icons, nav bar
-- Keep `rounded-md` on buttons, small inputs
+### What Needs to Change
 
-### Files to Update (22 files, ~451 occurrences)
+Currently, the platform pages (Overview, Wallets, Scans, Audiences, Touchpoints, Contracts, Costs) use:
+- `Card` wrappers (`rounded-lg`, `shadow-sm`, `border`, `p-6`) around every section
+- `rounded-xl` on scorecard metric pills and chart containers
+- Gradient backgrounds on the realtime pill (`bg-gradient-to-br`)
+- Decorative shadows throughout
+- Generous padding/spacing (mb-8, p-6)
 
-**Landing / marketing components (7 files):**
-1. `src/components/landing/DashboardFrame.tsx` -- `rounded-2xl` to `rounded-lg`
-2. `src/components/landing/MockBotSummary.tsx` -- `rounded-2xl` to `rounded-lg`
-3. `src/components/landing/MockHolderTrend.tsx` -- `rounded-2xl` to `rounded-lg`
-4. `src/components/Features.tsx` -- icon boxes from `rounded-2xl` to `rounded-lg`
-5. `src/components/MoneyBackGuarantee.tsx` -- icon box `rounded-2xl` to `rounded-lg`
-6. `src/components/FinalCTA.tsx` -- icon box `rounded-2xl` to `rounded-lg`
-7. `src/components/PlaybookFloatingCTA.tsx` -- `rounded-2xl` to `rounded-lg`
+The landing page (Index.tsx) uses large rounded containers and generous spacing that should also be tightened.
 
-**Landing pages (4 files):**
-8. `src/pages/LandingPageV3.tsx` -- all bento cards, testimonial, step cards
-9. `src/pages/Index.tsx` -- `rounded-xl` to `rounded-lg`
-10. `src/pages/Sample1.tsx` -- stat cards
-11. `src/pages/Pricing.tsx` -- if applicable
+### Design Targets
 
-**Blog posts (6 files):**
-12. `src/pages/BlogPostAddressableAudiences.tsx`
-13. `src/pages/BlogPostAgencyDifferentiation.tsx`
-14. `src/pages/BlogPostAudienceScanAds.tsx`
-15. `src/pages/BlogPostROI.tsx`
-16. `src/pages/BlogPostGuarantee.tsx`
-17. `src/pages/BlogPostTracking.tsx`
+| Element | Current | Target (Dune-style) |
+|---------|---------|---------------------|
+| Data tables | Wrapped in `Card` with `p-6`, `rounded-lg`, `shadow-sm` | Borderless, just a thin top border separator. Table rows with `border-b` only |
+| Scorecard chips | `rounded-xl`, gradient bg, icon circles | Flat inline text values, no card wrappers, separator borders between metrics |
+| Chart container | `Card` with `p-6` | Thin `border-b` separator above/below, no wrapper card |
+| List items (Scans, Touchpoints, etc.) | Individual `Card` per item with rounded corners + shadows | Flat rows with `border-b`, hover `bg-muted/50`, no card wrapping |
+| Section headers | Inside card padding | Standalone with `border-b` below |
+| Filter buttons | Current pills are fine | Keep as-is, they match Dune's tab pattern |
+| Sidebar | Already clean | No changes needed |
+| Dimension table inner border | `rounded-md border` wrapper | Keep thin border wrapper but remove card padding bloat |
+| Remaining `rounded-2xl`/`rounded-3xl` | 102 instances in 8 files | Replace with `rounded-lg` or `rounded-none` |
 
-**Standalone / video pages (5 files):**
-18. `src/pages/Video1.tsx`
-19. `src/pages/VideoWhite.tsx`
-20. `src/pages/Confidence.tsx`
-21. `src/pages/PlaceholderAI.tsx`
-22. `src/pages/Creation.tsx`
+### Files to Modify
 
-**No changes needed:**
-- `src/components/ui/card.tsx` -- already uses `rounded-lg` (correct)
-- `src/components/ui/button.tsx` -- already uses `rounded-md` (correct)
-- All dashboard/platform components (Overview, Bots, Audiences, etc.) -- no `rounded-2xl` or `rounded-3xl` found
-- `rounded-full` on pills, avatars, social icons -- stays as-is
+**Platform pages (list/data views -- highest priority):**
+1. `src/pages/Overview.tsx` -- Remove `Card` wrappers from major sections, reduce spacing from `mb-8` to `mb-6`, flatten cohort suggestions section
+2. `src/components/overview/ScorecardChips.tsx` -- Replace pill cards with flat inline stat rows separated by borders, remove `rounded-xl`, remove gradient on realtime pill, use simpler layout
+3. `src/components/overview/DailyChart.tsx` -- Remove `Card` wrapper, use `border-b` separator instead
+4. `src/components/overview/DimensionTable.tsx` -- Remove outer `Card` wrapper, keep inner table structure, fix `text-purple-500` (still needs purple purge)
+5. `src/components/overview/EventsTable.tsx` -- Remove `Card` wrapper, use section with `border-t` separator
+6. `src/components/overview/WalletsOverviewTable.tsx` -- Same treatment as EventsTable
+7. `src/components/overview/WalletExtensionsTable.tsx` -- Same treatment
+8. `src/pages/Scans.tsx` -- Flatten scan list items from individual Cards to `border-b` rows
+9. `src/pages/Audiences.tsx` + `src/components/audiences/AudienceList.tsx` -- Flatten audience items
+10. `src/pages/Touchpoints.tsx` -- Flatten touchpoint items to rows
+11. `src/pages/Contracts.tsx` -- Already uses a table, reduce card chrome
+12. `src/pages/Costs.tsx` + `src/components/costs/CostSourceList.tsx` -- Flatten cost items
+13. `src/pages/Wallets.tsx` -- Reduce card chrome around table, tighten spacing
 
-### Technical Detail
-This is a straightforward find-and-replace across 22 files:
-- Replace `rounded-3xl` with `rounded-xl`
-- Replace `rounded-2xl` with `rounded-lg`
-- Replace `rounded-xl` (on icon containers only, not pills) with `rounded-lg`
-- Leave `rounded-full`, `rounded-md`, and `rounded-sm` untouched
+**Landing page:**
+14. `src/pages/Index.tsx` -- Tighten spacing, reduce rounded corners, flatten stat cards
+
+**Remaining rounded-2xl/3xl files (8 files):**
+15. `src/pages/Video.tsx` -- Replace `rounded-2xl`/`rounded-3xl` with `rounded-lg`
+16. `src/pages/Video1.tsx` -- Same
+17. `src/pages/AI.tsx` -- Replace `rounded-2xl` with `rounded-lg`
+18. `src/pages/PlaceholderAI.tsx` -- Same
+19. `src/pages/PlaceholderConfidence.tsx` -- Same
+20. `src/pages/Wizard.tsx` -- Same
+21. `src/pages/ManagedService.tsx` -- Check and fix (from earlier audit)
+22. `src/pages/CaseStudies.tsx` -- Check and fix
+
+**UI Primitive (optional, low-risk):**
+23. `src/components/ui/card.tsx` -- Remove `shadow-sm` from default Card class (makes every card flatter globally)
+
+### Approach
+
+The core change is **removing the `Card` wrapper pattern from data-display components** and replacing it with section separators (`border-t` or `border-b` + spacing). This follows Dune's pattern where data sections flow vertically with only thin horizontal rules between them.
+
+For list pages (Scans, Audiences, Touchpoints), each item becomes a simple `div` row with `border-b border-border` and `hover:bg-muted/30` instead of a standalone Card.
+
+The Card component's default `shadow-sm` will be removed so any remaining Card usage is flatter.
+
+### Execution Order
+
+1. First: Update `card.tsx` to remove `shadow-sm` (global improvement)
+2. Then: Flatten all platform dashboard components (Overview scorecard, chart, tables) in parallel
+3. Then: Flatten all list pages (Scans, Audiences, Touchpoints, Costs) in parallel
+4. Then: Fix remaining `rounded-2xl`/`rounded-3xl` across all 8 files
+5. Finally: Tighten landing page spacing
 
