@@ -1,119 +1,73 @@
 
 
-# World Map, Conversion Event & Wallet Action Overhaul
+# Update Report for New API Fields: absolute_delta, low_confidence, smoothed uplift
 
-## 1. Install `react-simple-maps` for a real world map
+## What's Changing
 
-The current hand-drawn SVG paths will be replaced with `react-simple-maps`, which renders proper TopoJSON world geometry using d3-geo projections. This gives us an accurate, interactive choropleth map.
+The backend now returns three new fields on every breakdown metric (`visitors`, `conversions`, `wallets`):
+- `absolute_delta` -- the raw daily difference (event - baseline)
+- `low_confidence` -- boolean flag when sample size is too small
+- `uplift_percent` -- now smoothed (pseudo-counts), more conservative for small samples
 
-**Install:** `react-simple-maps` (works with React 18, MIT licensed, ~50k weekly downloads)
+We need to update three areas to use these properly:
 
-## 2. Interactive Drillable World Map
-
-Replace the contents of `CountryMapChart.tsx` with a proper map powered by `react-simple-maps`:
-
-- Renders a real world map using the `world-atlas` TopoJSON from unpkg CDN
-- Countries with data are color-coded (green for positive uplift, red for negative)
-- Countries without data are light gray
-- **Click a country** to trigger a callback that tells the parent "user wants region-level data for this country"
-- **Click a region** to drill into cities
-- A breadcrumb trail at the top shows the drill path: World > United States > California
-- A "Back" button lets users navigate up
-
-The component interface will accept:
-- `data` -- the current level's breakdown items
-- `drillLevel` -- "country" | "region" | "city"
-- `onDrill(countryCode: string)` -- callback when clicking a country/region
-- `onBack()` -- callback to go up one level
-- `breadcrumb` -- array of labels for the drill path
-- `loading` -- shows a spinner overlay when fetching drill-down data
-
-When at "region" or "city" level, the map zooms into the selected country/region automatically.
-
-## 3. Drill-down state management in IncrementalityResultsView
-
-In the parent component, add state to manage the drill:
-
-- `mapDrillLevel`: "country" | "region" | "city"
-- `mapDrillPath`: e.g., `["United States"]` or `["United States", "California"]`
-- `mapDrillData`: the breakdown data for the current drill level (starts as `breakdowns.country`)
-
-When a user clicks a country:
-1. Set loading state
-2. Call the backend API (via `supabase.functions.invoke`) with the touchpoint ID + country filter to get region-level data
-3. Display the region breakdown on the map
-4. Clicking a region repeats for city-level data
-
-If the backend call fails or returns no data, show a "No detailed data available" message.
-
-## 4. Focused Conversion Event Table
-
-When breakdown key is `conversion_event`, render a specialized 3-column table instead of the generic BreakdownTable:
-
-```text
- Dimension          | Conv/day                         | Uplift
---------------------|----------------------------------|--------
- Signed up          | [gray bar] 33  [green bar] 137   | +315%
- wallet_detected    | [gray bar] 254 [green bar] 450   | +77%
-```
-
-- **Dimension**: Event name, cleaned up (replace underscores with spaces, title case)
-- **Conv/day**: Two mini horizontal bars stacked -- gray for baseline daily avg, colored for actual daily avg. Numbers displayed inline.
-- **Uplift**: Badge colored green/red based on positive/negative
-
-## 5. Focused Wallet Action Table
-
-Same layout as Conversion Event, but uses `wallets` metric:
-
-```text
- Dimension          | Wallets/day                      | Uplift
---------------------|----------------------------------|--------
- submitted          | [gray bar] 33  [green bar] 137   | +307%
- connected          | [gray bar] 0   [green bar] 7     | NEW
-```
+1. **TypeScript interfaces** -- add the new fields
+2. **FocusedBreakdownTable** (conversion_event + wallet_action) -- show absolute_delta as primary metric, de-emphasize low confidence rows
+3. **CountryMapChart + country breakdown** -- use absolute_delta for map coloring and sorting
+4. **Generic BreakdownTable** -- same treatment for other breakdowns (utm_source, etc.)
+5. **Sorting** -- change from uplift_percent to |absolute_delta| everywhere
 
 ## Technical Details
 
-### Files to modify
+### 1. Update `BreakdownMetric` interface (both files)
 
-| File | Change |
-|------|--------|
-| `package.json` | Add `react-simple-maps` dependency |
-| `src/components/touchpoints/CountryMapChart.tsx` | Complete rewrite -- real map with `ComposableMap`, `Geographies`, `Geography` from react-simple-maps. Color-coded choropleth, click handlers, breadcrumb, zoom. |
-| `src/components/touchpoints/IncrementalityResultsView.tsx` | 1) Add drill-down state and API call logic for map. 2) Add `FocusedBreakdownTable` component for conversion_event and wallet_action. 3) In the breakdowns accordion, route conversion_event and wallet_action to the focused table instead of generic BreakdownTable. |
-
-### CountryMapChart new props interface
+Add the new fields to the shared interface in `IncrementalityResultsView.tsx` and `FocusedBreakdownTable.tsx`:
 
 ```typescript
-interface CountryMapChartProps {
-  data: CountryData[];
-  formatNumber: (n: number) => string;
-  formatPercent: (n: number) => string;
-  drillLevel: "country" | "region" | "city";
-  breadcrumb: string[];
-  onDrill?: (key: string) => void;
-  onBack?: () => void;
-  loading?: boolean;
+interface BreakdownMetric {
+  baseline_daily_avg: number;
+  event_daily_avg: number;
+  uplift_percent: number;
+  absolute_delta?: number;    // NEW
+  low_confidence?: boolean;   // NEW
 }
 ```
 
-### FocusedBreakdownTable component (inline in IncrementalityResultsView)
+### 2. FocusedBreakdownTable.tsx changes
 
+- **Sort by** `|absolute_delta|` descending instead of `event_daily_avg`
+- **Primary display**: Show `absolute_delta` with a +/- sign (e.g., "+157.7/day") alongside the comparison bars
+- **Low confidence rows**: Reduce opacity to 50%, append "(uncertain)" badge next to the uplift
+- **Uplift column**: Use the smoothed `uplift_percent` as-is (it's already conservative)
+
+### 3. CountryMapChart data mapping
+
+In `IncrementalityResultsView.tsx` where country data is mapped to the chart (around line 635-641), use `absolute_delta` for the `incremental` field instead of computing it manually. Also pass `low_confidence` to the tooltip.
+
+### 4. Generic BreakdownTable
+
+Update the existing `BreakdownTable` component in `IncrementalityResultsView.tsx` to:
+- Sort by `|absolute_delta|` on the visitors metric
+- Show absolute_delta as the primary number
+- Grey out low_confidence rows
+
+### 5. Breakdown accordion sorting (line 611-615)
+
+Change the sort from `uplift_percent` to `|absolute_delta|`:
 ```typescript
-interface FocusedBreakdownTableProps {
-  data: BreakdownItem[];
-  metricKey: "conversions" | "wallets";
-  metricLabel: string;  // "Conv/day" or "Wallets/day"
-  formatNumber: (n: number) => string;
-  formatPercent: (n: number) => string;
-}
+const sorted = [...data].sort((a, b) => {
+  const aD = Math.abs(a.visitors?.absolute_delta ?? 0);
+  const bD = Math.abs(b.visitors?.absolute_delta ?? 0);
+  return bD - aD;
+});
 ```
 
-Each row renders:
-- Dimension name (title-cased, underscores replaced)
-- Two inline bars: gray for `baseline_daily_avg`, green/red for `event_daily_avg`, with numbers
-- Uplift badge: green for positive, red for negative, "NEW" if baseline is 0
+### Files Modified
 
-### Map geography source
-Uses `https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json` -- lightweight TopoJSON loaded at runtime (no bundling overhead).
+| File | Changes |
+|------|---------|
+| `src/components/touchpoints/IncrementalityResultsView.tsx` | Update `BreakdownMetric` interface, change sort logic, update country map data mapping, update generic BreakdownTable |
+| `src/components/touchpoints/FocusedBreakdownTable.tsx` | Update interface, sort by absolute_delta, show delta as primary metric, grey out low confidence rows |
+
+### No new dependencies needed.
 
