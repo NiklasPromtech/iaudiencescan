@@ -181,13 +181,13 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
             {displayTags.map((tag, i) => (
               <span
                 key={i}
-                className="text-[10px] px-2 py-0.5 bg-slate-700/20 text-slate-700 rounded-full"
+                className="text-[10px] px-2 py-0.5 bg-amber-900/15 text-amber-900 rounded-full"
               >
                 {tag}
               </span>
             ))}
             {remainingTags > 0 && (
-              <span className="text-[10px] px-2 py-0.5 bg-slate-700/10 text-slate-600 rounded-full">
+              <span className="text-[10px] px-2 py-0.5 bg-amber-900/10 text-amber-800 rounded-full">
                 +{remainingTags} more
               </span>
             )}
@@ -473,7 +473,7 @@ const Network = () => {
                     cy={node.y}
                     r={node.size / 2 + 2}
                     fill="none"
-                    stroke={node.score > 0.5 ? "#f97316" : "#334155"}
+                    stroke={node.score > 0.5 ? "#f97316" : "#78716c"}
                     strokeWidth={isCenter ? 3 : 2}
                     strokeOpacity={0.4 + node.score * 0.5}
                   />
