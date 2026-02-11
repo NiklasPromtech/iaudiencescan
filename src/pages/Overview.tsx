@@ -609,20 +609,20 @@ const Overview = () => {
             <p className="text-p2 text-muted-foreground mb-6">
               Auto-generated based on your early traffic patterns
             </p>
-            <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div className="divide-y divide-border mb-6">
               {suggestedCohorts.map((cohort) => (
                 <div
                   key={cohort.id}
-                  className="p-4 rounded-lg border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer"
+                  className="flex items-center gap-3 py-3 hover:bg-muted/30 transition-colors cursor-pointer px-1"
                 >
-                  <div className="flex items-center gap-2 mb-2 text-primary">
-                    {cohort.icon}
+                  <span className="text-primary">{cohort.icon}</span>
+                  <div className="flex-1 min-w-0">
                     <span className="text-p2 font-medium text-foreground">{cohort.name}</span>
+                    <span className="text-p3 text-muted-foreground ml-2">{cohort.description}</span>
                   </div>
-                  <p className="text-p3 text-muted-foreground mb-3">{cohort.description}</p>
-                  <p className="text-p4 text-muted-foreground">
+                  <span className="text-p2 text-muted-foreground tabular-nums">
                     <span className="text-foreground font-medium">{cohort.size}</span> visitors
-                  </p>
+                  </span>
                 </div>
               ))}
             </div>

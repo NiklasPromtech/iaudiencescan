@@ -367,7 +367,7 @@ const LandingPageV2 = () => {
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="text-center p-3 rounded-xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-purple-500/30 transition-all duration-300 hover:scale-[1.02]"
+                  className="text-center p-3 rounded-lg bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-purple-500/30 transition-all duration-300 hover:scale-[1.02]"
                 >
                   <div className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                     <AnimatedCounter 
@@ -399,7 +399,7 @@ const LandingPageV2 = () => {
               {painPoints.map((pain, index) => (
                 <div 
                   key={index} 
-                  className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-xl p-5 hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300 hover:scale-[1.02]"
+                  className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-lg p-5 hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300 hover:scale-[1.02]"
                 >
                   <h3 className="text-lg font-semibold text-white mb-3">"{pain.title}"</h3>
                   <ul className="space-y-2">
@@ -432,7 +432,7 @@ const LandingPageV2 = () => {
                   Our data has already helped clients save thousands of dollars by identifying 
                   traffic sources sending nothing but bots.
                 </p>
-                <div className="bg-white/[0.02] backdrop-blur-sm border border-purple-500/30 rounded-xl p-5 shadow-[0_0_30px_rgba(168,85,247,0.1)]">
+                <div className="bg-white/[0.02] backdrop-blur-sm border border-purple-500/30 rounded-lg p-5 shadow-[0_0_30px_rgba(168,85,247,0.1)]">
                   <p className="text-base text-white/80 italic">
                     "One client discovered 73% of their traffic from a major ad network was bots. 
                     They cut the source and reallocated budget to channels bringing real users."
@@ -443,7 +443,7 @@ const LandingPageV2 = () => {
                   Cut the bad sources. Keep the good ones.
                 </p>
               </div>
-              <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-xl p-5 space-y-3">
+              <div className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-lg p-5 space-y-3">
                 <h3 className="text-lg font-semibold text-white mb-3">Bot Detection Signals</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center p-2.5 bg-white/[0.02] border border-white/[0.06] rounded-lg">
@@ -491,7 +491,7 @@ const LandingPageV2 = () => {
               {features.map((feature, index) => (
                 <div 
                   key={index} 
-                  className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-xl p-5 hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300 hover:scale-[1.02] group"
+                  className="bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] rounded-lg p-5 hover:border-purple-500/40 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300 hover:scale-[1.02] group"
                 >
                   <div className="flex items-start gap-4">
                     <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/30 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all duration-300">
@@ -523,7 +523,7 @@ const LandingPageV2 = () => {
 
             <div className="grid md:grid-cols-2 gap-6 items-stretch">
               {/* Without - Muted, dark styling */}
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5 opacity-70 flex flex-col h-full">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-5 opacity-70 flex flex-col h-full">
                 <h3 className="text-lg font-semibold text-white/50 mb-3">Without AudienceScan</h3>
                 <div className="space-y-3 font-mono text-xs flex-1 flex flex-col">
                   <div className="p-2.5 bg-white/[0.02] border border-white/[0.04] rounded-lg">
@@ -544,7 +544,7 @@ const LandingPageV2 = () => {
               </div>
 
               {/* With - Bright, glowing, spotlight effect */}
-              <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-xl p-5 shadow-[0_0_40px_rgba(168,85,247,0.3)] relative overflow-hidden flex flex-col h-full">
+              <div className="bg-purple-500/10 border-2 border-purple-500/40 rounded-lg p-5 shadow-[0_0_40px_rgba(168,85,247,0.3)] relative overflow-hidden flex flex-col h-full">
                 {/* Spotlight glow */}
                 <div className="absolute inset-0 bg-gradient-radial from-purple-500/10 via-transparent to-transparent pointer-events-none" />
                 
@@ -618,7 +618,7 @@ const LandingPageV2 = () => {
             </div>
 
             <div className="mt-10 text-center">
-              <div className="inline-block bg-purple-500/10 border border-purple-500/30 rounded-xl px-5 py-3 shadow-[0_0_30px_rgba(168,85,247,0.15)]">
+              <div className="inline-block bg-purple-500/10 border border-purple-500/30 rounded-lg px-5 py-3 shadow-[0_0_30px_rgba(168,85,247,0.15)]">
                 <p className="text-sm text-white/70">
                   We scan the chain to find communities they're already part of. Then help you target them on <span className="text-purple-400">X</span>, <span className="text-purple-400">Telegram</span>, and <span className="text-purple-400">Google</span>.
                 </p>
@@ -663,7 +663,7 @@ const LandingPageV2 = () => {
             </div>
 
             {/* Testimonial Glass Card */}
-            <div className="bg-white/[0.02] backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 max-w-2xl mx-auto mt-6 shadow-[0_0_40px_rgba(168,85,247,0.15)]">
+            <div className="bg-white/[0.02] backdrop-blur-sm border border-purple-500/30 rounded-lg p-6 max-w-2xl mx-auto mt-6 shadow-[0_0_40px_rgba(168,85,247,0.15)]">
               <p className="text-base text-white/80 italic mb-4">
                 "Every campaign we've run with AudienceScan data delivered 50%+ lower cost-per-engagement compared to guessing."
               </p>

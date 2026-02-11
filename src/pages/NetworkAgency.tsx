@@ -72,7 +72,7 @@ const HoverPanel = ({ node, position, colors }: HoverPanelProps) => {
 
   return (
     <div
-      className="absolute z-50 backdrop-blur-md rounded-xl p-4 shadow-2xl pointer-events-none"
+      className="absolute z-50 backdrop-blur-md rounded-lg p-4 shadow-2xl pointer-events-none"
       style={{
         left: position.x,
         top: position.y,
@@ -627,7 +627,7 @@ const NetworkAgency = () => {
 
         {/* Stats */}
         <div 
-          className="absolute bottom-6 left-6 backdrop-blur-md rounded-xl px-5 py-3"
+          className="absolute bottom-6 left-6 backdrop-blur-md rounded-lg px-5 py-3"
           style={{ 
             backgroundColor: `${colors.background}99`,
             border: `1px solid ${colors.accentPrimary}4d`

@@ -104,7 +104,7 @@ const HoverPanel = ({ node, position }: HoverPanelProps) => {
 
   return (
     <div
-      className="absolute z-50 bg-white/95 backdrop-blur-md border border-orange-500/40 rounded-xl p-4 shadow-2xl shadow-orange-900/20 pointer-events-none"
+      className="absolute z-50 bg-white/95 backdrop-blur-md border border-orange-500/40 rounded-lg p-4 shadow-2xl shadow-orange-900/20 pointer-events-none"
       style={{
         left: position.x,
         top: position.y,
@@ -513,7 +513,7 @@ const Network = () => {
         </svg>
 
         {/* Stats */}
-        <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-md border border-orange-500/30 rounded-xl px-5 py-3 shadow-lg">
+        <div className="absolute bottom-6 left-6 bg-white/80 backdrop-blur-md border border-orange-500/30 rounded-lg px-5 py-3 shadow-lg">
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-orange-500" />

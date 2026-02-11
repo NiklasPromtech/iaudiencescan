@@ -24,7 +24,7 @@ const MoneyBackGuarantee = () => {
                 We're confident because the data keeps proving itself.
               </p>
               
-              <div className="bg-primary/10 rounded-xl p-6 mb-8">
+              <div className="bg-primary/10 rounded-lg p-6 mb-8">
                 <div className="flex items-start gap-4">
                   <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
                   <p className="text-p1 text-foreground leading-relaxed text-left">

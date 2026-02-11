@@ -63,7 +63,7 @@ const PlaybookFloatingCTA = () => {
 
             <div className="flex items-center md:items-start gap-2 md:gap-3">
               {/* Icon */}
-              <div className="bg-gradient-to-br from-primary to-secondary p-2 md:p-3 rounded-lg md:rounded-xl flex-shrink-0">
+              <div className="bg-gradient-to-br from-primary to-secondary p-2 md:p-3 rounded-lg flex-shrink-0">
                 <BookOpen className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
 
