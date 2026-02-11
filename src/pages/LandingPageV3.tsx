@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TrendingUp as TrendUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Eye, Wallet, BarChart3, Shield, Bot, TrendingUp, DollarSign, Activity,
@@ -146,16 +147,26 @@ const LandingPageV3 = () => {
       <section className="py-10 relative z-10">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
-            {/* Scorecard row */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border [&>*:not(:last-child)]:border-r [&>*:not(:last-child)]:border-border max-sm:[&>*:nth-child(2)]:border-r-0 max-sm:[&>*:nth-child(4)]:border-r-0">
-              {mockScorecard.map((s) => (
-                <div key={s.label} className="px-5 py-4">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{s.label}</p>
-                  <p className={`text-lg font-bold tabular-nums font-mono ${s.highlight ? "text-destructive" : "text-foreground"}`}>{s.value}</p>
+            {/* Big stat cards — Dune style */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 border-b border-border">
+              {[
+                { label: "Visitors", value: "12,847", trend: "+12%", up: true },
+                { label: "With Extension", value: "4,231", trend: "+8%", up: true },
+                { label: "Wallets Connected", value: "892", trend: "+23%", up: true },
+                { label: "Median Balance", value: "$2,400", trend: "-3%", up: false },
+                { label: "Bot Rate", value: "23%", trend: "+5%", up: true, bad: true },
+              ].map((s) => (
+                <div key={s.label} className="px-5 py-5 border-r border-border last:border-r-0">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">{s.label}</p>
+                  <p className={`text-2xl md:text-3xl font-bold tabular-nums font-mono ${s.bad ? "text-destructive" : "text-foreground"}`}>{s.value}</p>
+                  <p className={`text-xs font-mono mt-1 flex items-center gap-1 ${s.bad ? (s.up ? "text-destructive" : "text-emerald-500") : (s.up ? "text-emerald-500" : "text-destructive")}`}>
+                    {s.up ? <TrendUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {s.trend} 7d
+                  </p>
                 </div>
               ))}
             </div>
-            {/* Mini dimension table */}
+            {/* Mini dimension table with chain tags */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -170,17 +181,29 @@ const LandingPageV3 = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockDimensionRows.map((r) => (
-                    <tr key={r.source} className="border-b border-border last:border-0 hover:bg-muted/30">
-                      <td className="px-5 py-3 font-medium text-foreground">{r.source}</td>
-                      <td className="text-center px-3 py-3"><InvestmentGradeBadge grade={r.grade} /></td>
-                      <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.visitors}</td>
-                      <td className="text-right px-4 py-3 tabular-nums font-mono text-muted-foreground">{r.extensions}</td>
-                      <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.wallets}</td>
-                      <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.avgBalance}</td>
-                      <td className={`text-right px-5 py-3 tabular-nums font-mono font-medium ${parseInt(r.botRate) > 30 ? "text-destructive" : parseInt(r.botRate) > 10 ? "text-amber-500" : "text-emerald-500"}`}>{r.botRate}</td>
-                    </tr>
-                  ))}
+                  {mockDimensionRows.map((r) => {
+                    const tags: Record<string, string> = {
+                      twitter_ads: "#X",
+                      telegram_promo: "#Telegram",
+                      kol_campaign: "#KOL",
+                      organic: "#Organic",
+                      coindesk_banner: "#Display",
+                    };
+                    return (
+                      <tr key={r.source} className="border-b border-border last:border-0 hover:bg-muted/30">
+                        <td className="px-5 py-3 font-medium text-foreground flex items-center gap-2">
+                          <span className="text-primary hover:underline cursor-pointer">{r.source}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">{tags[r.source]}</span>
+                        </td>
+                        <td className="text-center px-3 py-3"><InvestmentGradeBadge grade={r.grade} /></td>
+                        <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.visitors}</td>
+                        <td className="text-right px-4 py-3 tabular-nums font-mono text-muted-foreground">{r.extensions}</td>
+                        <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.wallets}</td>
+                        <td className="text-right px-4 py-3 tabular-nums font-mono text-foreground">{r.avgBalance}</td>
+                        <td className={`text-right px-5 py-3 tabular-nums font-mono font-medium ${parseInt(r.botRate) > 30 ? "text-destructive" : parseInt(r.botRate) > 10 ? "text-amber-500" : "text-emerald-500"}`}>{r.botRate}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
