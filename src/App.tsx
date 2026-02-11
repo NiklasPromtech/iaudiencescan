@@ -70,9 +70,10 @@ import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 2 * 60 * 1000, // 2 minutes - data is fresh for this long
+      staleTime: 0, // Always consider data stale — triggers background refetch on mount
       gcTime: 10 * 60 * 1000, // 10 minutes - cache kept after unmount
-      refetchOnWindowFocus: false, // Don't refetch when tab regains focus
+      refetchOnWindowFocus: false,
+      refetchOnMount: 'always', // Refetch every time a component mounts
     },
   },
 });

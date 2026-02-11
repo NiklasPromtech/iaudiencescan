@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Plus, AlertCircle } from "lucide-react";
+import { Users, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { Audience, Website } from "@/lib/api";
 import { AudienceList } from "@/components/audiences/AudienceList";
 import { AudienceDialog } from "@/components/audiences/AudienceDialog";
@@ -21,6 +21,7 @@ const Audiences = () => {
   const {
     data: audiences = [],
     isLoading: loading,
+    isFetching,
     error,
     refetch,
   } = useAudiences(selectedWebsite?.id);
@@ -113,10 +114,15 @@ const Audiences = () => {
               Create and manage audience segments for {selectedWebsite?.name}
             </p>
           </div>
-          <Button onClick={handleCreateClick}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Audience
-          </Button>
+          <div className="flex items-center gap-2">
+            {isFetching && !loading && (
+              <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+            <Button onClick={handleCreateClick}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Audience
+            </Button>
+          </div>
         </div>
 
         {/* Audience List or Empty State */}
