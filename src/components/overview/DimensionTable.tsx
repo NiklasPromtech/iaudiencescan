@@ -439,7 +439,7 @@ export function DimensionTable({
         </div>
       ) : (
         <>
-          <div className="rounded-md border border-border overflow-x-auto w-full">
+          <div className="rounded-none border border-border overflow-x-auto w-full">
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">

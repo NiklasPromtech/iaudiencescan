@@ -139,7 +139,7 @@ const FilterDropdown = ({
                 return (
                   <label
                     key={option}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-none hover:bg-muted/50 cursor-pointer transition-colors"
                   >
                     <Checkbox
                       checked={isSelected}

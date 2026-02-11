@@ -29,7 +29,7 @@ const CodeBlock = ({ code, label }: { code: string; label?: string }) => {
       {label && (
         <p className="text-p4 text-muted-foreground mb-2">{label}</p>
       )}
-      <div className="bg-muted/50 border border-border rounded-lg p-4 font-mono text-sm text-foreground overflow-x-auto">
+      <div className="bg-muted/50 border border-border rounded-none p-4 font-mono text-sm text-foreground overflow-x-auto">
         <pre className="whitespace-pre-wrap">{code}</pre>
       </div>
       <Button
@@ -59,7 +59,7 @@ export const TrackingSetupDialog = ({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-none bg-primary/10">
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
               <DialogTitle className="text-xl">Track Wallet Connections</DialogTitle>
@@ -121,7 +121,7 @@ export const TrackingSetupDialog = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-none bg-primary/10">
               <Target className="h-5 w-5 text-primary" />
             </div>
             <DialogTitle className="text-xl">Track Conversion Events</DialogTitle>

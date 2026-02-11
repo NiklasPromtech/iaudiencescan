@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!data) return null;
 
   return (
-    <div className="rounded-lg border border-border/50 bg-popover px-3 py-2 text-xs shadow-xl">
+    <div className="rounded-none border border-border/50 bg-popover px-3 py-2 text-xs shadow-xl">
       <p className="font-medium text-foreground mb-1.5">
         {format(parseISO(data.date), "MMM d, yyyy")}
       </p>
@@ -109,7 +109,7 @@ export const TimelineRangeChart = ({
           <button
             key={key}
             onClick={() => setActiveMetric(key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-none px-3 py-1 text-xs font-medium transition-colors ${
               activeMetric === key
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:text-foreground"
@@ -219,7 +219,7 @@ export const TimelineRangeChart = ({
       </div>
 
       {/* Summary stats */}
-      <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground bg-muted/30 rounded-lg py-2.5 px-4">
+      <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground bg-muted/30 rounded-none py-2.5 px-4">
         <span className="font-medium text-foreground">
           {selectedStats.days} days
         </span>

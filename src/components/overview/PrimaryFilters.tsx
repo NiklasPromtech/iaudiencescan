@@ -111,7 +111,7 @@ const SelectFilter = ({
                     key={option.value}
                     onClick={() => handleSelect(option.value)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors text-left",
+                      "w-full flex items-center gap-2 px-2 py-1.5 rounded-none text-sm transition-colors text-left",
                       isSelected ? "bg-primary/10 text-primary" : "hover:bg-muted/50"
                     )}
                   >
