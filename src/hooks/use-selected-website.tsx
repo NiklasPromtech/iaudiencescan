@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Website } from "@/lib/api";
 
 export interface SelectedWebsite {
   id: string;
@@ -10,21 +9,26 @@ export interface SelectedWebsite {
   status: string;
 }
 
-export function useSelectedWebsite() {
+interface SelectedWebsiteContextValue {
+  selectedWebsite: SelectedWebsite | null;
+  selectWebsite: (website: SelectedWebsite) => Promise<void>;
+  loading: boolean;
+}
+
+const SelectedWebsiteContext = createContext<SelectedWebsiteContextValue | null>(null);
+
+export function SelectedWebsiteProvider({ children }: { children: ReactNode }) {
   const [selectedWebsite, setSelectedWebsite] = useState<SelectedWebsite | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load selected website on mount
   useEffect(() => {
     const loadSelectedWebsite = async () => {
       try {
-        // First check localStorage for immediate display
         const stored = localStorage.getItem("selectedWebsite");
         if (stored) {
           setSelectedWebsite(JSON.parse(stored));
         }
 
-        // Then check the database for persisted preference
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setLoading(false);
@@ -38,12 +42,8 @@ export function useSelectedWebsite() {
           .maybeSingle();
 
         if (profile?.last_selected_website_id) {
-          // If we have a saved preference, fetch that website's details
           const storedId = stored ? JSON.parse(stored).id : null;
-          
-          // Only update if different from localStorage
           if (storedId !== profile.last_selected_website_id) {
-            // We need to fetch the website details - for now use what's in storage
             // The Install/Websites pages will handle the full sync
           }
         }
@@ -57,14 +57,11 @@ export function useSelectedWebsite() {
     loadSelectedWebsite();
   }, []);
 
-  // Save selection to both localStorage and database
   const selectWebsite = useCallback(async (website: SelectedWebsite) => {
-    // Update localStorage immediately for fast UI
     localStorage.setItem("selectedWebsite", JSON.stringify(website));
     localStorage.setItem("selectedWebsiteId", website.id);
     setSelectedWebsite(website);
 
-    // Persist to database
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -78,9 +75,17 @@ export function useSelectedWebsite() {
     }
   }, []);
 
-  return {
-    selectedWebsite,
-    selectWebsite,
-    loading,
-  };
+  return (
+    <SelectedWebsiteContext.Provider value={{ selectedWebsite, selectWebsite, loading }}>
+      {children}
+    </SelectedWebsiteContext.Provider>
+  );
+}
+
+export function useSelectedWebsite() {
+  const context = useContext(SelectedWebsiteContext);
+  if (!context) {
+    throw new Error("useSelectedWebsite must be used within a SelectedWebsiteProvider");
+  }
+  return context;
 }

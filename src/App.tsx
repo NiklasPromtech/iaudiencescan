@@ -65,6 +65,7 @@ import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
 import Change from "./pages/Change";
 import LandingPageV3 from "./pages/LandingPageV3";
+import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <SelectedWebsiteProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -148,6 +150,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </SelectedWebsiteProvider>
   </QueryClientProvider>
 );
 
