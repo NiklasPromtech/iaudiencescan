@@ -1,59 +1,6 @@
 @tailwind base;
 
-/* Shimmer effect for buttons */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) translateY(-100%);
-  }
-  100% {
-    transform: translateX(100%) translateY(100%);
-  }
-}
-
-@keyframes shimmerGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 rgba(168, 85, 247, 0);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(168, 85, 247, 0.4), 0 0 60px rgba(168, 85, 247, 0.2);
-  }
-}
-
-@keyframes shimmerBorder {
-  0%, 100% {
-    border-color: rgba(255, 255, 255, 0.06);
-  }
-  50% {
-    border-color: rgba(168, 85, 247, 0.6);
-  }
-}
-
-.shimmer-active {
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.4), 0 0 60px rgba(168, 85, 247, 0.2);
-  border-color: rgba(168, 85, 247, 0.6) !important;
-  transition: box-shadow 0.6s ease-in-out, border-color 0.6s ease-in-out;
-}
-
-.shimmer-active::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    transparent 40%,
-    rgba(168, 85, 247, 0.15) 45%,
-    rgba(168, 85, 247, 0.4) 50%,
-    rgba(168, 85, 247, 0.15) 55%,
-    transparent 60%,
-    transparent 100%
-  );
-  animation: shimmer 2.4s ease-in-out;
-  pointer-events: none;
-}
+/* Shimmer removed — Dune-style warm theme */
 @tailwind components;
 @tailwind utilities;
 
@@ -72,31 +19,32 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 258 100% 63%;
+    --primary: 28 100% 54%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 258 100% 75%;
+    --primary-glow: 36 100% 62%;
 
-    --secondary: 270 95% 65%;
+    --secondary: 36 100% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14.3% 95.9%;
+    --muted: 40 20% 96%;
     --muted-foreground: 220 8.9% 46.1%;
 
-    --accent: 234 100% 96%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 40 60% 97%;
+    --accent-foreground: 222 84% 5%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 258 90% 66%;
+    --border: 40 10% 90%;
+    --input: 40 10% 90%;
+    --ring: 28 100% 54%;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(258, 100%, 63%), hsl(258, 100%, 75%));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(270, 100%, 98%));
-    --shadow-elegant: 0 10px 30px -10px hsl(258 100% 63% / 0.3);
-    --shadow-glow: 0 0 40px hsl(258 100% 75% / 0.4);
+    /* Custom design tokens — Dune warm palette */
+    --gradient-primary: linear-gradient(135deg, hsl(28, 100%, 54%), hsl(36, 100%, 62%));
+    --gradient-hero: linear-gradient(135deg, hsl(30, 100%, 92%), hsl(40, 100%, 85%), hsl(28, 100%, 80%));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(40, 60%, 97%));
+    --shadow-elegant: 0 10px 30px -10px hsl(28 100% 54% / 0.2);
+    --shadow-glow: 0 0 40px hsl(36 100% 62% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
