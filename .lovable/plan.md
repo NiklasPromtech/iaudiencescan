@@ -1,82 +1,119 @@
 
 
-# Redesign the Incrementality Report for Instant Clarity
+# World Map, Conversion Event & Wallet Action Overhaul
 
-## The Problem
+## 1. Install `react-simple-maps` for a real world map
 
-The current report is structured like a PDF document (9+ pages, section headers, methodology appendices). When you open it on screen, you're scrolling through a wall of styled divs that look like printed pages. Nothing jumps out. You have to read before you understand.
+The current hand-drawn SVG paths will be replaced with `react-simple-maps`, which renders proper TopoJSON world geometry using d3-geo projections. This gives us an accurate, interactive choropleth map.
 
-## The Solution: A Dashboard-First Layout
+**Install:** `react-simple-maps` (works with React 18, MIT licensed, ~50k weekly downloads)
 
-Restructure the on-screen report into a **single-scroll dashboard** with clear visual hierarchy. The PDF export stays as-is (it already works well for sharing). The on-screen view gets a completely different treatment.
+## 2. Interactive Drillable World Map
 
-### What you'll see at first glance (above the fold)
+Replace the contents of `CountryMapChart.tsx` with a proper map powered by `react-simple-maps`:
+
+- Renders a real world map using the `world-atlas` TopoJSON from unpkg CDN
+- Countries with data are color-coded (green for positive uplift, red for negative)
+- Countries without data are light gray
+- **Click a country** to trigger a callback that tells the parent "user wants region-level data for this country"
+- **Click a region** to drill into cities
+- A breadcrumb trail at the top shows the drill path: World > United States > California
+- A "Back" button lets users navigate up
+
+The component interface will accept:
+- `data` -- the current level's breakdown items
+- `drillLevel` -- "country" | "region" | "city"
+- `onDrill(countryCode: string)` -- callback when clicking a country/region
+- `onBack()` -- callback to go up one level
+- `breadcrumb` -- array of labels for the drill path
+- `loading` -- shows a spinner overlay when fetching drill-down data
+
+When at "region" or "city" level, the map zooms into the selected country/region automatically.
+
+## 3. Drill-down state management in IncrementalityResultsView
+
+In the parent component, add state to manage the drill:
+
+- `mapDrillLevel`: "country" | "region" | "city"
+- `mapDrillPath`: e.g., `["United States"]` or `["United States", "California"]`
+- `mapDrillData`: the breakdown data for the current drill level (starts as `breakdowns.country`)
+
+When a user clicks a country:
+1. Set loading state
+2. Call the backend API (via `supabase.functions.invoke`) with the touchpoint ID + country filter to get region-level data
+3. Display the region breakdown on the map
+4. Clicking a region repeats for city-level data
+
+If the backend call fails or returns no data, show a "No detailed data available" message.
+
+## 4. Focused Conversion Event Table
+
+When breakdown key is `conversion_event`, render a specialized 3-column table instead of the generic BreakdownTable:
 
 ```text
-+--------------------------------------------------+
-|  STRONG POSITIVE IMPACT          65% Confidence   |
-|  "Period drove 658 incremental conversions"       |
-+--------------------------------------------------+
-|                                                    |
-|  +658 Conversions   +329 Wallets   $2.40 CPI      |
-|  (+116%)            (+326%)        12.3% ROI       |
-|                                                    |
-+--------------------------------------------------+
-|  WHAT CHANGED (visual comparison bars)             |
-|  Signed up:    99 expected --> 411 actual  +315%   |
-|  wallet_detected: 254 --> 450              +77%    |
-|  submitted:    99 --> 411                  +315%   |
-|  connected:    0 --> 21                    NEW     |
-+--------------------------------------------------+
+ Dimension          | Conv/day                         | Uplift
+--------------------|----------------------------------|--------
+ Signed up          | [gray bar] 33  [green bar] 137   | +315%
+ wallet_detected    | [gray bar] 254 [green bar] 450   | +77%
 ```
 
-**One look = "things went up, by how much, and I trust the signal."**
+- **Dimension**: Event name, cleaned up (replace underscores with spaces, title case)
+- **Conv/day**: Two mini horizontal bars stacked -- gray for baseline daily avg, colored for actual daily avg. Numbers displayed inline.
+- **Uplift**: Badge colored green/red based on positive/negative
 
-### Below the fold (scroll to explore)
+## 5. Focused Wallet Action Table
 
-1. **Traffic Sparkline** -- compact daily timeline with baseline/event shading (not the tall bar chart)
-2. **Top Sources** -- horizontal attribution bars (kept, but tighter)
-3. **Breakdowns** -- collapsible accordion sections instead of separate "pages"
-4. **Insights** -- numbered cards at the bottom
-5. **Methodology & Appendix** -- collapsed by default, expandable
+Same layout as Conversion Event, but uses `wallets` metric:
 
-### Key Design Decisions
-
-- **No more fake "pages" on screen** -- the `pageBreakAfter`, `minHeight: 9.5in`, page footers, and page numbers only render inside the PDF export (wrapped in a `print-only` container)
-- **The on-screen view is a proper dashboard** with cards, grids, and collapsible sections
-- **PDF export remains unchanged** -- the existing `reportRef` div stays hidden on screen but is used for `html2pdf` export
-- **"What Changed" section** replaces the separate "Incremental Story" page -- it shows conversion funnel AND wallet funnel side-by-side in a compact grid
-- **Breakdowns become accordions** -- click to expand country, UTM source, etc. instead of scrolling through 6 fake pages
-- **Confidence gets a traffic-light dot** next to the score (green/amber/red) so you instantly know the signal quality without reading text
+```text
+ Dimension          | Wallets/day                      | Uplift
+--------------------|----------------------------------|--------
+ submitted          | [gray bar] 33  [green bar] 137   | +307%
+ connected          | [gray bar] 0   [green bar] 7     | NEW
+```
 
 ## Technical Details
 
-### File: `src/components/touchpoints/IncrementalityResultsView.tsx`
+### Files to modify
 
-This is the only file that changes. The approach:
+| File | Change |
+|------|--------|
+| `package.json` | Add `react-simple-maps` dependency |
+| `src/components/touchpoints/CountryMapChart.tsx` | Complete rewrite -- real map with `ComposableMap`, `Geographies`, `Geography` from react-simple-maps. Color-coded choropleth, click handlers, breadcrumb, zoom. |
+| `src/components/touchpoints/IncrementalityResultsView.tsx` | 1) Add drill-down state and API call logic for map. 2) Add `FocusedBreakdownTable` component for conversion_event and wallet_action. 3) In the breakdowns accordion, route conversion_event and wallet_action to the focused table instead of generic BreakdownTable. |
 
-1. **Split the render into two containers:**
-   - `<div ref={reportRef} className="hidden">` -- the existing PDF layout (untouched, just hidden from screen)
-   - `<div className="print:hidden">` -- the new dashboard layout
+### CountryMapChart new props interface
 
-2. **New dashboard sections (all inline-styled for consistency with existing code):**
+```typescript
+interface CountryMapChartProps {
+  data: CountryData[];
+  formatNumber: (n: number) => string;
+  formatPercent: (n: number) => string;
+  drillLevel: "country" | "region" | "city";
+  breadcrumb: string[];
+  onDrill?: (key: string) => void;
+  onBack?: () => void;
+  loading?: boolean;
+}
+```
 
-   | Section | Description |
-   |---|---|
-   | Hero Card | Verdict badge + headline + confidence dot/score + reason, all in one row |
-   | Metric Grid | 2-4 cards: Incremental Conversions, Wallets, CPI, ROI (same MetricCard component) |
-   | "What Changed" | Compact grid showing conversion_funnel + wallet_funnel items with comparison bars (reuses FunnelComparisonBar but in a tighter 2-column grid) |
-   | Daily Timeline | Slim sparkline-style bar chart (reuses existing bar rendering, but 80px tall instead of 160px) |
-   | Attribution | Top sources bars (same as current, but limited to top 5) |
-   | Breakdowns | Each breakdown in a collapsible `<details>` element with the existing BreakdownTable + CountryMapChart |
-   | Insights | Numbered list (same as current) |
-   | Methodology | Collapsed `<details>` at the bottom |
+### FocusedBreakdownTable component (inline in IncrementalityResultsView)
 
-3. **Collapsible sections** use native HTML `<details>/<summary>` elements for zero-dependency accordion behavior. The first breakdown (utm_source) is open by default.
+```typescript
+interface FocusedBreakdownTableProps {
+  data: BreakdownItem[];
+  metricKey: "conversions" | "wallets";
+  metricLabel: string;  // "Conv/day" or "Wallets/day"
+  formatNumber: (n: number) => string;
+  formatPercent: (n: number) => string;
+}
+```
 
-4. **Analysis Period** moves to a subtle inline badge under the hero card instead of a full-width box.
+Each row renders:
+- Dimension name (title-cased, underscores replaced)
+- Two inline bars: gray for `baseline_daily_avg`, green/red for `event_daily_avg`, with numbers
+- Uplift badge: green for positive, red for negative, "NEW" if baseline is 0
 
-5. **"Why Incremental Matters"** callout is removed from the dashboard view (it's educational text that clutters the results -- it stays in the PDF).
-
-### No new files or dependencies needed.
+### Map geography source
+Uses `https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json` -- lightweight TopoJSON loaded at runtime (no bundling overhead).
 
