@@ -49,6 +49,7 @@ import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audie
 import { ScorecardChips } from "@/components/overview/ScorecardChips";
 import { useStarredMetrics } from "@/hooks/use-starred-metrics";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -86,12 +87,7 @@ const Overview = () => {
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
   const [audienceDialogFilters, setAudienceDialogFilters] = useState<AudienceDialogInitialFilters | undefined>(undefined);
 
-  // Redirect to install if no website selected
-  useEffect(() => {
-    if (!websiteLoading && !selectedWebsite) {
-      navigate("/install");
-    }
-  }, [websiteLoading, selectedWebsite, navigate]);
+  // Show empty state when no website is selected (handled below after hooks)
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -382,6 +378,14 @@ const Overview = () => {
 
     return () => clearInterval(interval);
   }, [selectedWebsite]);
+
+  if (!websiteLoading && !selectedWebsite) {
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
+  }
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);

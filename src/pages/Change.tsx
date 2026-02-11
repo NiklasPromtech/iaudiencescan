@@ -40,6 +40,7 @@ import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 import { fetchFilterOptions, fetchTrackingStatus, FilterOptionItem, FilterOptionsResponse, TrackingStatusResponse, DailyBreakdownItem } from "@/lib/api";
 import { IncrementalityResultsView, type IncrementalityResult, type IncrementalityResultsViewHandle } from "@/components/touchpoints/IncrementalityResultsView";
 import { addDays, differenceInDays, parseISO } from "date-fns";
@@ -238,7 +239,7 @@ const MultiSelectFilter = ({
 };
 
 const Change = () => {
-  const { selectedWebsite } = useSelectedWebsite();
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   
   // Date selection
   const [eventDate, setEventDate] = useState<Date>(subDays(new Date(), 7));
@@ -355,6 +356,7 @@ const Change = () => {
     }
     return basicFirstDate ? addDays(basicFirstDate, basicRange[1]) : null;
   }, [basicRange, trackingStatus, basicFirstDate]);
+
 
   const handleBasicAnalyze = async () => {
     if (!selectedWebsite?.tag_id || !basicStartDate || !basicEndDate || !basicFirstDate) {
@@ -571,14 +573,10 @@ const Change = () => {
   const totalIncludeFilters = Object.values(includeFilters).flat().length;
   const totalExcludeFilters = Object.values(excludeFilters).flat().length;
 
-  if (!selectedWebsite) {
+  if (!websiteLoading && !selectedWebsite) {
     return (
       <DashboardLayout>
-        <div className="container max-w-4xl py-8 px-4">
-          <Card className="p-12 text-center">
-            <p className="text-muted-foreground">Please select a website first</p>
-          </Card>
-        </div>
+        <NoWebsiteState />
       </DashboardLayout>
     );
   }

@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -86,6 +87,14 @@ const Scans = () => {
 
   const activeScans = scans.filter(s => !s.archived_at);
   const archivedScans = scans.filter(s => s.archived_at);
+
+  if (!websiteLoading && !selectedWebsite) {
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

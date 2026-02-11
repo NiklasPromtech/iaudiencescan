@@ -39,10 +39,13 @@ import { fetchWallets, enrichWallets, WalletRow, WalletSummary, SUPPORTED_CHAINS
 import { formatDistanceToNow, format, subDays, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const PAGE_SIZE = 50;
 
 export default function Wallets() {
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const [wallets, setWallets] = useState<WalletRow[]>([]);
   const [summary, setSummary] = useState<WalletSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,15 +67,12 @@ export default function Wallets() {
   const { toast } = useToast();
 
   const handleEnrichWallet = async (walletId: string) => {
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (!storedWebsite) return;
-
-    const website = JSON.parse(storedWebsite);
+    if (!selectedWebsite) return;
     setEnrichingWallets(prev => new Set(prev).add(walletId));
 
     try {
       const response = await enrichWallets({
-        tag_id: website.id,
+        tag_id: selectedWebsite.id,
         wallets: walletId,
       });
 
@@ -116,10 +116,8 @@ export default function Wallets() {
   }, [search]);
 
   const loadWallets = useCallback(async () => {
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (!storedWebsite) return;
+    if (!selectedWebsite) return;
 
-    const website = JSON.parse(storedWebsite);
     setLoading(true);
 
     try {
@@ -152,7 +150,7 @@ export default function Wallets() {
       }
 
       const response = await fetchWallets({
-        tag_id: website.id,
+        tag_id: selectedWebsite.id,
         range: rangeConfig,
         search: debouncedSearch || undefined,
         balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
@@ -200,7 +198,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, selectedChains, selectedTypes, toast]);
+  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, selectedChains, selectedTypes, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -248,6 +246,14 @@ export default function Wallets() {
     }
     setCurrentPage(0);
   };
+
+  if (!websiteLoading && !selectedWebsite) {
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
