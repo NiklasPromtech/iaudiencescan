@@ -1,73 +1,33 @@
 
 
-# Update Report for New API Fields: absolute_delta, low_confidence, smoothed uplift
+# Fix: Website selector not reloading data
 
-## What's Changing
+## The Problem
 
-The backend now returns three new fields on every breakdown metric (`visitors`, `conversions`, `wallets`):
-- `absolute_delta` -- the raw daily difference (event - baseline)
-- `low_confidence` -- boolean flag when sample size is too small
-- `uplift_percent` -- now smoothed (pseudo-counts), more conservative for small samples
+`useSelectedWebsite()` uses local `useState` inside each component. When the `WebsiteSelector` calls `selectWebsite(...)`, it updates **its own** state and localStorage, but the `Overview` page has a **separate** state instance that never gets the update. React Router's `navigate("/overview")` also does nothing because you're already on `/overview`.
 
-We need to update three areas to use these properly:
+## The Fix
 
-1. **TypeScript interfaces** -- add the new fields
-2. **FocusedBreakdownTable** (conversion_event + wallet_action) -- show absolute_delta as primary metric, de-emphasize low confidence rows
-3. **CountryMapChart + country breakdown** -- use absolute_delta for map coloring and sorting
-4. **Generic BreakdownTable** -- same treatment for other breakdowns (utm_source, etc.)
-5. **Sorting** -- change from uplift_percent to |absolute_delta| everywhere
+Convert `useSelectedWebsite` from a standalone hook into a **React Context** so every component shares the same state. When the selector updates the website, Overview (and every other page) immediately sees the change and reloads data.
 
 ## Technical Details
 
-### 1. Update `BreakdownMetric` interface (both files)
+### File: `src/hooks/use-selected-website.ts`
 
-Add the new fields to the shared interface in `IncrementalityResultsView.tsx` and `FocusedBreakdownTable.tsx`:
+- Export a `SelectedWebsiteProvider` context provider component
+- Export a `useSelectedWebsite()` hook that reads from context
+- The provider holds the single source of truth for `selectedWebsite` state
+- When `selectWebsite()` is called anywhere, all consumers re-render
 
-```typescript
-interface BreakdownMetric {
-  baseline_daily_avg: number;
-  event_daily_avg: number;
-  uplift_percent: number;
-  absolute_delta?: number;    // NEW
-  low_confidence?: boolean;   // NEW
-}
-```
+### File: `src/App.tsx`
 
-### 2. FocusedBreakdownTable.tsx changes
+- Wrap the router with `<SelectedWebsiteProvider>` so the context is available to all pages
 
-- **Sort by** `|absolute_delta|` descending instead of `event_daily_avg`
-- **Primary display**: Show `absolute_delta` with a +/- sign (e.g., "+157.7/day") alongside the comparison bars
-- **Low confidence rows**: Reduce opacity to 50%, append "(uncertain)" badge next to the uplift
-- **Uplift column**: Use the smoothed `uplift_percent` as-is (it's already conservative)
+### File: `src/components/dashboard/WebsiteSelector.tsx`
 
-### 3. CountryMapChart data mapping
+- Remove `navigate("/overview")` since the data reload now happens automatically via context
+- Optionally keep it for cases where user is on a non-overview page
 
-In `IncrementalityResultsView.tsx` where country data is mapped to the chart (around line 635-641), use `absolute_delta` for the `incremental` field instead of computing it manually. Also pass `low_confidence` to the tooltip.
-
-### 4. Generic BreakdownTable
-
-Update the existing `BreakdownTable` component in `IncrementalityResultsView.tsx` to:
-- Sort by `|absolute_delta|` on the visitors metric
-- Show absolute_delta as the primary number
-- Grey out low_confidence rows
-
-### 5. Breakdown accordion sorting (line 611-615)
-
-Change the sort from `uplift_percent` to `|absolute_delta|`:
-```typescript
-const sorted = [...data].sort((a, b) => {
-  const aD = Math.abs(a.visitors?.absolute_delta ?? 0);
-  const bD = Math.abs(b.visitors?.absolute_delta ?? 0);
-  return bD - aD;
-});
-```
-
-### Files Modified
-
-| File | Changes |
-|------|---------|
-| `src/components/touchpoints/IncrementalityResultsView.tsx` | Update `BreakdownMetric` interface, change sort logic, update country map data mapping, update generic BreakdownTable |
-| `src/components/touchpoints/FocusedBreakdownTable.tsx` | Update interface, sort by absolute_delta, show delta as primary metric, grey out low confidence rows |
-
-### No new dependencies needed.
+### No other files need changes
+All existing `useSelectedWebsite()` calls continue to work -- they just read from context instead of local state now.
 
