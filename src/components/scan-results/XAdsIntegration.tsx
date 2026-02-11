@@ -55,7 +55,7 @@ export const XAdsIntegration = ({ tokens, scanId }: XAdsIntegrationProps) => {
     <Card className="p-6 bg-gradient-to-br from-sky-500/5 to-sky-500/10 border-sky-500/20">
       <div className="flex items-start justify-between gap-4">
         <div className="flex gap-4">
-          <div className="h-12 w-12 rounded-full bg-sky-500/20 flex items-center justify-center shrink-0">
+          <div className="shrink-0">
             <Twitter className="h-6 w-6 text-sky-500" />
           </div>
           <div>

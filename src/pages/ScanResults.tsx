@@ -80,9 +80,9 @@ const ScanResults = () => {
 
         {/* Error State */}
         {error && !loading && (
-          <Card className="p-12 border border-destructive text-center">
-            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-              <AlertCircle className="h-6 w-6 text-destructive" />
+          <div className="p-12 border border-destructive text-center">
+            <div className="mx-auto mb-4">
+              <AlertCircle className="h-6 w-6 text-destructive mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">
               Failed to load results
@@ -96,7 +96,7 @@ const ScanResults = () => {
               </Button>
               <Button onClick={fetchData}>Try Again</Button>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* Results Content */}

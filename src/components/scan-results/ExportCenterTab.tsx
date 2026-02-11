@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Twitter,
@@ -154,9 +153,9 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
         <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">
           Full Export
         </h3>
-        <Card className="p-6">
+        <div className="border-t border-border pt-6">
           <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <div className="text-primary shrink-0">
               <Database className="h-6 w-6" />
             </div>
             <div className="flex-1">
@@ -185,7 +184,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

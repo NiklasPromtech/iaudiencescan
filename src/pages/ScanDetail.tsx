@@ -111,8 +111,8 @@ const ScanDetail = () => {
         {/* Error State */}
         {error && !loading && (
           <Card className="p-12 border border-destructive text-center">
-            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-              <AlertCircle className="h-6 w-6 text-destructive" />
+            <div className="mx-auto mb-4">
+              <AlertCircle className="h-6 w-6 text-destructive mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">Failed to load scan</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
@@ -134,7 +134,7 @@ const ScanDetail = () => {
             <Card className="p-6">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="shrink-0">
                     <Search className="h-6 w-6 text-primary" />
                   </div>
                   <div>
@@ -180,28 +180,28 @@ const ScanDetail = () => {
 
               {/* Error Message */}
               {scan.status === "FAILED" && scan.error && (
-                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20">
                   <p className="text-sm text-destructive">{scan.error}</p>
                 </div>
               )}
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-muted/50 rounded-lg p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-muted/50 p-4">
                   <p className="text-sm text-muted-foreground mb-1">Wallets</p>
                   <p className="text-2xl font-semibold">{scan.wallet_count}</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-4">
+                <div className="bg-muted/50 p-4">
                   <p className="text-sm text-muted-foreground mb-1">Chain</p>
                   <p className="text-2xl font-semibold">{getChainLabel(scan.chain)}</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-4">
+                <div className="bg-muted/50 p-4">
                   <p className="text-sm text-muted-foreground mb-1">Started</p>
                   <p className="text-lg font-medium">
                     {formatDistanceToNow(new Date(scan.created_at), { addSuffix: true })}
                   </p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-4">
+                <div className="bg-muted/50 p-4">
                   <p className="text-sm text-muted-foreground mb-1">Completed</p>
                   <p className="text-lg font-medium">
                     {scan.completed_at
