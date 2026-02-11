@@ -1,69 +1,61 @@
 
 
-# Phase 1: Landing Page Redesign — Dune.com Style
+# Refine Landing Page to Match Dune.com More Closely
 
-## Overview
-Redesign the landing page (LandingPageV3) and shared components (Header, Footer) to match Dune.com's visual identity: warm orange/yellow gradient hero, monospace typography accents, clean white background, and a polished data-platform aesthetic.
+Based on the three Dune screenshots, here are the key differences between our current implementation and Dune's actual design:
 
-## Visual Changes
+## What Needs to Change
 
-### 1. Theme & Color Palette Update (`src/index.css`)
-- Replace the current purple primary (`258 100%`) with Dune's warm palette:
-  - Primary: warm orange (~30-35 hue)
-  - Hero gradient: orange-to-yellow warm gradient (matching Dune's hero)
-  - Keep foreground dark, backgrounds white
-- Remove purple glow/shimmer keyframes
-- Add a warm gradient background for the hero section
+### 1. Header — Closer to Dune's Nav
+The Dune header has a distinctive black pill-shaped logo button (not just a logo image), a "Sim" toggle, centered nav with dropdown arrows, a search icon, and uppercase LOG IN / SIGN UP. Our current header is close but missing:
+- A **dark/black pill button** for the logo (like Dune's green circle + "Dune" text in a dark pill)
+- A **search icon** before LOG IN
+- **Dropdown arrows** on nav items (Products, Data, Use Cases, Resources)
+- File: `src/components/Header.tsx`
 
-### 2. Typography (`tailwind.config.ts` + `index.html`)
-- Add a monospace/mono font (e.g., "Space Mono" or "JetBrains Mono") for stats, labels, and CTAs — matching Dune's uppercase monospace button style
-- Keep "Bai Jamjuree" or swap to a serif for headings (Dune uses a serif-style for their main heading)
-- Add a serif font option (e.g., "DM Serif Display" or similar) for hero headlines
+### 2. Color Refinements
+Dune's actual accent color is a **warm teal-green** for the logo pill, with the hero gradient being a very **soft peach/salmon** (not deep orange). The charts use **vibrant multi-color palettes** (purples, teals, oranges, pinks, greens). Current orange is too saturated for the primary — it should be more subtle.
+- Soften the hero gradient to a lighter peach tone
+- Keep primary warm but dial back saturation slightly
+- Add chart color palette variables for vibrant multi-color charts
+- File: `src/index.css`
 
-### 3. Header Redesign (`src/components/Header.tsx`)
-- Rounded pill-shaped nav bar matching Dune's capsule navigation
-- Black "Dune"-style logo button on the left, nav links in the center, LOG IN / SIGN UP on the right
-- Monospace uppercase styling for nav buttons (LOG IN, SIGN UP)
-- Replace current simple header with Dune's nav structure (Products, Data, Use Cases, Resources, Pricing dropdowns — adapted for AudienceScan's sections)
+### 3. Dashboard Preview — More Dune-like Data Density
+Dune dashboards (IMG_2091, IMG_2092) feature:
+- **Large stat counters** at the top with icons and sparklines
+- **Clean tables** with linked entity names (blue/teal links), right-aligned numbers
+- Charts with a subtle **"Dune" watermark** — we should add an **"AudienceScan" watermark** to our mock charts
+- More **chart variety**: bar charts, area charts, pie/donut charts with vibrant multi-color fills
+- File: `src/pages/LandingPageV3.tsx`, `src/components/landing/MockDailyChart.tsx`, `src/components/landing/MockHolderTrend.tsx`
 
-### 4. Hero Section (in `LandingPageV3.tsx`)
-- Full-width warm orange/yellow gradient background (like Dune's peach-to-amber gradient)
-- Large serif headline
-- Two CTA buttons: one filled, one outlined — both using monospace uppercase text
-- Stats bar below hero: "100+ Chains" style counters adapted to AudienceScan metrics (e.g., "10+ Chains", "50+ Clients", "1M+ Wallets Scanned")
+### 4. Tag/Pill Styling
+Dune uses small rounded tag pills (like `#Ethereum`, `#DeFi`, `#ETF`) in a muted style. We should add similar tag pills to the mock dashboard table rows (e.g., chain tags next to source names).
+- File: `src/pages/LandingPageV3.tsx`
 
-### 5. Content Sections (in `LandingPageV3.tsx`)
-- Simplify to match Dune's bento-card layout with large rounded cards and minimal borders
-- Feature cards: large rounded rectangles with titles and short descriptions
-- Customer stories section with logo + quote cards
-- Keep the mock dashboard preview but restyle tables and charts to use the new warm color palette
-- "Enriched by Dune" badge/label where applicable
+### 5. Chart Watermark
+Both dashboard screenshots show a subtle "Dune" logo watermark in the center of charts. We should add a subtle "AudienceScan" watermark to our mock charts for brand consistency and to look more like a real analytics platform.
+- Files: `src/components/landing/MockDailyChart.tsx`, `src/components/landing/MockHolderTrend.tsx`
 
-### 6. Footer Redesign (`src/components/Footer.tsx`)
-- Clean multi-column footer matching Dune's style
-- Monospace section headers, simple link lists
+### 6. Stat Cards — Dune's Big Number Style
+Dune's dashboard stats (IMG_2091) show huge numbers like "$37,025,196" with subtitles and small trend icons. Our scorecard row is compact — we should make the top stats bigger and bolder with more visual weight, matching Dune's style.
+- File: `src/pages/LandingPageV3.tsx`
 
-### 7. Cleanup
-- Remove unused landing page variants (LandingPageV2, Index) — or leave for now and just update V3
-- Remove purple shimmer/glow animations from `index.css`
+## Technical Details
 
-## Files to Modify
-| File | Change |
-|------|--------|
-| `src/index.css` | New color palette, remove purple glows, add warm gradient |
-| `tailwind.config.ts` | Add serif + monospace font families |
-| `index.html` | Add Google Fonts links for new fonts |
-| `src/components/Header.tsx` | Pill-shaped nav, monospace buttons, Dune-style layout |
-| `src/pages/LandingPageV3.tsx` | Full hero + sections redesign |
-| `src/components/Footer.tsx` | Multi-column Dune-style footer |
-| `src/components/landing/MockDailyChart.tsx` | Warm palette for chart colors |
-| `src/components/landing/MockHolderTrend.tsx` | Warm palette for chart colors |
-| `src/components/landing/MockBotSummary.tsx` | Updated card styling |
-| `src/components/landing/mock-data.ts` | No changes needed |
+### Files to Modify
+| File | Changes |
+|------|---------|
+| `src/index.css` | Soften hero gradient to lighter peach; add chart color palette CSS variables |
+| `src/components/Header.tsx` | Dark logo pill button, search icon, dropdown arrows on nav items |
+| `src/pages/LandingPageV3.tsx` | Bigger stat cards at top of dashboard preview, add chain tag pills to table rows |
+| `src/components/landing/MockDailyChart.tsx` | Add subtle "AudienceScan" watermark overlay, use warmer bar colors |
+| `src/components/landing/MockHolderTrend.tsx` | Add subtle watermark overlay |
+| `src/components/landing/MockBotSummary.tsx` | No changes needed — already looks good |
 
-## What Stays the Same (for now)
-- Dashboard pages (Overview, Bots, Scans, etc.) — Phase 2
-- Auth page — Phase 2
-- Dune API integration — handled separately on the backend
-- Blog pages — later phase
+### What Stays the Same
+- Overall page structure and content sections
+- Footer design
+- Font choices (DM Serif Display + Space Mono)
+- Rounded card borders and spacing
+- Mobile responsiveness
 
