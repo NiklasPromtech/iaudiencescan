@@ -37,6 +37,7 @@ const Scans = () => {
   const { 
     data: scans = [], 
     isLoading: loading, 
+    isFetching,
     error,
     refetch 
   } = useScans(selectedWebsite?.id, showArchived);
@@ -120,7 +121,7 @@ const Scans = () => {
               </Button>
             )}
             <Button variant="outline" onClick={() => refetch()} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
               Refresh
             </Button>
           </div>

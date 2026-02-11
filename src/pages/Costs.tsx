@@ -3,7 +3,7 @@ import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Plus } from "lucide-react";
+import { DollarSign, Plus, RefreshCw } from "lucide-react";
 import { CostSource } from "@/lib/api";
 import { CostSourceList } from "@/components/costs/CostSourceList";
 import { CreateCostSourceDialog } from "@/components/costs/CreateCostSourceDialog";
@@ -19,6 +19,7 @@ const Costs = () => {
   const {
     data: costSources = [],
     isLoading: loading,
+    isFetching,
     error,
   } = useCostSources(selectedWebsite?.id);
 
@@ -60,7 +61,12 @@ const Costs = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-h2 text-foreground mb-2">Attribution</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-h2 text-foreground mb-2">Attribution</h1>
+              {isFetching && !loading && (
+                <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
             <p className="text-p1 text-muted-foreground">
               Add cost data to calculate ROI for your campaigns by UTM parameters.
             </p>
