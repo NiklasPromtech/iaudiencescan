@@ -42,6 +42,7 @@ interface CountryData {
   uplift_percent: number;
   baseline_total: number;
   actual: number;
+  low_confidence?: boolean;
 }
 
 interface CountryMapChartProps {
@@ -238,6 +239,9 @@ export const CountryMapChart = memo(function CountryMapChart({
                   <div>
                     Uplift: <span className="font-semibold">{formatPercent(tooltipContent.data.uplift_percent)}</span>
                   </div>
+                  {tooltipContent.data.low_confidence && (
+                    <div className="text-amber-500 text-[10px] mt-0.5">⚠ Low confidence</div>
+                  )}
                 </>
               ) : (
                 <div className="text-muted-foreground">No data</div>

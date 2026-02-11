@@ -55,6 +55,8 @@ interface BreakdownMetric {
   baseline_daily_avg: number;
   event_daily_avg: number;
   uplift_percent: number;
+  absolute_delta?: number;
+  low_confidence?: boolean;
 }
 
 interface BreakdownItem {
@@ -609,9 +611,9 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
           if (!data || data.length === 0) return null;
           const isOpen = openBreakdowns[key] || false;
           const sorted = [...data].sort((a, b) => {
-            const aU = a.visitors?.uplift_percent ?? a.uplift_percent ?? 0;
-            const bU = b.visitors?.uplift_percent ?? b.uplift_percent ?? 0;
-            return bU - aU;
+            const aD = Math.abs(a.visitors?.absolute_delta ?? 0);
+            const bD = Math.abs(b.visitors?.absolute_delta ?? 0);
+            return bD - aD;
           }).slice(0, 10);
 
           return (
@@ -632,12 +634,13 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                   {key === 'country' && (
                     <div className="mt-3 mb-3">
                       <CountryMapChart
-                        data={(mapDrillData ?? sorted).map(d => ({
+                         data={(mapDrillData ?? sorted).map(d => ({
                           key: d.key,
-                          incremental: Math.round((d.visitors?.event_daily_avg ?? 0) - (d.visitors?.baseline_daily_avg ?? 0)),
+                          incremental: d.visitors?.absolute_delta != null ? Math.round(d.visitors.absolute_delta) : Math.round((d.visitors?.event_daily_avg ?? 0) - (d.visitors?.baseline_daily_avg ?? 0)),
                           uplift_percent: d.visitors?.uplift_percent ?? 0,
                           baseline_total: Math.round(d.visitors?.baseline_daily_avg ?? 0),
                           actual: Math.round(d.visitors?.event_daily_avg ?? 0),
+                          low_confidence: d.visitors?.low_confidence,
                         }))}
                         formatNumber={formatNumber}
                         formatPercent={formatPercent}
@@ -1287,33 +1290,37 @@ function BreakdownTable({ data, formatNumber, formatPercent }: { data: Breakdown
     <div style={{ border: '1px solid #e4e4e7', borderRadius: '8px', overflow: 'hidden' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr repeat(3, 1fr 0.8fr)', backgroundColor: '#f4f4f5', padding: '10px 16px', fontSize: '10px', fontWeight: '600', color: '#52525b', textTransform: 'uppercase', letterSpacing: '0.5px', gap: '4px' }}>
         <div>Dimension</div>
-        <div style={{ textAlign: 'right' }}>Visitors/day</div>
+        <div style={{ textAlign: 'right' }}>Visitors Δ/day</div>
         <div style={{ textAlign: 'right' }}>Uplift</div>
-        <div style={{ textAlign: 'right' }}>Conv/day</div>
+        <div style={{ textAlign: 'right' }}>Conv Δ/day</div>
         <div style={{ textAlign: 'right' }}>Uplift</div>
-        <div style={{ textAlign: 'right' }}>Wallets/day</div>
+        <div style={{ textAlign: 'right' }}>Wallets Δ/day</div>
         <div style={{ textAlign: 'right' }}>Uplift</div>
       </div>
       {data.map((item, idx) => {
-        const zero = { baseline_daily_avg: 0, event_daily_avg: 0, uplift_percent: 0 };
+        const zero: BreakdownMetric = { baseline_daily_avg: 0, event_daily_avg: 0, uplift_percent: 0 };
         const v = item.visitors ?? zero;
         const c = item.conversions ?? zero;
         const w = item.wallets ?? zero;
+        const isLowConf = v.low_confidence || c.low_confidence || w.low_confidence;
         return (
-          <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.5fr repeat(3, 1fr 0.8fr)', padding: '10px 16px', fontSize: '11px', borderTop: '1px solid #e4e4e7', backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff', gap: '4px', alignItems: 'center' }}>
-            <div style={{ fontWeight: idx === 0 ? '600' : '500', color: '#18181b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.key || '(not set)'}</div>
+          <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1.5fr repeat(3, 1fr 0.8fr)', padding: '10px 16px', fontSize: '11px', borderTop: '1px solid #e4e4e7', backgroundColor: idx === 0 ? '#f0fdf4' : '#ffffff', gap: '4px', alignItems: 'center', opacity: isLowConf ? 0.5 : 1 }}>
+            <div style={{ fontWeight: idx === 0 ? '600' : '500', color: '#18181b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.key || '(not set)'}
+              {isLowConf && <span style={{ fontSize: '9px', color: '#a1a1aa', marginLeft: '4px' }}>(uncertain)</span>}
+            </div>
             <div style={{ textAlign: 'right', color: '#18181b' }}>
-              <span style={{ fontWeight: '500' }}>{v.event_daily_avg.toFixed(1)}</span>
+              <span style={{ fontWeight: '600' }}>{v.absolute_delta != null ? `${v.absolute_delta > 0 ? '+' : ''}${v.absolute_delta.toFixed(1)}` : v.event_daily_avg.toFixed(1)}</span>
               <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({v.baseline_daily_avg.toFixed(1)})</span>
             </div>
             <UpliftCell value={v.uplift_percent} isNew={v.baseline_daily_avg === 0 && v.event_daily_avg > 0} />
             <div style={{ textAlign: 'right', color: '#18181b' }}>
-              <span style={{ fontWeight: '500' }}>{c.event_daily_avg.toFixed(1)}</span>
+              <span style={{ fontWeight: '600' }}>{c.absolute_delta != null ? `${c.absolute_delta > 0 ? '+' : ''}${c.absolute_delta.toFixed(1)}` : c.event_daily_avg.toFixed(1)}</span>
               <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({c.baseline_daily_avg.toFixed(1)})</span>
             </div>
             <UpliftCell value={c.uplift_percent} isNew={c.baseline_daily_avg === 0 && c.event_daily_avg > 0} />
             <div style={{ textAlign: 'right', color: '#18181b' }}>
-              <span style={{ fontWeight: '500' }}>{w.event_daily_avg.toFixed(1)}</span>
+              <span style={{ fontWeight: '600' }}>{w.absolute_delta != null ? `${w.absolute_delta > 0 ? '+' : ''}${w.absolute_delta.toFixed(1)}` : w.event_daily_avg.toFixed(1)}</span>
               <span style={{ color: '#a1a1aa', fontSize: '9px', marginLeft: '2px' }}>({w.baseline_daily_avg.toFixed(1)})</span>
             </div>
             <UpliftCell value={w.uplift_percent} isNew={w.baseline_daily_avg === 0 && w.event_daily_avg > 0} />
