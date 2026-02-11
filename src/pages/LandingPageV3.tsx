@@ -200,7 +200,7 @@ const LandingPageV3 = () => {
 
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Large card: GA Comparison */}
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="rounded-lg border border-border bg-card overflow-hidden">
               <div className="px-6 py-4 border-b border-border">
                 <h3 className="font-semibold text-foreground flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-primary" /> Google Analytics vs AudienceScan
@@ -223,7 +223,7 @@ const LandingPageV3 = () => {
             </div>
 
             {/* Large card: Bot Detection */}
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="rounded-lg border border-border bg-card overflow-hidden">
               <div className="px-6 py-4 border-b border-border">
                 <h3 className="font-semibold text-foreground flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary" /> Bot Detection — 12+ Signals
@@ -245,7 +245,7 @@ const LandingPageV3 = () => {
 
           {/* Smaller bento cards */}
           <div className="grid sm:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-lg border border-border bg-card p-6">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Wallet className="w-4 h-4 text-primary" />
@@ -256,7 +256,7 @@ const LandingPageV3 = () => {
                 Detect extensions, capture addresses, enrich balances. Know if a campaign brought whales or dust.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-lg border border-border bg-card p-6">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                   <DollarSign className="w-4 h-4 text-primary" />
@@ -267,7 +267,7 @@ const LandingPageV3 = () => {
                 Attach spend to UTMs. See real CPA per supplier. Know cost per $1K in wallet balance.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="rounded-lg border border-border bg-card p-6">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Activity className="w-4 h-4 text-primary" />
@@ -281,7 +281,7 @@ const LandingPageV3 = () => {
           </div>
 
           {/* Testimonial */}
-          <div className="mt-10 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-8 max-w-3xl mx-auto">
+          <div className="mt-10 rounded-lg border-2 border-primary/20 bg-primary/[0.03] p-8 max-w-3xl mx-auto">
             <blockquote className="text-foreground font-medium leading-relaxed mb-4">
               "Our bot detection data is currently the foundation of a{" "}
               <span className="text-primary font-bold">$25K+ legal claim</span>{" "}
@@ -305,7 +305,7 @@ const LandingPageV3 = () => {
           <MockHolderTrend />
 
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="rounded-2xl border border-border bg-card p-8">
+            <div className="rounded-lg border border-border bg-card p-8">
               <h3 className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-4">Without AudienceScan</h3>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2"><XIcon className="w-4 h-4 text-destructive mt-0.5 shrink-0" /> "We got 5,000 visits from that campaign"</li>
@@ -314,7 +314,7 @@ const LandingPageV3 = () => {
                 <li className="flex items-start gap-2"><XIcon className="w-4 h-4 text-destructive mt-0.5 shrink-0" /> "No idea about bot traffic"</li>
               </ul>
             </div>
-            <div className="rounded-2xl border-2 border-primary/30 bg-background p-8 shadow-elegant">
+            <div className="rounded-lg border-2 border-primary/30 bg-background p-8 shadow-elegant">
               <h3 className="font-mono text-[10px] uppercase tracking-widest text-primary mb-4">With AudienceScan</h3>
               <ul className="space-y-3 text-sm text-foreground">
                 <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary mt-0.5 shrink-0" /> "412 wallet extensions detected out of 5,000 visits"</li>
@@ -338,7 +338,7 @@ const LandingPageV3 = () => {
           </p>
           <div className="grid md:grid-cols-3 gap-6 mb-10">
             {audienceIntelSteps.map((s) => (
-              <div key={s.step} className="rounded-2xl border border-border bg-card p-6 text-left">
+              <div key={s.step} className="rounded-lg border border-border bg-card p-6 text-left">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-mono font-bold">{s.step}</span>
                   <s.icon className="w-5 h-5 text-primary" />

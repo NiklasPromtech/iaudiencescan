@@ -56,7 +56,7 @@ const Features = () => {
             <Card key={index} className="border-2 border-primary/20 hover:border-primary/40 transition-smooth hover:shadow-elegant group bg-gradient-subtle">
               <CardContent className="p-12 text-center">
                 <div className="mb-8 flex justify-center">
-                  <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center group-hover:animate-float shadow-glow">
+                  <div className="w-20 h-20 bg-gradient-primary rounded-lg flex items-center justify-center group-hover:animate-float shadow-glow">
                     <principle.icon className="w-10 h-10 text-primary-foreground" />
                   </div>
                 </div>

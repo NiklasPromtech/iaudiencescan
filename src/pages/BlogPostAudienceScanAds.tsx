@@ -23,11 +23,11 @@ const BlogPostAudienceScanAds = () => {
 
         <article className="max-w-none">
           {/* Hero Section */}
-          <div className="relative bg-gradient-to-br from-primary/10 via-secondary/5 to-background rounded-3xl p-12 mb-16 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-primary/10 via-secondary/5 to-background rounded-xl p-12 mb-16 overflow-hidden">
             <div className="absolute inset-0 bg-[url('/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png')] bg-no-repeat bg-right bg-contain opacity-10"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-lg bg-primary/20 flex items-center justify-center">
                   <img 
                     src="/lovable-uploads/1d9776f1-1e66-4502-8cbf-01934910df52.png" 
                     alt="AudienceScan Analytics" 
@@ -67,7 +67,7 @@ const BlogPostAudienceScanAds = () => {
             </div>
 
             {/* Services Section */}
-            <div className="bg-card rounded-2xl p-8 border">
+            <div className="bg-card rounded-lg p-8 border">
               <h2 className="text-2xl font-bold text-foreground mb-6">
                 Web3 Paid Marketing Services
               </h2>
@@ -77,37 +77,37 @@ const BlogPostAudienceScanAds = () => {
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span className="text-foreground font-medium">Paid X (Twitter)</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span className="text-foreground font-medium">Paid DV360 (Google Display)</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span className="text-foreground font-medium">Paid Telegram</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span className="text-foreground font-medium">Paid Reddit</span>
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-lg">
                     <div className="w-2 h-2 bg-secondary rounded-full"></div>
                     <span className="text-foreground font-medium">DM campaigns on X</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-lg">
                     <div className="w-2 h-2 bg-secondary rounded-full"></div>
                     <span className="text-foreground font-medium">DM campaigns on Telegram</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-xl">
+                   <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-lg">
                     <div className="w-2 h-2 bg-secondary rounded-full"></div>
                     <span className="text-foreground font-medium">Tracking setup (Google Tag Manager)</span>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-xl">
+                  <div className="flex items-center gap-3 p-4 bg-secondary/5 rounded-lg">
                     <div className="w-2 h-2 bg-secondary rounded-full"></div>
                     <span className="text-foreground font-medium">Telegram bots</span>
                   </div>
@@ -116,7 +116,7 @@ const BlogPostAudienceScanAds = () => {
             </div>
 
             {/* Results Section */}
-            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-8 border border-primary/20">
               <div className="text-center">
                 <h3 className="text-3xl font-bold text-foreground mb-4">
                   Proven Results
@@ -132,7 +132,7 @@ const BlogPostAudienceScanAds = () => {
 
             {/* CTA Section */}
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-card rounded-2xl p-8 border text-center">
+               <div className="bg-card rounded-lg p-8 border text-center">
                 <h4 className="text-xl font-bold text-foreground mb-4">
                   Explore Real Data
                 </h4>
@@ -141,13 +141,13 @@ const BlogPostAudienceScanAds = () => {
                 </p>
                 <a 
                   href="/case-studies" 
-                  className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 >
                   View Case Studies →
                 </a>
               </div>
               
-              <div className="bg-card rounded-2xl p-8 border text-center">
+              <div className="bg-card rounded-lg p-8 border text-center">
                 <h4 className="text-xl font-bold text-foreground mb-4">
                   Run Campaigns Yourself
                 </h4>
@@ -156,7 +156,7 @@ const BlogPostAudienceScanAds = () => {
                 </p>
                 <a 
                   href="/#cta" 
-                  className="inline-flex items-center justify-center px-6 py-3 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/90 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/90 transition-colors"
                 >
                   Sign Up Now →
                 </a>

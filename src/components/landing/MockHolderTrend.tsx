@@ -2,7 +2,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { mockHolderTrend } from "./mock-data";
 
 export const MockHolderTrend = () => (
-  <div className="rounded-2xl border border-border bg-card p-6 mb-10 relative">
+  <div className="rounded-lg border border-border bg-card p-6 mb-10 relative">
     {/* Watermark */}
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
       <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/10 text-lg font-bold select-none">AudienceScan</span>

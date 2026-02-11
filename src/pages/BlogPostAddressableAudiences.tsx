@@ -50,7 +50,7 @@ const BlogPostAddressableAudiences = () => {
             
             {/* Key Metrics Highlight */}
             <div className="grid md:grid-cols-2 gap-6 mt-12 max-w-2xl mx-auto">
-              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 p-6 rounded-2xl border border-green-500/20">
+              <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 p-6 rounded-lg border border-green-500/20">
                 <div className="flex items-center gap-3 mb-2">
                   <TrendingDown className="w-6 h-6 text-green-500" />
                   <span className="text-green-500 font-semibold">Cost Reduction</span>
@@ -59,7 +59,7 @@ const BlogPostAddressableAudiences = () => {
                 <p className="text-sm text-muted-foreground">Lower cost-per-engagement</p>
               </div>
               
-              <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-2xl border border-primary/20">
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-lg border border-primary/20">
                 <div className="flex items-center gap-3 mb-2">
                   <Target className="w-6 h-6 text-primary" />
                   <span className="text-primary font-semibold">Break-even Point</span>
@@ -76,7 +76,7 @@ const BlogPostAddressableAudiences = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 p-8">
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 p-8">
               <img 
                 src="/lovable-uploads/2bb532a9-c9e2-4310-a6f0-b36ffd0d6c19.png" 
                 alt="Blockchain data visualization showing addressable audiences"
@@ -98,7 +98,7 @@ const BlogPostAddressableAudiences = () => {
                 <Zap className="w-8 h-8 text-primary" />
                 The Problem: Guessing in the Dark
               </h2>
-              <div className="bg-gradient-to-r from-destructive/10 to-destructive/5 p-6 rounded-2xl border-l-4 border-destructive mb-6">
+              <div className="bg-gradient-to-r from-destructive/10 to-destructive/5 p-6 rounded-lg border-l-4 border-destructive mb-6">
                 <p className="text-lg text-foreground leading-relaxed mb-0">
                   Running ads for crypto projects has always felt like throwing darts in a blackout. You can target broad interests, keywords, or communities, but you never really know if you're in front of communities that actually transact with tokens like yours.
                 </p>
@@ -118,28 +118,28 @@ const BlogPostAddressableAudiences = () => {
               </p>
               
               <div className="grid gap-6 mb-8">
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-2xl">
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold text-foreground mb-3">1. Add a token</h3>
                   <p className="text-muted-foreground">Any of the larger EVM chains.</p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-2xl">
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold text-foreground mb-3">2. Scan wallets that transact with it</h3>
                   <p className="text-muted-foreground">Instantly see which wallets are active with that token.</p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-2xl">
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold text-foreground mb-3">3. Discover overlap</h3>
                   <p className="text-muted-foreground">Find what other tokens these wallets are trading.</p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-2xl">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold text-foreground mb-3">4. Build segments</h3>
                   <p className="text-muted-foreground">Use these insights to create precise, addressable community audiences for your Twitter, Telegram, DV360, or programmatic campaigns.</p>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-green-500/10 to-green-600/5 p-6 rounded-2xl border border-green-500/20">
+              <div className="bg-gradient-to-r from-green-500/10 to-green-600/5 p-6 rounded-lg border border-green-500/20">
                 <p className="text-lg text-foreground font-medium mb-0">
                   No more "crypto enthusiasts" as your only targeting option. You now know exactly which communities your potential buyers are a part of and where to reach them.
                 </p>
@@ -156,7 +156,7 @@ const BlogPostAddressableAudiences = () => {
               </p>
 
               {/* ROI Highlight Box */}
-              <div className="bg-gradient-to-br from-green-500/20 via-green-500/10 to-green-600/5 p-8 rounded-3xl border-2 border-green-500/30 mb-8 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-green-500/20 via-green-500/10 to-green-600/5 p-8 rounded-xl border-2 border-green-500/30 mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full -translate-y-16 translate-x-16"></div>
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
@@ -204,7 +204,7 @@ const BlogPostAddressableAudiences = () => {
                 As Web3 grows, ad platforms will get smarter, but they'll always rely on the data you feed them. AudienceScan is your shortcut to cutting out the noise and finding the wallets that matter most.
               </p>
               
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8 rounded-2xl border border-primary/20">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8 rounded-lg border border-primary/20">
                 <p className="text-xl font-bold text-foreground text-center mb-0">
                   The days of wasting ad spend on "crypto-curious" audiences are ending. Your future customers are already on-chain – now, with AudienceScan, they're finally addressable.
                 </p>
@@ -213,7 +213,7 @@ const BlogPostAddressableAudiences = () => {
 
             {/* CTA Section */}
             <div className="text-center py-12">
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8 rounded-3xl">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8 rounded-xl">
                 <h3 className="text-2xl font-bold text-foreground mb-4">
                   Ready to make your audiences addressable?
                 </h3>

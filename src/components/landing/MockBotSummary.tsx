@@ -11,7 +11,7 @@ export const MockBotSummary = () => {
   const icons = [<Bot className="h-4 w-4" key="b" />, <User className="h-4 w-4" key="u" />, <HelpCircle className="h-4 w-4" key="h" />];
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 rounded-2xl border border-border bg-card p-6">
+    <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 rounded-lg border border-border bg-card p-6">
       {/* Donut chart */}
       <div className="relative shrink-0">
         <svg width="100" height="100" viewBox="0 0 100 100">

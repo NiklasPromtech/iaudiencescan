@@ -42,7 +42,7 @@ const Sample1 = () => {
             <div className="relative h-[600px] hidden lg:block">
               <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
               <div className="relative h-full flex items-center justify-center">
-                <div className="w-80 h-80 bg-card/50 backdrop-blur-sm rounded-3xl border-2 border-primary/20 shadow-glow flex items-center justify-center">
+                <div className="w-80 h-80 bg-card/50 backdrop-blur-sm rounded-xl border-2 border-primary/20 shadow-glow flex items-center justify-center">
                   <BarChart3 className="w-32 h-32 text-primary animate-pulse" />
                 </div>
               </div>
@@ -58,7 +58,7 @@ const Sample1 = () => {
           
           <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
             <div className="text-center space-y-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-3xl flex items-center justify-center shadow-glow">
+              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
                 <Target className="w-12 h-12 text-white" />
               </div>
               <h3 className="text-2xl font-bold">Connect a token</h3>
@@ -68,7 +68,7 @@ const Sample1 = () => {
             </div>
             
             <div className="text-center space-y-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-3xl flex items-center justify-center shadow-glow">
+              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
                 <Database className="w-12 h-12 text-white" />
               </div>
               <h3 className="text-2xl font-bold">We map wallet behavior</h3>
@@ -78,7 +78,7 @@ const Sample1 = () => {
             </div>
             
             <div className="text-center space-y-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-3xl flex items-center justify-center shadow-glow">
+              <div className="w-24 h-24 mx-auto bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
                 <Users className="w-12 h-12 text-white" />
               </div>
               <h3 className="text-2xl font-bold">You get a real audience</h3>
@@ -112,7 +112,7 @@ const Sample1 = () => {
             <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur-sm shadow-glow">
               <CardContent className="p-12">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
-                  <div className="h-96 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center">
+                  <div className="h-96 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center">
                     <div className="text-center space-y-4">
                       <BarChart3 className="w-32 h-32 mx-auto text-primary" />
                       <p className="text-muted-foreground">Interactive overlap visualization</p>
@@ -177,7 +177,7 @@ const Sample1 = () => {
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <Card className="border-2 border-primary/10 hover:border-primary/30 transition-all hover:shadow-glow">
               <CardContent className="p-8 space-y-4">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <Building2 className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold">Exchanges</h3>
@@ -189,7 +189,7 @@ const Sample1 = () => {
             
             <Card className="border-2 border-primary/10 hover:border-primary/30 transition-all hover:shadow-glow">
               <CardContent className="p-8 space-y-4">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <Zap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold">Token teams</h3>
@@ -201,7 +201,7 @@ const Sample1 = () => {
             
             <Card className="border-2 border-primary/10 hover:border-primary/30 transition-all hover:shadow-glow">
               <CardContent className="p-8 space-y-4">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <Rocket className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold">Launchpads</h3>
@@ -213,7 +213,7 @@ const Sample1 = () => {
             
             <Card className="border-2 border-primary/10 hover:border-primary/30 transition-all hover:shadow-glow">
               <CardContent className="p-8 space-y-4">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
                   <BarChart3 className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold">Agencies / Media buyers</h3>
@@ -235,7 +235,7 @@ const Sample1 = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-7xl mx-auto">
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-lg flex items-center justify-center">
                 <Target className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Real wallet-level targeting</h3>
@@ -245,7 +245,7 @@ const Sample1 = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">10–20× better media efficiency</h3>
@@ -255,7 +255,7 @@ const Sample1 = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-lg flex items-center justify-center">
                 <Shield className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Transparent, on-chain backed data</h3>
@@ -265,7 +265,7 @@ const Sample1 = () => {
             </div>
             
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center">
+              <div className="w-20 h-20 mx-auto bg-primary/20 rounded-lg flex items-center justify-center">
                 <Zap className="w-10 h-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold">10-second setup</h3>
@@ -281,7 +281,7 @@ const Sample1 = () => {
       <section className="py-32">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
-            <div className="relative h-[500px] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden shadow-glow">
+            <div className="relative h-[500px] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden shadow-glow">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center space-y-4">
                   <BarChart3 className="w-40 h-40 mx-auto text-primary" />

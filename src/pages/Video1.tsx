@@ -302,7 +302,7 @@ const Problem2Scene = () => (
           { value: "2%", label: "average CTR" },
           { value: "$50+", label: "cost per lead" },
         ].map((stat, i) => (
-          <div key={i} className="text-center p-6 bg-white/60 rounded-2xl backdrop-blur-sm">
+          <div key={i} className="text-center p-6 bg-white/60 rounded-lg backdrop-blur-sm">
             <div className="text-4xl font-bold text-orange-600 mb-2">{stat.value}</div>
             <div className="text-slate-600">{stat.label}</div>
           </div>
@@ -363,7 +363,7 @@ const SolutionScene = () => (
             className="p-8 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up"
             style={{ animationDelay: `${0.3 + i * 0.15}s`, opacity: 0 }}
           >
-            <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-600 mb-6">
+            <div className="w-16 h-16 rounded-lg bg-violet-100 flex items-center justify-center text-violet-600 mb-6">
               {item.icon}
             </div>
             <h3 className="text-xl font-bold mb-2">{item.title}</h3>
@@ -413,7 +413,7 @@ const Step1Scene = () => (
         ].map((cat, i) => (
           <div 
             key={i}
-            className={`p-6 rounded-2xl border-2 text-center cursor-pointer transition-all hover:scale-105 ${
+            className={`p-6 rounded-lg border-2 text-center cursor-pointer transition-all hover:scale-105 ${
               i === 0 ? 'border-violet-500 bg-violet-50 ring-4 ring-violet-200' : 'border-slate-200 bg-white hover:border-violet-300'
             }`}
           >
@@ -485,7 +485,7 @@ const Step3Scene = () => (
         ].map((item, i) => (
           <div 
             key={i}
-            className="p-6 bg-white rounded-2xl border border-slate-200 flex gap-4 animate-fade-in-left"
+            className="p-6 bg-white rounded-lg border border-slate-200 flex gap-4 animate-fade-in-left"
             style={{ animationDelay: `${0.2 + i * 0.1}s`, opacity: 0 }}
           >
             <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
@@ -546,11 +546,11 @@ const WidgetDemoScene = () => (
         ].map((option, i) => (
           <div 
             key={i}
-            className={`p-8 rounded-3xl border-2 text-center cursor-pointer transition-all ${
+            className={`p-8 rounded-xl border-2 text-center cursor-pointer transition-all ${
               i === 0 ? 'border-violet-500 bg-violet-50 shadow-lg shadow-violet-200/50' : 'border-slate-200 bg-white hover:border-violet-300'
             }`}
           >
-            <div className={`w-16 h-16 rounded-2xl mx-auto mb-6 flex items-center justify-center ${
+            <div className={`w-16 h-16 rounded-lg mx-auto mb-6 flex items-center justify-center ${
               i === 0 ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600'
             }`}>
               {option.icon}
@@ -647,7 +647,7 @@ const PlatformsScene = () => (
         ].map((platform, i) => (
           <div 
             key={i} 
-            className={`px-8 py-4 rounded-2xl ${platform.color} font-semibold text-lg`}
+            className={`px-8 py-4 rounded-lg ${platform.color} font-semibold text-lg`}
           >
             {platform.name}
           </div>
@@ -677,7 +677,7 @@ const UseCasesScene = () => (
         ].map((item, i) => (
           <div 
             key={i}
-            className="p-6 bg-slate-50 rounded-2xl animate-fade-in-up"
+            className="p-6 bg-slate-50 rounded-lg animate-fade-in-up"
             style={{ animationDelay: `${0.1 + i * 0.1}s`, opacity: 0 }}
           >
             <div className="text-3xl mb-3">{item.icon}</div>
@@ -724,12 +724,12 @@ const SocialProofStatsScene = () => (
         </h2>
       </div>
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="text-center p-10 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up delay-300">
+        <div className="text-center p-10 bg-white rounded-xl shadow-sm border border-violet-100 animate-fade-in-up delay-300">
           <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">$8M+</div>
           <h3 className="text-2xl font-bold mb-2">Ad Budget Powered</h3>
           <p className="text-slate-600">In marketing spend managed using AudienceScan data</p>
         </div>
-        <div className="text-center p-10 bg-white rounded-3xl shadow-sm border border-violet-100 animate-fade-in-up delay-500">
+        <div className="text-center p-10 bg-white rounded-xl shadow-sm border border-violet-100 animate-fade-in-up delay-500">
           <div className="text-6xl md:text-8xl font-bold gradient-text mb-4">314</div>
           <h3 className="text-2xl font-bold mb-2">Campaigns Activated</h3>
           <p className="text-slate-600">Successful campaigns launched with our targeting data</p>

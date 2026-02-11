@@ -5,7 +5,7 @@ interface DashboardFrameProps {
 }
 
 export const DashboardFrame = ({ children }: DashboardFrameProps) => (
-  <div className="rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
+  <div className="rounded-lg border border-border bg-card shadow-xl overflow-hidden">
     {/* Browser chrome bar */}
     <div className="flex items-center gap-2 px-4 py-2.5 bg-foreground/[0.03] border-b border-border">
       <div className="flex gap-1.5">
