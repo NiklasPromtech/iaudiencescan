@@ -1,39 +1,65 @@
 
 
-## Phase 3: Kill Remaining Rounded Corners Everywhere
+## Phase 4: Total Rounded Corner Elimination
 
-### Root Cause
+### Problem
 
-The `Card` UI primitive in `src/components/ui/card.tsx` still has `rounded-lg` baked in. Every component using `<Card>` inherits rounded corners automatically. Combined with `rounded-full` icon circles and `rounded-lg` icon containers scattered throughout, the entire app still feels "pillowy" instead of flat like Dune.
+Despite previous changes to card, button, input, tabs, badge, select, popover, and skeleton, there are still **401+ instances** of `rounded-*` classes across 36 UI primitive files and overview components. The screenshot clearly shows rounded corners on:
 
-### Nuclear Option: Fix the Source
+- The **dimension table** container (`rounded-md` in DimensionTable.tsx)
+- **Checkboxes** (`rounded-sm` in checkbox.tsx)  
+- **Dropdown menus** (`rounded-md` and `rounded-sm` in dropdown-menu.tsx)
+- **Dialogs** (`sm:rounded-lg` in dialog.tsx)
+- **Toasts** (`rounded-md` in toast.tsx)
+- **Toggles** (`rounded-md` in toggle.tsx)
+- **Hover cards** (`rounded-md` in hover-card.tsx)
+- **Chart tooltips** (`rounded-lg` in chart.tsx)
+- **Timeline metric pills** (`rounded-full` in TimelineRangeChart.tsx)
+- **Tracking setup dialog** icon containers (`rounded-lg`)
+- **Date range picker** preset buttons (`rounded-md`)
+- **Scorecard filters** labels (`rounded-md`)
+- **Touchpoint markers** color dots (`rounded-full` -- these are fine, they're dots)
 
-**Change `card.tsx` from `rounded-lg` to `rounded-none`**. This single change eliminates rounded corners from every Card usage across the entire app in one stroke. No more hunting through 50+ files.
+### Solution: Two-Part Sweep
 
-For the few places where rounding IS appropriate (e.g., avatar images, tiny badge pills), `rounded-full` on avatars is fine -- Dune does this too. But icon containers (the colored circles around Wallet/Twitter/etc icons) should become flat squares or be removed entirely.
+**Part 1 -- Flatten ALL remaining UI primitives** (fixes the entire app at once):
 
-### Changes
+| File | Change |
+|------|--------|
+| `src/components/ui/dialog.tsx` | `sm:rounded-lg` to `sm:rounded-none`, `rounded-sm` to `rounded-none` |
+| `src/components/ui/dropdown-menu.tsx` | All `rounded-md` and `rounded-sm` to `rounded-none` |
+| `src/components/ui/toast.tsx` | All `rounded-md` to `rounded-none` |
+| `src/components/ui/toggle.tsx` | `rounded-md` to `rounded-none` |
+| `src/components/ui/hover-card.tsx` | `rounded-md` to `rounded-none` |
+| `src/components/ui/checkbox.tsx` | `rounded-sm` to `rounded-none` |
+| `src/components/ui/chart.tsx` | `rounded-lg` to `rounded-none` on tooltip container |
+| `src/components/ui/tooltip.tsx` | `rounded-md` to `rounded-none` |
+| `src/components/ui/command.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/calendar.tsx` | Any `rounded-*` to `rounded-none` (day cells) |
+| `src/components/ui/context-menu.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/alert-dialog.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/sheet.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/drawer.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/navigation-menu.tsx` | Any `rounded-*` to `rounded-none` |
+| `src/components/ui/menubar.tsx` | Any `rounded-*` to `rounded-none` |
 
-| File | What changes |
-|------|-------------|
-| `src/components/ui/card.tsx` | `rounded-lg` to `rounded-none` |
-| `src/components/scan-results/ScanResultsStats.tsx` | Remove `Card` wrappers, use flat inline stats with `border-b`. Remove `rounded-full` icon circles. |
-| `src/components/scan-results/PlatformTargetingCard.tsx` | Remove outer `Card` wrapper, use `border border-border` div instead. Keep token avatars as `rounded-full`. |
-| `src/components/scan-results/ExportCard.tsx` | Remove `Card` wrapper, use `border-b` flat row. Remove `rounded-lg` icon container. |
-| `src/components/scan-results/ExportCenterTab.tsx` | Remove `Card` wrapper from full export section. Remove `rounded-lg` icon container. |
-| `src/components/scan-results/PROutletsSection.tsx` | Remove `Card` wrapper, use `border-t` section. Remove `rounded-lg` icon container. Fix `text-purple-600`/`bg-purple-500` to orange. |
-| `src/components/scan-results/CommunitiesTab.tsx` | Remove `Card` wrapper from filter section. |
-| `src/components/scan-results/XAdsIntegration.tsx` | Remove `rounded-full` icon circle. |
-| `src/components/scan-results/NewsArticleCard.tsx` | Keep `rounded-lg` on article cards (these are content cards, acceptable). |
-| `src/pages/ScanResults.tsx` | Remove `Card` from error state, use plain div. Remove `rounded-full` error icon circle. |
-| `src/pages/ScanDetail.tsx` | Remove `rounded-lg` from stat grid items. |
+**Part 2 -- Flatten overview components:**
 
-### Summary
+| File | Change |
+|------|--------|
+| `src/components/overview/DimensionTable.tsx` | `rounded-md` to `rounded-none` on table container |
+| `src/components/overview/TimelineRangeChart.tsx` | `rounded-lg` to `rounded-none` on tooltip, `rounded-full` to `rounded-none` on metric pills |
+| `src/components/overview/TrackingSetupDialog.tsx` | `rounded-lg` to `rounded-none` on code blocks and icon containers |
+| `src/components/overview/DateRangePicker.tsx` | `rounded-md` to `rounded-none` on preset buttons |
+| `src/components/overview/ScorecardFilters.tsx` | `rounded-md` to `rounded-none` on filter labels |
+| `src/components/overview/PrimaryFilters.tsx` | `rounded` to `rounded-none` on filter options |
 
-- 1 global primitive change (`card.tsx` rounded-lg to rounded-none)
-- 8 scan-results component flattening passes (remove Card wrappers, remove icon circles)
-- 2 page-level fixes (ScanResults.tsx, ScanDetail.tsx)
-- Purple color fixes in PROutletsSection
+**Exceptions kept as `rounded-full`** (these are intentional dots/circles):
+- Touchpoint color indicator dots (3x3px colored circles)
+- Realtime pulse dot (1.5x1.5px animated dot)
+- Chart legend color squares (`rounded-sm` on 3x3 swatches -- actually fine)
+- Avatar images (user photos)
 
-This will make the scan results page and all other Card-using pages completely flat.
+### Execution
 
+All changes are simple find-and-replace within each file. All UI primitive changes can be done in parallel, then overview components in parallel.
