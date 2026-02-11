@@ -1190,7 +1190,7 @@ const DataEnrichmentStage = () => {
         {platforms.map((platform, i) => (
           <div
             key={i}
-            className="relative bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-2xl p-6 animate-fade-in-up overflow-hidden"
+            className="relative bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-lg p-6 animate-fade-in-up overflow-hidden"
             style={{ animationDelay: `${0.3 + i * 0.15}s`, opacity: 0 }}
           >
             {/* Data Flow Animation */}
@@ -1231,7 +1231,7 @@ const FinalDatasetStage = () => (
 
     <div className="relative animate-fade-in-scale delay-300">
       {/* Dataset Preview Table */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden max-w-4xl mx-auto">
+      <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden max-w-4xl mx-auto">
         <div className="grid grid-cols-5 gap-2 p-3 bg-violet-500/20 border-b border-white/10 text-xs md:text-sm font-medium text-left">
           <span>Score</span>
           <span>Token</span>
