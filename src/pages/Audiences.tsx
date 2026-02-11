@@ -11,6 +11,7 @@ import { AudienceDetailDialog } from "@/components/audiences/AudienceDetailDialo
 import { DeleteAudienceDialog } from "@/components/audiences/DeleteAudienceDialog";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useAudiences, useInvalidateAudiences } from "@/hooks/use-dashboard-queries";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const Audiences = () => {
   const navigate = useNavigate();
@@ -64,31 +65,10 @@ const Audiences = () => {
     navigate(`/scans/${scanId}`);
   };
 
-  // No website selected state
   if (!selectedWebsite && !websiteLoading) {
     return (
       <DashboardLayout>
-        <div className="container max-w-5xl py-8 px-4">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-foreground mb-2">Audiences</h1>
-            <p className="text-muted-foreground">
-              Create and manage audience segments based on visitor behavior.
-            </p>
-          </div>
-
-          <Card className="p-12 border border-dashed border-border text-center">
-            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-              <AlertCircle className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No website selected</h3>
-            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              Select a website to manage audiences for your tracked visitors.
-            </p>
-            <Button onClick={() => navigate("/install")}>
-              Go to Websites
-            </Button>
-          </Card>
-        </div>
+        <NoWebsiteState />
       </DashboardLayout>
     );
   }

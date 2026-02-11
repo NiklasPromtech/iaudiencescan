@@ -17,13 +17,14 @@ import { CreateTouchpointDialog } from "@/components/touchpoints/CreateTouchpoin
 import { EditTouchpointDialog } from "@/components/touchpoints/EditTouchpointDialog";
 import { DeleteTouchpointDialog } from "@/components/touchpoints/DeleteTouchpointDialog";
 import { useTouchpoints, useInvalidateTouchpoints, Touchpoint } from "@/hooks/use-dashboard-queries";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const Touchpoints = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingTouchpoint, setEditingTouchpoint] = useState<Touchpoint | null>(null);
   const [deletingTouchpoint, setDeletingTouchpoint] = useState<Touchpoint | null>(null);
   
-  const { selectedWebsite } = useSelectedWebsite();
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const invalidateTouchpoints = useInvalidateTouchpoints();
 
   const {
@@ -46,6 +47,14 @@ const Touchpoints = () => {
     }
     return "No date";
   };
+
+  if (!websiteLoading && !selectedWebsite) {
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

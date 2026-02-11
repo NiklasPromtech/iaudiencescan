@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Plus, FileCode2, Trash2, Pencil, BarChart3 } from "lucide-react";
@@ -21,9 +21,8 @@ import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useContracts, useInvalidateContracts, TokenContract } from "@/hooks/use-dashboard-queries";
 
 const Contracts = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const { selectedWebsite } = useSelectedWebsite();
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const invalidateContracts = useInvalidateContracts();
   
   const {
@@ -58,17 +57,10 @@ const Contracts = () => {
     setHolderDialogOpen(true);
   };
 
-  if (!selectedWebsite) {
+  if (!websiteLoading && !selectedWebsite) {
     return (
       <DashboardLayout>
-        <div className="p-6 flex flex-col items-center justify-center h-[60vh] text-center">
-          <FileCode2 className="h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Website Selected</h2>
-          <p className="text-muted-foreground mb-4">
-            Please select a website from the dropdown to manage token contracts.
-          </p>
-          <Button onClick={() => navigate("/install")}>Go to Install</Button>
-        </div>
+        <NoWebsiteState />
       </DashboardLayout>
     );
   }

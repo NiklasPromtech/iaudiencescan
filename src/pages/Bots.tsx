@@ -17,11 +17,12 @@ import {
   fetchScorecard,
   BotAnalyticsResponse,
   TableDimension,
-  Website,
   RangeConfig,
   DIMENSION_TO_FILTER,
   FilterOptions,
 } from "@/lib/api";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 
 const Bots = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Bots = () => {
   const initialFiltersStr = searchParams.get("filters");
 
   // State
-  const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
+  const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const [botData, setBotData] = useState<BotAnalyticsResponse | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,19 +75,6 @@ const Bots = () => {
     return base;
   });
 
-  // Load website from localStorage
-  useEffect(() => {
-    const storedWebsite = localStorage.getItem("selectedWebsite");
-    if (storedWebsite) {
-      try {
-        setSelectedWebsite(JSON.parse(storedWebsite) as Website);
-      } catch {
-        navigate("/install");
-      }
-    } else {
-      navigate("/install");
-    }
-  }, [navigate]);
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -257,6 +245,14 @@ const Bots = () => {
   };
 
   const contextLabel = getContextLabel();
+
+  if (!websiteLoading && !selectedWebsite) {
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useCostSources, useInvalidateCostSources } from "@/hooks/use-dashboard-queries";
 
 const Costs = () => {
-  const navigate = useNavigate();
   const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
   const invalidateCostSources = useInvalidateCostSources();
 
@@ -47,10 +46,12 @@ const Costs = () => {
 
   const hasData = costSources.length > 0;
 
-  // Redirect to install if no website after loading
   if (!websiteLoading && !selectedWebsite) {
-    navigate("/install");
-    return null;
+    return (
+      <DashboardLayout>
+        <NoWebsiteState />
+      </DashboardLayout>
+    );
   }
 
   return (
