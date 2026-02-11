@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -47,14 +46,12 @@ export const PROutletsSection = ({ sources }: PROutletsSectionProps) => {
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="overflow-hidden">
+      <div className="border-t border-border overflow-hidden">
         <CollapsibleTrigger asChild>
           <div className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <Megaphone className="h-5 w-5 text-purple-600" />
-                </div>
+                <Megaphone className="h-5 w-5 text-primary" />
                 <div>
                   <h3 className="font-semibold flex items-center gap-2">
                     PR Opportunities
@@ -98,7 +95,7 @@ export const PROutletsSection = ({ sources }: PROutletsSectionProps) => {
 
         <CollapsibleContent>
           <div className="px-4 pb-4 space-y-4">
-            <p className="text-sm text-muted-foreground border-l-2 border-purple-500/50 pl-3">
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/50 pl-3">
               These outlets write about projects your audience invests in. If
               they're here, maybe you should be too.
             </p>
@@ -107,7 +104,7 @@ export const PROutletsSection = ({ sources }: PROutletsSectionProps) => {
               {sources.map((source) => (
                 <div
                   key={source.domain}
-                  className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50 transition-colors group"
+                  className="flex items-center justify-between py-2 px-3 hover:bg-muted/50 transition-colors group"
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-medium text-sm">{source.domain}</span>
@@ -130,7 +127,7 @@ export const PROutletsSection = ({ sources }: PROutletsSectionProps) => {
             </div>
           </div>
         </CollapsibleContent>
-      </Card>
+      </div>
     </Collapsible>
   );
 };

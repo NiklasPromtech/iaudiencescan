@@ -79,7 +79,7 @@ export const CommunitiesTab = ({ tokens }: CommunitiesTabProps) => {
       <SummaryBadges counts={counts} />
 
       {/* Filters */}
-      <Card className="p-4">
+      <div className="border-b border-border pb-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h3 className="font-medium text-sm mb-1">Filter Communities</h3>
@@ -102,7 +102,7 @@ export const CommunitiesTab = ({ tokens }: CommunitiesTabProps) => {
             setPlatformFilter={setPlatformFilter}
           />
         </div>
-      </Card>
+      </div>
 
       {/* Platform Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -114,7 +114,7 @@ export const CommunitiesTab = ({ tokens }: CommunitiesTabProps) => {
 
       {/* Empty State for Filtered Results */}
       {filteredTokens.length === 0 && (
-        <Card className="p-12 text-center">
+        <div className="p-12 text-center border-b border-border">
           <p className="text-muted-foreground">
             No communities match your current filters. Try adjusting the filters.
           </p>
@@ -123,7 +123,7 @@ export const CommunitiesTab = ({ tokens }: CommunitiesTabProps) => {
               Clear Filters
             </Button>
           )}
-        </Card>
+        </div>
       )}
     </div>
   );
