@@ -1,48 +1,46 @@
 
-# Update Brand Assets and Network Chart Colors
+# Fix: Pages Feel Like They Don't Update When Navigating
 
-The new branding has a distinct look: an **orange half-circle** behind **dark navy bar-chart bars**, with "Audience" in dark navy and "Scan" in orange. The network graph visuals use **orange** (core wallets), **navy/indigo** (overlapping holders), and **gray** (noise) — no more purple.
+## Root Cause
 
-## What Needs to Change
+There are two data-fetching patterns in the app, and one of them is causing the "nothing updates" feeling:
 
-### 1. Copy New Logo Assets into the Project
-Copy the uploaded images to replace the existing logo files:
-- **Icon (square)**: Copy `user-uploads://5DEB7A01-2E21-43B8-B7C5-9ED4271E3E28.jpeg` to `src/assets/audiencescan-icon.png` (replaces old icon)
-- **Logo with wordmark (dark)**: Copy `user-uploads://5DEB7A01-2E21-43B8-B7C5-9ED4271E3E28-2.jpeg` to `src/assets/audiencescan-logo-dark.png` (replaces old dark logo)
-- **Network hero image**: Copy `user-uploads://81883F2F-CB6B-43D5-B3B1-A3B8E786D461.png` to `public/og-network-preview.png` (replaces OG share image for scan network pages)
+**Pattern 1 — Manual `useEffect` + `useState`** (Overview, Bots, Change, Wallets)
+These pages refetch data every time they mount. They work correctly but show a brief loading state that can flash too quickly to notice.
 
-### 2. Update Footer Logo
-The Footer (`src/components/Footer.tsx`) uses an old logo from `lovable-uploads/7badbb3e...`. Replace it with the new `audiencescan-icon.png` asset imported properly via ES6 module.
+**Pattern 2 — React Query hooks** (Scans, Audiences, Costs, Contracts, Touchpoints)
+These pages use `useScans()`, `useAudiences()`, `useCostSources()`, etc. from `use-dashboard-queries.ts`. The global React Query config in `App.tsx` sets:
 
-### 3. Network Chart — Purple to Orange/Navy
-The Network page (`src/pages/Network.tsx`) currently uses **purple** (`#a855f7`, `purple-500`, `purple-600`) for everything: edges, node rings, ambient glow, hover panel borders, stats badge, and tags. Per the new brand imagery, these should be updated to:
-- **Edges/connections**: Orange (`hsl(28, 100%, 54%)` / `#f97316`) — matching the "core wallet cluster" lines in the brand images
-- **Node rings**: Orange for high-score nodes, navy (`#334155` / `slate-700`) for lower-score
-- **Ambient glow**: Warm orange glow instead of purple
-- **Hover panel**: Border and accents switch from purple to orange/navy
-- **Score dots**: Orange instead of purple
-- **Tags**: Navy/indigo pills instead of purple
-- **Stats badge**: Orange dot + orange text instead of purple
+```
+staleTime: 2 * 60 * 1000  // 2 minutes — data is "fresh" for 2 minutes
+refetchOnWindowFocus: false
+```
 
-This affects ~30 instances of purple in `Network.tsx`.
+This means when you navigate from Overview to Scans, then back and forth, React Query serves the cached data without refetching for 2 full minutes. The page appears instantly with the same data and zero loading indicators — making it feel like nothing happened.
 
-### 4. LandingPageV2 Footer Logo
-`src/pages/LandingPageV2.tsx` also references the old `lovable-uploads/7badbb3e...` logo — update to use the imported icon asset.
+## The Fix
 
-## Files to Modify
+### 1. Reduce `staleTime` to 0 in `App.tsx`
+Setting `staleTime: 0` means data is always considered stale. React Query will still show cached data instantly (no loading flicker), but immediately triggers a background refetch. If the data changed, the UI updates seamlessly. The `gcTime` stays at 10 minutes so cached data is still available for instant display.
+
+### 2. Enable `refetchOnMount: 'always'`
+This ensures every page navigation triggers a refetch, even if the data was just fetched. Combined with staleTime 0, the user always sees a background refresh happening.
+
+### 3. Add a subtle refetch indicator to key pages
+Since background refetches won't show a full loading skeleton (cached data is shown), add a small animated indicator (like a spinning refresh icon in the page header) when `isFetching && !isLoading` — meaning data is being refreshed in the background. This gives the user visual confirmation that the page is alive and updating.
+
+Apply this to:
+- **Scans** page — show a subtle spinner next to the "Refresh" button when `isFetching`
+- **Audiences** page — same pattern
+- The other react-query pages (Costs, Contracts, Touchpoints) can get the same treatment
+
+## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/assets/audiencescan-icon.png` | Replace with new icon (orange half-circle + navy bars) |
-| `src/assets/audiencescan-logo-dark.png` | Replace with new wordmark logo |
-| `public/og-network-preview.png` | Replace with new network hero image |
-| `src/components/Footer.tsx` | Import `audiencescan-icon.png` instead of hardcoded lovable-uploads path |
-| `src/pages/Network.tsx` | Replace all purple colors with orange/navy to match new brand palette |
-| `src/pages/LandingPageV2.tsx` | Update logo reference to use imported asset |
+| `src/App.tsx` | Change `staleTime` from `2 * 60 * 1000` to `0`, add `refetchOnMount: 'always'` |
+| `src/pages/Scans.tsx` | Use `isFetching` from `useScans` to show subtle background refresh indicator on the Refresh button |
+| `src/pages/Audiences.tsx` | Use `isFetching` from `useAudiences` to show background refresh indicator |
+| `src/pages/Costs.tsx` | Same pattern with `useCostSources` |
 
-## What Stays the Same
-- Header.tsx already imports `audiencescan-icon.png` — will automatically pick up new file
-- DashboardSidebar.tsx already imports both `audiencescan-icon.png` and `audiencescan-logo-dark.png` — will automatically pick up new files
-- All other pages importing `audiencescan-logo-white.png` (Wizard, Video, etc.) are unaffected unless a new white version is provided
-- Chart colors on landing page mock components (already orange/teal) stay as-is
-- CSS theme variables stay the same
+The changes are small but the difference is significant: every page navigation will now visibly trigger a data refresh, making the app feel responsive and alive.
