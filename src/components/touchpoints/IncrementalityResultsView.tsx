@@ -21,6 +21,8 @@ import {
 import { toast } from "sonner";
 import audienceScanLogo from "@/assets/audiencescan-logo-dark.png";
 import { CountryMapChart } from "./CountryMapChart";
+import { FocusedBreakdownTable } from "./FocusedBreakdownTable";
+import { supabase } from "@/integrations/supabase/client";
 
 // ==================== INTERFACES ====================
 
@@ -153,6 +155,51 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [openBreakdowns, setOpenBreakdowns] = useState<Record<string, boolean>>({ utm_source: true });
+
+  // Map drill-down state
+  const [mapDrillLevel, setMapDrillLevel] = useState<"country" | "region" | "city">("country");
+  const [mapDrillPath, setMapDrillPath] = useState<string[]>([]);
+  const [mapDrillData, setMapDrillData] = useState<typeof breakdowns extends undefined ? never : NonNullable<typeof breakdowns>["country"]>(undefined);
+  const [mapDrillLoading, setMapDrillLoading] = useState(false);
+
+  const handleMapDrill = async (key: string) => {
+    const nextLevel = mapDrillLevel === "country" ? "region" : "city";
+    const newPath = [...mapDrillPath, key];
+    setMapDrillLoading(true);
+    try {
+      const { data: drillData, error } = await supabase.functions.invoke("audiencescan-signal", {
+        body: {
+          action: "geo_drilldown",
+          country: newPath[0],
+          region: newPath.length > 1 ? newPath[1] : undefined,
+          level: nextLevel,
+        },
+      });
+      if (error || !drillData?.breakdown?.length) {
+        toast.error("No detailed data available for this region");
+        return;
+      }
+      setMapDrillData(drillData.breakdown);
+      setMapDrillLevel(nextLevel as "region" | "city");
+      setMapDrillPath(newPath);
+    } catch {
+      toast.error("Failed to load drill-down data");
+    } finally {
+      setMapDrillLoading(false);
+    }
+  };
+
+  const handleMapBack = () => {
+    if (mapDrillLevel === "city") {
+      setMapDrillLevel("region");
+      setMapDrillPath(prev => prev.slice(0, 1));
+      setMapDrillData(undefined); // will fall back to country data
+    } else {
+      setMapDrillLevel("country");
+      setMapDrillPath([]);
+      setMapDrillData(undefined);
+    }
+  };
 
   useImperativeHandle(ref, () => ({
     handleCopyReport,
@@ -584,18 +631,49 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
                 <div className="px-4 pb-4 border-t border-border">
                   {key === 'country' && (
                     <div className="mt-3 mb-3">
-                      <CountryMapChart data={sorted.map(d => ({
-                        key: d.key,
-                        incremental: Math.round((d.visitors?.event_daily_avg ?? 0) - (d.visitors?.baseline_daily_avg ?? 0)),
-                        uplift_percent: d.visitors?.uplift_percent ?? 0,
-                        baseline_total: Math.round(d.visitors?.baseline_daily_avg ?? 0),
-                        actual: Math.round(d.visitors?.event_daily_avg ?? 0),
-                      }))} formatNumber={formatNumber} formatPercent={formatPercent} />
+                      <CountryMapChart
+                        data={(mapDrillData ?? sorted).map(d => ({
+                          key: d.key,
+                          incremental: Math.round((d.visitors?.event_daily_avg ?? 0) - (d.visitors?.baseline_daily_avg ?? 0)),
+                          uplift_percent: d.visitors?.uplift_percent ?? 0,
+                          baseline_total: Math.round(d.visitors?.baseline_daily_avg ?? 0),
+                          actual: Math.round(d.visitors?.event_daily_avg ?? 0),
+                        }))}
+                        formatNumber={formatNumber}
+                        formatPercent={formatPercent}
+                        drillLevel={mapDrillLevel}
+                        breadcrumb={mapDrillPath}
+                        onDrill={handleMapDrill}
+                        onBack={handleMapBack}
+                        loading={mapDrillLoading}
+                      />
                     </div>
                   )}
-                  <div className="mt-3">
-                    <BreakdownTable data={sorted} formatNumber={formatNumber} formatPercent={formatPercent} />
-                  </div>
+                  {(key === 'conversion_event') ? (
+                    <div className="mt-3">
+                      <FocusedBreakdownTable
+                        data={sorted}
+                        metricKey="conversions"
+                        metricLabel="Conv/day"
+                        formatNumber={formatNumber}
+                        formatPercent={formatPercent}
+                      />
+                    </div>
+                  ) : (key === 'wallet_action') ? (
+                    <div className="mt-3">
+                      <FocusedBreakdownTable
+                        data={sorted}
+                        metricKey="wallets"
+                        metricLabel="Wallets/day"
+                        formatNumber={formatNumber}
+                        formatPercent={formatPercent}
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-3">
+                      <BreakdownTable data={sorted} formatNumber={formatNumber} formatPercent={formatPercent} />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
