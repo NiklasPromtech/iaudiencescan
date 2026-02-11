@@ -129,7 +129,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
                 key={`${preset.days}-${preset.includeToday}`}
                 onClick={() => handlePresetSelect(preset.days, preset.includeToday)}
                 className={cn(
-                  "w-full px-3 py-2 text-left text-sm rounded-md transition-colors",
+                  "w-full px-3 py-2 text-left text-sm rounded-none transition-colors",
                   "hover:bg-muted",
                   isPresetSelected(preset)
                     ? "bg-primary/10 text-primary font-medium"
@@ -143,7 +143,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
             <button
               onClick={() => setShowCustom(true)}
               className={cn(
-                "w-full px-3 py-2 text-left text-sm rounded-md transition-colors hover:bg-muted",
+                "w-full px-3 py-2 text-left text-sm rounded-none transition-colors hover:bg-muted",
                 value.type === "custom" ? "bg-primary/10 text-primary font-medium" : "text-foreground"
               )}
             >
