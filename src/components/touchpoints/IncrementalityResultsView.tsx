@@ -136,6 +136,7 @@ export interface IncrementalityResult {
     referrer_domain?: BreakdownItem[];
     conversion_event?: BreakdownItem[];
     wallet_action?: BreakdownItem[];
+    time_on_site?: BreakdownItem[];
   };
 }
 
@@ -409,6 +410,7 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
     { key: 'referrer_domain', title: 'Referrer Domain', icon: Globe },
     { key: 'conversion_event', title: 'Conversion Event', icon: Zap },
     { key: 'wallet_action', title: 'Wallet Action', icon: Wallet },
+    { key: 'time_on_site', title: 'Time on Site', icon: BarChart3 },
   ];
 
   // Combine conversion + wallet funnel for "What Changed"
