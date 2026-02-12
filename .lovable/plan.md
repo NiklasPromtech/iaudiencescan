@@ -1,48 +1,72 @@
 
 
-## Fix Multiple UI Issues Across Landing Page, Network, Wallets, and Scans
+## Dune-ify the Scan Results Page
 
-### Issues Identified
+Restyle the `/scans/[id]/results` page to match the platform's Dune-inspired aesthetic and the tab pattern from the Overview page.
 
-**1. GA Comparison table doesn't stretch to full height**
-The "Google Analytics vs AudienceScan" card (left) is shorter than the "Bot Detection" card (right). The card needs `h-full flex flex-col` and the rows container needs `flex-1` so it fills the available space to match the Bot Detection card height.
+### Changes
 
-**2. Landing page "Find More Users" section — mock data is sparse**
-The user provided a JSON file with ~50+ real tokens including rich social data (twitter, telegram, discord, reddit, news articles). The current `mock-data.ts` only has 4 Twitter tokens, 3 Telegram tokens, 3 Discord tokens, and 1 Reddit token. We need to update the mock data to include more entries derived from the uploaded JSON to fill out the platform cards and news feed on the landing page.
+#### 1. ScanResults.tsx -- Page layout and tabs
 
-**3. Network page back button is off**
-The back button is positioned at `fixed bottom-6 left-6` — overlapping the stats panel which is also at `absolute bottom-6 left-6`. The back button needs to be repositioned (e.g., top-left) to avoid overlap.
+- **Title**: Change from "Outreach Command Center" to the scan name (e.g., "US wallets"). Use `font-mono` for the subtitle metadata.
+- **Tabs**: Replace the current `TabsList` (grid-based, rounded, muted bg) with the Overview-style tabs:
+  - Wrap tabs in `border border-border`
+  - `TabsList` uses `w-full justify-start border-b border-border bg-transparent p-0`
+  - Each `TabsTrigger` uses `font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3`
+  - Tab content inside the same border container with `p-4`
+- **News count badge**: Style with `font-mono tabular-nums text-muted-foreground` inline (matching Overview pattern) instead of a colored pill.
 
-**4. Wallets page scorecards are old-style Card components**
-The `/wallets` page uses 6 individual `Card` components with `CardHeader/CardContent` — the old style. Per the layout standards, these should be converted to the flat inline stat row with vertical dividers (matching the dashboard overview and landing page scorecard pattern): a single horizontal strip with dividers, using `font-mono` labels.
+#### 2. ScanResultsStats.tsx -- Already good
 
-**5. Scans page feels off**
-The scans list items use plain `border-b` rows with no card wrapper, making them float without structure. Adding a subtle card border around the list group and tightening spacing will give it a more polished feel. Also apply `font-mono` styling to metadata text for consistency.
+The stat row already uses `font-mono`, `divide-x`, and `border-b` -- this matches the Dune style. No changes needed.
 
----
+#### 3. SummaryBadges.tsx -- Fix purple violation
 
-### Detailed Changes
+The PR Outlets badge uses `bg-purple-500/10 text-purple-600` which violates the color palette (no purple). Change to `bg-stone-500/10 text-stone-600` or use primary orange. Also apply `font-mono text-xs` to badge text for consistency.
 
-#### File: `src/pages/LandingPageV3.tsx`
-- **GA Comparison card** (~line 203): Add `h-full flex flex-col` to the outer div. Add `flex-1` to the rows container div so rows stretch to match the Bot Detection card.
+#### 4. CommunitiesTab.tsx -- Filter section typography
 
-#### File: `src/components/landing/mock-data.ts`
-- Update `mockPlatformTokens` to include more tokens per platform derived from the uploaded JSON:
-  - Twitter: expand from 4 to ~8 tokens (USDC, Chainlink, Ondo, Tether Gold, Paxos Gold, Aave, Mantle, Lido)
-  - Telegram: expand from 3 to ~6 tokens
-  - Discord: expand from 3 to ~5 tokens
-  - Reddit: expand from 1 to ~3 tokens
-- Update `mockNewsArticles` to include more articles from the JSON (expand from 5 to ~8-10)
-- Update `mockPROutlets` to include more outlets from the JSON data
+- "Filter Communities" heading: add `font-mono text-xs uppercase tracking-widest`
+- Filter labels already use `text-xs text-muted-foreground` which is fine
 
-#### File: `src/pages/Network.tsx`
-- Move the back button from `fixed bottom-6 left-6` to `fixed top-6 left-6` so it doesn't overlap the stats panel.
+#### 5. PlatformTargetingCard.tsx -- Remove Card wrapper, flatten
 
-#### File: `src/pages/Wallets.tsx`
-- Replace the 6-card grid (lines 270-369) with a single flat inline stat row using `flex items-center divide-x divide-border border-b border-border` — matching the pattern used in `ScanResultsStats` and the landing page scorecards. Each stat becomes a `div` with `font-mono` labels and bold values. Remove the Card/CardHeader/CardContent wrapper.
+- Replace `Card` with a plain `div` using `border border-border` (no rounded corners)
+- Remove the colored `bgColor` header backgrounds -- use a flat `border-b border-border` separator instead
+- Token names: add `font-mono` to handles/metadata
+- Market cap badges: use `font-mono tabular-nums`
 
-#### File: `src/pages/Scans.tsx`
-- Wrap the active scans list in a `border border-border rounded-lg overflow-hidden` container for visual grouping.
-- Apply `font-mono text-xs` to metadata text (wallet count, chain, time) for consistency.
-- Apply `font-mono` styling to the page title/subtitle.
+#### 6. NewsFeedTab.tsx -- Remove Card wrappers
 
+- Filter section: replace `Card className="p-4"` with `border border-border p-4`
+- Empty state: replace `Card` with `border border-border`
+- Section headers: add `font-mono text-xs uppercase tracking-widest`
+
+#### 7. NewsArticleCard.tsx -- Flatten
+
+- Replace `border border-border rounded-lg` with `border-b border-border` (row-based, no individual card wrappers)
+- Add `font-mono text-xs` to source domain and timestamp
+
+#### 8. WebsitesTab.tsx -- Remove Card wrapper from table
+
+- Replace `Card className="overflow-hidden"` with `border border-border overflow-hidden`
+- Table headers: add `font-mono text-xs uppercase tracking-widest`
+- Data cells: add `font-mono tabular-nums` to numeric values
+
+#### 9. PROutletsSection.tsx -- Remove rounded corners
+
+- Already uses `border-t` which is good. Add `font-mono text-xs` to article count text.
+
+#### 10. ExportCenterTab.tsx -- Section headers
+
+- Section headers already use `uppercase tracking-wide` -- update to `font-mono text-xs uppercase tracking-widest` for consistency
+- Export card grid items are already flat (`border-b`), which is correct
+
+### Technical summary
+
+- ~10 files touched, all in `src/components/scan-results/` and `src/pages/ScanResults.tsx`
+- Primarily CSS class changes -- no logic or data changes
+- Aligns with the Overview page tab pattern that's already working well
+- Eliminates all `rounded-lg` / Card wrappers in favor of flat `border border-border` containers
+- Enforces `font-mono` on all data-oriented text (handles, counts, metadata)
+- Fixes the purple color violation in SummaryBadges
