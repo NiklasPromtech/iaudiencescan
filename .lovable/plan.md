@@ -1,46 +1,66 @@
 
 
-# Landing Page V3 Updates
+# Add `time_on_site` Breakdown Dimension
 
-## 1. Add Ned's Testimonial with Book Demo Link
+## What Changes
 
-Add a third testimonial card below the existing two quotes:
+Add "Time on Site" as a new dimension option across the Overview page's DimensionTable dropdown and the Measure Change / Incrementality breakdown selectors.
 
-> "He got some really good ideas on how to maximize value from your visitor data — it's worth grabbing 30 minutes with him."
-> — Ned, Token Project
+## 1. Add `time_on_site` to the `TableDimension` type
 
-Below the quote, add a subtle "Book a Demo" text link (muted style, not a loud button) that links to a Calendly or contact page. Will use a simple `text-muted-foreground hover:text-foreground` link with an arrow icon.
+In `src/lib/api.ts`, extend the `TableDimension` union type to include `"time_on_site"`.
 
-## 2. Fix Logo Marquee to Loop Infinitely
+## 2. Add to DimensionTable dropdown (Overview page)
 
-The current marquee already duplicates the logos array (`[...clientLogos, ...clientLogos]`), but the animation may be stopping or glitching. The fix:
+In `src/components/overview/DimensionTable.tsx`, add a new entry to `DIMENSION_OPTIONS`:
 
-- Ensure the track has the logos duplicated (already done)
-- Verify the CSS animation uses `translateX(-50%)` so the second copy seamlessly replaces the first (already in place)
-- The issue is likely that `overflow-hidden` needs to be on a proper wrapper. Will clean up the container structure to guarantee seamless infinite looping.
+```text
+{ value: "time_on_site", label: "Time on Site" }
+```
 
-## 3. Simplify "Find More of Your Best Users" Section
+This automatically makes it available in the dimension `<Select>` on the Overview page. The existing `fetchTableData` call will send `dimension: "time_on_site"` and the API will return rows with `dim_value` keys like `"0-10s"`, `"10-30s"`, `"30s-1m"`, `"1-5m"`, `"5m+"`.
 
-Currently showing all 4 platform cards (X, Telegram, Discord, Reddit) with full token lists plus a full news feed. Will simplify to:
+## 3. Add to Measure Change breakdown options
 
-- Show only the **top 3 platform cards** (X, Telegram, Reddit) — dropping Discord
-- Limit each card to show only **3 tokens** instead of all 5-8
-- Replace the bottom italic text with a compelling CTA line like: *"Install our tag. We'll find the communities your users already belong to."*
-- **Remove the full MockNewsFeed** from this section — it's too much data for a landing page sell section
+In `src/pages/Change.tsx`, add to `BREAKDOWN_OPTIONS`:
 
-## Technical Details
+```text
+{ value: "time_on_site", label: "Time on Site" }
+```
 
-**Files to modify:**
+Also include `"time_on_site"` in the default `breakdowns` array for basic mode (line ~381).
 
-1. **`src/pages/LandingPageV3.tsx`**
-   - Add third testimonial block after the "Head of Growth" quote with Ned's quote and a "Book a Demo" link
-   - Clean up marquee wrapper structure if needed
-   - Replace `<MockPlatformCards />` with a trimmed inline version showing only 3 platforms with 3 tokens each
-   - Remove `<MockNewsFeed />` from the audience intelligence section
-   - Update the italic tagline text
+## 4. Add to Incrementality Analysis breakdown options
 
-2. **`src/components/landing/MockPlatformCards.tsx`**
-   - Add a `limit` prop to cap tokens shown per platform, or handle the trimming in LandingPageV3 directly
+In `src/components/touchpoints/IncrementalityAnalysisDialog.tsx`, add to `BREAKDOWN_OPTIONS`:
 
-3. **`src/components/landing/mock-data.ts`**
-   - No changes needed — we'll just slice the data in the component
+```text
+{ value: "time_on_site", label: "Time on Site" }
+```
+
+## 5. Add to Incrementality Results rendering
+
+In `src/components/touchpoints/IncrementalityResultsView.tsx`, add to `breakdownConfig`:
+
+```text
+{ key: 'time_on_site', title: 'Time on Site', icon: Clock }
+```
+
+(Import `Clock` from lucide-react if not already imported.)
+
+## 6. Add to filter dimension mapping
+
+In `src/lib/api.ts`, add `time_on_site` to `DIMENSION_TO_FILTER` if needed for click-through filtering (may map to itself or be omitted if no filter equivalent exists).
+
+## Technical Summary
+
+| File | Change |
+|------|--------|
+| `src/lib/api.ts` | Add `"time_on_site"` to `TableDimension` type |
+| `src/components/overview/DimensionTable.tsx` | Add to `DIMENSION_OPTIONS` array |
+| `src/pages/Change.tsx` | Add to `BREAKDOWN_OPTIONS`, include in basic mode defaults |
+| `src/components/touchpoints/IncrementalityAnalysisDialog.tsx` | Add to `BREAKDOWN_OPTIONS` |
+| `src/components/touchpoints/IncrementalityResultsView.tsx` | Add to `breakdownConfig` |
+
+No new components needed -- the existing table and breakdown rendering handles arbitrary `dim_value` strings, so buckets like `"0-10s"` and `"5m+"` will render correctly out of the box.
+
