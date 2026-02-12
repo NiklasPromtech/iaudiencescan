@@ -4,13 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sparkles,
-  ArrowRight,
-  TrendingUp,
-  Clock,
-  Zap,
-} from "lucide-react";
 import { 
   fetchScorecard, 
   fetchTableData,
@@ -391,6 +384,7 @@ const Overview = () => {
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
     loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
+    loadFilterOptions();
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
@@ -469,30 +463,6 @@ const Overview = () => {
     token_holders: tokenHoldersTotal,
   } : null;
   const conversionEvents = filterOptions?.conversion_events ?? [];
-
-  const suggestedCohorts = [
-    {
-      id: 1,
-      name: "High-intent visitors",
-      description: "Stayed 60s+",
-      size: data?.stayed_60s ?? 0,
-      icon: <TrendingUp className="h-4 w-4" />,
-    },
-    {
-      id: 2,
-      name: "Engaged visitors",
-      description: "Stayed 30s+",
-      size: data?.stayed_30s ?? 0,
-      icon: <Clock className="h-4 w-4" />,
-    },
-    {
-      id: 3,
-      name: "Wallet connected",
-      description: "Connected a wallet",
-      size: data?.wallet_users ?? 0,
-      icon: <Zap className="h-4 w-4" />,
-    },
-  ];
 
   return (
     <DashboardLayout>
@@ -628,37 +598,6 @@ const Overview = () => {
             </Tabs>
           </div>
 
-          {/* Cohort Suggestions */}
-          <div className="py-4 border-t border-border mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h3 className="text-h3 text-foreground">Suggested Cohorts</h3>
-            </div>
-            <p className="text-p2 text-muted-foreground mb-6">
-              Auto-generated based on your early traffic patterns
-            </p>
-            <div className="divide-y divide-border mb-6">
-              {suggestedCohorts.map((cohort) => (
-                <div
-                  key={cohort.id}
-                  className="flex items-center gap-3 py-3 hover:bg-muted/30 transition-colors cursor-pointer px-1"
-                >
-                  <span className="text-primary">{cohort.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-p2 font-medium text-foreground">{cohort.name}</span>
-                    <span className="text-p3 text-muted-foreground ml-2">{cohort.description}</span>
-                  </div>
-                  <span className="text-p2 text-muted-foreground tabular-nums">
-                    <span className="text-foreground font-medium">{cohort.size}</span> visitors
-                  </span>
-                </div>
-              ))}
-            </div>
-            <Button className="w-full bg-primary hover:bg-primary/90">
-              Create your first audience
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
 
           {/* Setup Dialogs */}
           <TrackingSetupDialog
