@@ -103,8 +103,8 @@ const Scans = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">Scans</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-semibold text-foreground mb-2 font-mono">Scans</h1>
+            <p className="text-muted-foreground font-mono text-sm">
               View and track your audience scans
             </p>
           </div>
@@ -174,11 +174,11 @@ const Scans = () => {
 
         {/* Scan List */}
         {!loading && !error && activeScans.length > 0 && (
-          <div className="space-y-3">
+          <div className="border border-border overflow-hidden">
             {activeScans.map((scan) => (
               <div
                 key={scan.id}
-                className="px-4 py-3 border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
+                className="px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
                 onClick={() => navigate(`/scans/${scan.id}`)}
               >
                 <div>
@@ -191,7 +191,7 @@ const Scans = () => {
                         <h3 className="font-medium text-foreground">
                           {scan.name || `Scan ${scan.id.slice(0, 8)}`}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground font-mono">
                           {scan.wallet_count} wallets · {getChainLabel(scan.chain)} ·{" "}
                           {formatDistanceToNow(new Date(scan.created_at), { addSuffix: true })}
                         </p>

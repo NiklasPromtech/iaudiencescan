@@ -267,105 +267,27 @@ export default function Wallets() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Wallets</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  {summary?.total_wallets.toLocaleString() || 0}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-24" />
-              ) : (
-              <div className="text-2xl font-bold">
-                  {formatBalance(summary?.total_balance_usd, true)}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Median Balance</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-20" />
-              ) : (
-              <div className="text-2xl font-bold">
-                  {formatBalance(summary?.median_balance_usd, true)}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Zero Balance</CardTitle>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-16" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  {summary?.wallets_with_zero_balance.toLocaleString() || 0}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">Enriched with $0</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Not Enriched</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-16" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  {summary?.wallets_not_enriched.toLocaleString() || 0}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">Pending enrichment</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Failed</CardTitle>
-              <XCircle className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              {loading && !summary ? (
-                <Skeleton className="h-7 w-16" />
-              ) : (
-                <div className="text-2xl font-bold text-destructive">
-                  {summary?.wallets_enrichment_failed?.toLocaleString() || 0}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">Enrichment failed</p>
-            </CardContent>
-          </Card>
+        <div className="flex items-center divide-x divide-border border-b border-border pb-4">
+          {[
+            { label: "Total Wallets", value: loading && !summary ? null : (summary?.total_wallets.toLocaleString() || "0"), icon: <Users className="h-4 w-4 text-primary" /> },
+            { label: "Total Balance", value: loading && !summary ? null : formatBalance(summary?.total_balance_usd, true), icon: <DollarSign className="h-4 w-4 text-primary" /> },
+            { label: "Median Balance", value: loading && !summary ? null : formatBalance(summary?.median_balance_usd, true), icon: <TrendingUp className="h-4 w-4 text-primary" /> },
+            { label: "Zero Balance", value: loading && !summary ? null : (summary?.wallets_with_zero_balance.toLocaleString() || "0"), icon: <Wallet className="h-4 w-4 text-muted-foreground" /> },
+            { label: "Not Enriched", value: loading && !summary ? null : (summary?.wallets_not_enriched.toLocaleString() || "0"), icon: <AlertCircle className="h-4 w-4 text-muted-foreground" /> },
+            { label: "Failed", value: loading && !summary ? null : (summary?.wallets_enrichment_failed?.toLocaleString() || "0"), icon: <XCircle className="h-4 w-4 text-destructive" />, destructive: true },
+          ].map((stat) => (
+            <div key={stat.label} className="flex items-center gap-2 px-6 first:pl-0">
+              {stat.icon}
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{stat.label}</p>
+                {stat.value === null ? (
+                  <Skeleton className="h-5 w-16 mt-1" />
+                ) : (
+                  <p className={`font-mono text-lg font-bold tabular-nums ${(stat as any).destructive ? "text-destructive" : ""}`}>{stat.value}</p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Filters */}

@@ -68,30 +68,39 @@ export const mockHolderTrend = Array.from({ length: 30 }, (_, i) => {
 export const mockPlatformTokens = {
   twitter: {
     label: "X / Twitter",
-    count: 7,
+    count: 8,
     color: "bg-sky-500/10 text-sky-500 border-sky-500/20",
     tokens: [
-      { symbol: "LINK", name: "Chainlink", handle: "@chainlink", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
-      { symbol: "ONDO", name: "Ondo Finance", handle: "@OndoFinance", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
-      { symbol: "XAUT", name: "Tether Gold", handle: "@tethergold", marketCap: "$2.5B", logo: "https://assets.coingecko.com/coins/images/10481/small/Tether_Gold.png" },
-      { symbol: "PAXG", name: "Paxos Gold", handle: "@paxosglobal", marketCap: "$2.2B", logo: "https://assets.coingecko.com/coins/images/9519/small/paxg.PNG" },
+      { symbol: "USDC", name: "USD Coin", handle: "@circle", marketCap: "$73.3B", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png" },
+      { symbol: "POL", name: "Polygon", handle: "@0xPolygon", marketCap: "$937M", logo: "https://coin-images.coingecko.com/coins/images/32440/large/pol.png" },
+      { symbol: "PEPE", name: "Pepe", handle: "@pepecoineth", marketCap: "$3.2B", logo: "https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg" },
+      { symbol: "T6900", name: "Token6900", handle: "@Token_6900", marketCap: "$749K", logo: "https://coin-images.coingecko.com/coins/images/68913/large/Token6900_Logo_200x200.png" },
+      { symbol: "PORK", name: "PepeFork", handle: "@PorkCoinETH", marketCap: "$6.2M", logo: "https://coin-images.coingecko.com/coins/images/34913/large/pork.png" },
+      { symbol: "SNORT", name: "Snorter", handle: "@SnorterToken", marketCap: "$1.9M", logo: "https://coin-images.coingecko.com/coins/images/70353/large/snort_400x400.jpg" },
+      { symbol: "BEST", name: "Best Wallet", handle: "@BestWalletHQ", marketCap: "$8.2M", logo: "https://coin-images.coingecko.com/coins/images/70874/large/Logo_%283%29.png" },
+      { symbol: "PNDC", name: "Pond Coin", handle: "@pond0x", marketCap: "$6.3M", logo: "https://coin-images.coingecko.com/coins/images/31215/large/pond-coin.jpeg" },
     ],
   },
   telegram: {
     label: "Telegram",
-    count: 5,
+    count: 6,
     color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     tokens: [
+      { symbol: "POL", name: "Polygon", handle: "PolygonHQ", marketCap: "$937M", logo: "https://coin-images.coingecko.com/coins/images/32440/large/pol.png" },
+      { symbol: "MATIC", name: "Matic Token", handle: "polygonofficial", marketCap: "$2.1B", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png" },
+      { symbol: "SNORT", name: "Snorter", handle: "Snorter_token", marketCap: "$1.9M", logo: "https://coin-images.coingecko.com/coins/images/70353/large/snort_400x400.jpg" },
+      { symbol: "BEST", name: "Best Wallet", handle: "Best_Wallet_Announcements", marketCap: "$8.2M", logo: "https://coin-images.coingecko.com/coins/images/70874/large/Logo_%283%29.png" },
       { symbol: "LINK", name: "Chainlink", handle: "chainlinkofficial", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
       { symbol: "ONDO", name: "Ondo Finance", handle: "ondofinance", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
-      { symbol: "NUSD", name: "Neutrl USD", handle: "NeutrlOfficial", marketCap: "$226M" },
     ],
   },
   discord: {
     label: "Discord",
-    count: 4,
+    count: 5,
     color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
     tokens: [
+      { symbol: "POL", name: "Polygon", handle: "0xPolygonCommunity", marketCap: "$937M", logo: "https://coin-images.coingecko.com/coins/images/32440/large/pol.png" },
+      { symbol: "BEST", name: "Best Wallet", handle: "bestwallet", marketCap: "$8.2M", logo: "https://coin-images.coingecko.com/coins/images/70874/large/Logo_%283%29.png" },
       { symbol: "ONDO", name: "Ondo Finance", handle: "Ondo DAO", marketCap: "$1.1B", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
       { symbol: "RESOLV", name: "Resolv", handle: "resolvcommunity", marketCap: "$28M" },
       { symbol: "EUL", name: "Euler Finance", handle: "euler.finance", marketCap: "$16.5M", logo: "https://assets.coingecko.com/coins/images/26149/small/YCvKDfl8_400x400.jpeg" },
@@ -99,19 +108,27 @@ export const mockPlatformTokens = {
   },
   reddit: {
     label: "Reddit",
-    count: 1,
+    count: 3,
     color: "bg-orange-500/10 text-orange-500 border-orange-500/20",
     tokens: [
+      { symbol: "POL", name: "Polygon", handle: "r/0xPolygon", marketCap: "$937M", logo: "https://coin-images.coingecko.com/coins/images/32440/large/pol.png" },
+      { symbol: "MATIC", name: "Matic Token", handle: "r/0xPolygon", marketCap: "$2.1B", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png" },
       { symbol: "LINK", name: "Chainlink", handle: "r/Chainlink", marketCap: "$5.8B", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
     ],
   },
 };
+
 export const mockNewsArticles = [
-  { symbol: "USDC", token: "USD Coin", title: "Circle Partners Polymarket to Integrate Native USDC, Eliminating Bridge Risk", source: "CoinSpeaker", timeAgo: "1h ago", logo: "https://assets.coingecko.com/coins/images/6319/small/usdc.png" },
-  { symbol: "XAUT", token: "Tether Gold", title: "$150M Investment in Tether Gold.com: XAUt Integration", source: "COINOTAG", timeAgo: "3h ago", logo: "https://assets.coingecko.com/coins/images/10481/small/Tether_Gold.png" },
-  { symbol: "ONDO", token: "Ondo Finance", title: "MetaMask Partners Ondo Finance to Integrate Tokenized US Stocks, ETFs", source: "CoinSpeaker", timeAgo: "1d ago", logo: "https://assets.coingecko.com/coins/images/26580/small/ONDO.png" },
-  { symbol: "LINK", token: "Chainlink", title: "Morph Integrates Chainlink CCIP As Exclusive Cross-Chain Standard", source: "Blockchain Reporter", timeAgo: "1d ago", logo: "https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png" },
-  { symbol: "PAXG", token: "Paxos Gold", title: "Paxos Gold (PAXG) sees record $248 million inflow in January", source: "CoinDesk", timeAgo: "1w ago", logo: "https://assets.coingecko.com/coins/images/9519/small/paxg.PNG" },
+  { symbol: "USDC", token: "USD Coin", title: "Circle Partners Polymarket to Integrate Native USDC, Eliminating Bridge Risk", source: "DeFi Rate", timeAgo: "1h ago", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png" },
+  { symbol: "USDC", token: "USD Coin", title: "Circle Mints 250M USDC on Solana to Expand Liquidity", source: "Crypto Economy", timeAgo: "3h ago", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png" },
+  { symbol: "POL", token: "Polygon", title: "Polygon Burns 25.9M POL to Cut Supply as Capital Inflows Rise", source: "AMBCrypto", timeAgo: "6h ago", logo: "https://coin-images.coingecko.com/coins/images/32440/large/pol.png" },
+  { symbol: "MATIC", token: "Matic Token", title: "Polygon Labs Acquires Coinme to Build Stablecoin Payment Rails", source: "Blockchain News", timeAgo: "1d ago", logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3890.png" },
+  { symbol: "PEPE", token: "Pepe", title: "Pepe Whale Moves 2.1T Tokens to Fresh Wallet Amid Price Rally", source: "CoinDesk", timeAgo: "1d ago", logo: "https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg" },
+  { symbol: "BEST", token: "Best Wallet", title: "Best Wallet Token Launch: What's Next After the Presale", source: "CryptoNews", timeAgo: "2d ago", logo: "https://coin-images.coingecko.com/coins/images/70874/large/Logo_%283%29.png" },
+  { symbol: "SNORT", token: "Snorter", title: "Snorter Hits $5.5M With 3 Days Until Exchange Listings", source: "Blockchain Reporter", timeAgo: "3d ago", logo: "https://coin-images.coingecko.com/coins/images/70353/large/snort_400x400.jpg" },
+  { symbol: "T6900", token: "Token6900", title: "TOKEN6900 Set to Explode — Could It Be the Next SPX6900?", source: "CoinSpeaker", timeAgo: "1w ago", logo: "https://coin-images.coingecko.com/coins/images/68913/large/Token6900_Logo_200x200.png" },
+  { symbol: "PNDC", token: "Pond Coin", title: "Pond Coin: The Rising Star in the Crypto World", source: "Medium", timeAgo: "1w ago", logo: "https://coin-images.coingecko.com/coins/images/31215/large/pond-coin.jpeg" },
+  { symbol: "PORK", token: "PepeFork", title: "PepeFork (PORK): A Meme Coin Forked from Pepe Gains Traction", source: "Bitget Academy", timeAgo: "2w ago", logo: "https://coin-images.coingecko.com/coins/images/34913/large/pork.png" },
 ];
 
 export const mockBotSummary = [
@@ -121,9 +138,12 @@ export const mockBotSummary = [
 ];
 
 export const mockPROutlets = [
-  { name: "CoinSpeaker", articles: 6 },
+  { name: "CoinSpeaker", articles: 8 },
+  { name: "Blockchain Reporter", articles: 6 },
   { name: "CoinDesk", articles: 4 },
-  { name: "Blockchain Reporter", articles: 3 },
+  { name: "CryptoNews", articles: 4 },
+  { name: "99Bitcoins", articles: 3 },
+  { name: "AMBCrypto", articles: 3 },
+  { name: "Bitget Academy", articles: 2 },
   { name: "Seeking Alpha", articles: 2 },
-  { name: "Benzinga", articles: 2 },
 ];
