@@ -1,41 +1,46 @@
 
 
-## Send Invite Email on Website Share
+## Fix: "Data" button on /install not updating the selected website
 
-### What we're building
+### Problem
+When you click the "Data" button for a website (e.g., Rubic) on the `/install` page, it only writes to `localStorage` but does **not** update the global `SelectedWebsiteProvider` context. The `/overview` page reads from that context, so it continues showing data for the previously selected website (e.g., qLabs).
 
-When you share a website with someone who doesn't have an account yet (`has_account: false`), we'll automatically send them a branded invite email via a new Supabase edge function using Resend.
+### Root Cause
+The `onGoToData` handler (line 303-307 in `Install.tsx`) bypasses the shared `selectWebsite()` function from the context:
 
----
+```text
+onGoToData={(w) => {
+  localStorage.setItem("selectedWebsiteId", w.id);
+  localStorage.setItem("selectedWebsite", JSON.stringify(w));
+  navigate("/overview");
+}}
+```
 
-### Secret: RESEND_API_KEY
+It should instead call `selectWebsite()` from the `useSelectedWebsite()` hook, which updates both localStorage **and** the React context state that all dashboard pages depend on.
 
-The `RESEND_API_KEY` is not currently in the project's secrets. We'll need to add it so the edge function can use it. You'll be prompted to provide it.
+### Fix (1 file)
 
----
+**`src/pages/Install.tsx`**
+1. Import and use `useSelectedWebsite` hook
+2. Update the `onGoToData` callback to call `selectWebsite()` before navigating
+3. Also update `handleSelectWebsite` to use the shared context function instead of manually writing to localStorage (fixing a secondary inconsistency)
 
-### Changes
+### Technical Detail
 
-**New file: `supabase/functions/send-invite-email/index.ts`**
-- Accepts `{ email, websiteName, inviterName }` via POST
-- Uses Resend API to send a branded HTML email
-- Email design: orange/white card layout matching the confirmation email template
-  - Badge: "AudienceScan"
-  - Headline: "You've been invited"
-  - Body: "{inviterName} has shared analytics access for {websiteName} with you"
-  - CTA: "Create your account" linking to the published site's `/auth` page
-- Input validation with Zod
-- CORS headers included
-- Rate limiting (same pattern as existing `send-notification-email`)
+The updated `onGoToData` will look like:
 
-**File: `supabase/config.toml`**
-- Add `[functions.send-invite-email]` with `verify_jwt = false`
+```text
+onGoToData={async (w) => {
+  await selectWebsite({
+    id: w.id,
+    name: w.name,
+    base_url: w.base_url,
+    tag_id: w.tag_id,
+    status: w.status,
+  });
+  navigate("/overview");
+}}
+```
 
-**File: `src/lib/api.ts`**
-- Add `sendInviteEmail(email, websiteName, inviterName)` function that calls the edge function via `supabase.functions.invoke("send-invite-email", ...)`
-
-**File: `src/components/websites/WebsiteShareDialog.tsx`**
-- After a successful share where `response.has_account === false`, call `sendInviteEmail()` in the background
-- Get the current user's email/name via `supabase.auth.getUser()` to pass as `inviterName`
-- No UX changes needed -- the existing toast "Invite sent to..." already communicates this
+This ensures the context is updated before navigation, so `/overview` immediately loads data for the correct website.
 
