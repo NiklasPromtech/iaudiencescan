@@ -24,13 +24,13 @@ import { useEffect, useState, useRef } from "react";
 import bitmexLogo from "@/assets/client-logos/bitmex.png";
 import okxLogo from "@/assets/client-logos/okx.png";
 import flareLogo from "@/assets/client-logos/flare.png";
-import mantraLogo from "@/assets/client-logos/mantra.png";
+import axionLogo from "@/assets/client-logos/axion.png";
 import mintlayerLogo from "@/assets/client-logos/mintlayer.png";
 import syscoinLogo from "@/assets/client-logos/syscoin.png";
 import luxyLogo from "@/assets/client-logos/luxy.png";
 import somaLogo from "@/assets/client-logos/soma.png";
 import synesisLogo from "@/assets/client-logos/synesis.png";
-import ventLogo from "@/assets/client-logos/vent.png";
+import nftradeLogo from "@/assets/client-logos/nftrade.png";
 import xLogo from "@/assets/x-logo.png";
 import telegramLogo from "@/assets/telegram-logo.png";
 import logoWhite from "@/assets/audiencescan-logo-white.png";
@@ -207,13 +207,13 @@ const LandingPageV2 = () => {
     { src: bitmexLogo, alt: "BitMEX" },
     { src: okxLogo, alt: "OKX" },
     { src: flareLogo, alt: "Flare" },
-    { src: mantraLogo, alt: "Mantra" },
+    { src: axionLogo, alt: "Axion" },
     { src: mintlayerLogo, alt: "Mintlayer" },
     { src: syscoinLogo, alt: "Syscoin" },
     { src: luxyLogo, alt: "LUXY" },
     { src: somaLogo, alt: "SOMA" },
     { src: synesisLogo, alt: "Synesis" },
-    { src: ventLogo, alt: "Vent" },
+    { src: nftradeLogo, alt: "NFTrade" },
   ];
 
   const stats = [
