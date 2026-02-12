@@ -1,54 +1,61 @@
 
 
-## Unify Dashboard Fonts with Landing Page
+## Clean Up the Events / Wallets / Extensions Section
 
 ### Problem
 
-The landing page uses **Space Mono** (`font-mono`) for all data-oriented elements -- table headers, numeric values, stat labels, percentages -- giving it a sharp, technical feel. The dashboard uses the default **Bai Jamjuree** (`font-bai`) for everything, creating a jarring disconnect when users transition from landing to platform.
+The three tables (Conversion Events, Wallet Actions, Wallet Extensions) sit side-by-side in a 3-column grid. Each has its own icon, heading, count badge, full table headers, and expand button -- creating visual clutter. The columns are cramped (5 columns squeezed into 1/3 width for Events), dates wrap awkwardly, and the section feels disjointed.
 
 ### Solution
 
-Apply the same typographic hierarchy from the landing page across all dashboard components:
+Replace the 3-column grid with a **tabbed layout** inside a single bordered container. One tab per data type, clean and focused.
 
-- **Table headers**: `font-mono text-[10px] uppercase tracking-widest text-muted-foreground` (matching landing page `<th>` style)
-- **Numeric data cells**: `font-mono tabular-nums` (matching landing page `<td>` style)
-- **Stat labels**: `font-mono text-[10px] uppercase tracking-widest` (matching landing page scorecard labels)
-- **Stat values**: `font-mono font-bold tabular-nums` (matching landing page scorecard values)
-- **Section headings** (h3 like "Breakdown by Referrer"): Keep `font-bai` or switch to `font-serif` for section titles -- these are descriptive, not data
-- **Body text / descriptions**: Keep `font-bai` -- it stays as the reading font
+```text
++----------------------------------------------------------+
+| [Conversion Events]  [Wallet Actions]  [Wallet Extensions]|
+|                                                          |
+|  EVENT          TOTAL    UNIQUE    FIRST SEEN  LAST SEEN |
+|  click            458      161    Feb 6       Feb 9      |
+|  wallet_detected  212       96    Feb 6       Feb 9      |
+|                                                          |
+|  2 event types                     [View all 5 more v]   |
++----------------------------------------------------------+
+```
 
-### Files to Update
+### Changes
 
-| File | What changes |
-|------|-------------|
-| **`src/components/overview/DimensionTable.tsx`** | All `TableHead` get `font-mono text-[10px] uppercase tracking-widest`. All numeric `TableCell` / `MetricCell` / `WalletMetricCell` values get `font-mono`. |
-| **`src/components/overview/MetricCell.tsx`** | Add `font-mono` to the count, rate, and cost spans. |
-| **`src/components/overview/DimensionCell.tsx`** | Add `font-mono` to the dimension value, bot rate text. |
-| **`src/components/overview/ScorecardChips.tsx`** | Stat values get `font-mono`. Category labels already have uppercase but need `font-mono tracking-widest`. The "live" label, metric labels, and values all get `font-mono`. |
-| **`src/components/overview/EventsTable.tsx`** | All `TableHead` get `font-mono text-[10px] uppercase tracking-widest`. Numeric cells get `font-mono tabular-nums`. |
-| **`src/components/overview/DailyChart.tsx`** | Chart axis ticks get `fontFamily: 'Space Mono, monospace'`. Metric selector labels, legend text get `font-mono`. |
-| **`src/components/bots/BotSummaryCards.tsx`** | Legend labels, percentages, counts all get `font-mono`. |
-| **`src/components/bots/BotDimensionTable.tsx`** | Same pattern: `TableHead` headers get `font-mono text-[10px] uppercase tracking-widest`, data cells get `font-mono tabular-nums`. |
-| **`src/components/bots/BotSignalsCard.tsx`** | Signal labels and values get `font-mono`. |
-| **`src/components/bots/RendererBreakdown.tsx`** | Data values get `font-mono tabular-nums`. |
-| **`src/components/contracts/HolderChartDialog.tsx`** | Stat card labels get `font-mono text-[10px] uppercase tracking-widest`. Values get `font-mono font-bold`. Chart axis ticks get `fontFamily: 'Space Mono, monospace'`. |
-| **`src/components/overview/WalletsOverviewTable.tsx`** | Headers and numeric cells get `font-mono`. |
-| **`src/components/overview/WalletExtensionsTable.tsx`** | Headers and numeric cells get `font-mono`. |
-| **`src/components/scan-results/SummaryBadges.tsx`** | Stat values get `font-mono`. |
-| **`src/components/scan-results/ScanResultsStats.tsx`** | Stat values get `font-mono tabular-nums`. Labels get `font-mono text-[10px] uppercase tracking-widest`. |
+**1. `src/pages/Overview.tsx`** (lines 584-601)
 
-### Typography Rules (Summary)
+Replace the `grid md:grid-cols-3` wrapper with a single `Tabs` component containing three `TabsTrigger` items and three `TabsContent` panels, one for each table. Each trigger shows the section name plus a count badge (e.g. "Conversion Events (2)").
 
-| Element | Font | Style |
-|---------|------|-------|
-| Section headings (h2, h3) | `font-serif` or `font-bai` | Normal casing, semibold |
-| Table column headers | `font-mono` | `text-[10px] uppercase tracking-widest` |
-| Numeric data values | `font-mono` | `tabular-nums` |
-| Stat card labels | `font-mono` | `text-[10px] uppercase tracking-widest` |
-| Stat card values | `font-mono` | `font-bold tabular-nums` |
-| Body/description text | `font-bai` | Normal |
-| Chart axis ticks | `Space Mono` | Via Recharts `fontFamily` prop |
+Remove the per-table icon + heading chrome since the tab itself serves as the label.
 
-### No structural changes
+**2. `src/components/overview/EventsTable.tsx`**
 
-This is purely a className update across dashboard components. No layout, logic, or data changes.
+- Remove the outer `py-4` wrapper, icon + heading row, and "X event types" count badge (these move to the tab trigger)
+- Keep only the table + expand button
+- Add a `compact` or `embedded` mode: no icon/title header, just the table content
+
+**3. `src/components/overview/WalletsOverviewTable.tsx`**
+
+Same treatment -- strip the icon/heading/count chrome; keep table + expand.
+
+**4. `src/components/overview/WalletExtensionsTable.tsx`**
+
+Same treatment -- strip the icon/heading/count chrome; keep table + expand.
+
+### Approach: Add `hideHeader` prop
+
+Rather than restructuring each component heavily, add an optional `hideHeader?: boolean` prop to all three table components. When `true`, the icon + title + count row is hidden, rendering only the table and expand button. This keeps the components reusable if needed standalone elsewhere.
+
+### Technical Details
+
+| File | Change |
+|------|--------|
+| `src/pages/Overview.tsx` | Import `Tabs, TabsContent, TabsList, TabsTrigger` from `@/components/ui/tabs`. Replace lines 584-601 grid with a `Tabs` defaultValue="events" containing 3 triggers and 3 content panels. Each trigger shows label + count badge. Pass `hideHeader={true}` to each table. |
+| `src/components/overview/EventsTable.tsx` | Add `hideHeader?: boolean` prop. When true, skip the icon/title/count row. |
+| `src/components/overview/WalletsOverviewTable.tsx` | Add `hideHeader?: boolean` prop. When true, skip the icon/title/count row. |
+| `src/components/overview/WalletExtensionsTable.tsx` | Add `hideHeader?: boolean` prop. When true, skip the icon/title/count row. |
+
+The tab triggers will use `font-mono text-xs uppercase tracking-widest` to match the established dashboard typography. Each trigger badge shows the count in `font-mono tabular-nums`.
+
