@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import InspirationPanel from "@/components/auth/InspirationPanel";
-import logoWhite from "@/assets/audiencescan-logo-dark.png";
+import icon from "@/assets/audiencescan-icon-large.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -106,8 +106,11 @@ const Auth = () => {
 
         <div className="flex-1 flex items-center justify-center px-6 lg:px-16">
           <div className="w-full max-w-sm space-y-8">
-            <div className="flex justify-center mb-2">
-              <img src={logoWhite} alt="AudienceScan" className="h-7" />
+            <div className="flex items-center gap-2 justify-center mb-2">
+              <img src={icon} alt="AudienceScan" className="h-6 w-6 rounded-md" />
+              <span className="font-semibold text-foreground text-sm tracking-tight">
+                AudienceScan
+              </span>
             </div>
 
             <div className="text-center">
