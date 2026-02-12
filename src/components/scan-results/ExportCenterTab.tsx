@@ -60,15 +60,15 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-semibold">Export Center</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="font-mono text-xs uppercase tracking-widest">Export Center</h2>
+        <p className="font-mono text-xs text-muted-foreground">
           Download your outreach data in multiple formats
         </p>
       </div>
 
       {/* Platform Handles */}
       <div>
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">
+        <h3 className="font-mono text-xs mb-3 text-muted-foreground uppercase tracking-widest">
           Platform Handles
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -109,7 +109,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
 
       {/* URLs */}
       <div>
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">
+        <h3 className="font-mono text-xs mb-3 text-muted-foreground uppercase tracking-widest">
           URLs
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -150,7 +150,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
 
       {/* Full Export */}
       <div>
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">
+        <h3 className="font-mono text-xs mb-3 text-muted-foreground uppercase tracking-widest">
           Full Export
         </h3>
         <div className="border-t border-border pt-6">

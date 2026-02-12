@@ -108,7 +108,7 @@ export const PROutletsSection = ({ sources }: PROutletsSectionProps) => {
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-medium text-sm">{source.domain}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
                       {source.article_count}{" "}
                       {source.article_count === 1 ? "article" : "articles"}
                     </span>

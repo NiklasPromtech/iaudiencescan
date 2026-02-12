@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -129,11 +128,11 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Globe className="h-5 w-5 text-green-500" />
+          <h2 className="font-mono text-xs uppercase tracking-widest flex items-center gap-2">
+            <Globe className="h-4 w-4 text-green-500" />
             Websites & Outreach List
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-mono text-xs text-muted-foreground">
             {tokensWithWebsites.length} project websites found
           </p>
         </div>
@@ -162,31 +161,31 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
 
       {/* Table */}
       {filteredTokens.length === 0 ? (
-        <Card className="p-12 text-center">
+        <div className="border border-border p-12 text-center">
           <Globe className="h-12 w-12 mx-auto opacity-30 mb-4" />
           <p className="text-muted-foreground">
             {tokensWithWebsites.length === 0
               ? "No project websites found in this scan."
               : "No websites match your search."}
           </p>
-        </Card>
+        </div>
       ) : (
-        <Card className="overflow-hidden">
+        <div className="border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[200px] font-mono text-xs uppercase tracking-widest">
                   <SortButton field="name" label="Token" />
                 </TableHead>
-                <TableHead>Website</TableHead>
-                <TableHead className="w-[120px]">Twitter</TableHead>
-                <TableHead className="w-[80px]">
+                <TableHead className="font-mono text-xs uppercase tracking-widest">Website</TableHead>
+                <TableHead className="w-[120px] font-mono text-xs uppercase tracking-widest">Twitter</TableHead>
+                <TableHead className="w-[80px] font-mono text-xs uppercase tracking-widest">
                   <SortButton field="news_count" label="News" />
                 </TableHead>
-                <TableHead className="w-[100px]">
+                <TableHead className="w-[100px] font-mono text-xs uppercase tracking-widest">
                   <SortButton field="market_cap" label="Mcap" />
                 </TableHead>
-                <TableHead className="w-[80px]">
+                <TableHead className="w-[80px] font-mono text-xs uppercase tracking-widest">
                   <SortButton field="transactions" label="Txns" />
                 </TableHead>
               </TableRow>
@@ -229,7 +228,7 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
                         href={`https://x.com/${token.twitter}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground text-sm"
+                        className="font-mono text-muted-foreground hover:text-foreground text-sm"
                       >
                         @{token.twitter.slice(0, 12)}
                         {token.twitter.length > 12 ? "..." : ""}
@@ -240,7 +239,7 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
                   </TableCell>
                   <TableCell>
                     {token.news_count && token.news_count > 0 ? (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="font-mono text-xs tabular-nums">
                         {token.news_count}
                       </Badge>
                     ) : (
@@ -248,12 +247,12 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm">
+                    <span className="font-mono text-sm tabular-nums">
                       {formatMarketCap(token.market_cap_usd) || "-"}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="font-mono text-sm tabular-nums text-muted-foreground">
                       {token.transaction_count.toLocaleString()}
                     </span>
                   </TableCell>
@@ -261,7 +260,7 @@ export const WebsitesTab = ({ tokens }: WebsitesTabProps) => {
               ))}
             </TableBody>
           </Table>
-        </Card>
+        </div>
       )}
     </div>
   );

@@ -123,11 +123,11 @@ const ScanResults = () => {
 
             {/* Title Section */}
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-2">
-                Outreach Command Center
+            <h1 className="text-2xl font-semibold text-foreground mb-2">
+                {scan.name || `Scan ${scan.id.slice(0, 8)}`}
               </h1>
-              <p className="text-muted-foreground">
-                {scan.name || `Scan ${scan.id.slice(0, 8)}`} • {getChainLabel(scan.chain)} • {scan.wallet_count} wallets analyzed •{" "}
+              <p className="font-mono text-xs text-muted-foreground tracking-wide">
+                {getChainLabel(scan.chain)} • {scan.wallet_count} wallets analyzed •{" "}
                 {scan.completed_at
                   ? `Completed ${formatDistanceToNow(new Date(scan.completed_at), { addSuffix: true })}`
                   : "Processing..."}
@@ -139,46 +139,45 @@ const ScanResults = () => {
 
             {/* Tab Navigation */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="communities" className="gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Communities</span>
-                  <span className="sm:hidden">Social</span>
-                </TabsTrigger>
-                <TabsTrigger value="news" className="gap-2">
-                  <Newspaper className="h-4 w-4" />
-                  <span className="hidden sm:inline">News</span>
-                  {counts.news > 0 && (
-                    <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full">
-                      {counts.news}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="websites" className="gap-2">
-                  <Globe className="h-4 w-4" />
-                  <span className="hidden sm:inline">Websites</span>
-                </TabsTrigger>
-                <TabsTrigger value="export" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">Export</span>
-                </TabsTrigger>
-              </TabsList>
+              <div className="border border-border">
+                <TabsList className="w-full justify-start border-b border-border bg-transparent p-0">
+                  <TabsTrigger value="communities" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 data-[state=active]:shadow-none px-4 py-3 gap-2">
+                    <Users className="h-4 w-4" />
+                    Communities
+                  </TabsTrigger>
+                  <TabsTrigger value="news" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 data-[state=active]:shadow-none px-4 py-3 gap-2">
+                    <Newspaper className="h-4 w-4" />
+                    News
+                    {counts.news > 0 && (
+                      <span className="font-mono tabular-nums text-muted-foreground">{counts.news}</span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="websites" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 data-[state=active]:shadow-none px-4 py-3 gap-2">
+                    <Globe className="h-4 w-4" />
+                    Websites
+                  </TabsTrigger>
+                  <TabsTrigger value="export" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 data-[state=active]:shadow-none px-4 py-3 gap-2">
+                    <Download className="h-4 w-4" />
+                    Export
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="communities" className="mt-0">
-                <CommunitiesTab tokens={tokens} />
-              </TabsContent>
+                <TabsContent value="communities" className="mt-0 p-4">
+                  <CommunitiesTab tokens={tokens} />
+                </TabsContent>
 
-              <TabsContent value="news" className="mt-0">
-                <NewsFeedTab tokens={tokens} />
-              </TabsContent>
+                <TabsContent value="news" className="mt-0 p-4">
+                  <NewsFeedTab tokens={tokens} />
+                </TabsContent>
 
-              <TabsContent value="websites" className="mt-0">
-                <WebsitesTab tokens={tokens} />
-              </TabsContent>
+                <TabsContent value="websites" className="mt-0 p-4">
+                  <WebsitesTab tokens={tokens} />
+                </TabsContent>
 
-              <TabsContent value="export" className="mt-0">
-                <ExportCenterTab tokens={tokens} scanName={scan.name || undefined} />
-              </TabsContent>
+                <TabsContent value="export" className="mt-0 p-4">
+                  <ExportCenterTab tokens={tokens} scanName={scan.name || undefined} />
+                </TabsContent>
+              </div>
             </Tabs>
           </div>
         )}

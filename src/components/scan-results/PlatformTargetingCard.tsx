@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -176,15 +175,15 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
   };
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <div className="border border-border overflow-hidden h-full flex flex-col">
       {/* Header */}
-      <div className={`p-4 ${config.bgColor} border-b border-border`}>
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className={config.color}>{config.icon}</div>
             <div className="min-w-0">
               <h3 className="font-semibold text-foreground">{config.label}</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 {tokensWithPlatform.length} communities found
               </p>
             </div>
@@ -272,14 +271,14 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
                   )}
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{token.token_name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="font-mono text-xs text-muted-foreground truncate">
                       {platform === "twitter" ? "@" : ""}{handle}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {token.market_cap_usd && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="font-mono text-xs tabular-nums">
                       {formatMarketCap(token.market_cap_usd)}
                     </Badge>
                   )}
@@ -317,6 +316,6 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
           )}
         </button>
       )}
-    </Card>
+    </div>
   );
 };

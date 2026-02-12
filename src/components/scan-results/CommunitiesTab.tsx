@@ -82,7 +82,7 @@ export const CommunitiesTab = ({ tokens }: CommunitiesTabProps) => {
       <div className="border-b border-border pb-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h3 className="font-medium text-sm mb-1">Filter Communities</h3>
+            <h3 className="font-mono text-xs uppercase tracking-widest mb-1">Filter Communities</h3>
             <p className="text-xs text-muted-foreground">
               Narrow down to high-value targeting opportunities
             </p>

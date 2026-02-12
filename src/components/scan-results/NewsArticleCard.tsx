@@ -12,7 +12,7 @@ export const NewsArticleCard = ({ article }: NewsArticleCardProps) => {
       href={article.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors group"
+      className="block p-4 border-b border-border hover:bg-muted/30 transition-colors group"
     >
       <div className="flex gap-4">
         {/* Token Logo */}
@@ -41,7 +41,7 @@ export const NewsArticleCard = ({ article }: NewsArticleCardProps) => {
             <span className="text-sm font-medium text-muted-foreground">
               {article.token_name}
             </span>
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="font-mono text-xs text-muted-foreground shrink-0">
               {formatDistanceToNow(new Date(article.published_at), {
                 addSuffix: true,
               })}
@@ -53,7 +53,7 @@ export const NewsArticleCard = ({ article }: NewsArticleCardProps) => {
           </h4>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Source: {article.source_domain}</span>
+            <span className="font-mono">Source: {article.source_domain}</span>
             <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
 
