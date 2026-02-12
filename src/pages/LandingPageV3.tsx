@@ -200,13 +200,13 @@ const LandingPageV3 = () => {
 
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Large card: GA Comparison */}
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <div className="rounded-lg border border-border bg-card overflow-hidden h-full flex flex-col">
               <div className="px-6 py-4 border-b border-border">
                 <h3 className="font-semibold text-foreground flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-primary" /> Google Analytics vs AudienceScan
                 </h3>
               </div>
-              <div>
+              <div className="flex-1 flex flex-col">
                 {gaComparison.map((row, i) => (
                   <div key={i} className="grid grid-cols-2 border-b border-border last:border-0">
                     <div className="px-5 py-3 flex items-center gap-2 bg-muted/30">
