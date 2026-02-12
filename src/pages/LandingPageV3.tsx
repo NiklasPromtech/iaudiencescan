@@ -208,7 +208,7 @@ const LandingPageV3 = () => {
               </div>
               <div className="flex-1 flex flex-col">
                 {gaComparison.map((row, i) => (
-                  <div key={i} className="grid grid-cols-2 border-b border-border last:border-0">
+                  <div key={i} className="grid grid-cols-2 border-b border-border last:border-0 flex-1">
                     <div className="px-5 py-3 flex items-center gap-2 bg-muted/30">
                       <XIcon className="w-3.5 h-3.5 text-destructive shrink-0" />
                       <span className="text-xs text-muted-foreground">{row.ga}</span>
