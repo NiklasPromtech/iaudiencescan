@@ -9,11 +9,20 @@ import {
   User,
   ChevronRight,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Settings = () => {
   const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("selectedWebsiteId");
+    localStorage.removeItem("selectedWebsite");
+    navigate("/auth");
+  };
 
   const settingsSections = [
     {
@@ -85,8 +94,25 @@ const Settings = () => {
           ))}
         </div>
 
+        {/* Sign Out */}
+        <Card
+          className="mt-6 p-4 border border-border hover:border-destructive/30 cursor-pointer transition-colors"
+          onClick={handleSignOut}
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-2 rounded-lg bg-destructive/10">
+              <LogOut className="h-5 w-5 text-destructive" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-p1 font-medium text-foreground">Sign out</h3>
+              <p className="text-p3 text-muted-foreground">Sign out of your AudienceScan account</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </Card>
+
         {/* Help Link */}
-        <Card className="mt-8 p-4 border border-border">
+        <Card className="mt-4 p-4 border border-border">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-p2 font-medium text-foreground">Need help?</h3>
