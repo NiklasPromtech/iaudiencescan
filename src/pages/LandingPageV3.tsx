@@ -177,10 +177,10 @@ const LandingPageV3 = () => {
         <div className="container mx-auto px-4 text-center mb-6">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Trusted by 50+ token teams, exchanges, and Web3 agencies</p>
         </div>
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
-          <div className="flex gap-16 items-center animate-marquee">
+          <div className="flex gap-16 items-center animate-marquee w-max">
             {[...clientLogos, ...clientLogos].map((logo, i) => (
               <img key={i} src={logo.src} alt={logo.alt} className="h-8 opacity-60 hover:opacity-100 transition-opacity shrink-0" />
             ))}
