@@ -15,7 +15,7 @@ export const DashboardFrame = ({ children }: DashboardFrameProps) => (
       </div>
       <div className="flex-1 flex justify-center">
         <div className="bg-muted rounded-md px-4 py-1 text-[10px] font-mono text-muted-foreground tracking-wide">
-          app.audiencescan.xyz/overview
+          audiencescan.io/overview
         </div>
       </div>
       <div className="w-12" /> {/* Spacer to center the URL bar */}
