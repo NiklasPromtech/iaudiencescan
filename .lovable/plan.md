@@ -1,66 +1,45 @@
 
 
-# Add `time_on_site` Breakdown Dimension
+## Add Logout + Redesign "Your Websites" Page
 
-## What Changes
+### What's changing
 
-Add "Time on Site" as a new dimension option across the Overview page's DimensionTable dropdown and the Measure Change / Incrementality breakdown selectors.
+**1. Add a logout option** -- currently there is no way to sign out. We'll add a user/logout section to the sidebar footer and the Settings page.
 
-## 1. Add `time_on_site` to the `TableDimension` type
+**2. Redesign the Install (Your Websites) page** -- wrap it inside the `DashboardLayout` so it feels like part of the app (sidebar + top bar), and restyle the website list to match the flat, Dune-inspired aesthetic used throughout the dashboard.
 
-In `src/lib/api.ts`, extend the `TableDimension` union type to include `"time_on_site"`.
+---
 
-## 2. Add to DimensionTable dropdown (Overview page)
+### Design Details
 
-In `src/components/overview/DimensionTable.tsx`, add a new entry to `DIMENSION_OPTIONS`:
+**Logout**
+- Add a user avatar/email row at the bottom of the `DashboardSidebar` with a "Sign out" option (dropdown or direct button)
+- Also add a "Sign Out" button to the Settings page under Account
+- On sign out: clear local storage, call `supabase.auth.signOut()`, redirect to `/auth`
 
-```text
-{ value: "time_on_site", label: "Time on Site" }
-```
+**Websites page redesign**
+- Wrap in `DashboardLayout` instead of the standalone full-screen layout
+- Rename the page header to "Websites" (simpler, matches sidebar "Settings > Websites" flow)
+- Restyle website cards: flat border-border containers, mono uppercase labels for status, inline stat-row style (matching the dashboard aesthetic)
+- Each website row: clean layout with name, URL, status badge, and action buttons (Go to data, Share, Archive) -- all using `rounded-none` buttons
+- The expanded installation instructions section keeps its current functionality but gets styled consistently
+- The "Add new" create form becomes a dialog or inline card within the layout
 
-This automatically makes it available in the dimension `<Select>` on the Overview page. The existing `fetchTableData` call will send `dimension: "time_on_site"` and the API will return rows with `dim_value` keys like `"0-10s"`, `"10-30s"`, `"30s-1m"`, `"1-5m"`, `"5m+"`.
+---
 
-## 3. Add to Measure Change breakdown options
+### Technical Plan
 
-In `src/pages/Change.tsx`, add to `BREAKDOWN_OPTIONS`:
+**File: `src/components/dashboard/DashboardSidebar.tsx`**
+- Import `supabase` and `LogOut` icon
+- Add a `SidebarFooter` section showing the current user's email (fetched via `supabase.auth.getUser()`) with a sign-out button
+- On click: `supabase.auth.signOut()`, clear localStorage (`selectedWebsiteId`, `selectedWebsite`), navigate to `/auth`
 
-```text
-{ value: "time_on_site", label: "Time on Site" }
-```
+**File: `src/pages/Install.tsx`**
+- Wrap the main return in `<DashboardLayout>` instead of the raw `div` with `bg-gradient-subtle`
+- Simplify the header -- remove the centered hero layout, use a left-aligned "Websites" heading with subtitle
+- Restyle `WebsiteListItemWithTag` to use the flat card aesthetic: `border-border`, mono text for labels, `rounded-none` on buttons
+- Keep all existing functionality (create, verify, archive, share, copy snippets)
 
-Also include `"time_on_site"` in the default `breakdowns` array for basic mode (line ~381).
-
-## 4. Add to Incrementality Analysis breakdown options
-
-In `src/components/touchpoints/IncrementalityAnalysisDialog.tsx`, add to `BREAKDOWN_OPTIONS`:
-
-```text
-{ value: "time_on_site", label: "Time on Site" }
-```
-
-## 5. Add to Incrementality Results rendering
-
-In `src/components/touchpoints/IncrementalityResultsView.tsx`, add to `breakdownConfig`:
-
-```text
-{ key: 'time_on_site', title: 'Time on Site', icon: Clock }
-```
-
-(Import `Clock` from lucide-react if not already imported.)
-
-## 6. Add to filter dimension mapping
-
-In `src/lib/api.ts`, add `time_on_site` to `DIMENSION_TO_FILTER` if needed for click-through filtering (may map to itself or be omitted if no filter equivalent exists).
-
-## Technical Summary
-
-| File | Change |
-|------|--------|
-| `src/lib/api.ts` | Add `"time_on_site"` to `TableDimension` type |
-| `src/components/overview/DimensionTable.tsx` | Add to `DIMENSION_OPTIONS` array |
-| `src/pages/Change.tsx` | Add to `BREAKDOWN_OPTIONS`, include in basic mode defaults |
-| `src/components/touchpoints/IncrementalityAnalysisDialog.tsx` | Add to `BREAKDOWN_OPTIONS` |
-| `src/components/touchpoints/IncrementalityResultsView.tsx` | Add to `breakdownConfig` |
-
-No new components needed -- the existing table and breakdown rendering handles arbitrary `dim_value` strings, so buckets like `"0-10s"` and `"5m+"` will render correctly out of the box.
+**File: `src/pages/Settings.tsx`**
+- Add a working "Sign Out" action to the Account section (or add a dedicated sign-out card)
 
