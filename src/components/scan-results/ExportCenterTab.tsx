@@ -71,7 +71,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
         <h3 className="font-mono text-xs mb-3 text-muted-foreground uppercase tracking-widest">
           Platform Handles
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="space-y-0">
           <ExportCard
             title="X / Twitter"
             subtitle="handles"
@@ -112,7 +112,7 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
         <h3 className="font-mono text-xs mb-3 text-muted-foreground uppercase tracking-widest">
           URLs
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-0">
           <ExportCard
             title="Project Websites"
             subtitle="URLs"
