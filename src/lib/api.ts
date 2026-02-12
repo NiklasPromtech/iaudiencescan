@@ -260,7 +260,8 @@ export type TableDimension =
   | "device_type" 
   | "browser" 
   | "os"
-  | "country";
+  | "country"
+  | "time_on_site";
 
 export interface TableRequest {
   tag_id: string;

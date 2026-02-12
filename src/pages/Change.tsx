@@ -69,6 +69,7 @@ const BREAKDOWN_OPTIONS = [
   { value: "region", label: "Region" },
   { value: "city", label: "City" },
   { value: "referrer_domain", label: "Referrer Domain" },
+  { value: "time_on_site", label: "Time on Site" },
 ];
 
 type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries" | "wallet_actions";
@@ -378,7 +379,7 @@ const Change = () => {
           end_date: format(basicEndDate, "yyyy-MM-dd"),
         },
         baseline_days: basicRange![0],
-        breakdowns: ["conversion_event", "wallet_action", "utm_source", "country", "referrer_domain"],
+        breakdowns: ["conversion_event", "wallet_action", "utm_source", "country", "referrer_domain", "time_on_site"],
         filters: basicExcludeBots ? { exclude: { bot_status: ["bot"] } } : undefined,
       };
 

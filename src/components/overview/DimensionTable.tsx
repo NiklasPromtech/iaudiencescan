@@ -114,6 +114,7 @@ const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
   { value: "browser", label: "Browser" },
   { value: "os", label: "Operating System" },
   { value: "country", label: "Country" },
+  { value: "time_on_site", label: "Time on Site" },
 ];
 
 // Map TableDimension to CostDimension
