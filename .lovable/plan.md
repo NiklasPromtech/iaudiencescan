@@ -1,45 +1,41 @@
 
 
-## Add Logout + Redesign "Your Websites" Page
+## Send Invite Email on Website Share
 
-### What's changing
+### What we're building
 
-**1. Add a logout option** -- currently there is no way to sign out. We'll add a user/logout section to the sidebar footer and the Settings page.
-
-**2. Redesign the Install (Your Websites) page** -- wrap it inside the `DashboardLayout` so it feels like part of the app (sidebar + top bar), and restyle the website list to match the flat, Dune-inspired aesthetic used throughout the dashboard.
+When you share a website with someone who doesn't have an account yet (`has_account: false`), we'll automatically send them a branded invite email via a new Supabase edge function using Resend.
 
 ---
 
-### Design Details
+### Secret: RESEND_API_KEY
 
-**Logout**
-- Add a user avatar/email row at the bottom of the `DashboardSidebar` with a "Sign out" option (dropdown or direct button)
-- Also add a "Sign Out" button to the Settings page under Account
-- On sign out: clear local storage, call `supabase.auth.signOut()`, redirect to `/auth`
-
-**Websites page redesign**
-- Wrap in `DashboardLayout` instead of the standalone full-screen layout
-- Rename the page header to "Websites" (simpler, matches sidebar "Settings > Websites" flow)
-- Restyle website cards: flat border-border containers, mono uppercase labels for status, inline stat-row style (matching the dashboard aesthetic)
-- Each website row: clean layout with name, URL, status badge, and action buttons (Go to data, Share, Archive) -- all using `rounded-none` buttons
-- The expanded installation instructions section keeps its current functionality but gets styled consistently
-- The "Add new" create form becomes a dialog or inline card within the layout
+The `RESEND_API_KEY` is not currently in the project's secrets. We'll need to add it so the edge function can use it. You'll be prompted to provide it.
 
 ---
 
-### Technical Plan
+### Changes
 
-**File: `src/components/dashboard/DashboardSidebar.tsx`**
-- Import `supabase` and `LogOut` icon
-- Add a `SidebarFooter` section showing the current user's email (fetched via `supabase.auth.getUser()`) with a sign-out button
-- On click: `supabase.auth.signOut()`, clear localStorage (`selectedWebsiteId`, `selectedWebsite`), navigate to `/auth`
+**New file: `supabase/functions/send-invite-email/index.ts`**
+- Accepts `{ email, websiteName, inviterName }` via POST
+- Uses Resend API to send a branded HTML email
+- Email design: orange/white card layout matching the confirmation email template
+  - Badge: "AudienceScan"
+  - Headline: "You've been invited"
+  - Body: "{inviterName} has shared analytics access for {websiteName} with you"
+  - CTA: "Create your account" linking to the published site's `/auth` page
+- Input validation with Zod
+- CORS headers included
+- Rate limiting (same pattern as existing `send-notification-email`)
 
-**File: `src/pages/Install.tsx`**
-- Wrap the main return in `<DashboardLayout>` instead of the raw `div` with `bg-gradient-subtle`
-- Simplify the header -- remove the centered hero layout, use a left-aligned "Websites" heading with subtitle
-- Restyle `WebsiteListItemWithTag` to use the flat card aesthetic: `border-border`, mono text for labels, `rounded-none` on buttons
-- Keep all existing functionality (create, verify, archive, share, copy snippets)
+**File: `supabase/config.toml`**
+- Add `[functions.send-invite-email]` with `verify_jwt = false`
 
-**File: `src/pages/Settings.tsx`**
-- Add a working "Sign Out" action to the Account section (or add a dedicated sign-out card)
+**File: `src/lib/api.ts`**
+- Add `sendInviteEmail(email, websiteName, inviterName)` function that calls the edge function via `supabase.functions.invoke("send-invite-email", ...)`
+
+**File: `src/components/websites/WebsiteShareDialog.tsx`**
+- After a successful share where `response.has_account === false`, call `sendInviteEmail()` in the background
+- Get the current user's email/name via `supabase.auth.getUser()` to pass as `inviterName`
+- No UX changes needed -- the existing toast "Invite sent to..." already communicates this
 
