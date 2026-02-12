@@ -23,8 +23,10 @@ import {
   shareWebsite, 
   listWebsiteShares, 
   revokeWebsiteShare, 
+  sendInviteEmail,
   WebsiteShare 
 } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WebsiteShareDialogProps {
   open: boolean;
@@ -89,6 +91,10 @@ export function WebsiteShareDialog({
         toast.success(`Invite sent to ${email.trim()}`, {
           description: "They'll get access once they create an account",
         });
+        // Send invite email in the background
+        const { data: { user } } = await supabase.auth.getUser();
+        const inviterName = user?.email || "Someone";
+        sendInviteEmail(email.trim(), websiteName, inviterName).catch(() => {});
       }
       setEmail("");
       fetchShares();
