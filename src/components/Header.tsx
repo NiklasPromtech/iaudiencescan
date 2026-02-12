@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
-import audienceScanIcon from "@/assets/audiencescan-icon.png";
+import audienceScanIcon from "@/assets/audiencescan-icon-large.png";
 
 const Header = () => {
   return (

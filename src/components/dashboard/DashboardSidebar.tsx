@@ -30,7 +30,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import audiencescanIcon from "@/assets/audiencescan-icon.png";
+import audiencescanIcon from "@/assets/audiencescan-icon-large.png";
 import audiencescanLogo from "@/assets/audiencescan-logo-wide.png";
 
 
@@ -186,18 +186,13 @@ export const DashboardSidebar = () => {
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
       <SidebarHeader className={cn("p-4", collapsed && "p-2 flex items-center justify-center")}>
         <Link to="/overview" className="flex items-center gap-2">
-          {collapsed ? (
-            <img
-              src={audiencescanIcon}
-              alt="AudienceScan"
-              className="h-6 w-auto"
-            />
-          ) : (
-            <img
-              src={audiencescanLogo}
-              alt="AudienceScan"
-              className="h-6 w-auto"
-            />
+          <img
+            src={audiencescanIcon}
+            alt="AudienceScan"
+            className="h-6 w-6 rounded-md shrink-0"
+          />
+          {!collapsed && (
+            <span className="font-semibold text-foreground text-sm tracking-tight">AudienceScan</span>
           )}
         </Link>
       </SidebarHeader>
