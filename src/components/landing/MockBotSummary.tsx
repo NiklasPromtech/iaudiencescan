@@ -7,7 +7,7 @@ export const MockBotSummary = () => {
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
   let cumulative = 0;
-  const colors = ["hsl(0, 84%, 60%)", "hsl(170, 70%, 45%)", "hsl(40, 20%, 80%)"];
+  const colors = ["hsl(0, 84%, 60%)", "hsl(var(--primary))", "hsl(170, 70%, 45%)"];
   const icons = [<Bot className="h-4 w-4" key="b" />, <User className="h-4 w-4" key="u" />, <HelpCircle className="h-4 w-4" key="h" />];
 
   return (

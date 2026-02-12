@@ -6,8 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -29,6 +29,8 @@ interface HolderChartDialogProps {
   };
   tagId: string;
 }
+
+const TEAL = "hsl(170, 70%, 45%)";
 
 export const HolderChartDialog = ({
   open,
@@ -132,16 +134,16 @@ export const HolderChartDialog = ({
               {/* Stats row */}
               {stats && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg border bg-muted/30">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <div className="p-4 rounded-none border bg-muted/30">
+                    <p className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                       Current Holders
                     </p>
                     <p className="text-2xl font-bold mt-1">
                       {stats.latest.toLocaleString()}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg border bg-muted/30">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <div className="p-4 rounded-none border bg-muted/30">
+                    <p className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                       7-Day Change
                     </p>
                     <div className="flex items-center gap-2 mt-1">
@@ -176,23 +178,34 @@ export const HolderChartDialog = ({
               {/* Chart */}
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="holderGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={TEAL} stopOpacity={0.3} />
+                        <stop offset="100%" stopColor={TEAL} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
                     <XAxis
                       dataKey="formattedDate"
+                      tickLine={false}
+                      axisLine={false}
                       tick={{ fontSize: 12 }}
                       className="text-muted-foreground"
                     />
                     <YAxis
+                      tickLine={false}
+                      axisLine={false}
                       tick={{ fontSize: 12 }}
                       className="text-muted-foreground"
                       tickFormatter={(v) => v.toLocaleString()}
+                      domain={["dataMin - 100", "dataMax + 100"]}
                     />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--popover))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
+                        borderRadius: "0",
                       }}
                       formatter={(value: number) => [
                         value.toLocaleString(),
@@ -200,15 +213,14 @@ export const HolderChartDialog = ({
                       ]}
                       labelFormatter={(label) => label}
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="holders"
-                      stroke="hsl(var(--primary))"
+                      stroke={TEAL}
                       strokeWidth={2}
-                      dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                      activeDot={{ r: 6 }}
+                      fill="url(#holderGradient)"
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </>

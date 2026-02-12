@@ -67,7 +67,7 @@ const METRIC_MAP = Object.fromEntries(METRIC_OPTIONS.map((m) => [m.key, m]));
 
 // Define chart colors
 const COLOR_LEFT = "hsl(var(--primary))";
-const COLOR_RIGHT = "hsl(var(--foreground))";
+const COLOR_RIGHT = "hsl(170, 70%, 45%)";
 
 export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
@@ -300,13 +300,13 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
                   yAxisId="left"
                   dataKey={metricLeft}
                   fill={COLOR_LEFT}
-                  radius={[4, 4, 0, 0]}
+                  radius={[3, 3, 0, 0]}
                 />
                 <Bar
                   yAxisId="right"
                   dataKey={metricRight}
                   fill={COLOR_RIGHT}
-                  radius={[4, 4, 0, 0]}
+                  radius={[3, 3, 0, 0]}
                 />
               </BarChart>
             </ChartContainer>
