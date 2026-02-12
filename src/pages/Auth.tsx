@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import InspirationPanel from "@/components/auth/InspirationPanel";
+import logoWhite from "@/assets/audiencescan-logo-dark.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,12 +22,10 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
-  // Check for signin_required message
   const message = searchParams.get("message");
   const showSignInRequired = message === "signin_required";
 
   useEffect(() => {
-    // Check for email verification success
     const verified = searchParams.get("verified");
     if (verified === "true") {
       setEmailVerified(true);
@@ -35,7 +35,6 @@ const Auth = () => {
       });
     }
 
-    // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -44,7 +43,6 @@ const Auth = () => {
       setCheckingSession(false);
     };
 
-    // Set up auth state listener BEFORE checking session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         navigate("/install");
@@ -52,7 +50,6 @@ const Auth = () => {
     });
 
     checkSession();
-
     return () => subscription.unsubscribe();
   }, [navigate, searchParams, toast]);
 
@@ -62,38 +59,23 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
+        toast({ title: "Welcome back!", description: "You have successfully signed in." });
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth?verified=true`,
-            data: {
-              display_name: displayName,
-            },
+            data: { display_name: displayName },
           },
         });
         if (error) throw error;
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+        toast({ title: "Account created!", description: "Please check your email to verify your account." });
       }
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Something went wrong", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -108,137 +90,138 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <div className="p-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-      </div>
+    <div className="min-h-screen lg:grid lg:grid-cols-2">
+      {/* Left: Form */}
+      <div className="flex flex-col min-h-screen bg-background">
+        <div className="p-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="text-muted-foreground hover:text-foreground rounded-none"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo/Title */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground">
-              {isLogin ? "Welcome Back" : "Create Account"}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {isLogin
-                ? "Sign in to your account to continue"
-                : "Sign up to get started with AudienceScan"}
-            </p>
-          </div>
+        <div className="flex-1 flex items-center justify-center px-6 lg:px-16">
+          <div className="w-full max-w-sm space-y-8">
+            <div className="flex justify-center mb-2">
+              <img src={logoWhite} alt="AudienceScan" className="h-7" />
+            </div>
 
-          {/* Sign In Required Alert */}
-          {showSignInRequired && !emailVerified && (
-            <Alert className="border-muted bg-muted/50">
-              <Lock className="h-4 w-4 text-foreground" />
-              <AlertTitle className="text-foreground">Sign in required</AlertTitle>
-              <AlertDescription className="text-muted-foreground">
-                Please sign in to access your dashboard.
-              </AlertDescription>
-            </Alert>
-          )}
+            <div className="text-center">
+              <h1 className="font-mono text-h3 text-foreground">
+                {isLogin ? "Welcome Back" : "Create Account"}
+              </h1>
+              <p className="mt-2 text-p3 text-muted-foreground font-bai">
+                {isLogin
+                  ? "Sign in to your account to continue"
+                  : "Sign up to get started with AudienceScan"}
+              </p>
+            </div>
 
-          {/* Email Verified Alert */}
-          {emailVerified && (
-            <Alert className="border-primary bg-primary/10">
-              <CheckCircle className="h-4 w-4 text-primary" />
-              <AlertTitle className="text-primary">Email Verified!</AlertTitle>
-              <AlertDescription className="text-muted-foreground">
-                Your email has been successfully verified. You can now sign in to your account.
-              </AlertDescription>
-            </Alert>
-          )}
+            {showSignInRequired && !emailVerified && (
+              <Alert className="border-muted bg-muted/50 rounded-none">
+                <Lock className="h-4 w-4 text-foreground" />
+                <AlertTitle className="text-foreground">Sign in required</AlertTitle>
+                <AlertDescription className="text-muted-foreground">
+                  Please sign in to access your dashboard.
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
+            {emailVerified && (
+              <Alert className="border-primary bg-primary/10 rounded-none">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                <AlertTitle className="text-primary">Email Verified!</AlertTitle>
+                <AlertDescription className="text-muted-foreground">
+                  Your email has been successfully verified. You can now sign in.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="displayName" className="text-foreground font-mono text-p4 uppercase tracking-widest">
+                    Display Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="displayName"
+                      type="text"
+                      placeholder="Your name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      className="pl-10 rounded-none"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-foreground">
-                  Display Name
+                <Label htmlFor="email" className="text-foreground font-mono text-p4 uppercase tracking-widest">
+                  Email
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="displayName"
-                    type="text"
-                    placeholder="Your name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="pl-10"
-                    required={!isLogin}
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 rounded-none"
+                    required
                   />
                 </div>
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-foreground font-mono text-p4 uppercase tracking-widest">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 rounded-none"
+                    required
+                    minLength={6}
+                  />
+                </div>
               </div>
+
+              <Button type="submit" className="w-full rounded-none" disabled={loading}>
+                {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {isLogin ? "Sign In" : "Create Account"}
+              </Button>
+            </form>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-p3 text-primary hover:underline font-bai"
+              >
+                {isLogin
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </button>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              {isLogin ? "Sign In" : "Create Account"}
-            </Button>
-          </form>
-
-          {/* Toggle */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
           </div>
         </div>
       </div>
+
+      {/* Right: Inspiration */}
+      <InspirationPanel isLogin={isLogin} />
     </div>
   );
 };
