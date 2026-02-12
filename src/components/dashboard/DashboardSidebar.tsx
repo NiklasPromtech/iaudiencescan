@@ -133,7 +133,7 @@ const NavItem = ({ item, collapsed }: NavItemProps) => {
           )}
         >
           <item.icon className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>{item.title}</span>}
+          {!collapsed && <span className="font-mono text-xs uppercase tracking-wider">{item.title}</span>}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -174,7 +174,7 @@ const NavGroup = ({ label, items, collapsed, defaultOpen = true }: NavGroupProps
     <Collapsible defaultOpen={defaultOpen || hasActiveChild} className="group/collapsible">
       <SidebarGroup>
         <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer hover:bg-muted/30 rounded-md px-2 py-1 flex items-center justify-between text-xs text-muted-foreground uppercase tracking-wider">
+          <SidebarGroupLabel className="cursor-pointer hover:bg-muted/30 rounded-md px-2 py-1 flex items-center justify-between font-mono text-xs text-muted-foreground uppercase tracking-wider">
             {label}
             <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />
           </SidebarGroupLabel>
@@ -238,7 +238,7 @@ export const DashboardSidebar = () => {
         {/* Trusted By logos */}
         {!collapsed && (
           <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3 px-2">Trusted by</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-3 px-2">Trusted by</p>
             <div className="grid grid-cols-5 gap-2 px-2">
               {clientLogos.map((logo, i) => (
                 <img
