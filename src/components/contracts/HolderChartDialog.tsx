@@ -138,7 +138,7 @@ export const HolderChartDialog = ({
                     <p className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
                       Current Holders
                     </p>
-                    <p className="text-2xl font-bold mt-1">
+                    <p className="font-mono text-2xl font-bold mt-1 tabular-nums">
                       {stats.latest.toLocaleString()}
                     </p>
                   </div>
@@ -155,7 +155,7 @@ export const HolderChartDialog = ({
                         <Minus className="h-5 w-5 text-muted-foreground" />
                       )}
                       <span
-                        className={`text-2xl font-bold ${
+                        className={`font-mono text-2xl font-bold tabular-nums ${
                           stats.change > 0
                             ? "text-green-500"
                             : stats.change < 0
@@ -166,7 +166,7 @@ export const HolderChartDialog = ({
                         {stats.change > 0 ? "+" : ""}
                         {stats.change.toLocaleString()}
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="font-mono text-sm text-muted-foreground tabular-nums">
                         ({stats.change >= 0 ? "+" : ""}
                         {stats.changePercent}%)
                       </span>
@@ -190,13 +190,13 @@ export const HolderChartDialog = ({
                       dataKey="formattedDate"
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 11, fontFamily: "Space Mono, monospace" }}
                       className="text-muted-foreground"
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 11, fontFamily: "Space Mono, monospace" }}
                       className="text-muted-foreground"
                       tickFormatter={(v) => v.toLocaleString()}
                       domain={["dataMin - 100", "dataMax + 100"]}

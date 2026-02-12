@@ -72,7 +72,7 @@ export const SummaryBadges = ({ counts, onBadgeClick }: SummaryBadgesProps) => {
             onClick={() => onBadgeClick?.(badge.key)}
           >
             {badge.icon}
-            {badge.count} {badge.label}
+            <span className="font-mono tabular-nums">{badge.count}</span> {badge.label}
           </Badge>
         ))}
     </div>

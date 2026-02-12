@@ -82,11 +82,11 @@ export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Event</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Total</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Unique Users</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">First Seen</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Last Seen</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Event</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Total</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Unique Users</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">First Seen</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Last Seen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,16 +95,16 @@ export const EventsTable = ({ data, loading, totalRows }: EventsTableProps) => {
                 <TableCell className="font-medium text-foreground">
                   {row.event_type}
                 </TableCell>
-                <TableCell className="text-right text-foreground">
+                <TableCell className="font-mono text-right text-foreground tabular-nums">
                   {row.event_count.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right text-foreground">
+                <TableCell className="font-mono text-right text-foreground tabular-nums">
                   {row.unique_users.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right text-muted-foreground text-sm">
+                <TableCell className="font-mono text-right text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.first_seen)}
                 </TableCell>
-                <TableCell className="text-right text-muted-foreground text-sm">
+                <TableCell className="font-mono text-right text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.last_seen)}
                 </TableCell>
               </TableRow>

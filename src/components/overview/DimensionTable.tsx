@@ -187,12 +187,12 @@ function WalletMetricCell({
       {isClickable ? (
         <button
           onClick={onClick}
-          className="font-medium tabular-nums text-primary hover:text-primary/80 hover:underline cursor-pointer transition-colors text-right"
+          className="font-mono font-medium tabular-nums text-primary hover:text-primary/80 hover:underline cursor-pointer transition-colors text-right"
         >
           {count!.toLocaleString()}
         </button>
       ) : (
-        <span className="font-medium tabular-nums text-foreground">
+        <span className="font-mono font-medium tabular-nums text-foreground">
           {customValue !== undefined && customValue !== null
             ? customValue
             : count !== null && count !== undefined
@@ -202,12 +202,12 @@ function WalletMetricCell({
       )}
       
       {/* Row 2: Rate % */}
-      <span className={cn("text-xs tabular-nums h-4", rate !== null && rate !== undefined ? rateColorClass : "text-muted-foreground")}>
+      <span className={cn("font-mono text-xs tabular-nums h-4", rate !== null && rate !== undefined ? rateColorClass : "text-muted-foreground")}>
         {rate !== null && rate !== undefined ? `${Math.round(rate)}%` : "—"}
       </span>
       
       {/* Row 3: Cost-per or CPB */}
-      <span className={cn("text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
+      <span className={cn("font-mono text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
         {showCost
           ? cpb !== null && cpb !== undefined
             ? `$${cpb.toFixed(2)}`
@@ -443,20 +443,20 @@ export function DimensionTable({
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
                     {dimensionLabel}
                   </TableHead>
 
                   {/* Traffic Group - Views first, then Visitors (Main Tag) */}
                   {visibleGroups.has("traffic") && (
                     <>
-                      <TableHead className="text-right font-medium min-w-[80px]">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px]">
                         <div className="flex items-center justify-end gap-1">
                           Views
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-right font-medium min-w-[80px] border-r border-border/50">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px] border-r border-border/50">
                         <div className="flex items-center justify-end gap-1">
                           Visitors
                           <TrackingBadge source="main" />
@@ -468,15 +468,15 @@ export function DimensionTable({
                   {/* Engagement Group (Main Tag) */}
                   {visibleGroups.has("engagement") && (
                     <>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[70px]">
                         <div className="flex items-center justify-end gap-1">
                           10s
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[70px]">30s</TableHead>
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[70px]">60s</TableHead>
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[70px] border-r border-border/50">
                         5m
                       </TableHead>
                     </>
@@ -485,22 +485,22 @@ export function DimensionTable({
                   {/* Wallets Group - Extensions (Main), Tracked (Wallet Script), Enriched, Avg Balance, Total Value */}
                   {visibleGroups.has("wallets") && (
                     <>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           Extensions
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           Tracked
                           <TrackingBadge source="wallet" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[90px] whitespace-nowrap">
                         Enriched
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
@@ -513,7 +513,7 @@ export function DimensionTable({
                           </Tooltip>
                         </TooltipProvider>
                       </TableHead>
-                      <TableHead className="text-right font-medium text-muted-foreground min-w-[110px] whitespace-nowrap border-r border-border/50">
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[110px] whitespace-nowrap border-r border-border/50">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
@@ -532,7 +532,7 @@ export function DimensionTable({
 
                   {/* Conversions Group (Conversion Script) */}
                   {visibleGroups.has("conversions") && (
-                    <TableHead className="text-right font-medium text-muted-foreground min-w-[100px]">
+                    <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[100px]">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger className="flex items-center justify-end gap-1 w-full">

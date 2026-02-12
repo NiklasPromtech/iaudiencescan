@@ -54,7 +54,7 @@ export function DimensionCell({
         {hasHighBots && (
           <AlertTriangle className="h-3 w-3 text-destructive flex-shrink-0" />
         )}
-        <span className="font-medium text-foreground truncate">
+        <span className="font-mono font-medium text-foreground truncate">
           {row.dim_value || "(not set)"}
         </span>
         {showGrade && <InvestmentGradeBadge grade={grade} />}
@@ -76,7 +76,7 @@ export function DimensionCell({
             onBotClick?.(row.dim_value);
           }}
           className={cn(
-            "text-xs tabular-nums text-left hover:underline cursor-pointer",
+            "font-mono text-xs tabular-nums text-left hover:underline cursor-pointer",
             getBotRateColor()
           )}
         >
