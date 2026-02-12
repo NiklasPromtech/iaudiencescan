@@ -56,7 +56,7 @@ export const SummaryBadges = ({ counts, onBadgeClick }: SummaryBadgesProps) => {
       label: "PR Outlets",
       count: counts.prOutlets || 0,
       icon: <Megaphone className="h-3 w-3" />,
-      color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20",
+      color: "bg-stone-500/10 text-stone-600 hover:bg-stone-500/20",
     },
   ];
 
@@ -68,7 +68,7 @@ export const SummaryBadges = ({ counts, onBadgeClick }: SummaryBadgesProps) => {
           <Badge
             key={badge.key}
             variant="secondary"
-            className={`gap-1.5 cursor-pointer transition-colors ${badge.color}`}
+            className={`gap-1.5 cursor-pointer transition-colors font-mono text-xs ${badge.color}`}
             onClick={() => onBadgeClick?.(badge.key)}
           >
             {badge.icon}

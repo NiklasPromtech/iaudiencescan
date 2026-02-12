@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,11 +89,11 @@ export const NewsFeedTab = ({ tokens }: NewsFeedTabProps) => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Newspaper className="h-5 w-5 text-amber-500" />
+          <h2 className="font-mono text-xs uppercase tracking-widest flex items-center gap-2">
+            <Newspaper className="h-4 w-4 text-amber-500" />
             News Feed
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-mono text-xs text-muted-foreground">
             {filteredArticles.length} articles from {tokenCount} communities
           </p>
         </div>
@@ -111,7 +110,7 @@ export const NewsFeedTab = ({ tokens }: NewsFeedTabProps) => {
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <div className="border border-border p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
             <Label className="text-xs text-muted-foreground mb-1.5 block">Search</Label>
@@ -155,23 +154,23 @@ export const NewsFeedTab = ({ tokens }: NewsFeedTabProps) => {
             </Select>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Articles List */}
       {filteredArticles.length === 0 ? (
-        <Card className="p-12 text-center">
+        <div className="border border-border p-12 text-center">
           <Newspaper className="h-12 w-12 mx-auto opacity-30 mb-4" />
           <p className="text-muted-foreground">
             {allArticles.length === 0
               ? "No news articles found for these communities."
               : "No articles match your current filters."}
           </p>
-        </Card>
+        </div>
       ) : groupByToken && groupedArticles ? (
         <div className="space-y-6">
           {groupedArticles.map(([tokenName, articles]) => (
             <div key={tokenName}>
-              <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+              <h3 className="font-mono text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
                 {articles[0].token_logo_url && (
                   <img
                     src={articles[0].token_logo_url}
