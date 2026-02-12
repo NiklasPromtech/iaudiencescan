@@ -1,72 +1,46 @@
 
 
-## Dune-ify the Scan Results Page
+# Landing Page V3 Updates
 
-Restyle the `/scans/[id]/results` page to match the platform's Dune-inspired aesthetic and the tab pattern from the Overview page.
+## 1. Add Ned's Testimonial with Book Demo Link
 
-### Changes
+Add a third testimonial card below the existing two quotes:
 
-#### 1. ScanResults.tsx -- Page layout and tabs
+> "He got some really good ideas on how to maximize value from your visitor data — it's worth grabbing 30 minutes with him."
+> — Ned, Token Project
 
-- **Title**: Change from "Outreach Command Center" to the scan name (e.g., "US wallets"). Use `font-mono` for the subtitle metadata.
-- **Tabs**: Replace the current `TabsList` (grid-based, rounded, muted bg) with the Overview-style tabs:
-  - Wrap tabs in `border border-border`
-  - `TabsList` uses `w-full justify-start border-b border-border bg-transparent p-0`
-  - Each `TabsTrigger` uses `font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3`
-  - Tab content inside the same border container with `p-4`
-- **News count badge**: Style with `font-mono tabular-nums text-muted-foreground` inline (matching Overview pattern) instead of a colored pill.
+Below the quote, add a subtle "Book a Demo" text link (muted style, not a loud button) that links to a Calendly or contact page. Will use a simple `text-muted-foreground hover:text-foreground` link with an arrow icon.
 
-#### 2. ScanResultsStats.tsx -- Already good
+## 2. Fix Logo Marquee to Loop Infinitely
 
-The stat row already uses `font-mono`, `divide-x`, and `border-b` -- this matches the Dune style. No changes needed.
+The current marquee already duplicates the logos array (`[...clientLogos, ...clientLogos]`), but the animation may be stopping or glitching. The fix:
 
-#### 3. SummaryBadges.tsx -- Fix purple violation
+- Ensure the track has the logos duplicated (already done)
+- Verify the CSS animation uses `translateX(-50%)` so the second copy seamlessly replaces the first (already in place)
+- The issue is likely that `overflow-hidden` needs to be on a proper wrapper. Will clean up the container structure to guarantee seamless infinite looping.
 
-The PR Outlets badge uses `bg-purple-500/10 text-purple-600` which violates the color palette (no purple). Change to `bg-stone-500/10 text-stone-600` or use primary orange. Also apply `font-mono text-xs` to badge text for consistency.
+## 3. Simplify "Find More of Your Best Users" Section
 
-#### 4. CommunitiesTab.tsx -- Filter section typography
+Currently showing all 4 platform cards (X, Telegram, Discord, Reddit) with full token lists plus a full news feed. Will simplify to:
 
-- "Filter Communities" heading: add `font-mono text-xs uppercase tracking-widest`
-- Filter labels already use `text-xs text-muted-foreground` which is fine
+- Show only the **top 3 platform cards** (X, Telegram, Reddit) — dropping Discord
+- Limit each card to show only **3 tokens** instead of all 5-8
+- Replace the bottom italic text with a compelling CTA line like: *"Install our tag. We'll find the communities your users already belong to."*
+- **Remove the full MockNewsFeed** from this section — it's too much data for a landing page sell section
 
-#### 5. PlatformTargetingCard.tsx -- Remove Card wrapper, flatten
+## Technical Details
 
-- Replace `Card` with a plain `div` using `border border-border` (no rounded corners)
-- Remove the colored `bgColor` header backgrounds -- use a flat `border-b border-border` separator instead
-- Token names: add `font-mono` to handles/metadata
-- Market cap badges: use `font-mono tabular-nums`
+**Files to modify:**
 
-#### 6. NewsFeedTab.tsx -- Remove Card wrappers
+1. **`src/pages/LandingPageV3.tsx`**
+   - Add third testimonial block after the "Head of Growth" quote with Ned's quote and a "Book a Demo" link
+   - Clean up marquee wrapper structure if needed
+   - Replace `<MockPlatformCards />` with a trimmed inline version showing only 3 platforms with 3 tokens each
+   - Remove `<MockNewsFeed />` from the audience intelligence section
+   - Update the italic tagline text
 
-- Filter section: replace `Card className="p-4"` with `border border-border p-4`
-- Empty state: replace `Card` with `border border-border`
-- Section headers: add `font-mono text-xs uppercase tracking-widest`
+2. **`src/components/landing/MockPlatformCards.tsx`**
+   - Add a `limit` prop to cap tokens shown per platform, or handle the trimming in LandingPageV3 directly
 
-#### 7. NewsArticleCard.tsx -- Flatten
-
-- Replace `border border-border rounded-lg` with `border-b border-border` (row-based, no individual card wrappers)
-- Add `font-mono text-xs` to source domain and timestamp
-
-#### 8. WebsitesTab.tsx -- Remove Card wrapper from table
-
-- Replace `Card className="overflow-hidden"` with `border border-border overflow-hidden`
-- Table headers: add `font-mono text-xs uppercase tracking-widest`
-- Data cells: add `font-mono tabular-nums` to numeric values
-
-#### 9. PROutletsSection.tsx -- Remove rounded corners
-
-- Already uses `border-t` which is good. Add `font-mono text-xs` to article count text.
-
-#### 10. ExportCenterTab.tsx -- Section headers
-
-- Section headers already use `uppercase tracking-wide` -- update to `font-mono text-xs uppercase tracking-widest` for consistency
-- Export card grid items are already flat (`border-b`), which is correct
-
-### Technical summary
-
-- ~10 files touched, all in `src/components/scan-results/` and `src/pages/ScanResults.tsx`
-- Primarily CSS class changes -- no logic or data changes
-- Aligns with the Overview page tab pattern that's already working well
-- Eliminates all `rounded-lg` / Card wrappers in favor of flat `border border-border` containers
-- Enforces `font-mono` on all data-oriented text (handles, counts, metadata)
-- Fixes the purple color violation in SummaryBadges
+3. **`src/components/landing/mock-data.ts`**
+   - No changes needed — we'll just slice the data in the component
