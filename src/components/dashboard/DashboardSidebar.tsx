@@ -1,4 +1,5 @@
-import { useLocation, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Wallet,
@@ -10,7 +11,9 @@ import {
   ChevronDown,
   FileCode2,
   TrendingUp,
+  LogOut,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -181,6 +184,21 @@ const NavGroup = ({ label, items, collapsed, defaultOpen = true }: NavGroupProps
 export const DashboardSidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) setUserEmail(user.email);
+    });
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("selectedWebsiteId");
+    localStorage.removeItem("selectedWebsite");
+    navigate("/auth");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
@@ -215,6 +233,30 @@ export const DashboardSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* User + Sign out */}
+        <div className={cn("border-t border-border pt-3 mt-2", collapsed && "flex flex-col items-center")}>
+          {!collapsed && userEmail && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground truncate px-3 mb-2">
+              {userEmail}
+            </p>
+          )}
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <button
+                  onClick={handleSignOut}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-destructive hover:bg-destructive/10 w-full",
+                    collapsed && "justify-center px-0"
+                  )}
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="font-mono text-xs uppercase tracking-wider">Sign out</span>}
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
