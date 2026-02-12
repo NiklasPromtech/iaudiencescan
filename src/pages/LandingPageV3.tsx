@@ -192,7 +192,7 @@ const LandingPageV3 = () => {
       <section className="py-24">
         <div className="container mx-auto px-4 max-w-5xl">
           <h2 className="font-serif text-3xl md:text-4xl text-center mb-4 text-foreground">
-            Everything GA Can't Do
+            Everything Google Analytics Can't Do
           </h2>
           <p className="text-center text-muted-foreground mb-14 max-w-xl mx-auto">
             Standard analytics were built for Web2. Your users have wallets.
