@@ -309,17 +309,22 @@ export const IncrementalityResultsView = forwardRef<IncrementalityResultsViewHan
     if (!reportRef.current) return;
     setExporting(true);
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const opt = {
-        margin: [0.35, 0.45, 0.5, 0.45],
-        filename: `incrementality-report-${result.event_name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      await html2pdf().set(opt).from(reportRef.current).save();
-      toast.success("PDF exported successfully");
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast.error("Please allow popups to export PDF");
+        return;
+      }
+      const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+          try { return Array.from(sheet.cssRules).map(r => r.cssText).join('\n'); } catch { return ''; }
+        }).join('\n');
+      printWindow.document.write(`<!DOCTYPE html><html><head><style>${styles}
+        @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        </style></head><body>${reportRef.current.outerHTML}</body></html>`);
+      printWindow.document.close();
+      printWindow.onafterprint = () => printWindow.close();
+      setTimeout(() => { printWindow.print(); }, 500);
+      toast.success("Print dialog opened — save as PDF");
     } catch (error) {
       console.error("PDF export error:", error);
       toast.error("Failed to export PDF");
