@@ -449,7 +449,7 @@ Need help? Contact support@audiencescan.io`;
             <p className="font-mono text-[11px] text-muted-foreground/60 truncate">{website.base_url}</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            <Badge variant="outline" className={`${sc.className} font-mono text-[10px] tracking-widest`}>
+            <Badge variant="outline" className={`${sc.className} font-mono text-[10px] tracking-widest h-7 flex items-center`}>
               <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${sc.dotClass}`} />
               {sc.label}
             </Badge>
