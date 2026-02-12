@@ -52,9 +52,9 @@ export function RendererBreakdown({ data, loading }: RendererBreakdownProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="font-medium">Renderer</TableHead>
-              <TableHead className="text-right font-medium">Visitors</TableHead>
-              <TableHead className="text-center font-medium w-[80px]">Flag</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest font-medium">Renderer</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium">Visitors</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-center font-medium w-[80px]">Flag</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -63,7 +63,7 @@ export function RendererBreakdown({ data, loading }: RendererBreakdownProps) {
                 <TableCell className="font-medium max-w-[300px] truncate" title={row.renderer}>
                   {row.renderer || "(unknown)"}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="font-mono text-right tabular-nums">
                   {row.visitor_count.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-center">

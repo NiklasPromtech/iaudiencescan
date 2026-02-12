@@ -77,17 +77,17 @@ export const WalletExtensionsTable = ({
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Wallet Type</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Count</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Wallet Type</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Count</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {visibleData.map((row) => (
               <TableRow key={row.wallet_type} className="border-border">
-                <TableCell className="font-medium text-foreground">
+                <TableCell className="font-mono font-medium text-foreground">
                   {row.wallet_type}
                 </TableCell>
-                <TableCell className="text-right text-foreground font-medium">
+                <TableCell className="font-mono text-right text-foreground font-medium tabular-nums">
                   {row.count?.toLocaleString() ?? "—"}
                 </TableCell>
               </TableRow>

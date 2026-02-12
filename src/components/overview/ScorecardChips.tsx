@@ -135,10 +135,10 @@ export function ScorecardChips({
                 {item.type === "realtime" ? (
                   <>
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    <span className="text-lg font-semibold text-foreground tabular-nums">
+                    <span className="font-mono text-lg font-semibold text-foreground tabular-nums">
                       {realtimeVisitors !== null ? realtimeVisitors : "—"}
                     </span>
-                    <span className="text-xs text-muted-foreground">live</span>
+                    <span className="font-mono text-xs text-muted-foreground">live</span>
                   </>
                 ) : (
                   <FlatMetric
@@ -176,7 +176,7 @@ export function ScorecardChips({
 
             return (
               <div key={category}>
-                <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">
+                <p className="font-mono text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-widest">
                   {label}
                 </p>
                 <div className="flex items-stretch flex-wrap">
@@ -246,14 +246,14 @@ function FlatMetric({ metric, value, formatValue, isStarred, onToggleStar, compa
 
       <div className="min-w-0">
         <p className={cn(
-          "font-semibold leading-tight tabular-nums",
+          "font-mono font-semibold leading-tight tabular-nums",
           compact ? "text-sm" : "text-lg",
           isStarred ? "text-foreground" : "text-muted-foreground"
         )}>
           {displayValue}
         </p>
         <p className={cn(
-          "text-muted-foreground truncate",
+          "font-mono text-muted-foreground truncate",
           compact ? "text-[10px]" : "text-xs"
         )}>
           {metric.shortLabel || metric.label}

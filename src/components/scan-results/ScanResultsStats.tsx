@@ -23,8 +23,8 @@ export const ScanResultsStats = ({ results }: ScanResultsStatsProps) => {
         <div key={stat.label} className="flex items-center gap-2 px-6 first:pl-0">
           {stat.icon}
           <div>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-            <p className="text-lg font-semibold">{stat.value}</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{stat.label}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{stat.value}</p>
           </div>
         </div>
       ))}

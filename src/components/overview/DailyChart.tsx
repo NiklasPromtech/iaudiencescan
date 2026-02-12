@@ -268,7 +268,8 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  fontSize={12}
+                  fontSize={11}
+                  fontFamily="Space Mono, monospace"
                 />
                 {/* Left Y-Axis for first metric */}
                 <YAxis
@@ -277,7 +278,8 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  fontSize={12}
+                  fontSize={11}
+                  fontFamily="Space Mono, monospace"
                   tickFormatter={(value) => value.toLocaleString()}
                   stroke="hsl(var(--primary))"
                 />
@@ -288,7 +290,8 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  fontSize={12}
+                  fontSize={11}
+                  fontFamily="Space Mono, monospace"
                   tickFormatter={(value) => value.toLocaleString()}
                   stroke="hsl(var(--chart-3))"
                 />
@@ -362,7 +365,7 @@ function MetricSelector({ value, onChange, color, label }: MetricSelectorProps) 
         style={{ backgroundColor: color }}
       />
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-8 w-[150px] text-xs bg-background">
+        <SelectTrigger className="h-8 w-[150px] text-xs font-mono bg-background">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-popover z-50">

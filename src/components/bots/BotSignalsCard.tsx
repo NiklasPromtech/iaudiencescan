@@ -62,19 +62,19 @@ export function BotSignalsCard({ signals, loading }: BotSignalsCardProps) {
           >
             <div className="flex items-center gap-2">
               {row.icon}
-              <span className="text-sm text-foreground">{row.label}</span>
+              <span className="font-mono text-sm text-foreground">{row.label}</span>
             </div>
             <div className="text-right">
-              <span className="text-sm font-medium text-foreground tabular-nums">
+              <span className="font-mono text-sm font-medium text-foreground tabular-nums">
                 {row.value.toLocaleString()}
               </span>
               {row.pct !== null && (
-                <span className="text-xs text-muted-foreground ml-2">
+                <span className="font-mono text-xs text-muted-foreground ml-2">
                   ({row.pct}% of checked)
                 </span>
               )}
               {row.pct === null && (
-                <span className="text-xs text-muted-foreground ml-2">
+                <span className="font-mono text-xs text-muted-foreground ml-2">
                   visitors
                 </span>
               )}

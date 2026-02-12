@@ -91,11 +91,11 @@ export const WalletsOverviewTable = ({
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Action Type</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Count</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Unique Wallets</TableHead>
-              <TableHead className="text-muted-foreground font-medium">First Seen</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Last Seen</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Action Type</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Count</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Unique Wallets</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">First Seen</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Last Seen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,16 +109,16 @@ export const WalletsOverviewTable = ({
                     {formatActionType(row.action_type)}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right text-foreground font-medium">
+                <TableCell className="font-mono text-right text-foreground font-medium tabular-nums">
                   {row.action_count.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right text-foreground">
+                <TableCell className="font-mono text-right text-foreground tabular-nums">
                   {row.unique_wallets.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
+                <TableCell className="font-mono text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.first_seen)}
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
+                <TableCell className="font-mono text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.last_seen)}
                 </TableCell>
               </TableRow>

@@ -95,7 +95,7 @@ export function BotDimensionTable({
     const isActive = sortField === field;
     return (
       <TableHead
-        className={`font-medium cursor-pointer hover:bg-muted/70 transition-colors select-none ${className || ""}`}
+        className={`font-mono text-[10px] uppercase tracking-widest font-medium cursor-pointer hover:bg-muted/70 transition-colors select-none ${className || ""}`}
         onClick={() => handleSort(field)}
       >
         <div className="flex items-center gap-1">
@@ -190,19 +190,19 @@ export function BotDimensionTable({
                     <TableCell className="font-medium sticky left-0 bg-background z-10">
                       {row.dim_value || "(not set)"}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="font-mono text-right tabular-nums">
                       {row.total_visitors.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-destructive">
+                    <TableCell className="font-mono text-right tabular-nums text-destructive">
                       {row.bot_visitors.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-primary">
+                    <TableCell className="font-mono text-right tabular-nums text-primary">
                       {row.human_visitors.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                    <TableCell className="font-mono text-right tabular-nums text-muted-foreground">
                       {row.unknown_visitors.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums font-medium">
+                    <TableCell className="font-mono text-right tabular-nums font-medium">
                       {row.bot_pct.toFixed(1)}%
                     </TableCell>
                   </TableRow>

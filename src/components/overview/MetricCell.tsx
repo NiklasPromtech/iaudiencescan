@@ -48,17 +48,17 @@ export function MetricCell({
   return (
     <div className={cn("flex flex-col text-right", className)}>
       {/* Row 1: Count - always visible */}
-      <span className="font-medium tabular-nums text-foreground">
+      <span className="font-mono font-medium tabular-nums text-foreground">
         {count !== null && count !== undefined ? count.toLocaleString() : "—"}
       </span>
       
       {/* Row 2: Rate - always takes space, content conditional */}
-      <span className={cn("text-xs tabular-nums h-4", showRate ? rateColorClass : "invisible")}>
+      <span className={cn("font-mono text-xs tabular-nums h-4", showRate ? rateColorClass : "invisible")}>
         {showRate && rate !== undefined && rate !== null ? `${Math.round(rate)}%` : "—"}
       </span>
       
       {/* Row 3: Cost-per - always takes space when showCost is true for any cell */}
-      <span className={cn("text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
+      <span className={cn("font-mono text-xs tabular-nums h-4", showCost ? "text-muted-foreground" : "invisible")}>
         {showCost ? formatCurrency(costPer ?? null) : "—"}
       </span>
     </div>
