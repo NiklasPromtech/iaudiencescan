@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Search, RefreshCw, ExternalLink, Archive, ArchiveRestore, MoreHorizontal } from "lucide-react";
+import { AlertCircle, Search, RefreshCw, ExternalLink, Archive, ArchiveRestore, MoreHorizontal, Users, Plus } from "lucide-react";
 import { archiveScan, unarchiveScan, Scan, SUPPORTED_CHAINS } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
@@ -235,6 +235,25 @@ const Scans = () => {
                 </div>
               </div>
             ))}
+            {/* CTA to create more audiences */}
+            <div
+              className="px-4 py-3 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
+              onClick={() => navigate("/audiences")}
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-muted-foreground">
+                    Create more wallet groups to scan
+                  </h3>
+                  <p className="text-xs text-muted-foreground/70 font-mono">
+                    Go to Wallet Groups →
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
