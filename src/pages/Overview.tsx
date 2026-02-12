@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -582,22 +583,49 @@ const Overview = () => {
           </div>
 
           {/* Events, Wallets & Extensions Tables */}
-          <div className="grid md:grid-cols-3 gap-6 mb-6">
-            <EventsTable
-              data={eventsData?.rows ?? []}
-              loading={eventsLoading}
-              totalRows={eventsData?.pagination?.total_rows ?? 0}
-            />
-            <WalletsOverviewTable
-              data={walletsData?.rows ?? []}
-              loading={walletsLoading}
-              totalRows={walletsData?.pagination?.total_rows ?? 0}
-            />
-            <WalletExtensionsTable
-              data={walletExtensionsData?.rows ?? []}
-              loading={walletExtensionsLoading}
-              totalRows={walletExtensionsData?.pagination?.total_rows ?? 0}
-            />
+          <div className="border border-border mb-6">
+            <Tabs defaultValue="events">
+              <TabsList className="w-full justify-start border-b border-border bg-transparent p-0">
+                <TabsTrigger value="events" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Conversion Events
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({eventsData?.pagination?.total_rows ?? 0})</span>
+                </TabsTrigger>
+                <TabsTrigger value="wallets" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Wallet Actions
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletsData?.pagination?.total_rows ?? 0})</span>
+                </TabsTrigger>
+                <TabsTrigger value="extensions" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Wallet Extensions
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletExtensionsData?.pagination?.total_rows ?? 0})</span>
+                </TabsTrigger>
+              </TabsList>
+              <div className="p-4">
+                <TabsContent value="events" className="mt-0">
+                  <EventsTable
+                    data={eventsData?.rows ?? []}
+                    loading={eventsLoading}
+                    totalRows={eventsData?.pagination?.total_rows ?? 0}
+                    hideHeader
+                  />
+                </TabsContent>
+                <TabsContent value="wallets" className="mt-0">
+                  <WalletsOverviewTable
+                    data={walletsData?.rows ?? []}
+                    loading={walletsLoading}
+                    totalRows={walletsData?.pagination?.total_rows ?? 0}
+                    hideHeader
+                  />
+                </TabsContent>
+                <TabsContent value="extensions" className="mt-0">
+                  <WalletExtensionsTable
+                    data={walletExtensionsData?.rows ?? []}
+                    loading={walletExtensionsLoading}
+                    totalRows={walletExtensionsData?.pagination?.total_rows ?? 0}
+                    hideHeader
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
 
           {/* Cohort Suggestions */}

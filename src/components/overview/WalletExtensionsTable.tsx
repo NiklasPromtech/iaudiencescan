@@ -16,6 +16,7 @@ interface WalletExtensionsTableProps {
   data: WalletExtensionsRow[];
   loading: boolean;
   totalRows: number;
+  hideHeader?: boolean;
 }
 
 const DEFAULT_VISIBLE_COUNT = 5;
@@ -23,7 +24,8 @@ const DEFAULT_VISIBLE_COUNT = 5;
 export const WalletExtensionsTable = ({ 
   data, 
   loading, 
-  totalRows 
+  totalRows,
+  hideHeader 
 }: WalletExtensionsTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -33,11 +35,13 @@ export const WalletExtensionsTable = ({
 
   if (loading) {
     return (
-      <div className="py-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Puzzle className="h-5 w-5 text-primary" />
-          <Skeleton className="h-6 w-32" />
-        </div>
+      <div className={hideHeader ? "" : "py-4"}>
+        {!hideHeader && (
+          <div className="flex items-center gap-2 mb-4">
+            <Puzzle className="h-5 w-5 text-primary" />
+            <Skeleton className="h-6 w-32" />
+          </div>
+        )}
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />
@@ -49,11 +53,13 @@ export const WalletExtensionsTable = ({
 
   if (data.length === 0) {
     return (
-      <div className="py-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Puzzle className="h-5 w-5 text-primary" />
-          <h3 className="text-h3 text-foreground">Wallet Extensions</h3>
-        </div>
+      <div className={hideHeader ? "" : "py-4"}>
+        {!hideHeader && (
+          <div className="flex items-center gap-2 mb-4">
+            <Puzzle className="h-5 w-5 text-primary" />
+            <h3 className="text-h3 text-foreground">Wallet Extensions</h3>
+          </div>
+        )}
         <p className="text-p2 text-muted-foreground">
           No wallet extension data available yet. Connect wallet tracking to see data here.
         </p>
@@ -62,16 +68,18 @@ export const WalletExtensionsTable = ({
   }
 
   return (
-    <div className="py-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Puzzle className="h-5 w-5 text-primary" />
-          <h3 className="text-h3 text-foreground">Wallet Extensions</h3>
+    <div className={hideHeader ? "" : "py-4"}>
+      {!hideHeader && (
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Puzzle className="h-5 w-5 text-primary" />
+            <h3 className="text-h3 text-foreground">Wallet Extensions</h3>
+          </div>
+          <span className="text-p3 text-muted-foreground">
+            {totalRows} extension{totalRows !== 1 ? "s" : ""}
+          </span>
         </div>
-        <span className="text-p3 text-muted-foreground">
-          {totalRows} extension{totalRows !== 1 ? "s" : ""}
-        </span>
-      </div>
+      )}
 
       <div className="overflow-x-auto">
         <Table>
