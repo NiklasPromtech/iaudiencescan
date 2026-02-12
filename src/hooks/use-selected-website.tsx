@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { listWebsites } from "@/lib/api";
 
 export interface SelectedWebsite {
   id: string;
@@ -21,6 +22,12 @@ export function SelectedWebsiteProvider({ children }: { children: ReactNode }) {
   const [selectedWebsite, setSelectedWebsite] = useState<SelectedWebsite | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const applySelection = useCallback((website: SelectedWebsite) => {
+    localStorage.setItem("selectedWebsite", JSON.stringify(website));
+    localStorage.setItem("selectedWebsiteId", website.id);
+    setSelectedWebsite(website);
+  }, []);
+
   useEffect(() => {
     const loadSelectedWebsite = async () => {
       try {
@@ -41,10 +48,26 @@ export function SelectedWebsiteProvider({ children }: { children: ReactNode }) {
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (profile?.last_selected_website_id) {
-          const storedId = stored ? JSON.parse(stored).id : null;
-          if (storedId !== profile.last_selected_website_id) {
-            // The Install/Websites pages will handle the full sync
+        const storedId = stored ? JSON.parse(stored).id : null;
+        const needsFetch = !stored || (profile?.last_selected_website_id && storedId !== profile.last_selected_website_id);
+
+        if (needsFetch) {
+          try {
+            const { websites } = await listWebsites();
+            if (websites && websites.length > 0) {
+              const targetId = profile?.last_selected_website_id;
+              const match = targetId ? websites.find(w => w.id === targetId) : null;
+              const pick = match || websites[0];
+              applySelection({
+                id: pick.id,
+                name: pick.name,
+                base_url: pick.base_url,
+                tag_id: pick.tag_id,
+                status: pick.status,
+              });
+            }
+          } catch (err) {
+            console.error("Failed to fetch websites for auto-select:", err);
           }
         }
       } catch (error) {
@@ -55,7 +78,7 @@ export function SelectedWebsiteProvider({ children }: { children: ReactNode }) {
     };
 
     loadSelectedWebsite();
-  }, []);
+  }, [applySelection]);
 
   const selectWebsite = useCallback(async (website: SelectedWebsite) => {
     localStorage.setItem("selectedWebsite", JSON.stringify(website));
