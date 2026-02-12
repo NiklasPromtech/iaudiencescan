@@ -182,7 +182,7 @@ const LandingPageV3 = () => {
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
           <div className="flex gap-16 items-center animate-marquee w-max">
             {[...clientLogos, ...clientLogos].map((logo, i) => (
-              <img key={i} src={logo.src} alt={logo.alt} className="h-8 opacity-60 hover:opacity-100 transition-opacity shrink-0" />
+              <img key={i} src={logo.src} alt={logo.alt} className="h-8 shrink-0 opacity-50 hover:opacity-80 transition-opacity grayscale brightness-0" />
             ))}
           </div>
         </div>
