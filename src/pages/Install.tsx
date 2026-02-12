@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Check, Copy, RefreshCw, Plus, Globe, ChevronDown, Share2, ArrowRight, FileText, Archive, ArchiveRestore, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { supabase } from "@/integrations/supabase/client";
 import { listWebsites, createWebsite, verifyWebsite, archiveWebsite, unarchiveWebsite, Website, CreateWebsiteResponse } from "@/lib/api";
 import { WebsiteShareDialog } from "@/components/websites/WebsiteShareDialog";
@@ -38,6 +39,7 @@ const Install = () => {
   const [showArchived, setShowArchived] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { selectWebsite: contextSelectWebsite } = useSelectedWebsite();
 
   useEffect(() => {
     const fetchWebsites = async () => {
@@ -300,9 +302,14 @@ const Install = () => {
               copied={copied}
               verifying={verifying}
               onShare={(w) => { setShareWebsite(w); setShareDialogOpen(true); }}
-              onGoToData={(w) => {
-                localStorage.setItem("selectedWebsiteId", w.id);
-                localStorage.setItem("selectedWebsite", JSON.stringify(w));
+              onGoToData={async (w) => {
+                await contextSelectWebsite({
+                  id: w.id,
+                  name: w.name,
+                  base_url: w.base_url,
+                  tag_id: w.tag_id,
+                  status: w.status,
+                });
                 navigate("/overview");
               }}
               onArchive={handleArchive}
