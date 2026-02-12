@@ -443,8 +443,8 @@ export function DimensionTable({
           <div className="rounded-none border border-border overflow-x-auto w-full">
             <Table className="w-full">
               <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="font-mono text-[10px] uppercase tracking-widest font-medium sticky left-0 bg-muted/50 z-10 w-[30%] min-w-[180px]">
+                <TableRow className="bg-muted hover:bg-muted">
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest font-medium sticky left-0 bg-muted z-10 w-[30%] min-w-[180px]">
                     {dimensionLabel}
                   </TableHead>
 
