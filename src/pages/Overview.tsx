@@ -596,7 +596,7 @@ const Overview = () => {
                 </TabsTrigger>
                 <TabsTrigger value="extensions" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
                   Wallet Extensions
-                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletExtensionsData?.pagination?.total_rows ?? 0})</span>
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletExtensionsData?.rows?.length ?? 0})</span>
                 </TabsTrigger>
               </TabsList>
               <div className="p-4">
