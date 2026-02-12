@@ -19,13 +19,13 @@ import telegramLogo from "@/assets/telegram-logo.png";
 import logoBitmex from "@/assets/client-logos/bitmex.png";
 import logoFlare from "@/assets/client-logos/flare.png";
 import logoLuxy from "@/assets/client-logos/luxy.png";
-import logoMantra from "@/assets/client-logos/mantra.png";
+import logoAxion from "@/assets/client-logos/axion.png";
 import logoMintlayer from "@/assets/client-logos/mintlayer.png";
 import logoOkx from "@/assets/client-logos/okx.png";
 import logoSoma from "@/assets/client-logos/soma.png";
 import logoSynesis from "@/assets/client-logos/synesis.png";
 import logoSyscoin from "@/assets/client-logos/syscoin.png";
-import logoVent from "@/assets/client-logos/vent.png";
+import logoNftrade from "@/assets/client-logos/nftrade.png";
 
 interface ScanOption {
   id: string;
@@ -870,11 +870,11 @@ const WizardV2 = () => {
                   { src: logoBitmex, alt: "BitMEX" },
                   { src: logoOkx, alt: "OKX" },
                   { src: logoFlare, alt: "Flare" },
-                  { src: logoMantra, alt: "Mantra" },
+                  { src: logoAxion, alt: "Axion" },
                   { src: logoMintlayer, alt: "MintLayer" },
                   { src: logoSyscoin, alt: "Syscoin" },
                   { src: logoSynesis, alt: "Synesis One" },
-                  { src: logoVent, alt: "Vent" },
+                  { src: logoNftrade, alt: "NFTrade" },
                   { src: logoSoma, alt: "Soma" },
                   { src: logoLuxy, alt: "Luxy" },
                 ].map((logo, i) => (
@@ -890,11 +890,11 @@ const WizardV2 = () => {
                   { src: logoBitmex, alt: "BitMEX" },
                   { src: logoOkx, alt: "OKX" },
                   { src: logoFlare, alt: "Flare" },
-                  { src: logoMantra, alt: "Mantra" },
+                  { src: logoAxion, alt: "Axion" },
                   { src: logoMintlayer, alt: "MintLayer" },
                   { src: logoSyscoin, alt: "Syscoin" },
                   { src: logoSynesis, alt: "Synesis One" },
-                  { src: logoVent, alt: "Vent" },
+                  { src: logoNftrade, alt: "NFTrade" },
                   { src: logoSoma, alt: "Soma" },
                   { src: logoLuxy, alt: "Luxy" },
                 ].map((logo, i) => (

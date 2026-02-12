@@ -33,22 +33,7 @@ import { cn } from "@/lib/utils";
 import audiencescanIcon from "@/assets/audiencescan-icon.png";
 import audiencescanLogo from "@/assets/audiencescan-logo-dark.png";
 
-// Client logos
-import logoBitmex from "@/assets/client-logos/bitmex.png";
-import logoFlare from "@/assets/client-logos/flare.png";
-import logoLuxy from "@/assets/client-logos/luxy.png";
-import logoMantra from "@/assets/client-logos/mantra.png";
-import logoMintlayer from "@/assets/client-logos/mintlayer.png";
-import logoOkx from "@/assets/client-logos/okx.png";
-import logoSoma from "@/assets/client-logos/soma.png";
-import logoSynesis from "@/assets/client-logos/synesis.png";
-import logoSyscoin from "@/assets/client-logos/syscoin.png";
-import logoVent from "@/assets/client-logos/vent.png";
 
-const clientLogos = [
-  logoBitmex, logoFlare, logoLuxy, logoMantra, logoMintlayer,
-  logoOkx, logoSoma, logoSynesis, logoSyscoin, logoVent,
-];
 
 
 const insightsItems = [
@@ -235,22 +220,6 @@ export const DashboardSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Trusted By logos */}
-        {!collapsed && (
-          <div className="mt-4 pt-4 border-t border-border">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-3 px-2">Trusted by</p>
-            <div className="grid grid-cols-5 gap-2 px-2">
-              {clientLogos.map((logo, i) => (
-                <img
-                  key={i}
-                  src={logo}
-                  alt="Client"
-                  className="h-5 w-auto object-contain opacity-40 hover:opacity-70 transition-opacity grayscale"
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </SidebarFooter>
     </Sidebar>
   );

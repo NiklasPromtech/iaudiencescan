@@ -23,25 +23,25 @@ import {
 import bitmex from "@/assets/client-logos/bitmex.png";
 import flare from "@/assets/client-logos/flare.png";
 import luxy from "@/assets/client-logos/luxy.png";
-import mantra from "@/assets/client-logos/mantra.png";
+import axion from "@/assets/client-logos/axion.png";
 import mintlayer from "@/assets/client-logos/mintlayer.png";
 import okx from "@/assets/client-logos/okx.png";
 import soma from "@/assets/client-logos/soma.png";
 import synesis from "@/assets/client-logos/synesis.png";
 import syscoin from "@/assets/client-logos/syscoin.png";
-import vent from "@/assets/client-logos/vent.png";
+import nftrade from "@/assets/client-logos/nftrade.png";
 
 const clientLogos = [
   { src: bitmex, alt: "BitMEX" },
   { src: okx, alt: "OKX" },
   { src: flare, alt: "Flare" },
-  { src: mantra, alt: "Mantra" },
+  { src: axion, alt: "Axion" },
   { src: mintlayer, alt: "Mintlayer" },
   { src: luxy, alt: "Luxy" },
   { src: soma, alt: "Soma" },
   { src: synesis, alt: "Synesis" },
   { src: syscoin, alt: "Syscoin" },
-  { src: vent, alt: "Vent" },
+  { src: nftrade, alt: "NFTrade" },
 ];
 
 const gaComparison = [
