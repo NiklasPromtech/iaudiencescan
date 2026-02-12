@@ -289,6 +289,13 @@ const LandingPageV3 = () => {
             </blockquote>
             <p className="text-sm text-muted-foreground">— AudienceScan client, token project</p>
           </div>
+
+          <div className="mt-4 rounded-lg border border-border bg-card p-8 max-w-3xl mx-auto">
+            <blockquote className="text-foreground font-medium leading-relaxed mb-4">
+              "It's like Google Analytics wrapped in Dune. Genuinely the first dashboard I actually <span className="text-primary font-bold">want</span> to open every morning."
+            </blockquote>
+            <p className="text-sm text-muted-foreground">— Head of Growth, DeFi protocol</p>
+          </div>
         </div>
       </section>
 
