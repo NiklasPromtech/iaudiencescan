@@ -1,46 +1,60 @@
 
 
-## Fix: "Data" button on /install not updating the selected website
+## Redesign Auth Page: Dune-Inspired Split Layout with Inspirational Panel
 
-### Problem
-When you click the "Data" button for a website (e.g., Rubic) on the `/install` page, it only writes to `localStorage` but does **not** update the global `SelectedWebsiteProvider` context. The `/overview` page reads from that context, so it continues showing data for the previously selected website (e.g., qLabs).
+### Design
 
-### Root Cause
-The `onGoToData` handler (line 303-307 in `Install.tsx`) bypasses the shared `selectWebsite()` function from the context:
+Transform the current single-column auth page into a **split-panel layout** inspired by Dune's sign-up page:
 
-```text
-onGoToData={(w) => {
-  localStorage.setItem("selectedWebsiteId", w.id);
-  localStorage.setItem("selectedWebsite", JSON.stringify(w));
-  navigate("/overview");
-}}
-```
+- **Left panel**: The existing login/signup form with AudienceScan logo
+- **Right panel**: A visually striking inspirational section with a minimalist geometric animation and a compelling tagline
 
-It should instead call `selectWebsite()` from the `useSelectedWebsite()` hook, which updates both localStorage **and** the React context state that all dashboard pages depend on.
+The right panel will feature:
+1. A **minimalist network/constellation animation** -- dots connected by lines radiating outward, matching AudienceScan's on-chain data theme (nodes = wallets, lines = transactions). Built with pure CSS animations, no libraries needed.
+2. A **bold tagline** that rotates between sign-in and sign-up contexts:
+   - Sign up: *"Your on-chain audience, decoded."* with sub-text *"From raw wallets to real communities -- in minutes, not months."*
+   - Sign in: *"Your data is waiting."* with sub-text *"Actionable insights from every wallet, every transaction, every community."*
 
-### Fix (1 file)
-
-**`src/pages/Install.tsx`**
-1. Import and use `useSelectedWebsite` hook
-2. Update the `onGoToData` callback to call `selectWebsite()` before navigating
-3. Also update `handleSelectWebsite` to use the shared context function instead of manually writing to localStorage (fixing a secondary inconsistency)
-
-### Technical Detail
-
-The updated `onGoToData` will look like:
+### Layout
 
 ```text
-onGoToData={async (w) => {
-  await selectWebsite({
-    id: w.id,
-    name: w.name,
-    base_url: w.base_url,
-    tag_id: w.tag_id,
-    status: w.status,
-  });
-  navigate("/overview");
-}}
++------------------------------+------------------------------+
+|                              |                              |
+|  [Logo]                      |        [Network Visual]      |
+|                              |         o---o                |
+|  Sign In / Sign Up           |        /     \               |
+|                              |   o---o       o---o          |
+|  [Form fields]               |        \     /               |
+|                              |         o---o                |
+|  [Submit button]             |                              |
+|                              |  "Your on-chain audience,    |
+|  [Toggle link]               |         decoded."            |
+|                              |                              |
++------------------------------+------------------------------+
 ```
 
-This ensures the context is updated before navigation, so `/overview` immediately loads data for the correct website.
+On mobile (below `lg` breakpoint), the right panel hides completely -- form only.
+
+### Technical Changes
+
+**1 file modified: `src/pages/Auth.tsx`**
+
+- Wrap the page in a two-column `flex` layout (`lg:grid lg:grid-cols-2`)
+- Left side: existing form, largely unchanged, with logo added at top
+- Right side: new inspirational panel component (inline, no separate file needed)
+  - CSS-only constellation/network animation using `absolute`-positioned dots with connecting lines via pseudo-elements and `@keyframes` for gentle pulsing/floating
+  - Bold headline in Space Mono (data font per style guide), large body text in Bai Jamjuree
+  - Background: subtle `bg-muted` to contrast with the white form side
+- All styling follows the Dune aesthetic: `rounded-none`, flat, shadow-free
+- The animation uses small dots (`w-2 h-2 rounded-full bg-primary`) connected by thin lines (`border-primary/30`), gently pulsing with CSS `animate-pulse` and custom float keyframes
+
+### Copy
+
+**Sign Up state:**
+- Headline: "Your on-chain audience, decoded."
+- Sub: "From raw wallets to real communities -- in minutes, not months."
+
+**Sign In state:**
+- Headline: "Your data is waiting."  
+- Sub: "Actionable insights from every wallet, every transaction, every community."
 
