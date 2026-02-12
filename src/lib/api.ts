@@ -618,8 +618,9 @@ export interface WalletExtensionsRow {
 
 export interface WalletExtensionsResponse {
   success: boolean;
+  total_with_extension?: number;
   rows: WalletExtensionsRow[];
-  pagination: { limit: number; offset: number; total_rows: number };
+  pagination?: { limit: number; offset: number; total_rows: number };
 }
 
 export async function fetchWalletExtensions(request: WalletExtensionsRequest): Promise<WalletExtensionsResponse> {
