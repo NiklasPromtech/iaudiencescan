@@ -14,7 +14,7 @@ import { MockDailyChart } from "@/components/landing/MockDailyChart";
 import { MockHolderTrend } from "@/components/landing/MockHolderTrend";
 import { MockBotSummary } from "@/components/landing/MockBotSummary";
 import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
-import { MockNewsFeed } from "@/components/landing/MockNewsFeed";
+
 import { DashboardFrame } from "@/components/landing/DashboardFrame";
 import {
   mockScorecard, mockDimensionRows, mockCostRows,
@@ -180,8 +180,8 @@ const LandingPageV3 = () => {
         <div className="relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
-          <div className="flex gap-16 items-center animate-marquee w-max">
-            {[...clientLogos, ...clientLogos].map((logo, i) => (
+          <div className="flex gap-16 items-center w-max animate-marquee">
+            {[...clientLogos, ...clientLogos, ...clientLogos].map((logo, i) => (
               <img key={i} src={logo.src} alt={logo.alt} className="h-8 shrink-0 opacity-50 hover:opacity-80 transition-opacity grayscale brightness-0" />
             ))}
           </div>
@@ -296,6 +296,16 @@ const LandingPageV3 = () => {
             </blockquote>
             <p className="text-sm text-muted-foreground">— Head of Growth, DeFi protocol</p>
           </div>
+
+          <div className="mt-4 rounded-lg border border-border bg-card p-8 max-w-3xl mx-auto">
+            <blockquote className="text-foreground font-medium leading-relaxed mb-4">
+              "He got some really good ideas on how to maximize value from your visitor data — it's worth grabbing 30 minutes with him."
+            </blockquote>
+            <p className="text-sm text-muted-foreground mb-3">— Ned, Token Project</p>
+            <Link to="/auth" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-mono">
+              Book a Demo <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -356,15 +366,11 @@ const LandingPageV3 = () => {
             ))}
           </div>
 
-          <MockPlatformCards />
+          <MockPlatformCards limit={3} platforms={["twitter", "telegram", "reddit"]} />
 
-          <p className="mt-8 text-sm text-muted-foreground italic max-w-lg mx-auto">
-            From analytics to action. We don't just show you data — we give you the outreach lists to act on it.
+          <p className="mt-8 text-sm text-muted-foreground max-w-lg mx-auto">
+            Just place your tag — we'll find these communities based on <span className="text-foreground font-medium">your</span> users.
           </p>
-
-          <div className="mt-12 text-left">
-            <MockNewsFeed />
-          </div>
         </div>
       </section>
 
@@ -395,11 +401,10 @@ const LandingPageV3 = () => {
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-33.333%); }
         }
         .animate-marquee {
-          animation: marquee 30s linear infinite;
-          width: max-content;
+          animation: marquee 40s linear infinite;
         }
       `}</style>
     </div>
