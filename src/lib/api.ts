@@ -1453,6 +1453,20 @@ export async function listAccessibleWebsites(): Promise<AccessibleWebsitesRespon
   return apiRequest<AccessibleWebsitesResponse>(`/websites/accessible`);
 }
 
+// Send invite email via edge function
+export async function sendInviteEmail(
+  email: string,
+  websiteName: string,
+  inviterName: string
+): Promise<void> {
+  const { error } = await supabase.functions.invoke("send-invite-email", {
+    body: { email, websiteName, inviterName },
+  });
+  if (error) {
+    console.error("Failed to send invite email:", error);
+  }
+}
+
 // Holder Analytics types
 export interface HolderDataPoint {
   date: string;
