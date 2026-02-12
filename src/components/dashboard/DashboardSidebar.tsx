@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import audiencescanIcon from "@/assets/audiencescan-icon.png";
-import audiencescanLogo from "@/assets/audiencescan-logo-dark.png";
+import audiencescanLogo from "@/assets/audiencescan-logo-wide.png";
 
 
 
