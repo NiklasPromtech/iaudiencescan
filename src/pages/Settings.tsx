@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ExternalLink,
   LogOut,
+  Key,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,13 @@ const Settings = () => {
       description: "Manage your tracked websites and installation",
       icon: Globe,
       action: () => navigate("/install"),
+      badge: null,
+    },
+    {
+      title: "AI Assistant Access",
+      description: "Generate API keys for external AI tools",
+      icon: Key,
+      action: () => navigate("/settings/api-keys"),
       badge: null,
     },
     {
