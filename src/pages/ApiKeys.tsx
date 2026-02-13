@@ -13,8 +13,8 @@ const API_BASE_URL = "https://cdn.audiencescan.io/auth";
 const AI_PROMPT_BLOCK = `You have read-only access to my AudienceScan analytics data via the API below.
 
 ## Authentication
-Include the API key as a Bearer token in every request:
-  Authorization: Bearer <API_KEY>
+Include the API key in the X-Api-Key header in every request:
+  X-Api-Key: <API_KEY>
 
 ## Base URL
 ${API_BASE_URL}
@@ -145,7 +145,7 @@ const ApiKeys = () => {
             </p>
             <div className="bg-muted rounded p-3 font-mono text-xs text-foreground overflow-x-auto">
               <pre>{`curl ${API_BASE_URL}/analytics/scorecard \\
-  -H "Authorization: Bearer as_k_YOUR_KEY" \\
+  -H "X-Api-Key: as_k_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"range":{"type":"last_full_days","days":7,"timezone":"UTC"}}'`}</pre>
             </div>
@@ -162,7 +162,7 @@ const ApiKeys = () => {
             </p>
             <div className="bg-muted rounded p-3 font-mono text-xs text-foreground overflow-x-auto">
               <pre>{`curl ${API_BASE_URL}/analytics/table \\
-  -H "Authorization: Bearer as_k_YOUR_KEY" \\
+  -H "X-Api-Key: as_k_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"range":{"type":"last_full_days","days":7,"timezone":"UTC"},"dimension":"source"}'`}</pre>
             </div>

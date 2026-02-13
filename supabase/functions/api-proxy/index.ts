@@ -31,16 +31,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Extract API key
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer as_k_")) {
+    // Extract API key from X-Api-Key header (or fallback to Authorization for backwards compat)
+    const apiKey = req.headers.get("X-Api-Key") || req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!apiKey?.startsWith("as_k_")) {
       return new Response(
-        JSON.stringify({ error: "Invalid or missing API key" }),
+        JSON.stringify({ error: "Invalid or missing API key. Pass it via X-Api-Key header." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const apiKey = authHeader.replace("Bearer ", "");
     const keyHash = await hashKey(apiKey);
 
     // Validate key using service role
