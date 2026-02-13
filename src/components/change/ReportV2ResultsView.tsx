@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -130,8 +131,30 @@ const ClickChangesTable = ({ title, icon, items }: { title: string; icon: React.
         <TableBody>
           {items.map((item, i) => (
             <TableRow key={i}>
-              <TableCell className="font-medium">{item.click_text || "—"}</TableCell>
-              <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground">{item.href}</TableCell>
+              <TableCell className="max-w-[180px]">
+                <TooltipProvider>
+                  <UiTooltip>
+                    <TooltipTrigger asChild>
+                      <span className="font-medium block truncate cursor-default">{item.click_text || "—"}</span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs break-all">
+                      {item.click_text || "—"}
+                    </TooltipContent>
+                  </UiTooltip>
+                </TooltipProvider>
+              </TableCell>
+              <TableCell className="max-w-[200px]">
+                <TooltipProvider>
+                  <UiTooltip>
+                    <TooltipTrigger asChild>
+                      <span className="block truncate text-xs text-muted-foreground cursor-default">{item.href}</span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-sm break-all">
+                      {item.href}
+                    </TooltipContent>
+                  </UiTooltip>
+                </TooltipProvider>
+              </TableCell>
               <TableCell className="text-right tabular-nums">{item.baseline_clicks}</TableCell>
               <TableCell className="text-right tabular-nums">{item.event_clicks}</TableCell>
               <TableCell className="text-right tabular-nums">
