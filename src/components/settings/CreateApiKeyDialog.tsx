@@ -102,7 +102,7 @@ export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {generatedKey ? "API Key Created" : "Create API Key"}
