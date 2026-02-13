@@ -31,6 +31,7 @@ export interface BehaviorItem {
 export interface ClickChangeItem {
   href: string;
   click_text: string;
+  page_path: string;
   baseline_clicks: number;
   event_clicks: number;
   delta: number;

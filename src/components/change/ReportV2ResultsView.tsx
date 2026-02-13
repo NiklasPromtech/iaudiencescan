@@ -120,13 +120,14 @@ const ClickChangesTable = ({ title, icon, items }: { title: string; icon: React.
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Link Text</TableHead>
-            <TableHead className="max-w-[200px]">URL</TableHead>
-            <TableHead className="text-right">Baseline</TableHead>
-            <TableHead className="text-right">Event</TableHead>
-            <TableHead className="text-right">Δ</TableHead>
-            <TableHead className="text-right">Δ%</TableHead>
-          </TableRow>
+             <TableHead>Link Text</TableHead>
+             <TableHead className="max-w-[200px]">URL</TableHead>
+             <TableHead>Page</TableHead>
+             <TableHead className="text-right">Baseline</TableHead>
+             <TableHead className="text-right">Event</TableHead>
+             <TableHead className="text-right">Δ</TableHead>
+             <TableHead className="text-right">Δ%</TableHead>
+           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item, i) => (
@@ -155,7 +156,19 @@ const ClickChangesTable = ({ title, icon, items }: { title: string; icon: React.
                   </UiTooltip>
                 </TooltipProvider>
               </TableCell>
-              <TableCell className="text-right tabular-nums">{item.baseline_clicks}</TableCell>
+               <TableCell className="max-w-[140px]">
+                 <TooltipProvider>
+                   <UiTooltip>
+                     <TooltipTrigger asChild>
+                       <span className="block truncate text-xs text-muted-foreground cursor-default">{item.page_path || "—"}</span>
+                     </TooltipTrigger>
+                     <TooltipContent side="top" className="max-w-xs break-all">
+                       {item.page_path || "—"}
+                     </TooltipContent>
+                   </UiTooltip>
+                 </TooltipProvider>
+               </TableCell>
+               <TableCell className="text-right tabular-nums">{item.baseline_clicks}</TableCell>
               <TableCell className="text-right tabular-nums">{item.event_clicks}</TableCell>
               <TableCell className="text-right tabular-nums">
                 <span className={item.delta > 0 ? "text-emerald-600" : item.delta < 0 ? "text-red-500" : ""}>
