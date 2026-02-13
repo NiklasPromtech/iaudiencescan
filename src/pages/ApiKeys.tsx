@@ -58,12 +58,11 @@ const ApiKeys = () => {
             <pre>{`curl ${proxyBaseUrl}/analytics/scorecard \\
   -H "Authorization: Bearer as_k_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
-  -d '{"tag_id":"YOUR_TAG_ID","range":{"type":"last_full_days","days":7,"timezone":"UTC"}}'`}</pre>
+  -d '{"range":{"type":"last_full_days","days":7,"timezone":"UTC"}}'`}</pre>
           </div>
           <p className="text-p4 text-muted-foreground mt-3">
             Supported endpoints: <code>/analytics/scorecard</code>,{" "}
-            <code>/analytics/table</code>, <code>/analytics/bots</code>,{" "}
-            <code>/analytics/tracking-status/*</code>
+            <code>/analytics/table</code>
           </p>
         </Card>
 

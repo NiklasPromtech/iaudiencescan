@@ -11,14 +11,10 @@ const ANALYTICS_API_URL = "https://cdn.audiencescan.io/api";
 const ALLOWED_PATHS = [
   "/analytics/scorecard",
   "/analytics/table",
-  "/analytics/bots",
-  "/analytics/filtering",
 ];
 
 function isAllowedPath(path: string): boolean {
-  if (ALLOWED_PATHS.includes(path)) return true;
-  if (path.startsWith("/analytics/tracking-status/")) return true;
-  return false;
+  return ALLOWED_PATHS.includes(path);
 }
 
 async function hashKey(key: string): Promise<string> {
@@ -74,9 +70,22 @@ Deno.serve(async (req) => {
       .eq("id", keyRow.id)
       .then(() => {});
 
+    // Fetch tag_id from websites table
+    const { data: website, error: websiteError } = await supabase
+      .from("websites")
+      .select("tag_id")
+      .eq("id", keyRow.website_id)
+      .single();
+
+    if (websiteError || !website?.tag_id) {
+      return new Response(
+        JSON.stringify({ error: "No website linked to this API key" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Resolve proxy path
     const url = new URL(req.url);
-    // Path after /api-proxy, e.g. /analytics/scorecard
     const proxyPath = url.pathname.replace(/^\/api-proxy/, "").replace(/^\/+/, "/");
 
     if (!isAllowedPath(proxyPath)) {
@@ -94,10 +103,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse body and inject tag_id
+    let body: Record<string, unknown> = {};
+    if (req.method !== "GET") {
+      try {
+        body = await req.json();
+      } catch {
+        body = {};
+      }
+    }
+    body.tag_id = website.tag_id;
+
     // Forward request to backend
     const targetUrl = `${ANALYTICS_API_URL}${proxyPath}`;
     const forwardHeaders: Record<string, string> = {
-      "Content-Type": req.headers.get("Content-Type") || "application/json",
+      "Content-Type": "application/json",
       "X-Service-Key": serviceKey,
       "X-User-Id": keyRow.user_id,
       "X-Website-Id": keyRow.website_id,
@@ -106,7 +126,7 @@ Deno.serve(async (req) => {
     const backendResponse = await fetch(targetUrl, {
       method: req.method,
       headers: forwardHeaders,
-      body: req.method !== "GET" ? await req.text() : undefined,
+      body: JSON.stringify(body),
     });
 
     const responseBody = await backendResponse.text();
