@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Key, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 
 interface ApiKey {
   id: string;
@@ -22,16 +23,23 @@ interface Props {
 
 export function ApiKeyList({ refreshKey }: Props) {
   const { toast } = useToast();
+  const { selectedWebsite } = useSelectedWebsite();
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
 
   const fetchKeys = async () => {
+    if (!selectedWebsite) {
+      setKeys([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from("api_keys")
       .select("id, key_prefix, label, website_id, created_at, last_used_at")
       .is("revoked_at", null)
+      .eq("website_id", selectedWebsite.id)
       .order("created_at", { ascending: false });
 
     if (!error && data) setKeys(data);
@@ -40,7 +48,7 @@ export function ApiKeyList({ refreshKey }: Props) {
 
   useEffect(() => {
     fetchKeys();
-  }, [refreshKey]);
+  }, [refreshKey, selectedWebsite?.id]);
 
   const handleRevoke = async (id: string) => {
     setRevoking(id);
