@@ -43,7 +43,7 @@ import { ReportV2ResultsView, type ReportV2ResultsViewHandle } from "@/component
 import { TimelineRangeChart } from "@/components/overview/TimelineRangeChart";
 import type { ReportV2Response } from "@/types/report-v2";
 
-const REPORT_V2_URL = "https://api.audiencescan.xyz/analytics/report/v2";
+const REPORT_V2_URL = "https://cdn.audiencescan.io/api/analytics/report/v2";
 
 const Change = () => {
   const { selectedWebsite, loading: websiteLoading } = useSelectedWebsite();
