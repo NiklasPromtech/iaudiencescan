@@ -10,18 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { listWebsites } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { Copy, Check, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 
 interface Props {
   open: boolean;
@@ -48,21 +40,14 @@ async function hashKey(key: string): Promise<string> {
 
 export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
   const { toast } = useToast();
+  const { selectedWebsite } = useSelectedWebsite();
   const [label, setLabel] = useState("");
-  const [websiteId, setWebsiteId] = useState("");
   const [creating, setCreating] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const { data: websitesData } = useQuery({
-    queryKey: ["websites"],
-    queryFn: () => listWebsites({ status: "verified" }),
-  });
-
-  const websites = websitesData?.websites ?? [];
-
   const handleCreate = async () => {
-    if (!websiteId) return;
+    if (!selectedWebsite) return;
     setCreating(true);
     try {
       const {
@@ -78,7 +63,7 @@ export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
         .from("api_keys")
         .insert({
           user_id: user.id,
-          website_id: websiteId,
+          website_id: selectedWebsite.id,
           key_hash: keyHash,
           key_prefix: keyPrefix,
           label: label || null,
@@ -109,7 +94,6 @@ export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
   const handleClose = (open: boolean) => {
     if (!open) {
       setLabel("");
-      setWebsiteId("");
       setGeneratedKey(null);
       setCopied(false);
     }
@@ -155,18 +139,9 @@ export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Website</Label>
-              <Select value={websiteId} onValueChange={setWebsiteId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a website" />
-                </SelectTrigger>
-                <SelectContent>
-                  {websites.map((w) => (
-                    <SelectItem key={w.id} value={w.id}>
-                      {w.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="text-sm text-foreground px-3 py-2 bg-muted rounded border border-border">
+                {selectedWebsite?.name ?? "No website selected"}
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Label (optional)</Label>
@@ -185,7 +160,7 @@ export function CreateApiKeyDialog({ open, onOpenChange, onCreated }: Props) {
           ) : (
             <Button
               onClick={handleCreate}
-              disabled={!websiteId || creating}
+              disabled={!selectedWebsite || creating}
             >
               {creating ? "Creating…" : "Create Key"}
             </Button>
