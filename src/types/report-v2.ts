@@ -28,6 +28,15 @@ export interface BehaviorItem {
   low_confidence: boolean;
 }
 
+export interface ClickChangeItem {
+  href: string;
+  click_text: string;
+  baseline_clicks: number;
+  event_clicks: number;
+  delta: number;
+  delta_percent: number;
+}
+
 export interface DimensionMetric {
   baseline: number;
   event: number;
@@ -106,6 +115,10 @@ export interface ReportV2Response {
   };
   behavior_changes: {
     items: BehaviorItem[];
+    outbound_click_gainers?: ClickChangeItem[];
+    outbound_click_losers?: ClickChangeItem[];
+    internal_click_gainers?: ClickChangeItem[];
+    internal_click_losers?: ClickChangeItem[];
   };
   dimension_performance: {
     utm_campaign?: DimensionRow[];

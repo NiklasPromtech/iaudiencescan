@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   AlertTriangle, TrendingUp, TrendingDown, Minus, ChevronDown,
-  Wallet, Activity, Eye, BarChart3, ShieldAlert,
+  Wallet, Activity, Eye, BarChart3, ShieldAlert, ExternalLink, Link2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
@@ -18,7 +18,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import type {
-  ReportV2Response, KpiMetric, DimensionRow, DimensionMetric,
+  ReportV2Response, KpiMetric, DimensionRow, DimensionMetric, ClickChangeItem,
 } from "@/types/report-v2";
 
 export interface ReportV2ResultsViewHandle {
@@ -108,6 +108,47 @@ const MetricDelta = ({ metric }: { metric: DimensionMetric | undefined }) => {
         ({fmtPct(metric.delta_percent)})
       </span>
     </span>
+  );
+};
+
+const ClickChangesTable = ({ title, icon, items }: { title: string; icon: React.ReactNode; items: ClickChangeItem[] }) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">{icon} {title}</p>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Link Text</TableHead>
+            <TableHead className="max-w-[200px]">URL</TableHead>
+            <TableHead className="text-right">Baseline</TableHead>
+            <TableHead className="text-right">Event</TableHead>
+            <TableHead className="text-right">Δ</TableHead>
+            <TableHead className="text-right">Δ%</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((item, i) => (
+            <TableRow key={i}>
+              <TableCell className="font-medium">{item.click_text || "—"}</TableCell>
+              <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground">{item.href}</TableCell>
+              <TableCell className="text-right tabular-nums">{item.baseline_clicks}</TableCell>
+              <TableCell className="text-right tabular-nums">{item.event_clicks}</TableCell>
+              <TableCell className="text-right tabular-nums">
+                <span className={item.delta > 0 ? "text-emerald-600" : item.delta < 0 ? "text-red-500" : ""}>
+                  {item.delta > 0 ? "+" : ""}{item.delta}
+                </span>
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                <span className={item.delta_percent > 0 ? "text-emerald-600" : item.delta_percent < 0 ? "text-red-500" : ""}>
+                  {fmtPct(item.delta_percent)}
+                </span>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 
@@ -223,47 +264,53 @@ export const ReportV2ResultsView = forwardRef<ReportV2ResultsViewHandle, Props>(
           </CardContent>
         </Card>
 
-        {/* Behavior Changes */}
-        {behavior_changes.items.length > 0 && (
+        {/* Behavior Changes & Click Changes */}
+        {(behavior_changes.items.length > 0 || behavior_changes.outbound_click_gainers?.length || behavior_changes.outbound_click_losers?.length || behavior_changes.internal_click_gainers?.length || behavior_changes.internal_click_losers?.length) && (
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" /> Behavior Changes
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Behavior</TableHead>
-                    <TableHead className="text-right">Baseline</TableHead>
-                    <TableHead className="text-right">Event</TableHead>
-                    <TableHead className="text-right">Δ</TableHead>
-                    <TableHead className="text-right">Δ%</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...behavior_changes.items]
-                    .sort((a, b) => Math.abs(b.delta_percent) - Math.abs(a.delta_percent))
-                    .map((item) => (
-                      <TableRow key={item.behavior}>
-                        <TableCell className="font-medium">{item.behavior.replace(/_/g, " ")}</TableCell>
-                        <TableCell className="text-right tabular-nums">{item.baseline_rate.toFixed(1)}%</TableCell>
-                        <TableCell className="text-right tabular-nums">{item.event_rate.toFixed(1)}%</TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          <span className={item.delta > 0 ? "text-emerald-600" : item.delta < 0 ? "text-red-500" : ""}>
-                            {item.delta > 0 ? "+" : ""}{item.delta.toFixed(1)}pp
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          <span className={item.delta_percent > 0 ? "text-emerald-600" : item.delta_percent < 0 ? "text-red-500" : ""}>
-                            {fmtPct(item.delta_percent)}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+            <CardContent className="space-y-6">
+              {behavior_changes.items.length > 0 && (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Behavior</TableHead>
+                      <TableHead className="text-right">Baseline</TableHead>
+                      <TableHead className="text-right">Event</TableHead>
+                      <TableHead className="text-right">Δ</TableHead>
+                      <TableHead className="text-right">Δ%</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...behavior_changes.items]
+                      .sort((a, b) => Math.abs(b.delta_percent) - Math.abs(a.delta_percent))
+                      .map((item) => (
+                        <TableRow key={item.behavior}>
+                          <TableCell className="font-medium">{item.behavior.replace(/_/g, " ")}</TableCell>
+                          <TableCell className="text-right tabular-nums">{item.baseline_rate.toFixed(1)}%</TableCell>
+                          <TableCell className="text-right tabular-nums">{item.event_rate.toFixed(1)}%</TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            <span className={item.delta > 0 ? "text-emerald-600" : item.delta < 0 ? "text-red-500" : ""}>
+                              {item.delta > 0 ? "+" : ""}{item.delta.toFixed(1)}pp
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            <span className={item.delta_percent > 0 ? "text-emerald-600" : item.delta_percent < 0 ? "text-red-500" : ""}>
+                              {fmtPct(item.delta_percent)}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
+              <ClickChangesTable title="Outbound Click Gainers" icon={<ExternalLink className="h-3.5 w-3.5 text-emerald-600" />} items={behavior_changes.outbound_click_gainers || []} />
+              <ClickChangesTable title="Outbound Click Losers" icon={<ExternalLink className="h-3.5 w-3.5 text-red-500" />} items={behavior_changes.outbound_click_losers || []} />
+              <ClickChangesTable title="Internal Click Gainers" icon={<Link2 className="h-3.5 w-3.5 text-emerald-600" />} items={behavior_changes.internal_click_gainers || []} />
+              <ClickChangesTable title="Internal Click Losers" icon={<Link2 className="h-3.5 w-3.5 text-red-500" />} items={behavior_changes.internal_click_losers || []} />
             </CardContent>
           </Card>
         )}
