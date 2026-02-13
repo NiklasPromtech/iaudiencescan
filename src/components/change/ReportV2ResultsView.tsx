@@ -1,5 +1,4 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   AlertTriangle, TrendingUp, TrendingDown, Minus, ChevronDown,
-  Wallet, Activity, Eye, BarChart3, ShieldAlert, ExternalLink, Link2,
+  Wallet, Activity, Eye, BarChart3, ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
@@ -19,8 +18,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import type {
-  ReportV2Response, KpiMetric, DimensionRow, DimensionMetric, ClickChangeItem,
+  ReportV2Response, KpiMetric, DimensionRow, DimensionMetric,
 } from "@/types/report-v2";
+import { ClickChangesSection } from "./ClickChangesSection";
 
 export interface ReportV2ResultsViewHandle {
   handleCopyReport: () => void;
@@ -112,81 +112,6 @@ const MetricDelta = ({ metric }: { metric: DimensionMetric | undefined }) => {
   );
 };
 
-const ClickChangesTable = ({ title, icon, items }: { title: string; icon: React.ReactNode; items: ClickChangeItem[] }) => {
-  if (!items || items.length === 0) return null;
-  return (
-    <div className="space-y-2">
-      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">{icon} {title}</p>
-      <Table>
-        <TableHeader>
-          <TableRow>
-             <TableHead>Link Text</TableHead>
-             <TableHead className="max-w-[200px]">URL</TableHead>
-             <TableHead>Page</TableHead>
-             <TableHead className="text-right">Baseline</TableHead>
-             <TableHead className="text-right">Event</TableHead>
-             <TableHead className="text-right">Δ</TableHead>
-             <TableHead className="text-right">Δ%</TableHead>
-           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item, i) => (
-            <TableRow key={i}>
-              <TableCell className="max-w-[180px]">
-                <TooltipProvider>
-                  <UiTooltip>
-                    <TooltipTrigger asChild>
-                      <span className="font-medium block truncate cursor-default">{item.click_text || "—"}</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs break-all">
-                      {item.click_text || "—"}
-                    </TooltipContent>
-                  </UiTooltip>
-                </TooltipProvider>
-              </TableCell>
-              <TableCell className="max-w-[200px]">
-                <TooltipProvider>
-                  <UiTooltip>
-                    <TooltipTrigger asChild>
-                      <span className="block truncate text-xs text-muted-foreground cursor-default">{item.href}</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-sm break-all">
-                      {item.href}
-                    </TooltipContent>
-                  </UiTooltip>
-                </TooltipProvider>
-              </TableCell>
-               <TableCell className="max-w-[140px]">
-                 <TooltipProvider>
-                   <UiTooltip>
-                     <TooltipTrigger asChild>
-                       <span className="block truncate text-xs text-muted-foreground cursor-default">{item.page_path || "—"}</span>
-                     </TooltipTrigger>
-                     <TooltipContent side="top" className="max-w-xs break-all">
-                       {item.page_path || "—"}
-                     </TooltipContent>
-                   </UiTooltip>
-                 </TooltipProvider>
-               </TableCell>
-               <TableCell className="text-right tabular-nums">{item.baseline_clicks}</TableCell>
-              <TableCell className="text-right tabular-nums">{item.event_clicks}</TableCell>
-              <TableCell className="text-right tabular-nums">
-                <span className={item.delta > 0 ? "text-emerald-600" : item.delta < 0 ? "text-red-500" : ""}>
-                  {item.delta > 0 ? "+" : ""}{item.delta}
-                </span>
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                <span className={item.delta_percent > 0 ? "text-emerald-600" : item.delta_percent < 0 ? "text-red-500" : ""}>
-                  {fmtPct(item.delta_percent)}
-                </span>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
 
 export const ReportV2ResultsView = forwardRef<ReportV2ResultsViewHandle, Props>(
   ({ result }, ref) => {
@@ -343,10 +268,12 @@ export const ReportV2ResultsView = forwardRef<ReportV2ResultsViewHandle, Props>(
                   </TableBody>
                 </Table>
               )}
-              <ClickChangesTable title="Outbound Click Gainers" icon={<ExternalLink className="h-3.5 w-3.5 text-emerald-600" />} items={behavior_changes.outbound_click_gainers || []} />
-              <ClickChangesTable title="Outbound Click Losers" icon={<ExternalLink className="h-3.5 w-3.5 text-red-500" />} items={behavior_changes.outbound_click_losers || []} />
-              <ClickChangesTable title="Internal Click Gainers" icon={<Link2 className="h-3.5 w-3.5 text-emerald-600" />} items={behavior_changes.internal_click_gainers || []} />
-              <ClickChangesTable title="Internal Click Losers" icon={<Link2 className="h-3.5 w-3.5 text-red-500" />} items={behavior_changes.internal_click_losers || []} />
+              <ClickChangesSection
+                outbound_click_gainers={behavior_changes.outbound_click_gainers}
+                outbound_click_losers={behavior_changes.outbound_click_losers}
+                internal_click_gainers={behavior_changes.internal_click_gainers}
+                internal_click_losers={behavior_changes.internal_click_losers}
+              />
             </CardContent>
           </Card>
         )}
