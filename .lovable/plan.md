@@ -1,31 +1,28 @@
 
 
-# Update API Keys Page Instructions
+## Fix: api-proxy Silent Deploy Failure
 
-Remove `tag_id` from the example request and update the supported endpoints list, since the edge function will auto-inject the `tag_id` from the API key's linked website.
+### Problem
+The `api-proxy` edge function fails to deploy silently. It never appears in the Supabase Edge Functions dashboard despite correct file structure and config.
 
-## Changes
+### Root Cause
+Line 110 uses optional catch binding (`catch {}`), which may not be supported by the Supabase edge runtime parser. All other working functions use `catch (error)` or `catch (error: any)`.
 
-### `src/pages/ApiKeys.tsx`
+### Fix
+One-line change in `supabase/functions/api-proxy/index.ts`:
 
-1. Update the curl example to remove `tag_id` from the request body -- callers only need to send `range` (and any other non-tag params)
-2. Update the "Supported endpoints" line to show only `/analytics/scorecard` and `/analytics/table`
-
-### `supabase/functions/api-proxy/index.ts`
-
-1. After key validation, query the `websites` table for the `tag_id` using `keyRow.website_id`
-2. Parse the incoming JSON body, inject the resolved `tag_id`, and forward
-3. Trim `ALLOWED_PATHS` to only `/analytics/scorecard` and `/analytics/table`
-4. Remove the `/analytics/tracking-status/*` wildcard check
-
-### Updated curl example will look like:
-
-```text
-curl https://wksyyydmgpcaxdijalqf.supabase.co/functions/v1/api-proxy/analytics/scorecard \
-  -H "Authorization: Bearer as_k_YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"range":{"type":"last_full_days","days":7,"timezone":"UTC"}}'
+Change line 110 from:
+```
+} catch {
+```
+to:
+```
+} catch (_e) {
 ```
 
-No new files. Two files modified.
+### After the Fix
+1. Publish the project
+2. Check the Supabase Edge Functions dashboard for `api-proxy`
+3. Test with a direct curl to `https://wksyyydmgpcaxdijalqf.supabase.co/functions/v1/api-proxy/analytics/scorecard`
+4. Test end-to-end through OpenClaw
 
