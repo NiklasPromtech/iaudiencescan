@@ -11,6 +11,8 @@ type Phase =
   | 'reveal'
   | 'tagline';
 
+const LOOP_DURATION = 10000;
+
 const GADune: React.FC = () => {
   const [phase, setPhase] = useState<Phase>('black');
 
@@ -22,7 +24,15 @@ const GADune: React.FC = () => {
       ['reveal', 7000],
       ['tagline', 8200],
     ];
-    const timers = schedule.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
+
+    const runLoop = () => {
+      setPhase('black');
+      const timers = schedule.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
+      const loopTimer = setTimeout(runLoop, LOOP_DURATION);
+      return [...timers, loopTimer];
+    };
+
+    let timers = runLoop();
     return () => timers.forEach(clearTimeout);
   }, []);
 
@@ -120,7 +130,7 @@ const GADune: React.FC = () => {
             phase === 'logos-in'
               ? 'translateX(-160px) scale(1)'
               : phase === 'orbiting'
-              ? 'translateX(-120px) translateY(-20px) scale(0.85)'
+              ? 'translateX(-120px) scale(0.85)'
               : past('reveal')
               ? 'translateX(0) scale(0.3)'
               : 'translateX(-300px) scale(0.8)',
@@ -155,7 +165,7 @@ const GADune: React.FC = () => {
             phase === 'logos-in'
               ? 'translateX(160px) scale(1)'
               : phase === 'orbiting'
-              ? 'translateX(120px) translateY(20px) scale(0.85)'
+              ? 'translateX(120px) scale(0.85)'
               : past('reveal')
               ? 'translateX(0) scale(0.3)'
               : 'translateX(300px) scale(0.8)',
