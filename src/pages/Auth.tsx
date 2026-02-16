@@ -33,6 +33,21 @@ const Auth = () => {
         title: "Email verified!",
         description: "Your email has been verified. You can now sign in.",
       });
+
+      // Google Ads conversion – Sign up
+      if (typeof (window as any).gtag === "function") {
+        (window as any).gtag("event", "conversion", {
+          send_to: "AW-443807859/82g4CPGXgvYbEPPwz9MB",
+          value: 1.0,
+          currency: "GBP",
+        });
+      }
+
+      // AudienceScan conversion – Sign up
+      if (typeof (window as any).AudienceScan?.trackEvent === "function") {
+        const userEmail = searchParams.get("email") || "";
+        (window as any).AudienceScan.trackEvent("Sign up", userEmail);
+      }
     }
 
     const checkSession = async () => {

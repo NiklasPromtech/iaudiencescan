@@ -144,6 +144,21 @@ const Install = () => {
       setNewSiteName("");
       setNewSiteUrl("");
       toast({ title: "Webpage created", description: "Your tracking tag has been generated." });
+
+      // Google Ads conversion – Create tag
+      if (typeof (window as any).gtag === "function") {
+        (window as any).gtag("event", "conversion", {
+          send_to: "AW-443807859/Zx_OCNiFhPYbEPPwz9MB",
+          value: 1.0,
+          currency: "GBP",
+        });
+      }
+
+      // AudienceScan conversion – Created Tag
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (typeof (window as any).AudienceScan?.trackEvent === "function") {
+        (window as any).AudienceScan.trackEvent("Created Tag", currentUser?.email || "");
+      }
     } catch (error: any) {
       toast({
         title: "Error creating site",
