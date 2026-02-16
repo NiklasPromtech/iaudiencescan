@@ -1601,3 +1601,95 @@ export async function fetchHoldersData(request: HoldersRequest): Promise<Holders
 
   return response.json();
 }
+
+// Unified Overview endpoint types
+export interface SubResult<T> {
+  success: boolean;
+  data: T | null;
+  error?: string;
+}
+
+export interface OverviewRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+  conversion_events?: string[];
+  cost?: {
+    mode: string;
+    keys?: Record<string, string>;
+    cost_source_id?: string;
+  };
+  table_date_day?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  table_referrer_domain?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  events_table?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  wallets_table?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  clicks_table?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  wallet_distribution?: {
+    sort?: { by: string; dir: string };
+    limit?: number;
+    offset?: number;
+  };
+  holders?: {
+    contract_id?: string;
+  };
+}
+
+export interface OverviewResponse {
+  success: boolean;
+  tag_id: string;
+  scorecard: SubResult<ScorecardResponse>;
+  table_date_day: SubResult<TableResponse>;
+  table_referrer_domain: SubResult<TableResponse>;
+  filtering: SubResult<FilterOptionsResponse>;
+  cost_sources: SubResult<{ cost_sources: CostSource[] }>;
+  events: SubResult<EventsTableResponse>;
+  wallets: SubResult<WalletsTableResponse>;
+  wallet_extensions: SubResult<WalletExtensionsResponse>;
+  wallet_distribution: SubResult<WalletDistributionResponse>;
+  clicks: SubResult<ClicksTableResponse>;
+  holders: SubResult<HoldersResponse>;
+}
+
+export async function fetchOverview(request: OverviewRequest): Promise<OverviewResponse> {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/overview`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}

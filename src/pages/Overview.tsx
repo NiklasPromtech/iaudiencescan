@@ -5,17 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  fetchScorecard, 
+  fetchOverview,
   fetchTableData,
   fetchRealtimeVisitors,
-  fetchEventsTable,
-  fetchWalletsTable,
-  fetchWalletExtensions,
-  fetchWalletDistribution,
-  fetchClicksTable,
-  listCostSources,
-  fetchFilterOptions,
-  fetchHoldersData,
   ScorecardResponse, 
   TableResponse, 
   TableDimension, 
@@ -178,6 +170,7 @@ const Overview = () => {
     setWalletExtensionsLoading(true);
     setWalletDistributionLoading(true);
     setClicksLoading(true);
+    setFilterOptionsLoading(true);
     setError(null);
 
     const filtersParam = getFiltersParam(filters);
@@ -190,137 +183,103 @@ const Overview = () => {
       : filtersParam;
 
     try {
-      // Fetch core data in parallel - these are critical
-      const [scorecardData, dailyChartData, dimensionTableData] = await Promise.all([
-        fetchScorecard({
-          tag_id: selectedWebsite.id,
-          range: rangeConfig,
-          filters: mergedFilters,
-          conversion_events: conversionEvents,
-          cost: { mode: "none" },
-        }),
-        fetchTableData({
-          tag_id: selectedWebsite.id,
-          dimension: "date_day",
-          range: rangeConfig,
-          filters: mergedFilters,
-          conversion_events: conversionEvents,
-          cost: { mode: "none" },
-        }),
-        fetchTableData({
-          tag_id: selectedWebsite.id,
-          dimension,
-          range: rangeConfig,
-          filters: mergedFilters,
-          conversion_events: conversionEvents,
-          cost: { mode: "none" },
-          pagination: { limit: 50 },
-        }),
-      ]);
+      const response = await fetchOverview({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: mergedFilters,
+        conversion_events: conversionEvents,
+        cost: { mode: "none" },
+        table_referrer_domain: {
+          sort: { by: "pageviews", dir: "desc" },
+          limit: 50,
+        },
+        events_table: {
+          sort: { by: "event_count", dir: "desc" },
+          limit: 10,
+        },
+        wallets_table: {
+          sort: { by: "action_count", dir: "desc" },
+          limit: 10,
+        },
+        wallet_distribution: {
+          sort: { by: "tier_order", dir: "asc" },
+        },
+        clicks_table: {
+          sort: { by: "click_count", dir: "desc" },
+          limit: 20,
+        },
+      });
 
-      setScorecard(scorecardData);
-      setDailyData(dailyChartData);
-      setTableData(dimensionTableData);
+      // Scorecard
+      if (response.scorecard.success && response.scorecard.data) {
+        setScorecard(response.scorecard.data);
+      } else {
+        setError(response.scorecard.error || "Failed to load scorecard");
+      }
+
+      // Daily chart
+      if (response.table_date_day.success && response.table_date_day.data) {
+        setDailyData(response.table_date_day.data);
+      }
+
+      // Dimension table (referrer_domain default)
+      if (response.table_referrer_domain.success && response.table_referrer_domain.data) {
+        setTableData(response.table_referrer_domain.data);
+      }
+
+      // Filter options
+      if (response.filtering.success && response.filtering.data) {
+        setFilterOptions(response.filtering.data);
+      }
+
+      // Cost sources
+      if (response.cost_sources.success && response.cost_sources.data) {
+        setCostSources(response.cost_sources.data.cost_sources);
+      }
+
+      // Events
+      if (response.events.success && response.events.data) {
+        setEventsData(response.events.data);
+      }
+
+      // Wallets
+      if (response.wallets.success && response.wallets.data) {
+        setWalletsData(response.wallets.data);
+      }
+
+      // Wallet extensions
+      if (response.wallet_extensions.success && response.wallet_extensions.data) {
+        setWalletExtensionsData(response.wallet_extensions.data);
+      }
+
+      // Wallet distribution
+      if (response.wallet_distribution.success && response.wallet_distribution.data) {
+        setWalletDistributionData(response.wallet_distribution.data);
+      }
+
+      // Clicks
+      if (response.clicks.success && response.clicks.data) {
+        setClicksData(response.clicks.data);
+      }
+
+      // Holders
+      if (response.holders.success && response.holders.data) {
+        setHolderData(response.holders.data.data || []);
+      } else {
+        setHolderData([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load analytics");
     } finally {
       setLoading(false);
       setChartLoading(false);
       setTableLoading(false);
-    }
-
-    // Fetch optional data separately - these can fail without breaking the dashboard
-    try {
-      const eventsTableData = await fetchEventsTable({
-        tag_id: selectedWebsite.id,
-        range: rangeConfig,
-        filters: mergedFilters,
-        sort: { by: "event_count", dir: "desc" },
-        pagination: { limit: 10 },
-      });
-      setEventsData(eventsTableData);
-    } catch (err) {
-      console.error("Failed to load events data:", err);
-    } finally {
       setEventsLoading(false);
-    }
-
-    try {
-      const walletsTableData = await fetchWalletsTable({
-        tag_id: selectedWebsite.id,
-        range: rangeConfig,
-        filters: mergedFilters,
-        sort: { by: "action_count", dir: "desc" },
-        pagination: { limit: 10 },
-      });
-      setWalletsData(walletsTableData);
-    } catch (err) {
-      console.error("Failed to load wallets data:", err);
-    } finally {
       setWalletsLoading(false);
-    }
-
-    // Fetch wallet extensions data
-    try {
-      const walletExtensionsTableData = await fetchWalletExtensions({
-        tag_id: selectedWebsite.id,
-        range: rangeConfig,
-        filters: mergedFilters,
-      });
-      setWalletExtensionsData(walletExtensionsTableData);
-    } catch (err) {
-      console.error("Failed to load wallet extensions data:", err);
-    } finally {
       setWalletExtensionsLoading(false);
-    }
-
-    // Fetch wallet distribution data
-    try {
-      const walletDistData = await fetchWalletDistribution({
-        tag_id: selectedWebsite.id,
-        range: rangeConfig,
-        filters: mergedFilters,
-        sort: { by: "tier_order", dir: "asc" },
-      });
-      setWalletDistributionData(walletDistData);
-    } catch (err) {
-      console.error("Failed to load wallet distribution data:", err);
-    } finally {
       setWalletDistributionLoading(false);
-    }
-
-    // Fetch clicks table data
-    try {
-      const clicksTableData = await fetchClicksTable({
-        tag_id: selectedWebsite.id,
-        range: rangeConfig,
-        filters: mergedFilters,
-        sort: { by: "click_count", dir: "desc" },
-        pagination: { limit: 20 },
-      });
-      setClicksData(clicksTableData);
-    } catch (err) {
-      console.error("Failed to load clicks data:", err);
-    } finally {
       setClicksLoading(false);
-    }
-
-    try {
-      const rangeFrom = rangeConfig.type === "custom" 
-        ? rangeConfig.from 
-        : format(new Date(Date.now() - (rangeConfig.days * 24 * 60 * 60 * 1000)), "yyyy-MM-dd");
-      const rangeTo = rangeConfig.type === "custom"
-        ? rangeConfig.to
-        : format(new Date(), "yyyy-MM-dd");
-      
-      const holdersResponse = await fetchHoldersData({
-        tag_id: selectedWebsite.id,
-        range: { from: rangeFrom, to: rangeTo },
-      });
-      setHolderData(holdersResponse.data || []);
-    } catch (err) {
-      console.error("Failed to load holder data:", err);
-      setHolderData([]);
+      setFilterOptionsLoading(false);
     }
   }, [selectedWebsite, getFiltersParam]);
 
@@ -355,42 +314,11 @@ const Overview = () => {
     }
   }, [selectedWebsite, getFiltersParam]);
 
-  // Load filter options
-  const loadFilterOptions = useCallback(async () => {
-    if (!selectedWebsite) return;
-    setFilterOptionsLoading(true);
-    try {
-      const response = await fetchFilterOptions({
-        tag_id: selectedWebsite.id,
-        range: getRangeConfig(),
-      });
-      setFilterOptions(response);
-    } catch (err) {
-      console.error("Failed to load filter options:", err);
-    } finally {
-      setFilterOptionsLoading(false);
-    }
-  }, [selectedWebsite, getRangeConfig]);
-
   useEffect(() => {
     if (selectedWebsite) {
       loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
-      // Also load cost sources and filter options
-      loadCostSources();
-      loadFilterOptions();
     }
   }, [selectedWebsite, dateRange, selectedConversionEvent, selectedWalletAction]);
-
-  // Load cost sources
-  const loadCostSources = useCallback(async () => {
-    if (!selectedWebsite) return;
-    try {
-      const response = await listCostSources(selectedWebsite.id);
-      setCostSources(response.cost_sources);
-    } catch (err) {
-      console.error("Failed to load cost sources:", err);
-    }
-  }, [selectedWebsite]);
 
   // Realtime visitors polling
   useEffect(() => {
@@ -426,7 +354,6 @@ const Overview = () => {
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
     loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
-    loadFilterOptions();
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
