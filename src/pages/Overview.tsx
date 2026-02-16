@@ -26,7 +26,7 @@ import {
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { FilterDialog } from "@/components/overview/FilterDialog";
-import { PrimaryFilters } from "@/components/overview/PrimaryFilters";
+
 import { DailyChart } from "@/components/overview/DailyChart";
 import { DimensionTable } from "@/components/overview/DimensionTable";
 import { EventsTable } from "@/components/overview/EventsTable";
@@ -63,8 +63,6 @@ const Overview = () => {
   const [realtimeVisitors, setRealtimeVisitors] = useState<number | null>(null);
   const [costSources, setCostSources] = useState<CostSource[]>([]);
   const [selectedCostSourceId, setSelectedCostSourceId] = useState<string | null>(null);
-  const [selectedConversionEvent, setSelectedConversionEvent] = useState<string | null>(null);
-  const [selectedWalletAction, setSelectedWalletAction] = useState<string | null>(null);
   const [eventsData, setEventsData] = useState<EventsTableResponse | null>(null);
   const [walletsData, setWalletsData] = useState<WalletsTableResponse | null>(null);
   const [walletExtensionsData, setWalletExtensionsData] = useState<WalletExtensionsResponse | null>(null);
@@ -156,9 +154,7 @@ const Overview = () => {
   const loadAllData = useCallback(async (
     filters: ActiveFilters, 
     dimension: TableDimension, 
-    rangeConfig: RangeConfig,
-    conversionEvent: string | null,
-    walletAction: string | null
+    rangeConfig: RangeConfig
   ) => {
     if (!selectedWebsite) return;
 
@@ -173,20 +169,16 @@ const Overview = () => {
     setFilterOptionsLoading(true);
     setError(null);
 
-    const filtersParam = getFiltersParam(filters);
-    const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
-    const walletActionsFilter = walletAction ? [walletAction] : undefined;
-    
-    // Merge wallet_actions into filters if set
-    const mergedFilters = walletActionsFilter 
-      ? { ...filtersParam, wallet_actions: walletActionsFilter }
-      : filtersParam;
+    // Extract conversion_events from filters (separate API param), pass rest as filters
+    const { conversion_events: convEvents, ...restFilters } = filters;
+    const filtersParam = getFiltersParam(restFilters);
+    const conversionEvents = convEvents?.length ? convEvents : undefined;
 
     try {
       const response = await fetchOverview({
         tag_id: selectedWebsite.id,
         range: rangeConfig,
-        filters: mergedFilters,
+        filters: filtersParam,
         conversion_events: conversionEvents,
         cost: { mode: "none" },
         table_referrer_domain: {
@@ -287,19 +279,19 @@ const Overview = () => {
     dimension: TableDimension, 
     filters: ActiveFilters, 
     rangeConfig: RangeConfig,
-    conversionEvent: string | null,
     costSourceId: string | null = null
   ) => {
     if (!selectedWebsite) return;
 
     setTableLoading(true);
-    const conversionEvents = conversionEvent ? [conversionEvent] : undefined;
+    const { conversion_events: convEvents, ...restFilters } = filters;
+    const conversionEvents = convEvents?.length ? convEvents : undefined;
     try {
       const data = await fetchTableData({
         tag_id: selectedWebsite.id,
         dimension,
         range: rangeConfig,
-        filters: getFiltersParam(filters),
+        filters: getFiltersParam(restFilters),
         conversion_events: conversionEvents,
         cost: costSourceId 
           ? { mode: "utm", cost_source_id: costSourceId }
@@ -316,9 +308,9 @@ const Overview = () => {
 
   useEffect(() => {
     if (selectedWebsite) {
-      loadAllData(activeFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
+      loadAllData(activeFilters, tableDimension, getRangeConfig());
     }
-  }, [selectedWebsite, dateRange, selectedConversionEvent, selectedWalletAction]);
+  }, [selectedWebsite, dateRange]);
 
   // Realtime visitors polling
   useEffect(() => {
@@ -353,19 +345,18 @@ const Overview = () => {
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
-    loadAllData(newFilters, tableDimension, getRangeConfig(), selectedConversionEvent, selectedWalletAction);
+    loadAllData(newFilters, tableDimension, getRangeConfig());
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
-    setSelectedCostSourceId(null); // Reset cost source when dimension changes
-    loadTableData(newDimension, activeFilters, getRangeConfig(), selectedConversionEvent, null);
+    setSelectedCostSourceId(null);
+    loadTableData(newDimension, activeFilters, getRangeConfig(), null);
   };
 
   const handleCostSourceChange = (costSourceId: string | null) => {
     setSelectedCostSourceId(costSourceId);
-    // Re-fetch table data with the selected cost source
-    loadTableData(tableDimension, activeFilters, getRangeConfig(), selectedConversionEvent, costSourceId);
+    loadTableData(tableDimension, activeFilters, getRangeConfig(), costSourceId);
   };
 
   const handleAddCostSource = () => {
@@ -374,10 +365,6 @@ const Overview = () => {
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
     setDateRange(newDateRange);
-  };
-
-  const handleConversionEventChange = (event: string | null) => {
-    setSelectedConversionEvent(event);
   };
 
   const handleBotClick = (dimValue: string) => {
@@ -450,17 +437,7 @@ const Overview = () => {
                   Here's what we're seeing so far.
                 </p>
               </div>
-              {/* Primary row: Date + Conversion + Wallet Action */}
               <div className="flex items-center gap-2 flex-wrap">
-                <PrimaryFilters
-                  conversionEvents={filterOptions?.conversion_events ?? []}
-                  walletActions={filterOptions?.wallet_actions ?? []}
-                  selectedConversionEvent={selectedConversionEvent}
-                  selectedWalletAction={selectedWalletAction}
-                  onConversionEventChange={handleConversionEventChange}
-                  onWalletActionChange={setSelectedWalletAction}
-                  loading={filterOptionsLoading}
-                />
                 <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
               </div>
             </div>

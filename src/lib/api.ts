@@ -173,6 +173,7 @@ export interface FilterOptionsResponse {
   countries?: FilterOptionItem[];
   conversion_events?: FilterOptionItem[];
   wallet_actions?: FilterOptionItem[];
+  wallet_tiers?: FilterOptionItem[];
   cost_sources?: Array<{
     id: string;
     name: string;
