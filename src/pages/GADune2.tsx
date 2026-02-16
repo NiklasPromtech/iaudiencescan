@@ -67,33 +67,29 @@ const GADune2: React.FC = () => {
       <style>{`
         @keyframes slide-from-left {
           0% { transform: translateX(-50vw); opacity: 0; }
-          10% { opacity: 1; }
-          45% { opacity: 1; transform: translateX(-100px); }
-          65% { opacity: 0; transform: translateX(-40px); }
-          100% { opacity: 0; transform: translateX(-40px); }
+          8% { opacity: 1; }
+          100% { opacity: 0; transform: translateX(0px); }
         }
         @keyframes slide-from-right {
           0% { transform: translateX(50vw); opacity: 0; }
-          10% { opacity: 1; }
-          45% { opacity: 1; transform: translateX(100px); }
-          65% { opacity: 0; transform: translateX(40px); }
-          100% { opacity: 0; transform: translateX(40px); }
+          8% { opacity: 1; }
+          100% { opacity: 0; transform: translateX(0px); }
         }
         @keyframes reveal-logo {
-          0%, 60% { opacity: 0; transform: scale(0.5); }
-          75% { opacity: 1; transform: scale(1); }
+          0%, 40% { opacity: 0; transform: scale(0.5); }
+          60% { opacity: 1; transform: scale(1); }
           100% { opacity: 1; transform: scale(1); }
         }
         @keyframes reveal-tagline {
-          0%, 70% { opacity: 0; transform: translateY(20px); }
-          85% { opacity: 1; transform: translateY(0); }
+          0%, 55% { opacity: 0; transform: translateY(20px); }
+          75% { opacity: 1; transform: translateY(0); }
           100% { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-from-left {
-          animation: slide-from-left ${LOOP_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+          animation: slide-from-left 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
         }
         .animate-slide-from-right {
-          animation: slide-from-right ${LOOP_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+          animation: slide-from-right 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
         }
         .animate-reveal-logo {
           animation: reveal-logo ${LOOP_DURATION}ms ease-out forwards;
