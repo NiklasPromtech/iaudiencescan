@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import gaLogo from '@/assets/ga-logo.png';
-import duneLogo from '@/assets/dune-logo.png';
+import gaLogo from '@/assets/ga-logo-2.png';
+import duneLogo from '@/assets/dune-logo-2.png';
 import audiencescanIcon from '@/assets/audiencescan-icon-result.png';
 
 type Phase =
