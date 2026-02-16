@@ -12,8 +12,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilterOptionsResponse, ActiveFilters, FilterOptionItem } from "@/lib/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries";
+type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term" | "countries" | "conversion_events" | "wallet_actions" | "wallet_tiers";
 
 interface FilterSection {
   key: FilterKey;
@@ -28,6 +34,9 @@ const FILTER_SECTIONS: FilterSection[] = [
   { key: "utm_content", label: "Content" },
   { key: "utm_term", label: "Term" },
   { key: "countries", label: "Country" },
+  { key: "conversion_events", label: "Conversion" },
+  { key: "wallet_actions", label: "Wallet Action" },
+  { key: "wallet_tiers", label: "Wallet Tier" },
 ];
 
 interface FilterButtonProps {
@@ -274,12 +283,12 @@ export const FilterDialog = ({
     onFiltersChange(newFilters);
   };
 
-  // Get available sections (those with data)
-  const availableSections = useMemo(() => {
-    return FILTER_SECTIONS.filter((section) => {
-      const options = filterOptions?.[section.key] as FilterOptionItem[] | undefined;
-      return options && Array.isArray(options) && options.length > 0;
-    });
+  // Get options per section — empty array if no data
+  const sectionOptions = useMemo(() => {
+    return FILTER_SECTIONS.map((section) => ({
+      ...section,
+      options: (filterOptions?.[section.key] as FilterOptionItem[] | undefined) || [],
+    }));
   }, [filterOptions]);
 
   const totalPendingFilters = Object.values(pendingFilters).reduce(
@@ -292,24 +301,49 @@ export const FilterDialog = ({
     (values || []).map((value) => ({ key, value }))
   );
 
-  if (!filterOptions || availableSections.length === 0) {
+  if (!filterOptions) {
     return null;
   }
 
   return (
+    <TooltipProvider delayDuration={300}>
     <div className="flex flex-wrap items-center gap-2">
       {/* Filter buttons - use pendingFilters for display */}
-      {availableSections.map((section) => (
-        <FilterButton
-          key={section.key}
-          label={section.label}
-          options={(filterOptions[section.key] as FilterOptionItem[]) || []}
-          selectedValues={pendingFilters[section.key] || []}
-          onToggle={(value) => handleToggle(section.key, value)}
-          onSelectAll={(values) => handleSelectAll(section.key, values)}
-          onClear={() => handleClear(section.key)}
-        />
-      ))}
+      {sectionOptions.map((section) => {
+        const isEmpty = section.options.length === 0;
+        if (isEmpty) {
+          return (
+            <Tooltip key={section.key}>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled
+                    className="h-7 px-2.5 gap-1 font-normal text-muted-foreground/50 cursor-not-allowed"
+                  >
+                    <span className="text-xs">{section.label}</span>
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p className="text-xs">No {section.label.toLowerCase()} data available</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+        return (
+          <FilterButton
+            key={section.key}
+            label={section.label}
+            options={section.options}
+            selectedValues={pendingFilters[section.key] || []}
+            onToggle={(value) => handleToggle(section.key, value)}
+            onSelectAll={(values) => handleSelectAll(section.key, values)}
+            onClear={() => handleClear(section.key)}
+          />
+        );
+      })}
 
       {/* Apply button - only show when there are unapplied changes */}
       {hasChanges && (
@@ -356,5 +390,6 @@ export const FilterDialog = ({
         </>
       )}
     </div>
+    </TooltipProvider>
   );
 };
