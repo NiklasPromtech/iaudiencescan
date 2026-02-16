@@ -3,48 +3,23 @@ import gaLogo from '@/assets/ga-logo-2.png';
 import duneLogo from '@/assets/dune-logo-2.png';
 import audiencescanIcon from '@/assets/audiencescan-icon-result.png';
 
-type Phase = 'black' | 'slide' | 'fade' | 'reveal' | 'tagline';
-
-const LOOP_DURATION = 11000;
+const LOOP_DURATION = 10000;
 
 const GADune2: React.FC = () => {
-  const [phase, setPhase] = useState<Phase>('black');
+  const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
-    const schedule: [Phase, number][] = [
-      ['slide', 300],
-      ['fade', 3000],
-      ['reveal', 4200],
-      ['tagline', 5400],
-    ];
-
-    const runLoop = () => {
-      setPhase('black');
-      const timers = schedule.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
-      const loopTimer = setTimeout(runLoop, LOOP_DURATION);
-      return [...timers, loopTimer];
-    };
-
-    let timers = runLoop();
-    return () => timers.forEach(clearTimeout);
+    const interval = setInterval(() => setCycle(c => c + 1), LOOP_DURATION);
+    return () => clearInterval(interval);
   }, []);
-
-  const phases = ['black', 'slide', 'fade', 'reveal', 'tagline'];
-  const current = phases.indexOf(phase);
-  const past = (p: Phase) => current >= phases.indexOf(p);
 
   return (
     <div className="w-full h-screen bg-white flex items-center justify-center overflow-hidden relative select-none">
 
-      {/* GA Logo - slides from far left to center, fades out in second half */}
+      {/* GA Logo */}
       <div
-        className="absolute z-10 flex flex-col items-center"
-        style={{
-          opacity: phase === 'black' ? 0 : past('fade') ? 0 : undefined,
-          animation: phase === 'slide' ? 'slide-in-left 3200ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards' : undefined,
-          transform: phase === 'black' ? 'translateX(-45vw)' : undefined,
-          transition: phase === 'black' ? 'opacity 400ms' : past('fade') ? 'opacity 600ms ease-out' : undefined,
-        }}
+        key={`ga-${cycle}`}
+        className="absolute z-10 flex flex-col items-center animate-slide-from-left"
       >
         <img src={gaLogo} alt="Google Analytics" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
         <p className="text-black/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
@@ -52,15 +27,10 @@ const GADune2: React.FC = () => {
         </p>
       </div>
 
-      {/* Dune Logo - slides from far right to center, fades out in second half */}
+      {/* Dune Logo */}
       <div
-        className="absolute z-10 flex flex-col items-center"
-        style={{
-          opacity: phase === 'black' ? 0 : past('fade') ? 0 : undefined,
-          animation: phase === 'slide' ? 'slide-in-right 3200ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards' : undefined,
-          transform: phase === 'black' ? 'translateX(45vw)' : undefined,
-          transition: phase === 'black' ? 'opacity 400ms' : past('fade') ? 'opacity 600ms ease-out' : undefined,
-        }}
+        key={`dune-${cycle}`}
+        className="absolute z-10 flex flex-col items-center animate-slide-from-right"
       >
         <img src={duneLogo} alt="Dune" className="w-28 h-28 md:w-36 md:h-36 object-contain rounded-full" />
         <p className="text-black/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
@@ -70,12 +40,8 @@ const GADune2: React.FC = () => {
 
       {/* AudienceScan reveal */}
       <div
-        className="absolute z-30 flex flex-col items-center transition-all ease-out"
-        style={{
-          opacity: past('reveal') ? 1 : 0,
-          transform: past('reveal') ? 'scale(1)' : 'scale(0.5)',
-          transitionDuration: '1200ms',
-        }}
+        key={`as-${cycle}`}
+        className="absolute z-30 flex flex-col items-center animate-reveal-logo"
       >
         <img
           src={audiencescanIcon}
@@ -86,12 +52,8 @@ const GADune2: React.FC = () => {
 
       {/* Tagline */}
       <div
-        className="absolute bottom-20 md:bottom-28 z-30 flex flex-col items-center gap-2 transition-all ease-out"
-        style={{
-          opacity: past('tagline') ? 1 : 0,
-          transform: past('tagline') ? 'translateY(0)' : 'translateY(20px)',
-          transitionDuration: '1500ms',
-        }}
+        key={`tag-${cycle}`}
+        className="absolute bottom-20 md:bottom-28 z-30 flex flex-col items-center gap-2 animate-reveal-tagline"
       >
         <p className="font-mono text-base md:text-xl tracking-[0.3em] uppercase text-black/90">
           AudienceScan
@@ -103,19 +65,41 @@ const GADune2: React.FC = () => {
       </div>
 
       <style>{`
-        @keyframes slide-in-left {
-          0% { transform: translateX(-45vw); opacity: 0; }
-          15% { opacity: 1; }
-          55% { opacity: 1; }
-          85% { opacity: 0; }
-          100% { transform: translateX(0px); opacity: 0; }
+        @keyframes slide-from-left {
+          0% { transform: translateX(-50vw); opacity: 0; }
+          10% { opacity: 1; }
+          45% { opacity: 1; transform: translateX(-100px); }
+          65% { opacity: 0; transform: translateX(-40px); }
+          100% { opacity: 0; transform: translateX(-40px); }
         }
-        @keyframes slide-in-right {
-          0% { transform: translateX(45vw); opacity: 0; }
-          15% { opacity: 1; }
-          55% { opacity: 1; }
-          85% { opacity: 0; }
-          100% { transform: translateX(0px); opacity: 0; }
+        @keyframes slide-from-right {
+          0% { transform: translateX(50vw); opacity: 0; }
+          10% { opacity: 1; }
+          45% { opacity: 1; transform: translateX(100px); }
+          65% { opacity: 0; transform: translateX(40px); }
+          100% { opacity: 0; transform: translateX(40px); }
+        }
+        @keyframes reveal-logo {
+          0%, 60% { opacity: 0; transform: scale(0.5); }
+          75% { opacity: 1; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes reveal-tagline {
+          0%, 70% { opacity: 0; transform: translateY(20px); }
+          85% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-from-left {
+          animation: slide-from-left ${LOOP_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+        }
+        .animate-slide-from-right {
+          animation: slide-from-right ${LOOP_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+        }
+        .animate-reveal-logo {
+          animation: reveal-logo ${LOOP_DURATION}ms ease-out forwards;
+        }
+        .animate-reveal-tagline {
+          animation: reveal-tagline ${LOOP_DURATION}ms ease-out forwards;
         }
       `}</style>
     </div>
