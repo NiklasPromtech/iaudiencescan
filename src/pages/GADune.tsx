@@ -32,13 +32,13 @@ const GADune: React.FC = () => {
   const past = (p: Phase) => current >= phaseIndex(p);
 
   return (
-    <div className="w-full h-screen bg-[#050505] flex items-center justify-center overflow-hidden relative select-none">
+    <div className="w-full h-screen bg-white flex items-center justify-center overflow-hidden relative select-none">
       {/* Subtle grid background */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
+            'linear-gradient(rgba(0,0,0,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.08) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }}
       />
@@ -49,11 +49,11 @@ const GADune: React.FC = () => {
           phase === 'text1' ? 'opacity-100 translate-y-0' : phase === 'black' ? 'opacity-0 translate-y-8' : 'opacity-0 -translate-y-8'
         }`}
       >
-        <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-white/30">Introducing</p>
-        <p className="font-mono text-lg md:text-2xl tracking-[0.3em] uppercase text-white/80">
+        <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-black/30">Introducing</p>
+        <p className="font-mono text-lg md:text-2xl tracking-[0.3em] uppercase text-black/80">
           A New Standard
         </p>
-        <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-orange-500/60 mt-1">
+        <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-orange-500/70 mt-1">
           Web2 Analytics × On-Chain Intelligence
         </p>
       </div>
@@ -134,7 +134,7 @@ const GADune: React.FC = () => {
           />
           <img src={gaLogo} alt="Google Analytics" className="w-28 h-28 md:w-36 md:h-36 object-contain relative" />
         </div>
-        <p className="text-white/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
+        <p className="text-black/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
           Google Analytics
         </p>
       </div>
@@ -169,7 +169,7 @@ const GADune: React.FC = () => {
           />
           <img src={duneLogo} alt="Dune" className="w-28 h-28 md:w-36 md:h-36 object-contain rounded-full relative" />
         </div>
-        <p className="text-white/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
+        <p className="text-black/40 mt-3 font-mono text-[9px] tracking-[0.4em] uppercase">
           Dune Analytics
         </p>
       </div>
@@ -206,11 +206,11 @@ const GADune: React.FC = () => {
           past('tagline') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}
       >
-        <p className="font-mono text-base md:text-xl tracking-[0.3em] uppercase text-white/90">
+        <p className="font-mono text-base md:text-xl tracking-[0.3em] uppercase text-black/90">
           AudienceScan
         </p>
         <div className="w-12 h-px bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
-        <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-white/30">
+        <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-black/30">
           The Full Picture
         </p>
       </div>
