@@ -37,6 +37,16 @@ const WALLET_TIER_ORDER = [
   "Not enriched",
 ];
 
+const WALLET_TIER_LABELS: Record<string, string> = {
+  "$0": "Zero balance",
+  "$1 - $100": "Micro",
+  "$100 - $1K": "Small",
+  "$1K - $10K": "Mid",
+  "$10K - $100K": "Large",
+  "$100K+": "Whale",
+  "Not enriched": "Unknown",
+};
+
 const FILTER_SECTIONS: FilterSection[] = [
   { key: "sources", label: "Source" },
   { key: "utm_source", label: "UTM Source" },
@@ -58,6 +68,7 @@ interface FilterButtonProps {
   onSelectAll: (values: string[]) => void;
   onClear: () => void;
   customOrder?: string[];
+  renderCustomOption?: (option: FilterOptionItem, allOptions: FilterOptionItem[]) => React.ReactNode;
 }
 
 const FilterButton = ({
@@ -68,6 +79,7 @@ const FilterButton = ({
   onSelectAll,
   onClear,
   customOrder,
+  renderCustomOption,
 }: FilterButtonProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -171,21 +183,35 @@ const FilterButton = ({
                     <label
                       key={option.value}
                       className={cn(
-                        "flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer transition-colors",
+                        "relative flex items-center gap-2.5 px-2 py-1.5 rounded-none cursor-pointer transition-colors overflow-hidden",
                         isSelected ? "bg-primary/10" : "hover:bg-muted/50"
                       )}
                     >
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => onToggle(option.value)}
-                        className="h-4 w-4"
-                      />
-                      <span className="flex-1 text-sm truncate">
-                        {option.value}
-                      </span>
-                      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-                        {option.count.toLocaleString()}
-                      </span>
+                      {renderCustomOption ? (
+                        <>
+                          {renderCustomOption(option, filteredOptions)}
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => onToggle(option.value)}
+                            className="h-4 w-4 relative z-10"
+                            style={{ position: 'absolute', left: 8 }}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => onToggle(option.value)}
+                            className="h-4 w-4"
+                          />
+                          <span className="flex-1 text-sm truncate">
+                            {option.value}
+                          </span>
+                          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                            {option.count.toLocaleString()}
+                          </span>
+                        </>
+                      )}
                     </label>
                   );
                 })}
@@ -354,6 +380,30 @@ export const FilterDialog = ({
             </Tooltip>
           );
         }
+        const walletTierRenderer = section.key === "wallet_tiers"
+          ? (option: FilterOptionItem, allOptions: FilterOptionItem[]) => {
+              const totalCount = allOptions.reduce((sum, o) => sum + o.count, 0);
+              const percentage = totalCount > 0 ? (option.count / totalCount) * 100 : 0;
+              const descriptor = WALLET_TIER_LABELS[option.value] || "";
+              return (
+                <>
+                  <div
+                    className="absolute inset-y-0 left-0 bg-primary/5"
+                    style={{ width: `${percentage}%` }}
+                  />
+                  <span className="relative z-10 flex items-center gap-2.5 pl-7 flex-1 min-w-0">
+                    <span className="text-sm truncate">{option.value}</span>
+                    <span className="text-[10px] font-mono uppercase text-muted-foreground/60 shrink-0 ml-auto">
+                      {descriptor}
+                    </span>
+                  </span>
+                  <span className="relative z-10 text-xs text-muted-foreground tabular-nums shrink-0">
+                    {option.count.toLocaleString()}
+                  </span>
+                </>
+              );
+            }
+          : undefined;
         return (
           <FilterButton
             key={section.key}
@@ -364,6 +414,7 @@ export const FilterDialog = ({
             onSelectAll={(values) => handleSelectAll(section.key, values)}
             onClear={() => handleClear(section.key)}
             customOrder={section.customOrder}
+            renderCustomOption={walletTierRenderer}
           />
         );
       })}
