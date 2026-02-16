@@ -483,7 +483,7 @@ export function DimensionTable({
                     </>
                   )}
 
-                  {/* Wallets Group - Extensions (Main), Tracked (Wallet Script), Enriched, Avg Balance, Total Value */}
+                  {/* Wallets Group - Extensions (Main), Tracked (Wallet Script), Enriched, Median Balance, Total Value */}
                   {visibleGroups.has("wallets") && (
                     <>
                       <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium text-muted-foreground min-w-[100px] whitespace-nowrap">
@@ -505,11 +505,11 @@ export function DimensionTable({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="flex items-center justify-end gap-1 w-full">
-                              Avg Bal
+                              Median Bal
                               <Info className="h-3 w-3 text-muted-foreground/60" />
                             </TooltipTrigger>
                             <TooltipContent side="top" className="max-w-[200px]">
-                              <p className="text-xs">Total Value ÷ Enriched Wallets</p>
+                              <p className="text-xs">Median balance of enriched wallets</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -639,7 +639,7 @@ export function DimensionTable({
                         </>
                       )}
 
-                      {/* Wallets Group - Extensions, Wallets, Enriched, Avg Balance, Total Value */}
+                      {/* Wallets Group - Extensions, Wallets, Enriched, Median Balance, Total Value */}
                       {visibleGroups.has("wallets") && (
                         (() => {
                           const extensionsCount = row.visitors_with_wallet_extension;
@@ -658,10 +658,8 @@ export function DimensionTable({
                           // Enriched rate: from API percent_enriched
                           const enrichedRate = row.percent_enriched;
                           
-                          // Avg Balance: total_balance_usd / wallets_enriched
-                          const avgBalance = enrichedCount && enrichedCount > 0 && totalValue !== null
-                            ? totalValue / enrichedCount
-                            : null;
+                          // Median Balance: from API
+                          const medianBalance = row.median_balance_usd;
                           
                           // CPB: cost / total_balance (only if cost source selected)
                           const cpb = hasCostSource && row.cost_total !== null && totalValue !== null && totalValue > 0
@@ -705,11 +703,11 @@ export function DimensionTable({
                                 />
                               </TableCell>
                               
-                              {/* Avg Balance: amount (no cost row, just placeholder) */}
+                              {/* Median Balance */}
                               <TableCell className="text-right py-3">
                                 <WalletMetricCell
                                   count={null}
-                                  customValue={avgBalance !== null ? `$${avgBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
+                                  customValue={medianBalance !== null && medianBalance !== undefined ? `$${medianBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : null}
                                   showCost={hasCostSource}
                                 />
                               </TableCell>
