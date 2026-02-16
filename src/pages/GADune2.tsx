@@ -3,20 +3,19 @@ import gaLogo from '@/assets/ga-logo-2.png';
 import duneLogo from '@/assets/dune-logo-2.png';
 import audiencescanIcon from '@/assets/audiencescan-icon-result.png';
 
-type Phase = 'black' | 'logos-in' | 'logos-center' | 'logos-fade' | 'reveal' | 'tagline';
+type Phase = 'black' | 'slide' | 'fade' | 'reveal' | 'tagline';
 
-const LOOP_DURATION = 12000;
+const LOOP_DURATION = 11000;
 
 const GADune2: React.FC = () => {
   const [phase, setPhase] = useState<Phase>('black');
 
   useEffect(() => {
     const schedule: [Phase, number][] = [
-      ['logos-in', 500],
-      ['logos-center', 2500],
-      ['logos-fade', 5000],
-      ['reveal', 6200],
-      ['tagline', 7400],
+      ['slide', 300],
+      ['fade', 3500],
+      ['reveal', 5500],
+      ['tagline', 6700],
     ];
 
     const runLoop = () => {
@@ -30,32 +29,25 @@ const GADune2: React.FC = () => {
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  const phases = ['black', 'logos-in', 'logos-center', 'logos-fade', 'reveal', 'tagline'];
+  const phases = ['black', 'slide', 'fade', 'reveal', 'tagline'];
   const current = phases.indexOf(phase);
   const past = (p: Phase) => current >= phases.indexOf(p);
 
   return (
     <div className="w-full h-screen bg-white flex items-center justify-center overflow-hidden relative select-none">
 
-      {/* GA Logo */}
+      {/* GA Logo - slides from far left to center */}
       <div
-        className="absolute z-10 flex flex-col items-center transition-all ease-out"
+        className="absolute z-10 flex flex-col items-center"
         style={{
-          opacity:
-            phase === 'black' ? 0
-            : phase === 'logos-in' ? 1
-            : phase === 'logos-center' ? 1
-            : 0,
+          transition: phase === 'slide' ? 'transform 3200ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 800ms ease-out'
+            : phase === 'fade' ? 'opacity 1200ms ease-out'
+            : 'opacity 400ms ease-out',
+          opacity: phase === 'black' ? 0 : phase === 'slide' ? 1 : 0,
           transform:
-            phase === 'black' ? 'translateX(-300px) scale(0.8)'
-            : phase === 'logos-in' ? 'translateX(-160px) scale(1)'
-            : phase === 'logos-center' ? 'translateX(-80px) scale(0.9)'
-            : 'translateX(-80px) scale(0.9)',
-          transitionDuration:
-            phase === 'logos-in' ? '1200ms'
-            : phase === 'logos-center' ? '2000ms'
-            : phase === 'logos-fade' ? '1000ms'
-            : '500ms',
+            phase === 'black' ? 'translateX(-45vw)'
+            : phase === 'slide' ? 'translateX(-60px)'
+            : 'translateX(-60px)',
         }}
       >
         <img src={gaLogo} alt="Google Analytics" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
@@ -64,25 +56,18 @@ const GADune2: React.FC = () => {
         </p>
       </div>
 
-      {/* Dune Logo */}
+      {/* Dune Logo - slides from far right to center */}
       <div
-        className="absolute z-10 flex flex-col items-center transition-all ease-out"
+        className="absolute z-10 flex flex-col items-center"
         style={{
-          opacity:
-            phase === 'black' ? 0
-            : phase === 'logos-in' ? 1
-            : phase === 'logos-center' ? 1
-            : 0,
+          transition: phase === 'slide' ? 'transform 3200ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 800ms ease-out'
+            : phase === 'fade' ? 'opacity 1200ms ease-out'
+            : 'opacity 400ms ease-out',
+          opacity: phase === 'black' ? 0 : phase === 'slide' ? 1 : 0,
           transform:
-            phase === 'black' ? 'translateX(300px) scale(0.8)'
-            : phase === 'logos-in' ? 'translateX(160px) scale(1)'
-            : phase === 'logos-center' ? 'translateX(80px) scale(0.9)'
-            : 'translateX(80px) scale(0.9)',
-          transitionDuration:
-            phase === 'logos-in' ? '1200ms'
-            : phase === 'logos-center' ? '2000ms'
-            : phase === 'logos-fade' ? '1000ms'
-            : '500ms',
+            phase === 'black' ? 'translateX(45vw)'
+            : phase === 'slide' ? 'translateX(60px)'
+            : 'translateX(60px)',
         }}
       >
         <img src={duneLogo} alt="Dune" className="w-28 h-28 md:w-36 md:h-36 object-contain rounded-full" />
