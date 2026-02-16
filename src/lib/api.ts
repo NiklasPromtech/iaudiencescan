@@ -647,6 +647,94 @@ export async function fetchWalletExtensions(request: WalletExtensionsRequest): P
   return response.json();
 }
 
+// Wallet Distribution types
+export interface WalletDistributionRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+  sort?: { by: "wallet_count" | "total_usd" | "tier_order" | "percentage"; dir: "asc" | "desc" };
+  pagination?: { limit?: number; offset?: number };
+}
+
+export interface WalletDistributionRow {
+  tier: string;
+  wallet_count: number;
+  total_usd: number;
+  percentage: number;
+  tier_order: number;
+}
+
+export interface WalletDistributionResponse {
+  success: boolean;
+  rows: WalletDistributionRow[];
+  pagination?: { limit: number; offset: number; total_rows: number };
+}
+
+export async function fetchWalletDistribution(request: WalletDistributionRequest): Promise<WalletDistributionResponse> {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallet-distribution`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Clicks Table types
+export interface ClicksTableRequest {
+  tag_id: string;
+  range: RangeConfig;
+  filters?: Record<string, string[]>;
+  sort?: { by: "click_count" | "unique_visitors" | "click_text" | "href" | "page_path"; dir: "asc" | "desc" };
+  pagination?: { limit?: number; offset?: number };
+}
+
+export interface ClicksTableRow {
+  click_text: string;
+  href: string;
+  page_path: string;
+  click_count: number;
+  unique_visitors: number;
+}
+
+export interface ClicksTableResponse {
+  success: boolean;
+  rows: ClicksTableRow[];
+  pagination?: { limit: number; offset: number; total_rows: number };
+}
+
+export async function fetchClicksTable(request: ClicksTableRequest): Promise<ClicksTableResponse> {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/clicks-table`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 // Realtime Analytics types
 export interface RealtimeResponse {
   success: boolean;

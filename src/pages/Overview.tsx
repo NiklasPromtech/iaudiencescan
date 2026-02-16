@@ -11,6 +11,8 @@ import {
   fetchEventsTable,
   fetchWalletsTable,
   fetchWalletExtensions,
+  fetchWalletDistribution,
+  fetchClicksTable,
   listCostSources,
   fetchFilterOptions,
   fetchHoldersData,
@@ -23,6 +25,8 @@ import {
   EventsTableResponse,
   WalletsTableResponse,
   WalletExtensionsResponse,
+  WalletDistributionResponse,
+  ClicksTableResponse,
   FilterOptionsResponse,
   ActiveFilters,
   DIMENSION_TO_FILTER,
@@ -36,6 +40,8 @@ import { DimensionTable } from "@/components/overview/DimensionTable";
 import { EventsTable } from "@/components/overview/EventsTable";
 import { WalletsOverviewTable } from "@/components/overview/WalletsOverviewTable";
 import { WalletExtensionsTable } from "@/components/overview/WalletExtensionsTable";
+import { WalletDistributionTable } from "@/components/overview/WalletDistributionTable";
+import { ClicksTable } from "@/components/overview/ClicksTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -76,6 +82,10 @@ const Overview = () => {
   const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [holderData, setHolderData] = useState<HolderDataPoint[]>([]);
+  const [walletDistributionData, setWalletDistributionData] = useState<WalletDistributionResponse | null>(null);
+  const [walletDistributionLoading, setWalletDistributionLoading] = useState(true);
+  const [clicksData, setClicksData] = useState<ClicksTableResponse | null>(null);
+  const [clicksLoading, setClicksLoading] = useState(true);
   
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
@@ -166,6 +176,8 @@ const Overview = () => {
     setEventsLoading(true);
     setWalletsLoading(true);
     setWalletExtensionsLoading(true);
+    setWalletDistributionLoading(true);
+    setClicksLoading(true);
     setError(null);
 
     const filtersParam = getFiltersParam(filters);
@@ -262,7 +274,37 @@ const Overview = () => {
       setWalletExtensionsLoading(false);
     }
 
-    // Fetch holder data
+    // Fetch wallet distribution data
+    try {
+      const walletDistData = await fetchWalletDistribution({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: mergedFilters,
+        sort: { by: "tier_order", dir: "asc" },
+      });
+      setWalletDistributionData(walletDistData);
+    } catch (err) {
+      console.error("Failed to load wallet distribution data:", err);
+    } finally {
+      setWalletDistributionLoading(false);
+    }
+
+    // Fetch clicks table data
+    try {
+      const clicksTableData = await fetchClicksTable({
+        tag_id: selectedWebsite.id,
+        range: rangeConfig,
+        filters: mergedFilters,
+        sort: { by: "click_count", dir: "desc" },
+        pagination: { limit: 20 },
+      });
+      setClicksData(clicksTableData);
+    } catch (err) {
+      console.error("Failed to load clicks data:", err);
+    } finally {
+      setClicksLoading(false);
+    }
+
     try {
       const rangeFrom = rangeConfig.type === "custom" 
         ? rangeConfig.from 
@@ -568,6 +610,14 @@ const Overview = () => {
                   Wallet Extensions
                   <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletExtensionsData?.total_with_extension ?? walletExtensionsData?.rows?.length ?? 0})</span>
                 </TabsTrigger>
+                <TabsTrigger value="distribution" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Wallet Distribution
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletDistributionData?.rows?.length ?? 0})</span>
+                </TabsTrigger>
+                <TabsTrigger value="clicks" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Clicks
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({clicksData?.pagination?.total_rows ?? 0})</span>
+                </TabsTrigger>
               </TabsList>
               <div className="p-4">
                 <TabsContent value="events" className="mt-0">
@@ -591,6 +641,22 @@ const Overview = () => {
                     data={walletExtensionsData?.rows ?? []}
                     loading={walletExtensionsLoading}
                     totalRows={walletExtensionsData?.total_with_extension ?? walletExtensionsData?.rows?.length ?? 0}
+                    hideHeader
+                  />
+                </TabsContent>
+                <TabsContent value="distribution" className="mt-0">
+                  <WalletDistributionTable
+                    data={walletDistributionData?.rows ?? []}
+                    loading={walletDistributionLoading}
+                    totalRows={walletDistributionData?.rows?.length ?? 0}
+                    hideHeader
+                  />
+                </TabsContent>
+                <TabsContent value="clicks" className="mt-0">
+                  <ClicksTable
+                    data={clicksData?.rows ?? []}
+                    loading={clicksLoading}
+                    totalRows={clicksData?.pagination?.total_rows ?? 0}
                     hideHeader
                   />
                 </TabsContent>
