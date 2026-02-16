@@ -68,11 +68,13 @@ const GADune2: React.FC = () => {
         @keyframes slide-from-left {
           0% { transform: translateX(-50vw); opacity: 0; }
           8% { opacity: 1; }
+          60% { opacity: 0.8; }
           100% { opacity: 0; transform: translateX(0px); }
         }
         @keyframes slide-from-right {
           0% { transform: translateX(50vw); opacity: 0; }
           8% { opacity: 1; }
+          60% { opacity: 0.8; }
           100% { opacity: 0; transform: translateX(0px); }
         }
         @keyframes reveal-logo {
