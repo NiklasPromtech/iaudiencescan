@@ -8,9 +8,6 @@ type Phase =
   | 'text1'
   | 'logos-in'
   | 'orbiting'
-  | 'pull'
-  | 'collide'
-  | 'shockwave'
   | 'reveal'
   | 'tagline';
 
@@ -22,18 +19,15 @@ const GADune: React.FC = () => {
       ['text1', 600],
       ['logos-in', 2800],
       ['orbiting', 4200],
-      ['pull', 6800],
-      ['collide', 8200],
-      ['shockwave', 8600],
-      ['reveal', 9400],
-      ['tagline', 10600],
+      ['reveal', 7000],
+      ['tagline', 8200],
     ];
     const timers = schedule.map(([p, ms]) => setTimeout(() => setPhase(p), ms));
     return () => timers.forEach(clearTimeout);
   }, []);
 
   const phaseIndex = (p: Phase) =>
-    ['black', 'text1', 'logos-in', 'orbiting', 'pull', 'collide', 'shockwave', 'reveal', 'tagline'].indexOf(p);
+    ['black', 'text1', 'logos-in', 'orbiting', 'reveal', 'tagline'].indexOf(p);
   const current = phaseIndex(phase);
   const past = (p: Phase) => current >= phaseIndex(p);
 
@@ -67,31 +61,31 @@ const GADune: React.FC = () => {
       {/* Orbital ring */}
       <div
         className={`absolute w-[280px] h-[280px] md:w-[360px] md:h-[360px] rounded-full border transition-all ease-out ${
-          past('orbiting') && !past('collide')
+          past('orbiting') && !past('reveal')
             ? 'opacity-30 scale-100 border-orange-500/40 duration-[2000ms]'
-            : past('collide')
-            ? 'opacity-0 scale-150 border-orange-500/0 duration-700'
+            : past('reveal')
+            ? 'opacity-0 scale-150 border-orange-500/0 duration-[1200ms]'
             : 'opacity-0 scale-50 border-white/0 duration-500'
         }`}
         style={{
-          animation: past('orbiting') && !past('collide') ? 'spin-slow 8s linear infinite' : undefined,
+          animation: past('orbiting') && !past('reveal') ? 'spin-slow 8s linear infinite' : undefined,
         }}
       />
       <div
         className={`absolute w-[320px] h-[320px] md:w-[420px] md:h-[420px] rounded-full border border-dashed transition-all ease-out ${
-          past('orbiting') && !past('collide')
+          past('orbiting') && !past('reveal')
             ? 'opacity-15 scale-100 border-purple-500/30 duration-[2000ms]'
-            : past('collide')
-            ? 'opacity-0 scale-[2] border-purple-500/0 duration-700'
+            : past('reveal')
+            ? 'opacity-0 scale-[2] border-purple-500/0 duration-[1200ms]'
             : 'opacity-0 scale-50 border-white/0 duration-500'
         }`}
         style={{
-          animation: past('orbiting') && !past('collide') ? 'spin-slow 12s linear infinite reverse' : undefined,
+          animation: past('orbiting') && !past('reveal') ? 'spin-slow 12s linear infinite reverse' : undefined,
         }}
       />
 
       {/* Energy gathering particles */}
-      {past('orbiting') && !past('shockwave') && (
+      {past('orbiting') && !past('reveal') && (
         <div className="absolute z-10">
           {Array.from({ length: 20 }).map((_, i) => {
             const angle = (i / 20) * 360;
@@ -116,11 +110,9 @@ const GADune: React.FC = () => {
           phase === 'logos-in'
             ? 'opacity-100 duration-[1200ms]'
             : phase === 'orbiting'
-            ? 'duration-[2000ms]'
-            : phase === 'pull'
-            ? 'duration-[1400ms]'
-            : past('collide')
-            ? 'opacity-0 duration-300 scale-0'
+            ? 'opacity-100 duration-[2000ms]'
+            : past('reveal')
+            ? 'opacity-0 duration-[1000ms]'
             : 'opacity-0 duration-500'
         }`}
         style={{
@@ -129,10 +121,8 @@ const GADune: React.FC = () => {
               ? 'translateX(-160px) scale(1)'
               : phase === 'orbiting'
               ? 'translateX(-120px) translateY(-20px) scale(0.85)'
-              : phase === 'pull'
-              ? 'translateX(-30px) scale(0.6)'
-              : past('collide')
-              ? 'translateX(0) scale(0)'
+              : past('reveal')
+              ? 'translateX(0) scale(0.3)'
               : 'translateX(-300px) scale(0.8)',
         }}
       >
@@ -155,11 +145,9 @@ const GADune: React.FC = () => {
           phase === 'logos-in'
             ? 'opacity-100 duration-[1200ms]'
             : phase === 'orbiting'
-            ? 'duration-[2000ms]'
-            : phase === 'pull'
-            ? 'duration-[1400ms]'
-            : past('collide')
-            ? 'opacity-0 duration-300 scale-0'
+            ? 'opacity-100 duration-[2000ms]'
+            : past('reveal')
+            ? 'opacity-0 duration-[1000ms]'
             : 'opacity-0 duration-500'
         }`}
         style={{
@@ -168,10 +156,8 @@ const GADune: React.FC = () => {
               ? 'translateX(160px) scale(1)'
               : phase === 'orbiting'
               ? 'translateX(120px) translateY(20px) scale(0.85)'
-              : phase === 'pull'
-              ? 'translateX(30px) scale(0.6)'
-              : past('collide')
-              ? 'translateX(0) scale(0)'
+              : past('reveal')
+              ? 'translateX(0) scale(0.3)'
               : 'translateX(300px) scale(0.8)',
         }}
       >
@@ -188,44 +174,6 @@ const GADune: React.FC = () => {
         </p>
       </div>
 
-      {/* Shockwave rings */}
-      {past('shockwave') && (
-        <>
-          <div className="absolute w-4 h-4 rounded-full border-2 border-orange-400/80 z-20 animate-shockwave-1" />
-          <div className="absolute w-4 h-4 rounded-full border border-orange-500/40 z-20 animate-shockwave-2" />
-          <div className="absolute w-4 h-4 rounded-full border border-white/20 z-20 animate-shockwave-3" />
-        </>
-      )}
-
-      {/* Flash */}
-      <div
-        className={`absolute inset-0 z-20 pointer-events-none transition-opacity ${
-          phase === 'shockwave' ? 'opacity-80 duration-200 bg-white' : phase === 'reveal' ? 'opacity-0 duration-[800ms] bg-white' : 'opacity-0 duration-500'
-        }`}
-      />
-
-      {/* Particle explosion */}
-      {(phase === 'collide' || phase === 'shockwave') && (
-        <div className="absolute z-15">
-          {Array.from({ length: 24 }).map((_, i) => {
-            const angle = (i / 24) * 360;
-            const colors = ['bg-orange-400', 'bg-orange-500', 'bg-purple-500', 'bg-purple-700', 'bg-white'];
-            const size = i % 3 === 0 ? 'w-2 h-2' : 'w-1 h-1';
-            return (
-              <div
-                key={i}
-                className={`absolute rounded-full ${colors[i % colors.length]} ${size}`}
-                style={{
-                  animation: `particle-explode 1s ease-out forwards`,
-                  animationDelay: `${(i % 5) * 0.03}s`,
-                  ['--angle' as string]: `${angle}deg`,
-                  ['--distance' as string]: `${80 + (i % 3) * 60}px`,
-                }}
-              />
-            );
-          })}
-        </div>
-      )}
 
       {/* AudienceScan reveal */}
       <div
