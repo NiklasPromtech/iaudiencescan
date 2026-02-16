@@ -24,7 +24,18 @@ type FilterKey = "sources" | "utm_source" | "utm_medium" | "utm_campaign" | "utm
 interface FilterSection {
   key: FilterKey;
   label: string;
+  customOrder?: string[];
 }
+
+const WALLET_TIER_ORDER = [
+  "$0",
+  "$1 - $100",
+  "$100 - $1K",
+  "$1K - $10K",
+  "$10K - $100K",
+  "$100K+",
+  "Not enriched",
+];
 
 const FILTER_SECTIONS: FilterSection[] = [
   { key: "sources", label: "Source" },
@@ -36,7 +47,7 @@ const FILTER_SECTIONS: FilterSection[] = [
   { key: "countries", label: "Country" },
   { key: "conversion_events", label: "Conversion" },
   { key: "wallet_actions", label: "Wallet Action" },
-  { key: "wallet_tiers", label: "Wallet Tier" },
+  { key: "wallet_tiers", label: "Wallet Tier", customOrder: WALLET_TIER_ORDER },
 ];
 
 interface FilterButtonProps {
@@ -46,6 +57,7 @@ interface FilterButtonProps {
   onToggle: (value: string) => void;
   onSelectAll: (values: string[]) => void;
   onClear: () => void;
+  customOrder?: string[];
 }
 
 const FilterButton = ({
@@ -55,6 +67,7 @@ const FilterButton = ({
   onToggle,
   onSelectAll,
   onClear,
+  customOrder,
 }: FilterButtonProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -62,12 +75,21 @@ const FilterButton = ({
   const hasSelection = selectedValues.length > 0;
 
   const filteredOptions = useMemo(() => {
-    const sorted = [...options].sort((a, b) => b.count - a.count);
+    let sorted: FilterOptionItem[];
+    if (customOrder) {
+      sorted = [...options].sort((a, b) => {
+        const idxA = customOrder.indexOf(a.value);
+        const idxB = customOrder.indexOf(b.value);
+        return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+      });
+    } else {
+      sorted = [...options].sort((a, b) => b.count - a.count);
+    }
     if (!search) return sorted.slice(0, 20);
     return sorted.filter((opt) =>
       opt.value.toLowerCase().includes(search.toLowerCase())
     ).slice(0, 50);
-  }, [options, search]);
+  }, [options, search, customOrder]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -341,6 +363,7 @@ export const FilterDialog = ({
             onToggle={(value) => handleToggle(section.key, value)}
             onSelectAll={(values) => handleSelectAll(section.key, values)}
             onClear={() => handleClear(section.key)}
+            customOrder={section.customOrder}
           />
         );
       })}
