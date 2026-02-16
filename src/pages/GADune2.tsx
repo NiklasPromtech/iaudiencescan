@@ -13,9 +13,9 @@ const GADune2: React.FC = () => {
   useEffect(() => {
     const schedule: [Phase, number][] = [
       ['slide', 300],
-      ['fade', 3500],
-      ['reveal', 5500],
-      ['tagline', 6700],
+      ['fade', 3000],
+      ['reveal', 4200],
+      ['tagline', 5400],
     ];
 
     const runLoop = () => {
@@ -36,18 +36,14 @@ const GADune2: React.FC = () => {
   return (
     <div className="w-full h-screen bg-white flex items-center justify-center overflow-hidden relative select-none">
 
-      {/* GA Logo - slides from far left to center */}
+      {/* GA Logo - slides from far left to center, fades out in second half */}
       <div
         className="absolute z-10 flex flex-col items-center"
         style={{
-          transition: phase === 'slide' ? 'transform 3200ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 800ms ease-out'
-            : phase === 'fade' ? 'opacity 1200ms ease-out'
-            : 'opacity 400ms ease-out',
-          opacity: phase === 'black' ? 0 : phase === 'slide' ? 1 : 0,
-          transform:
-            phase === 'black' ? 'translateX(-45vw)'
-            : phase === 'slide' ? 'translateX(-60px)'
-            : 'translateX(-60px)',
+          opacity: phase === 'black' ? 0 : past('fade') ? 0 : undefined,
+          animation: phase === 'slide' ? 'slide-in-left 3200ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards' : undefined,
+          transform: phase === 'black' ? 'translateX(-45vw)' : undefined,
+          transition: phase === 'black' ? 'opacity 400ms' : past('fade') ? 'opacity 600ms ease-out' : undefined,
         }}
       >
         <img src={gaLogo} alt="Google Analytics" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
@@ -56,18 +52,14 @@ const GADune2: React.FC = () => {
         </p>
       </div>
 
-      {/* Dune Logo - slides from far right to center */}
+      {/* Dune Logo - slides from far right to center, fades out in second half */}
       <div
         className="absolute z-10 flex flex-col items-center"
         style={{
-          transition: phase === 'slide' ? 'transform 3200ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 800ms ease-out'
-            : phase === 'fade' ? 'opacity 1200ms ease-out'
-            : 'opacity 400ms ease-out',
-          opacity: phase === 'black' ? 0 : phase === 'slide' ? 1 : 0,
-          transform:
-            phase === 'black' ? 'translateX(45vw)'
-            : phase === 'slide' ? 'translateX(60px)'
-            : 'translateX(60px)',
+          opacity: phase === 'black' ? 0 : past('fade') ? 0 : undefined,
+          animation: phase === 'slide' ? 'slide-in-right 3200ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards' : undefined,
+          transform: phase === 'black' ? 'translateX(45vw)' : undefined,
+          transition: phase === 'black' ? 'opacity 400ms' : past('fade') ? 'opacity 600ms ease-out' : undefined,
         }}
       >
         <img src={duneLogo} alt="Dune" className="w-28 h-28 md:w-36 md:h-36 object-contain rounded-full" />
@@ -109,6 +101,23 @@ const GADune2: React.FC = () => {
           The Full Picture
         </p>
       </div>
+
+      <style>{`
+        @keyframes slide-in-left {
+          0% { transform: translateX(-45vw); opacity: 0; }
+          15% { opacity: 1; }
+          55% { opacity: 1; }
+          85% { opacity: 0; }
+          100% { transform: translateX(0px); opacity: 0; }
+        }
+        @keyframes slide-in-right {
+          0% { transform: translateX(45vw); opacity: 0; }
+          15% { opacity: 1; }
+          55% { opacity: 1; }
+          85% { opacity: 0; }
+          100% { transform: translateX(0px); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 };
