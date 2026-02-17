@@ -178,6 +178,45 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     item.nested.sort((a, b) => a.ts - b.ts);
   });
 
+  // Second pass: extend session windows based on claimed events, then re-claim
+  const EXTENSION_BUFFER = 300_000; // 5 min after last nested event
+  for (const item of sessionItems) {
+    if (item.nested.length > 0) {
+      const lastNestedTs = Math.max(...item.nested.map(n => n.ts));
+      item._endMs = Math.max(item._endMs, lastNestedTs + EXTENSION_BUFFER);
+    }
+  }
+
+  journey.events.forEach((e, idx) => {
+    if (e.event_type === "wallet_detected") return;
+    if (claimedEvents.has(idx)) return;
+    const eMs = new Date(e.created_at).getTime();
+    for (const item of sessionItems) {
+      if (eMs >= item.ts && eMs <= item._endMs) {
+        item.nested.push({ kind: "event", data: e, ts: eMs });
+        claimedEvents.add(idx);
+        break;
+      }
+    }
+  });
+
+  journey.wallet_actions.forEach((a, idx) => {
+    if (claimedActions.has(idx)) return;
+    const aMs = new Date(a.created_at).getTime();
+    for (const item of sessionItems) {
+      if (aMs >= item.ts && aMs <= item._endMs) {
+        item.nested.push({ kind: "action", data: a, ts: aMs });
+        claimedActions.add(idx);
+        break;
+      }
+    }
+  });
+
+  // Re-sort after second pass
+  sessionItems.forEach((item) => {
+    item.nested.sort((a, b) => a.ts - b.ts);
+  });
+
   // Standalone items: unclaimed non-wallet_detected events + unclaimed actions
   const standaloneItems: TimelineItem[] = [];
 
@@ -415,7 +454,9 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                 }
 
                 const s = item.session;
-                const exitTimeMs = new Date(s.started_at).getTime() + s.duration_seconds * 1000;
+                const rawEndMs = new Date(s.started_at).getTime() + s.duration_seconds * 1000;
+                const lastEventMs = item.nested.length > 0 ? item.nested[item.nested.length - 1].ts : 0;
+                const exitTimeMs = Math.max(rawEndMs, lastEventMs);
                 const exitTime = format(new Date(exitTimeMs), "HH:mm");
                 const pageGroups = groupByPage(item.nested, s.entry_page);
 
