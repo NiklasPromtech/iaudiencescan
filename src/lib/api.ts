@@ -1697,27 +1697,30 @@ export async function fetchOverview(request: OverviewRequest): Promise<OverviewR
 }
 
 // ============= WALLET BALANCES =============
-export interface WalletBalance {
-  token_name: string;
-  token_symbol: string;
-  contract_address: string;
-  chain: string;
-  balance: number;
-  balance_usd: number;
-  price_usd: number;
-  logo_url?: string;
-}
-
-export interface WalletBalancesResponse {
-  success: boolean;
+export interface WalletBalanceRow {
   wallet_address: string;
-  total_balance_usd: number;
-  chain_count: number;
-  token_count: number;
-  balances: WalletBalance[];
+  website_id: string;
+  scan_id: string | null;
+  chain_id: string;
+  chain_name: string;
+  chain_display_name: string;
+  contract_address: string;
+  contract_name: string;
+  contract_ticker: string;
+  contract_decimals: string;
+  token_type: string;
+  is_spam: string;
+  is_native_token: string;
+  balance_raw: string;
+  balance: string;
+  quote_rate_usd: string;
+  quote_usd: string;
+  last_transferred_at: string | null;
+  logo_url: string | null;
+  enriched_at: string;
 }
 
-export async function fetchWalletBalances(walletAddress: string, websiteId: string): Promise<WalletBalancesResponse> {
+export async function fetchWalletBalances(walletAddress: string, websiteId: string): Promise<WalletBalanceRow[]> {
   const token = await getAuthToken();
   if (!token) throw new Error("Not authenticated");
 
