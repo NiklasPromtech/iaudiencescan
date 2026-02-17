@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Coins, Layers, DollarSign, Clock } from "lucide-react";
-import { fetchWalletBalances, WalletBalanceRow } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, Coins, Layers, DollarSign, Clock, RefreshCw, Loader2 } from "lucide-react";
+import { fetchWalletBalances, enrichWallets, WalletBalanceRow } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface WalletDetailDialogProps {
   walletAddress: string | null;
@@ -28,7 +30,18 @@ interface WalletDetailDialogProps {
 export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: WalletDetailDialogProps) {
   const [rows, setRows] = useState<WalletBalanceRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadBalances = useCallback(() => {
+    if (!walletAddress) return;
+    setLoading(true);
+    setError(null);
+    fetchWalletBalances(walletAddress, websiteId)
+      .then((data) => setRows(data.filter((r) => r.is_spam !== "true")))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [walletAddress, websiteId]);
 
   useEffect(() => {
     if (!walletAddress) {
@@ -36,15 +49,27 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
       setError(null);
       return;
     }
+    loadBalances();
+  }, [walletAddress, loadBalances]);
 
-    setLoading(true);
-    setError(null);
-
-    fetchWalletBalances(walletAddress, websiteId)
-      .then((data) => setRows(data.filter((r) => r.is_spam !== "true")))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [walletAddress, websiteId]);
+  const handleReEnrich = async () => {
+    if (!walletAddress) return;
+    setEnriching(true);
+    try {
+      const res = await enrichWallets({ tag_id: websiteId, wallets: walletAddress });
+      if (res.success && res.queued > 0) {
+        toast.success("Re-enrichment queued — data will refresh shortly.");
+      } else if (res.already_queued > 0) {
+        toast.info("Already in the enrichment queue.");
+      } else {
+        toast.error("Could not queue for enrichment.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to enrich");
+    } finally {
+      setEnriching(false);
+    }
+  };
 
   const formatUsd = (value: number, compact = false) => {
     if (compact && Math.abs(value) >= 1_000_000) {
@@ -98,19 +123,35 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     <Dialog open={!!walletAddress} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-mono text-sm">
-            {walletAddress && truncate(walletAddress)}
-            {walletAddress && (
-              <a
-                href={`https://etherscan.io/address/${walletAddress}#asset-multichain`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            )}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2 font-mono text-sm">
+              {walletAddress && truncate(walletAddress)}
+              {walletAddress && (
+                <a
+                  href={`https://etherscan.io/address/${walletAddress}#asset-multichain`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </DialogTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReEnrich}
+              disabled={enriching}
+              className="h-7 text-xs mr-6"
+            >
+              {enriching ? (
+                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              ) : (
+                <RefreshCw className="h-3 w-3 mr-1" />
+              )}
+              Re-enrich
+            </Button>
+          </div>
         </DialogHeader>
 
         {loading && (
