@@ -154,12 +154,6 @@ export default function Wallets() {
         range: rangeConfig,
         search: undefined,
         balance: undefined,
-        
-        
-        sort_by: sortBy,
-        sort_dir: sortDir,
-        limit: PAGE_SIZE,
-        offset: currentPage * PAGE_SIZE,
       });
 
       setWallets(response.rows);
@@ -198,7 +192,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWebsite, sortBy, sortDir, currentPage, dateRange, toast]);
+  }, [selectedWebsite, dateRange, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -235,7 +229,39 @@ export default function Wallets() {
     return chain?.label || chainValue;
   };
 
-  const totalPages = Math.ceil(totalRows / PAGE_SIZE);
+  // Client-side: filter, sort, paginate
+  const filteredWallets = wallets
+    .filter((wallet) => !debouncedSearch || wallet.wallet_id.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
+    .filter((wallet) => selectedTypes.length === 0 || wallet.types.some(t => selectedTypes.includes(t)))
+    .filter((wallet) => selectedChains.length === 0 || (wallet.chains || []).some(c => selectedChains.includes(c)))
+    .filter((wallet) => {
+      const bal = wallet.total_balance_usd ?? 0;
+      const min = minBalance ? parseFloat(minBalance) : undefined;
+      const max = maxBalance ? parseFloat(maxBalance) : undefined;
+      if (min !== undefined && !isNaN(min) && bal < min) return false;
+      if (max !== undefined && !isNaN(max) && bal > max) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      let aVal: number;
+      let bVal: number;
+      if (sortBy === "total_balance_usd") {
+        aVal = a.total_balance_usd ?? 0;
+        bVal = b.total_balance_usd ?? 0;
+      } else if (sortBy === "visit_count") {
+        aVal = a.visit_count ?? 0;
+        bVal = b.visit_count ?? 0;
+      } else {
+        aVal = new Date(a.last_seen).getTime();
+        bVal = new Date(b.last_seen).getTime();
+      }
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+    });
+
+  const filteredTotal = filteredWallets.length;
+  const paginatedWallets = filteredWallets.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
 
   const handleSort = (column: typeof sortBy) => {
     if (sortBy === column) {
@@ -490,26 +516,14 @@ export default function Wallets() {
                       <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                     </TableRow>
                   ))
-                ) : wallets.length === 0 ? (
+                ) : paginatedWallets.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No wallets found matching your filters
                     </TableCell>
                   </TableRow>
                 ) : (
-                  wallets
-                    .filter((wallet) => !debouncedSearch || wallet.wallet_id.toLowerCase().includes(debouncedSearch.toLowerCase()))
-                    .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
-                    .filter((wallet) => selectedTypes.length === 0 || wallet.types.some(t => selectedTypes.includes(t)))
-                    .filter((wallet) => selectedChains.length === 0 || (wallet.chains || []).some(c => selectedChains.includes(c)))
-                    .filter((wallet) => {
-                      const bal = wallet.total_balance_usd ?? 0;
-                      const min = minBalance ? parseFloat(minBalance) : undefined;
-                      const max = maxBalance ? parseFloat(maxBalance) : undefined;
-                      if (min !== undefined && !isNaN(min) && bal < min) return false;
-                      if (max !== undefined && !isNaN(max) && bal > max) return false;
-                      return true;
-                    })
+                  paginatedWallets
                     .map((wallet) => {
                     // Determine if we should show Enrich button
                     const isEnriched = wallet.enrichment_status === "completed";
@@ -606,7 +620,7 @@ export default function Wallets() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t">
                 <div className="text-sm text-muted-foreground">
-                  Showing {currentPage * PAGE_SIZE + 1}-{Math.min((currentPage + 1) * PAGE_SIZE, totalRows)} of {totalRows.toLocaleString()}
+                  Showing {currentPage * PAGE_SIZE + 1}-{Math.min((currentPage + 1) * PAGE_SIZE, filteredTotal)} of {filteredTotal.toLocaleString()}
                 </div>
                 <div className="flex gap-2">
                   <Button
