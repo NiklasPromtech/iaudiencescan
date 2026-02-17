@@ -625,6 +625,7 @@ export default function Wallets() {
         </Card>
         <WalletDetailDialog
           walletAddress={selectedWalletAddress}
+          websiteId={selectedWebsite?.id ?? ""}
           onOpenChange={(open) => !open && setSelectedWalletAddress(null)}
         />
       </div>

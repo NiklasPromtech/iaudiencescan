@@ -20,10 +20,11 @@ import { fetchWalletBalances, WalletBalancesResponse, SUPPORTED_CHAINS } from "@
 
 interface WalletDetailDialogProps {
   walletAddress: string | null;
+  websiteId: string;
   onOpenChange: (open: boolean) => void;
 }
 
-export function WalletDetailDialog({ walletAddress, onOpenChange }: WalletDetailDialogProps) {
+export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: WalletDetailDialogProps) {
   const [data, setData] = useState<WalletBalancesResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +39,7 @@ export function WalletDetailDialog({ walletAddress, onOpenChange }: WalletDetail
     setLoading(true);
     setError(null);
 
-    fetchWalletBalances(walletAddress)
+    fetchWalletBalances(walletAddress, websiteId)
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
