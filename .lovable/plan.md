@@ -1,78 +1,43 @@
 
 
-# Fix Session Count and Show Referrer/UTM Per Entry Page
+# Move Sort and Pagination Client-Side (Fetch All Wallets Once)
 
-## 1. Session count in summary should match merged timeline sessions
+## Problem
 
-The summary row currently shows `journey.total_sessions` (4, from the raw API data). But after merging, the timeline shows 1 session dropdown. The summary should reflect what the user actually sees.
+Currently, `sortBy`, `sortDir`, and `currentPage` are in the `loadWallets` dependency array, meaning every sort change or page navigation triggers a new backend request. Since we've already moved search, chains, types, and balance filters to client-side, sorting and pagination are the last remaining unnecessary API calls.
 
-**Change:** Replace `journey.total_sessions` with the count of session-type items in the built timeline. Similarly, recompute `total_events` from the timeline's nested items to stay consistent.
+## Approach
 
-In the component, derive the merged session count from `timeline`:
+Fetch **all** wallet rows in a single request (remove `limit`/`offset` from the API call), then handle sorting and pagination entirely client-side. This means:
 
-```typescript
-const mergedSessionCount = timeline.filter(t => t.type === "session").length;
-```
+- One API call when the page loads or the date range / website changes
+- Everything else (search, filter, sort, paginate) happens instantly in the browser
 
-Then render `mergedSessionCount` instead of `journey.total_sessions`.
+## Changes to `src/pages/Wallets.tsx`
 
-## 2. Show referrer domain and UTM inline with the entry page path
+### 1. Remove sort and pagination from the API call
 
-Currently, the referrer and UTM info sits in the session metadata block at the top of the expanded session. The user wants it tied to the specific entry page so it's clear *how* the user arrived at that page.
+- Remove `sort_by`, `sort_dir`, `limit`, `offset` from the `fetchWallets` params
+- Remove `sortBy`, `sortDir`, `currentPage` from the `loadWallets` dependency array
+- Keep only `selectedWebsite` and `dateRange` as triggers for a new fetch
 
-**Change:** On the **first page group** of each session (which corresponds to the entry page), show the referrer domain and UTM source/medium/campaign as small badges right next to the page path. This makes attribution immediately clear in context.
+### 2. Add client-side sorting
 
-The page group header will change from:
+After the existing `.filter()` chain, add a `.sort()` step that compares rows by the selected `sortBy` field and `sortDir`.
 
-```
-/en
-```
+### 3. Add client-side pagination
 
-To something like:
+After sorting, `.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)` to show only the current page.
 
-```
-/en  via chatgpt.com  utm: chatgpt.com/referral
-```
+### 4. Fix total count for pagination
 
-Shown as subtle inline badges after the path, only on the first page group of the session.
+The pagination footer currently uses `totalRows` from the API. After client-side filtering, `totalRows` should reflect the filtered count, not the raw API total. Compute this from the filtered array length so the "Showing X-Y of Z" text and page buttons stay accurate.
 
-## Technical Details
+### 5. Reset page on filter/sort changes
 
-### File: `src/components/wallets/WalletJourneyTab.tsx`
+Sorting or filter changes should reset `currentPage` to 0. The `handleSort` function already does this. The filter `onChange` handlers already do this too.
 
-**Summary row (lines 400-404):**
+## Risk consideration
 
-Replace `journey.total_sessions` with a computed count from the timeline:
-
-```typescript
-const mergedSessionCount = useMemo(
-  () => timeline.filter(t => t.type === "session").length,
-  [timeline]
-);
-```
-
-Render `mergedSessionCount` instead of `journey.total_sessions`.
-
-**Page group header (lines 526-529):**
-
-Pass session data and group index to the page group rendering. For the first group (`gi === 0`), append referrer and UTM badges after the page path:
-
-```tsx
-<div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center gap-2">
-  {group.pagePath}
-  {gi === 0 && s.referrer_domain && (
-    <Badge variant="outline" className="text-[9px] py-0 px-1 font-sans">
-      via {s.referrer_domain}
-    </Badge>
-  )}
-  {gi === 0 && s.utm_source && (
-    <Badge variant="outline" className="text-[9px] py-0 px-1 font-sans">
-      utm: {s.utm_source}{s.utm_medium ? `/${s.utm_medium}` : ""}
-      {s.utm_campaign ? ` (${s.utm_campaign})` : ""}
-    </Badge>
-  )}
-</div>
-```
-
-The referrer/UTM info in the session metadata block (lines 513-519) can be kept as-is for completeness, or removed to avoid duplication -- keeping it is fine since it provides a consolidated view.
+If a website has thousands of wallets, fetching all at once could be slow. However, the current pagination is 50 rows, and the typical dataset appears manageable. If needed in the future, a hybrid approach (server-side for large sets) can be added back.
 
