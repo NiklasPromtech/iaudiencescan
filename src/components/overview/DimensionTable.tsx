@@ -27,7 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { MetricCell, ENGAGEMENT_THRESHOLDS } from "./MetricCell";
+import { MetricCell, ENGAGEMENT_THRESHOLDS, calcDeltaPct, DeltaBadge } from "./MetricCell";
 import { DimensionCell } from "./DimensionCell";
 
 // Tracking source indicator component
@@ -168,6 +168,7 @@ interface WalletMetricCellProps {
   showCost?: boolean;
   rateThresholds?: { good: number; warning: number };
   onClick?: () => void;  // Optional click handler
+  comparisonCount?: number | null; // For delta
 }
 
 function WalletMetricCell({
@@ -179,29 +180,34 @@ function WalletMetricCell({
   showCost = false,
   rateThresholds,
   onClick,
+  comparisonCount,
 }: WalletMetricCellProps) {
   const rateColorClass = getRateColorClass(rate ?? null, rateThresholds);
   const isClickable = onClick && count !== null && count > 0;
+  const delta = calcDeltaPct(count, comparisonCount);
 
   return (
     <div className="flex flex-col text-right">
-      {/* Row 1: Count or custom value */}
-      {isClickable ? (
-        <button
-          onClick={onClick}
-          className="font-mono font-medium tabular-nums text-primary hover:text-primary/80 hover:underline cursor-pointer transition-colors text-right"
-        >
-          {count!.toLocaleString()}
-        </button>
-      ) : (
-        <span className="font-mono font-medium tabular-nums text-foreground">
-          {customValue !== undefined && customValue !== null
-            ? customValue
-            : count !== null && count !== undefined
-              ? count.toLocaleString()
-              : "—"}
-        </span>
-      )}
+      {/* Row 1: Count or custom value + delta */}
+      <div className="flex items-baseline justify-end gap-1">
+        {isClickable ? (
+          <button
+            onClick={onClick}
+            className="font-mono font-medium tabular-nums text-primary hover:text-primary/80 hover:underline cursor-pointer transition-colors text-right"
+          >
+            {count!.toLocaleString()}
+          </button>
+        ) : (
+          <span className="font-mono font-medium tabular-nums text-foreground">
+            {customValue !== undefined && customValue !== null
+              ? customValue
+              : count !== null && count !== undefined
+                ? count.toLocaleString()
+                : "—"}
+          </span>
+        )}
+        <DeltaBadge delta={delta} />
+      </div>
       
       {/* Row 2: Rate % */}
       <span className={cn("font-mono text-xs tabular-nums h-4", rate !== null && rate !== undefined ? rateColorClass : "text-muted-foreground")}>
@@ -467,20 +473,12 @@ export function DimensionTable({
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      <TableHead className={cn(
-                        "font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px]",
-                        !comparisonMap && "border-r border-border/50"
-                      )}>
+                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px] border-r border-border/50">
                         <div className="flex items-center justify-end gap-1">
                           Visitors
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      {comparisonMap && (
-                        <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[60px] border-r border-border/50">
-                          Δ
-                        </TableHead>
-                      )}
                     </>
                   )}
 
@@ -602,112 +600,93 @@ export function DimensionTable({
                               showRate={false}
                               showCost={hasCostSource}
                               costPer={row.cost_per_pageview}
+                              comparisonCount={comparisonMap?.get(row.dim_value)?.pageviews}
                             />
                           </TableCell>
-                          <TableCell className={cn("text-right py-3", !comparisonMap && "border-r border-border/50")}>
+                          <TableCell className="text-right py-3 border-r border-border/50">
                             <MetricCell
                               count={visitors}
                               showRate={false}
                               showCost={hasCostSource}
                               costPer={row.cost_per_visitor}
+                              comparisonCount={comparisonMap?.get(row.dim_value)?.unique_visitors}
                             />
                           </TableCell>
-                          {comparisonMap && (() => {
-                            const prev = comparisonMap.get(row.dim_value);
-                            const prevVisitors = prev?.unique_visitors ?? null;
-                            const pctChange = prevVisitors !== null && prevVisitors > 0
-                              ? Math.round(((visitors - prevVisitors) / prevVisitors) * 100)
-                              : null;
-                            return (
-                              <TableCell className="text-right py-3 border-r border-border/50">
-                                {pctChange !== null ? (
-                                  <span className={cn(
-                                    "font-mono text-[11px] tabular-nums",
-                                    pctChange > 0 ? "text-emerald-500" : pctChange < 0 ? "text-red-500" : "text-muted-foreground"
-                                  )}>
-                                    {pctChange > 0 ? "+" : ""}{pctChange}%
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground text-[11px]">—</span>
-                                )}
-                              </TableCell>
-                            );
-                          })()}
                         </>
                       )}
 
                       {/* Engagement Group */}
                       {visibleGroups.has("engagement") && (
-                        <>
-                          <TableCell className="text-right py-3">
-                            <MetricCell
-                              count={row.stayed_10s}
-                              rate={calcRate(row.stayed_10s, visitors)}
-                              showCost={hasCostSource}
-                              costPer={row.cost_per_stayed_10s}
-                              rateThresholds={ENGAGEMENT_THRESHOLDS}
-                            />
-                          </TableCell>
-                          <TableCell className="text-right py-3">
-                            <MetricCell
-                              count={row.stayed_30s}
-                              rate={calcRate(row.stayed_30s, visitors)}
-                              showCost={hasCostSource}
-                              costPer={row.cost_per_stayed_30s}
-                              rateThresholds={ENGAGEMENT_THRESHOLDS}
-                            />
-                          </TableCell>
-                          <TableCell className="text-right py-3">
-                            <MetricCell
-                              count={row.stayed_60s}
-                              rate={calcRate(row.stayed_60s, visitors)}
-                              showCost={hasCostSource}
-                              costPer={row.cost_per_stayed_60s}
-                              rateThresholds={ENGAGEMENT_THRESHOLDS}
-                            />
-                          </TableCell>
-                          <TableCell className="text-right py-3 border-r border-border/50">
-                            <MetricCell
-                              count={row.stayed_5m}
-                              rate={calcRate(row.stayed_5m, visitors)}
-                              showCost={hasCostSource}
-                              costPer={row.cost_per_stayed_5m}
-                              rateThresholds={ENGAGEMENT_THRESHOLDS}
-                            />
-                          </TableCell>
-                        </>
+                        (() => {
+                          const prev = comparisonMap?.get(row.dim_value);
+                          return (
+                            <>
+                              <TableCell className="text-right py-3">
+                                <MetricCell
+                                  count={row.stayed_10s}
+                                  rate={calcRate(row.stayed_10s, visitors)}
+                                  showCost={hasCostSource}
+                                  costPer={row.cost_per_stayed_10s}
+                                  rateThresholds={ENGAGEMENT_THRESHOLDS}
+                                  comparisonCount={prev?.stayed_10s}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right py-3">
+                                <MetricCell
+                                  count={row.stayed_30s}
+                                  rate={calcRate(row.stayed_30s, visitors)}
+                                  showCost={hasCostSource}
+                                  costPer={row.cost_per_stayed_30s}
+                                  rateThresholds={ENGAGEMENT_THRESHOLDS}
+                                  comparisonCount={prev?.stayed_30s}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right py-3">
+                                <MetricCell
+                                  count={row.stayed_60s}
+                                  rate={calcRate(row.stayed_60s, visitors)}
+                                  showCost={hasCostSource}
+                                  costPer={row.cost_per_stayed_60s}
+                                  rateThresholds={ENGAGEMENT_THRESHOLDS}
+                                  comparisonCount={prev?.stayed_60s}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right py-3 border-r border-border/50">
+                                <MetricCell
+                                  count={row.stayed_5m}
+                                  rate={calcRate(row.stayed_5m, visitors)}
+                                  showCost={hasCostSource}
+                                  costPer={row.cost_per_stayed_5m}
+                                  rateThresholds={ENGAGEMENT_THRESHOLDS}
+                                  comparisonCount={prev?.stayed_5m}
+                                />
+                              </TableCell>
+                            </>
+                          );
+                        })()
                       )}
 
                       {/* Wallets Group - Extensions, Wallets, Enriched, Median Balance, Total Value */}
                       {visibleGroups.has("wallets") && (
                         (() => {
+                          const prev = comparisonMap?.get(row.dim_value);
                           const extensionsCount = row.visitors_with_wallet_extension;
                           const walletsCount = row.wallet_users;
                           const enrichedCount = row.wallets_enriched;
                           const totalValue = row.total_balance_usd;
                           
-                          // Extensions rate: extensions / visitors
                           const extensionsRate = calcRate(extensionsCount, visitors);
-                          
-                          // Wallets rate: wallets / extensions (how many with extension connected)
                           const walletsRate = extensionsCount && extensionsCount > 0
                             ? ((walletsCount ?? 0) / extensionsCount) * 100
                             : null;
-                          
-                          // Enriched rate: from API percent_enriched
                           const enrichedRate = row.percent_enriched;
-                          
-                          // Median Balance: from API
                           const medianBalance = row.median_balance_usd;
-                          
-                          // CPB: cost / total_balance (only if cost source selected)
                           const cpb = hasCostSource && row.cost_total !== null && totalValue !== null && totalValue > 0
                             ? row.cost_total / totalValue
                             : null;
                           
                           return (
                             <>
-                              {/* Extensions: count + rate (% of visitors) + cost per extension */}
                               <TableCell className="text-right py-3">
                                 <WalletMetricCell
                                   count={extensionsCount}
@@ -715,10 +694,10 @@ export function DimensionTable({
                                   costPer={hasCostSource ? row.cost_per_extension : undefined}
                                   showCost={hasCostSource}
                                   rateThresholds={{ good: 20, warning: 5 }}
+                                  comparisonCount={prev?.visitors_with_wallet_extension}
                                 />
                               </TableCell>
                               
-                              {/* Wallets: count + rate (% of extensions that connected) */}
                               <TableCell className="text-right py-3">
                                 <WalletMetricCell
                                   count={walletsCount}
@@ -729,20 +708,20 @@ export function DimensionTable({
                                   onClick={walletsCount && walletsCount > 0 && onWalletClick 
                                     ? () => onWalletClick(row.dim_value, walletsCount) 
                                     : undefined}
+                                  comparisonCount={prev?.wallet_users}
                                 />
                               </TableCell>
                               
-                              {/* Enriched: count + percent_enriched */}
                               <TableCell className="text-right py-3">
                                 <WalletMetricCell
                                   count={enrichedCount}
                                   rate={enrichedRate}
                                   showCost={hasCostSource}
                                   rateThresholds={{ good: 80, warning: 40 }}
+                                  comparisonCount={prev?.wallets_enriched}
                                 />
                               </TableCell>
                               
-                              {/* Median Balance */}
                               <TableCell className="text-right py-3">
                                 <WalletMetricCell
                                   count={null}
@@ -751,7 +730,6 @@ export function DimensionTable({
                                 />
                               </TableCell>
                               
-                              {/* Total Value: total_balance_usd + CPB (when cost source) */}
                               <TableCell className="text-right py-3 border-r border-border/50">
                                 <WalletMetricCell
                                   count={null}
@@ -765,7 +743,7 @@ export function DimensionTable({
                         })()
                       )}
 
-                      {/* Conversions Group - single column with CPA */}
+                      {/* Conversions Group */}
                       {visibleGroups.has("conversions") && (
                         <TableCell className="text-right py-3">
                           <MetricCell
@@ -776,6 +754,7 @@ export function DimensionTable({
                               ? row.cost_total / row.converted_users
                               : null}
                             rateThresholds={{ good: 5, warning: 1 }}
+                            comparisonCount={comparisonMap?.get(row.dim_value)?.converted_users}
                           />
                         </TableCell>
                       )}

@@ -10,6 +10,7 @@ export interface MetricCellProps {
     good: number;                 // Green above this
     warning: number;              // Orange above this, red below
   };
+  comparisonCount?: number | null; // Previous period count for delta
   className?: string;
 }
 
@@ -34,6 +35,24 @@ function getRateColorClass(
   return "text-destructive";
 }
 
+export function calcDeltaPct(current: number | null, previous: number | null | undefined): number | null {
+  if (previous === undefined || previous === null || current === null) return null;
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / Math.abs(previous)) * 100);
+}
+
+export function DeltaBadge({ delta }: { delta: number | null }) {
+  if (delta === null) return null;
+  return (
+    <span className={cn(
+      "font-mono text-[10px] tabular-nums",
+      delta > 0 ? "text-emerald-500" : delta < 0 ? "text-red-500" : "text-muted-foreground"
+    )}>
+      {delta > 0 ? "+" : ""}{delta}%
+    </span>
+  );
+}
+
 export function MetricCell({
   count,
   rate,
@@ -41,16 +60,21 @@ export function MetricCell({
   showRate = true,
   showCost = false,
   rateThresholds,
+  comparisonCount,
   className,
 }: MetricCellProps) {
   const rateColorClass = getRateColorClass(rate ?? null, rateThresholds);
+  const delta = calcDeltaPct(count, comparisonCount);
 
   return (
     <div className={cn("flex flex-col text-right", className)}>
-      {/* Row 1: Count - always visible */}
-      <span className="font-mono font-medium tabular-nums text-foreground">
-        {count !== null && count !== undefined ? count.toLocaleString() : "—"}
-      </span>
+      {/* Row 1: Count + inline delta */}
+      <div className="flex items-baseline justify-end gap-1">
+        <span className="font-mono font-medium tabular-nums text-foreground">
+          {count !== null && count !== undefined ? count.toLocaleString() : "—"}
+        </span>
+        <DeltaBadge delta={delta} />
+      </div>
       
       {/* Row 2: Rate - always takes space, content conditional */}
       <span className={cn("font-mono text-xs tabular-nums h-4", showRate ? rateColorClass : "invisible")}>

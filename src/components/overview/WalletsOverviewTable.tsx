@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,14 @@ import {
 import { Wallet, ChevronDown, ChevronUp } from "lucide-react";
 import { WalletsTableRow } from "@/lib/api";
 import { format, parseISO } from "date-fns";
+import { calcDeltaPct, DeltaBadge } from "./MetricCell";
 
 interface WalletsOverviewTableProps {
   data: WalletsTableRow[];
   loading: boolean;
   totalRows: number;
   hideHeader?: boolean;
+  comparisonData?: WalletsTableRow[];
 }
 
 const DEFAULT_VISIBLE_COUNT = 5;
@@ -27,7 +29,8 @@ export const WalletsOverviewTable = ({
   data, 
   loading, 
   totalRows,
-  hideHeader 
+  hideHeader,
+  comparisonData,
 }: WalletsOverviewTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -42,6 +45,13 @@ export const WalletsOverviewTable = ({
   const formatActionType = (type: string) => {
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
+
+  const comparisonMap = useMemo(() => {
+    if (!comparisonData?.length) return null;
+    const map = new Map<string, WalletsTableRow>();
+    comparisonData.forEach(r => map.set(r.action_type, r));
+    return map;
+  }, [comparisonData]);
 
   const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
   const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
@@ -118,10 +128,16 @@ export const WalletsOverviewTable = ({
                   </Badge>
                 </TableCell>
                 <TableCell className="font-mono text-right text-foreground font-medium tabular-nums">
-                  {row.action_count.toLocaleString()}
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.action_count.toLocaleString()}
+                    <DeltaBadge delta={calcDeltaPct(row.action_count, comparisonMap?.get(row.action_type)?.action_count)} />
+                  </div>
                 </TableCell>
                 <TableCell className="font-mono text-right text-foreground tabular-nums">
-                  {row.unique_wallets.toLocaleString()}
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.unique_wallets.toLocaleString()}
+                    <DeltaBadge delta={calcDeltaPct(row.unique_wallets, comparisonMap?.get(row.action_type)?.unique_wallets)} />
+                  </div>
                 </TableCell>
                 <TableCell className="font-mono text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.first_seen)}
