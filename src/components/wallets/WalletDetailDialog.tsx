@@ -129,35 +129,19 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     <Dialog open={!!walletAddress} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 font-mono text-sm">
-              {walletAddress && truncate(walletAddress)}
-              {walletAddress && (
-                <a
-                  href={`https://etherscan.io/address/${walletAddress}#asset-multichain`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-              )}
-            </DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReEnrich}
-              disabled={enriching}
-              className="h-7 text-xs mr-6"
-            >
-              {enriching ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <RefreshCw className="h-3 w-3 mr-1" />
-              )}
-              Re-enrich
-            </Button>
-          </div>
+          <DialogTitle className="flex items-center gap-2 font-mono text-sm">
+            {walletAddress && truncate(walletAddress)}
+            {walletAddress && (
+              <a
+                href={`https://etherscan.io/address/${walletAddress}#asset-multichain`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </DialogTitle>
         </DialogHeader>
 
         {loading && (
@@ -246,6 +230,20 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
                       </tbody>
                     </table>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReEnrich}
+                    disabled={enriching}
+                    className="h-6 text-[11px] text-muted-foreground hover:text-foreground px-2 mb-1"
+                  >
+                    {enriching ? (
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                    )}
+                    Re-enrich wallet
+                  </Button>
                 </CollapsibleContent>
               </Collapsible>
             )}
