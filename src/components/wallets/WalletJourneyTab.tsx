@@ -80,7 +80,10 @@ function mergeSessions(sessions: WalletJourneySession[]): MergedSession[] {
 
     if (sStartMs <= latestEndMs) {
       // Merge into current group
-      current.pages = [...current.pages, ...s.pages];
+  // Deduplicate consecutive pages
+  const lastPage = current.pages[current.pages.length - 1];
+  const newPages = s.pages.filter((p, i) => i === 0 ? p !== lastPage : p !== s.pages[i - 1]);
+  current.pages = [...current.pages, ...newPages];
       current.page_count += s.page_count;
       const newEndMs = new Date(s.started_at).getTime() + Math.max(s.duration_seconds, 0) * 1000;
       current.duration_seconds = Math.round(
@@ -218,45 +221,80 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
 
 function NestedItemRow({ item }: { item: NestedItem }) {
   const time = format(new Date(item.ts), "HH:mm");
+
   if (item.kind === "action") {
     return (
-      <div className="flex items-center gap-2 text-[11px]">
+      <div className="flex items-center gap-2 text-[11px] py-0.5">
         <span className="font-mono text-muted-foreground w-10 shrink-0">{time}</span>
-        <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
-          {item.data.type}
-        </Badge>
+        <ArrowRightLeft className="h-3 w-3 text-primary shrink-0" />
+        <span>Wallet {item.data.type}</span>
       </div>
     );
   }
+
   const e = item.data;
-  const isWalletDetected = e.event_type === "wallet_detected";
   const walletData = e.event_data as Record<string, any> | undefined;
   const wallets = walletData?.wallets_detected as string[] | undefined;
 
-  return (
-    <div className="flex items-center gap-2 text-[11px] min-w-0">
-      <span className="font-mono text-muted-foreground w-10 shrink-0">{time}</span>
-      <Badge variant="outline" className="text-[10px] py-0 px-1.5 shrink-0">
-        {e.event_type}
-      </Badge>
-      {isWalletDetected && (
-        <Badge variant="secondary" className="text-[9px] py-0 px-1">
-          <Radio className="h-2.5 w-2.5 mr-0.5" /> script
-        </Badge>
-      )}
-      {isWalletDetected && wallets && wallets.length > 0 ? (
-        <span className="text-muted-foreground text-[11px] truncate">{wallets.join(", ")}</span>
-      ) : e.click_text ? (
-        <span className="truncate flex items-center gap-1">
-          {e.click_text}
+  // Build human-readable description
+  let icon: React.ReactNode;
+  let description: React.ReactNode;
+
+  switch (e.event_type) {
+    case "wallet_detected":
+      icon = <Radio className="h-3 w-3 text-primary shrink-0" />;
+      description = (
+        <span>
+          Wallet detected
+          {wallets && wallets.length > 0 && (
+            <span className="text-muted-foreground ml-1">— {wallets.join(", ")}</span>
+          )}
+        </span>
+      );
+      break;
+    case "click":
+      icon = <MousePointerClick className="h-3 w-3 text-primary shrink-0" />;
+      description = (
+        <span className="flex items-center gap-1 min-w-0">
+          Clicked{e.click_text ? <> "<span className="font-medium truncate">{e.click_text}</span>"</> : ""}
+          {e.page_path && <span className="font-mono text-muted-foreground ml-1 shrink-0">{e.page_path}</span>}
           {e.is_outbound && <ExternalLink className="h-2.5 w-2.5 text-muted-foreground shrink-0" />}
         </span>
-      ) : (
-        !isWalletDetected && <span className="text-muted-foreground">—</span>
-      )}
-      {e.page_path && !isWalletDetected && (
-        <span className="font-mono text-muted-foreground ml-auto shrink-0">{e.page_path}</span>
-      )}
+      );
+      break;
+    case "pageview":
+      icon = <Eye className="h-3 w-3 text-primary shrink-0" />;
+      description = (
+        <span>
+          Viewed <span className="font-mono">{e.page_path || "—"}</span>
+        </span>
+      );
+      break;
+    case "conversion":
+      icon = <Zap className="h-3 w-3 text-primary shrink-0" />;
+      description = (
+        <span>
+          Conversion{e.click_text ? `: ${e.click_text}` : ""}
+          {e.page_path && <span className="font-mono text-muted-foreground ml-1">{e.page_path}</span>}
+        </span>
+      );
+      break;
+    default:
+      icon = <Zap className="h-3 w-3 text-muted-foreground shrink-0" />;
+      description = (
+        <span>
+          {e.event_type}
+          {e.click_text && <span className="ml-1">"{e.click_text}"</span>}
+          {e.page_path && <span className="font-mono text-muted-foreground ml-1">{e.page_path}</span>}
+        </span>
+      );
+  }
+
+  return (
+    <div className="flex items-center gap-2 text-[11px] py-0.5 min-w-0">
+      <span className="font-mono text-muted-foreground w-10 shrink-0">{time}</span>
+      {icon}
+      {description}
     </div>
   );
 }
@@ -447,17 +485,6 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                             </div>
                           )}
 
-                          {/* Page flow */}
-                          <div className="flex flex-wrap gap-1">
-                            {s.pages.map((p, i) => (
-                              <span key={i} className="inline-flex items-center">
-                                <code className="bg-muted px-1 py-0.5 text-[10px] font-mono">{p}</code>
-                                {i < s.pages.length - 1 && (
-                                  <span className="text-muted-foreground mx-0.5">→</span>
-                                )}
-                              </span>
-                            ))}
-                          </div>
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
