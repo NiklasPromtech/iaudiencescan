@@ -135,7 +135,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
 
   return (
     <Dialog open={!!walletAddress} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col top-[5%] translate-y-0 data-[state=open]:slide-in-from-top-2">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-mono text-sm">
             {walletAddress && truncate(walletAddress)}
