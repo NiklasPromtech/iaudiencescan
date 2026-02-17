@@ -1,42 +1,75 @@
 
-# Clean Up Session Display: Remove "Merged" Label + Add All Approved Changes
 
-## Summary of all accumulated changes to apply
+# Fix Page Grouping to Preserve Chronological Order
 
-This plan rolls together all previously approved-but-not-yet-implemented changes plus the new request:
+## Problem
 
-### 1. Remove "X sessions merged" label
-Since we present merged sessions as a single session, showing "8 sessions merged" breaks the illusion and confuses the user. Remove this line entirely (lines 472-476).
+The current `groupByPage` function uses a Map to collect all events by page path. This means if a user navigates `/` then `/en/swap` then back to `/`, all the `/` events get merged into one group and all `/en/swap` events into another. The chronological story is completely lost.
 
-### 2. Simplify session header to "Session on [date]"
-Replace `entry_page -> exit_page` path display with a clean `Session on Feb 10, 15:36` label. Page paths belong inside the expanded detail, not the header.
+## Solution
 
-### 3. Promote wallet names to top-level badges
-Extract unique wallet names from all `wallet_detected` events and show them as badges in the badges row (alongside country, device). Filter `wallet_detected` events out of the nested feed and standalone items entirely.
+Replace the Map-based grouping with **sequential grouping**: walk through events in timestamp order and start a new page group every time the page path changes from the previous event. If the user visits the same page twice at different points, it appears as two separate groups.
 
-### 4. Group nested events by page path
-Inside expanded sessions, group remaining events into bordered blocks by page path. Each block has the path as a header and chronological events listed inside.
+**Before (broken):**
+```
+/                          <- all / events merged
+  15:36 Clicked "Launch App"
+  15:43 Clicked "Launch App"
+  15:58 Clicked "Launch App"
 
-### 5. Add "Left" indicator at end of each session
-After the page-grouped events, show a subtle row with the exit timestamp and "Left" label (LogOut icon), confirming the user was inactive for 30+ minutes after.
+/en/swap                   <- all /en/swap events merged
+  15:42 Clicked "Swap"
+  15:58 Clicked "Earn"
+```
+
+**After (chronological):**
+```
+/
+  15:36 Clicked "Launch App"
+
+/en/swap
+  15:42 Clicked "Swap"
+  15:42 Clicked "BOB"
+
+/en/
+  15:42 Clicked "Swap now"
+
+/en/swap
+  15:43 Clicked "Stake"
+
+/
+  15:43 Clicked "Launch App"
+
+...and so on in exact order
+```
 
 ## Technical details
 
 ### File: `src/components/wallets/WalletJourneyTab.tsx`
 
-**Imports:** Add `LogOut` from lucide-react.
+**Rewrite `groupByPage` function (lines 229-243):**
 
-**Wallet badges (lines 368-385):** Extract unique wallet names from `journey.events` where `event_type === "wallet_detected"`. Render as badges with Radio icon in the existing badges section.
+Replace the Map-based approach with sequential grouping:
 
-**Filter wallet_detected from timeline (buildTimeline, lines 155-165):** Skip events where `event_type === "wallet_detected"` when pushing to `item.nested`. Also skip them from standalone items (lines 187-195).
+```typescript
+function groupByPage(nested: NestedItem[], fallbackPage: string): PageGroup[] {
+  const groups: PageGroup[] = [];
+  let current: PageGroup | null = null;
 
-**Session header (lines 417-453):** Replace the entry/exit page display with `Session on {formatted date}`. Keep the right-side stats (page count, duration, referrer, chevron).
+  for (const item of nested) {
+    const path = getItemPagePath(item, fallbackPage);
+    if (!current || current.pagePath !== path) {
+      current = { pagePath: path, items: [] };
+      groups.push(current);
+    }
+    current.items.push(item);
+  }
 
-**Remove "sessions merged" (lines 472-476):** Delete this block entirely.
+  return groups;
+}
+```
 
-**Page-grouped rendering (lines 479-486):** Replace the flat event list with:
-1. Group nested items by `page_path` (fallback to session entry page for actions or events without a path)
-2. Render each group as a bordered div with the page path as a mono header and events listed chronologically inside
-3. After all page groups, render a "Left" row: subtle divider + `[exit time] Left` with LogOut icon in muted styling
+This relies on the fact that `nested` is already sorted chronologically (which it is -- `buildTimeline` sorts by timestamp at line 178). Each time the page path differs from the previous event, a new group starts. Same page visited later gets its own separate group.
 
-**Exit time calculation:** `new Date(session.started_at).getTime() + session.duration_seconds * 1000`, formatted as `HH:mm`.
+No other files or functions need to change -- the rendering code already iterates over the groups array in order.
+
