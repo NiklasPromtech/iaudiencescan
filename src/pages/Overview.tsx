@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { format } from "date-fns";
+import { format, differenceInDays, subDays, parseISO } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ArrowLeftRight, X, Loader2 } from "lucide-react";
 import { 
   fetchOverview,
   fetchTableData,
@@ -23,6 +24,7 @@ import {
   ActiveFilters,
   DIMENSION_TO_FILTER,
   HolderDataPoint,
+  OverviewResponse,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { FilterDialog } from "@/components/overview/FilterDialog";
@@ -42,6 +44,7 @@ import { ScorecardChips } from "@/components/overview/ScorecardChips";
 import { useStarredMetrics } from "@/hooks/use-starred-metrics";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { NoWebsiteState } from "@/components/dashboard/NoWebsiteState";
+import { ComparisonConfirmCard } from "@/components/overview/ComparisonConfirmCard";
 
 const Overview = () => {
   const navigate = useNavigate();
@@ -80,6 +83,10 @@ const Overview = () => {
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
   const [audienceDialogFilters, setAudienceDialogFilters] = useState<AudienceDialogInitialFilters | undefined>(undefined);
+
+  // Comparison state
+  const [comparisonMode, setComparisonMode] = useState<"idle" | "confirming" | "loading" | "active">("idle");
+  const [comparisonData, setComparisonData] = useState<OverviewResponse | null>(null);
 
   // Show empty state when no website is selected (handled below after hooks)
 
@@ -150,6 +157,94 @@ const Overview = () => {
       timezone,
     };
   }, [dateRange, timezone]);
+
+  // Calculate previous period range for comparison
+  const getPreviousRangeConfig = useCallback((): { range: RangeConfig; label: string } => {
+    const currentRange = getRangeConfig();
+    
+    if (currentRange.type === "custom") {
+      const from = parseISO(currentRange.from);
+      const to = parseISO(currentRange.to);
+      const daysDiff = differenceInDays(to, from) + 1; // inclusive
+      const prevTo = subDays(from, 1);
+      const prevFrom = subDays(from, daysDiff);
+      return {
+        range: {
+          type: "custom",
+          from: format(prevFrom, "yyyy-MM-dd"),
+          to: format(prevTo, "yyyy-MM-dd"),
+          timezone: currentRange.timezone,
+        },
+        label: `${format(prevFrom, "MMM d")} – ${format(prevTo, "MMM d")}`,
+      };
+    }
+    
+    // last_full_days
+    const days = currentRange.days;
+    const today = new Date();
+    const currentTo = subDays(today, 1);
+    const currentFrom = subDays(today, days);
+    const prevTo = subDays(currentFrom, 1);
+    const prevFrom = subDays(currentFrom, days);
+    return {
+      range: {
+        type: "custom",
+        from: format(prevFrom, "yyyy-MM-dd"),
+        to: format(prevTo, "yyyy-MM-dd"),
+        timezone: currentRange.timezone,
+      },
+      label: `${format(prevFrom, "MMM d")} – ${format(prevTo, "MMM d")}`,
+    };
+  }, [getRangeConfig]);
+
+  const handleStartComparison = useCallback(async () => {
+    if (!selectedWebsite) return;
+    setComparisonMode("loading");
+
+    const { conversion_events: convEvents, ...restFilters } = activeFilters;
+    const filtersParam = getFiltersParam(restFilters);
+    const conversionEvents = convEvents?.length ? convEvents : undefined;
+    const { range: prevRange } = getPreviousRangeConfig();
+
+    try {
+      const response = await fetchOverview({
+        tag_id: selectedWebsite.id,
+        range: prevRange,
+        filters: filtersParam,
+        conversion_events: conversionEvents,
+        cost: { mode: "none" },
+        table_referrer_domain: {
+          sort: { by: "pageviews", dir: "desc" },
+          limit: 50,
+        },
+        events_table: {
+          sort: { by: "event_count", dir: "desc" },
+          limit: 10,
+        },
+        wallets_table: {
+          sort: { by: "action_count", dir: "desc" },
+          limit: 10,
+        },
+        wallet_distribution: {
+          sort: { by: "tier_order", dir: "asc" },
+        },
+        clicks_table: {
+          sort: { by: "click_count", dir: "desc" },
+          limit: 20,
+        },
+      });
+      setComparisonData(response);
+      setComparisonMode("active");
+    } catch (err) {
+      console.error("Comparison fetch failed:", err);
+      setComparisonMode("idle");
+    }
+  }, [selectedWebsite, activeFilters, getFiltersParam, getPreviousRangeConfig]);
+
+  const handleExitComparison = useCallback(() => {
+    setComparisonMode("idle");
+    setComparisonData(null);
+  }, []);
 
   const loadAllData = useCallback(async (
     filters: ActiveFilters, 
@@ -345,6 +440,7 @@ const Overview = () => {
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
+    handleExitComparison();
     loadAllData(newFilters, tableDimension, getRangeConfig());
   };
 
@@ -365,6 +461,7 @@ const Overview = () => {
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
     setDateRange(newDateRange);
+    handleExitComparison();
   };
 
   const handleBotClick = (dimValue: string) => {
@@ -459,6 +556,47 @@ const Overview = () => {
             />
           </div>
 
+          {/* Compare periods button / confirm card */}
+          <div className="mb-6">
+            {comparisonMode === "idle" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setComparisonMode("confirming")}
+                className="border-dashed border-primary/40 text-muted-foreground hover:text-foreground h-8 text-xs font-mono"
+              >
+                <ArrowLeftRight className="h-3.5 w-3.5 mr-1.5" />
+                Compare to previous period
+              </Button>
+            )}
+            {comparisonMode === "confirming" && (
+              <ComparisonConfirmCard
+                dateRangeLabel={getDateRangeLabel()}
+                previousRangeLabel={getPreviousRangeConfig().label}
+                activeFilters={activeFilters}
+                onConfirm={handleStartComparison}
+                onCancel={() => setComparisonMode("idle")}
+              />
+            )}
+            {comparisonMode === "loading" && (
+              <Button variant="outline" size="sm" disabled className="border-dashed border-primary/40 h-8 text-xs font-mono">
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                Loading comparison…
+              </Button>
+            )}
+            {comparisonMode === "active" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExitComparison}
+                className="border-primary/40 text-primary hover:text-foreground h-8 text-xs font-mono"
+              >
+                <X className="h-3.5 w-3.5 mr-1.5" />
+                Exit comparison
+              </Button>
+            )}
+          </div>
+
           {/* Compact Scorecard Chips */}
           <div className="mb-6">
             <ScorecardChips
@@ -468,6 +606,11 @@ const Overview = () => {
               starredMetrics={starredMetrics}
               onToggleStar={toggleMetric}
               dateRangeLabel={getDateRangeLabel()}
+              comparisonData={
+                comparisonMode === "active" && comparisonData?.scorecard?.data?.data
+                  ? comparisonData.scorecard.data.data
+                  : undefined
+              }
             />
           </div>
 
@@ -477,6 +620,11 @@ const Overview = () => {
               data={dailyData?.rows ?? []} 
               loading={chartLoading} 
               holderData={holderData}
+              comparisonData={
+                comparisonMode === "active" && comparisonData?.table_date_day?.data?.rows
+                  ? comparisonData.table_date_day.data.rows
+                  : undefined
+              }
             />
           </div>
 
@@ -495,6 +643,11 @@ const Overview = () => {
               selectedCostSourceId={selectedCostSourceId}
               onCostSourceChange={handleCostSourceChange}
               onAddCostSource={handleAddCostSource}
+              comparisonRows={
+                comparisonMode === "active" && comparisonData?.table_referrer_domain?.data?.rows
+                  ? comparisonData.table_referrer_domain.data.rows
+                  : undefined
+              }
             />
           </div>
 
