@@ -487,7 +487,7 @@ const Overview = () => {
   };
 
   const handleAddCostSource = () => {
-    navigate("/attribution");
+    navigate("/costs");
   };
 
   const handleDateRangeChange = (newDateRange: DateRangeValue) => {
