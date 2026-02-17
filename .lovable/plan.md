@@ -1,67 +1,76 @@
 
 
-# Compare Periods on Overview
+# Comparison Mode for Dimension Table + Filter Reset
 
 ## What this does
-Adds a "Compare periods" button to the Overview page that lets you see how your current date range compares to the equivalent previous period -- surfacing positive/negative deltas across all metrics (scorecard, daily chart, dimension table, events, wallets, etc.).
-
-## How it works
-
-1. **Button placement** -- Below the filter bar, a distinct button (not styled like filters) reading **"Compare to previous period"** appears. It uses a secondary/outline style with a compare icon (e.g., `ArrowLeftRight`) so it stands out from filters.
-
-2. **Confirmation step** -- Clicking the button opens a small inline card (not a dialog) that explains:
-   - "Compare **[date range label]** against the **previous [N] days**"
-   - Shows any active filters as badges (e.g., `utm_source: ChainView`, `Country: India`)
-   - A **"Run Comparison"** button and a **"Cancel"** link
-
-3. **Two parallel API calls** -- On confirm, two `fetchOverview` requests fire simultaneously:
-   - **Current period**: uses the existing `getRangeConfig()` and `activeFilters`
-   - **Previous period**: same filters, but the date range is shifted back by the period length (e.g., Feb 11-17 becomes Feb 3-10)
-
-4. **Comparison mode UI** -- Once both responses arrive:
-   - The button changes to **"Exit comparison"** (with an X icon)
-   - **ScorecardChips** receives both current and previous data, showing a small green/red delta badge next to each metric value (e.g., `+12%` or `-5%`)
-   - **DimensionTable** gains a delta column showing change per row for the sorted metric
-   - **DailyChart** overlays the previous period as a dashed/faded line behind the current period
-
-5. **Exiting comparison** -- Clicking "Exit comparison" clears the comparison state and returns to normal view.
-
-## Date range calculation
-- **Preset "Last 7 days"** (Feb 11-17): previous = Feb 3-10 (7 days before)
-- **Preset "Last 30 days"**: previous = 30 days before that range
-- **Custom range** (e.g., Feb 5-12, 8 days): previous = Jan 28 - Feb 4
-- **"Today"**: previous = yesterday
-- **"Yesterday"**: previous = day before yesterday
+Two changes:
+1. When comparison mode is active and the user changes the "Breakdown by" dropdown, we fire **two** `fetchTableData` calls (current + previous period) so the delta column stays populated.
+2. When a filter is applied at the top, the dimension table resets back to `referrer_domain` (the default).
 
 ## Technical details
 
-### New files
-- **`src/components/overview/ComparisonConfirmCard.tsx`** -- The inline confirmation card showing the comparison explanation, active filter badges, and Run/Cancel buttons.
+### `src/pages/Overview.tsx`
 
-### Modified files
+**1. Reset dimension on filter change**
+In `handleFiltersChange`, also reset `tableDimension` to `"referrer_domain"`:
+```typescript
+const handleFiltersChange = (newFilters: ActiveFilters) => {
+  setActiveFilters(newFilters);
+  setTableDimension("referrer_domain"); // reset to default
+  handleExitComparison();
+  loadAllData(newFilters, "referrer_domain", getRangeConfig());
+};
+```
 
-- **`src/pages/Overview.tsx`**:
-  - Add state: `comparisonData` (the previous-period overview response), `comparisonLoading`, `comparisonMode` boolean
-  - Add `getPreviousRangeConfig()` that calculates the shifted date range
-  - Add `handleStartComparison()` that fires the second API call
-  - Add `handleExitComparison()` that clears comparison state
-  - Render the "Compare to previous period" / "Exit comparison" button between FilterDialog and ScorecardChips
-  - Render ComparisonConfirmCard inline when user clicks the button (before data loads)
-  - Pass `comparisonData` down to ScorecardChips and DimensionTable
+**2. Comparison-aware dimension change**
+Update `handleDimensionChange` to also fetch comparison table data when in comparison mode:
+```typescript
+const handleDimensionChange = (newDimension: TableDimension) => {
+  setTableDimension(newDimension);
+  setSelectedCostSourceId(null);
+  loadTableData(newDimension, activeFilters, getRangeConfig(), null);
 
-- **`src/components/overview/ScorecardChips.tsx`**:
-  - Accept optional `comparisonData` prop (previous period scorecard)
-  - When present, render a small delta badge next to each metric value showing percentage change with green (positive) / red (negative) coloring
+  // If comparison is active, also fetch the previous period for this dimension
+  if (comparisonMode === "active" && comparisonData) {
+    const { range: prevRange } = getPreviousRangeConfig();
+    fetchComparisonTableData(newDimension, prevRange);
+  }
+};
+```
 
-- **`src/components/overview/DimensionTable.tsx`**:
-  - Accept optional `comparisonRows` prop
-  - When present, match rows by `dim_value` and show a small delta indicator next to the primary sorted metric
+**3. New helper: `fetchComparisonTableData`**
+A small function that calls `fetchTableData` with the previous range and updates just the comparison table rows inside `comparisonData`:
+```typescript
+const fetchComparisonTableData = async (
+  dimension: TableDimension, 
+  prevRange: RangeConfig
+) => {
+  if (!selectedWebsite) return;
+  const { conversion_events: convEvents, ...restFilters } = activeFilters;
+  try {
+    const data = await fetchTableData({
+      tag_id: selectedWebsite.id,
+      dimension,
+      range: prevRange,
+      filters: getFiltersParam(restFilters),
+      conversion_events: convEvents?.length ? convEvents : undefined,
+      cost: { mode: "none" },
+      pagination: { limit: 50 },
+    });
+    // Update the comparison data's table rows
+    setComparisonData(prev => prev ? {
+      ...prev,
+      table_referrer_domain: { success: true, data: data }
+    } : null);
+  } catch (err) {
+    console.error("Comparison table fetch failed:", err);
+  }
+};
+```
 
-- **`src/components/overview/DailyChart.tsx`**:
-  - Accept optional `comparisonData` prop (previous period daily rows)
-  - When present, render a second line/area with reduced opacity and dashed stroke, offset so dates align visually
+**4. Pass comparison rows correctly**
+The `comparisonRows` prop passed to `DimensionTable` currently reads from `comparisonData?.table_referrer_domain` -- this will naturally update when `setComparisonData` is called with the new dimension's data, so no change needed there.
 
-### Styling
-- Compare button: `variant="outline"` with `border-dashed border-primary/40` and `ArrowLeftRight` icon -- visually distinct from the solid filter buttons
-- Delta badges: `text-[11px] font-mono` with `text-green-500` for positive, `text-red-500` for negative
-- All elements use `rounded-none` per the Dune aesthetic
+### No changes to `DimensionTable.tsx`
+The component already accepts and renders `comparisonRows` -- it just needs the parent to supply updated data when the dimension changes, which is handled above.
+
