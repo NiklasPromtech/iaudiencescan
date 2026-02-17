@@ -1695,3 +1695,40 @@ export async function fetchOverview(request: OverviewRequest): Promise<OverviewR
 
   return response.json();
 }
+
+// ============= WALLET BALANCES =============
+export interface WalletBalance {
+  token_name: string;
+  token_symbol: string;
+  contract_address: string;
+  chain: string;
+  balance: number;
+  balance_usd: number;
+  price_usd: number;
+  logo_url?: string;
+}
+
+export interface WalletBalancesResponse {
+  success: boolean;
+  wallet_address: string;
+  total_balance_usd: number;
+  chain_count: number;
+  token_count: number;
+  balances: WalletBalance[];
+}
+
+export async function fetchWalletBalances(walletAddress: string): Promise<WalletBalancesResponse> {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallet-balances/${walletAddress}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}

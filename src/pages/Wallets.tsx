@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { WalletDetailDialog } from "@/components/wallets/WalletDetailDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ export default function Wallets() {
   const [totalRows, setTotalRows] = useState(0);
   const [dateRange, setDateRange] = useState<DateRangeValue>({ type: "preset", days: 0, includeToday: true });
   const [enrichingWallets, setEnrichingWallets] = useState<Set<string>>(new Set());
+  const [selectedWalletAddress, setSelectedWalletAddress] = useState<string | null>(null);
   const [showFailed, setShowFailed] = useState(false);
   const [selectedChains, setSelectedChains] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -510,9 +512,14 @@ export default function Wallets() {
                       <TableRow key={wallet.wallet_id}>
                         <TableCell className="font-mono text-sm">
                           <div className="flex items-center gap-2">
-                            {truncateAddress(wallet.wallet_id)}
+                            <button
+                              onClick={() => setSelectedWalletAddress(wallet.wallet_id)}
+                              className="hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer"
+                            >
+                              {truncateAddress(wallet.wallet_id)}
+                            </button>
                             <a
-                              href={`https://etherscan.io/address/${wallet.wallet_id}`}
+                              href={`https://etherscan.io/address/${wallet.wallet_id}#asset-multichain`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-muted-foreground hover:text-foreground"
@@ -616,6 +623,10 @@ export default function Wallets() {
             )}
           </CardContent>
         </Card>
+        <WalletDetailDialog
+          walletAddress={selectedWalletAddress}
+          onOpenChange={(open) => !open && setSelectedWalletAddress(null)}
+        />
       </div>
     </DashboardLayout>
   );

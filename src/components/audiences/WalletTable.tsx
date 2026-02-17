@@ -123,7 +123,7 @@ export function WalletTable({
                 <div className="flex items-center gap-2">
                   {truncateAddress(wallet.wallet_id)}
                   <a
-                    href={`https://etherscan.io/address/${wallet.wallet_id}`}
+                    href={`https://etherscan.io/address/${wallet.wallet_id}#asset-multichain`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground"
