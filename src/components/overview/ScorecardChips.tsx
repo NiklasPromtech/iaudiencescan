@@ -79,6 +79,7 @@ interface ScorecardChipsProps {
   starredMetrics: string[];
   onToggleStar: (metricKey: string) => void;
   dateRangeLabel: string;
+  comparisonData?: ScorecardResponse["data"];
 }
 
 export function ScorecardChips({
@@ -88,6 +89,7 @@ export function ScorecardChips({
   starredMetrics,
   onToggleStar,
   dateRangeLabel,
+  comparisonData,
 }: ScorecardChipsProps) {
   const [showAll, setShowAll] = useState(false);
 
@@ -147,6 +149,7 @@ export function ScorecardChips({
                     formatValue={formatValue}
                     isStarred={true}
                     onToggleStar={() => onToggleStar(item.metric.key)}
+                    comparisonValue={comparisonData ? item.metric.getValue(comparisonData) : undefined}
                   />
                 )}
               </div>
@@ -195,6 +198,7 @@ export function ScorecardChips({
                         isStarred={starredMetrics.includes(metric.key)}
                         onToggleStar={() => onToggleStar(metric.key)}
                         compact
+                        comparisonValue={comparisonData ? metric.getValue(comparisonData) : undefined}
                       />
                     </div>
                   ))}
@@ -221,12 +225,20 @@ interface FlatMetricProps {
   isStarred: boolean;
   onToggleStar: () => void;
   compact?: boolean;
+  comparisonValue?: number | null;
 }
 
-function FlatMetric({ metric, value, formatValue, isStarred, onToggleStar, compact }: FlatMetricProps) {
+function FlatMetric({ metric, value, formatValue, isStarred, onToggleStar, compact, comparisonValue }: FlatMetricProps) {
   const [isHovered, setIsHovered] = useState(false);
   const isUnconfigured = value === null;
   const displayValue = formatValue(value, metric.format);
+
+  // Calculate delta percentage
+  const delta = (() => {
+    if (comparisonValue === undefined || comparisonValue === null || value === null) return null;
+    if (comparisonValue === 0) return value > 0 ? 100 : 0;
+    return Math.round(((value - comparisonValue) / Math.abs(comparisonValue)) * 100);
+  })();
 
   return (
     <div
@@ -245,13 +257,23 @@ function FlatMetric({ metric, value, formatValue, isStarred, onToggleStar, compa
       </span>
 
       <div className="min-w-0">
-        <p className={cn(
-          "font-mono font-semibold leading-tight tabular-nums",
-          compact ? "text-sm" : "text-lg",
-          isStarred ? "text-foreground" : "text-muted-foreground"
-        )}>
-          {displayValue}
-        </p>
+        <div className="flex items-baseline gap-1.5">
+          <p className={cn(
+            "font-mono font-semibold leading-tight tabular-nums",
+            compact ? "text-sm" : "text-lg",
+            isStarred ? "text-foreground" : "text-muted-foreground"
+          )}>
+            {displayValue}
+          </p>
+          {delta !== null && (
+            <span className={cn(
+              "font-mono text-[11px] tabular-nums",
+              delta > 0 ? "text-emerald-500" : delta < 0 ? "text-red-500" : "text-muted-foreground"
+            )}>
+              {delta > 0 ? "+" : ""}{delta}%
+            </span>
+          )}
+        </div>
         <p className={cn(
           "font-mono text-muted-foreground truncate",
           compact ? "text-[10px]" : "text-xs"

@@ -36,6 +36,7 @@ interface DailyChartProps {
   data: TableRow[];
   loading: boolean;
   holderData?: HolderDataPoint[];
+  comparisonData?: TableRow[];
 }
 
 type MetricKey = keyof Omit<ExtendedTableRow, "dim_value">;
@@ -69,7 +70,7 @@ const METRIC_MAP = Object.fromEntries(METRIC_OPTIONS.map((m) => [m.key, m]));
 const COLOR_LEFT = "hsl(var(--primary))";
 const COLOR_RIGHT = "hsl(170, 70%, 45%)";
 
-export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) {
+export function DailyChart({ data, loading, holderData = [], comparisonData }: DailyChartProps) {
   const [metricLeft, setMetricLeft] = useState<MetricKey>("pageviews");
   const [metricRight, setMetricRight] = useState<MetricKey>("visitors_with_wallet_extension");
   const [createTouchpointOpen, setCreateTouchpointOpen] = useState(false);
@@ -113,7 +114,7 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
   }, [data, holderData]);
 
   const chartConfig = useMemo(() => {
-    return {
+    const config: ChartConfig = {
       [metricLeft]: {
         label: METRIC_MAP[metricLeft]?.label ?? metricLeft,
         color: COLOR_LEFT,
@@ -122,11 +123,22 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
         label: METRIC_MAP[metricRight]?.label ?? metricRight,
         color: COLOR_RIGHT,
       },
-    } satisfies ChartConfig;
-  }, [metricLeft, metricRight]);
+    };
+    if (comparisonData?.length) {
+      config[`prev_${metricLeft}`] = {
+        label: `Prev ${METRIC_MAP[metricLeft]?.label ?? metricLeft}`,
+        color: COLOR_LEFT,
+      };
+      config[`prev_${metricRight}`] = {
+        label: `Prev ${METRIC_MAP[metricRight]?.label ?? metricRight}`,
+        color: COLOR_RIGHT,
+      };
+    }
+    return config;
+  }, [metricLeft, metricRight, comparisonData]);
 
   const chartData = useMemo(() => {
-    return mergedData
+    const sorted = mergedData
       .map((row) => ({
         date: row.dim_value,
         [metricLeft]: row[metricLeft] ?? 0,
@@ -134,7 +146,21 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
         label: formatDate(row.dim_value),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [mergedData, metricLeft, metricRight]);
+
+    // Merge comparison data by index (aligned by position, not date)
+    if (comparisonData?.length) {
+      const compSorted = [...comparisonData].sort((a, b) => a.dim_value.localeCompare(b.dim_value));
+      sorted.forEach((row, idx) => {
+        const compRow = compSorted[idx];
+        if (compRow) {
+          (row as any)[`prev_${metricLeft}`] = (compRow as any)[metricLeft] ?? 0;
+          (row as any)[`prev_${metricRight}`] = (compRow as any)[metricRight] ?? 0;
+        }
+      });
+    }
+
+    return sorted;
+  }, [mergedData, metricLeft, metricRight, comparisonData]);
 
   // Get chart date keys for positioning
   const chartDates = useMemo(() => chartData.map((d) => d.date), [chartData]);
@@ -299,6 +325,25 @@ export function DailyChart({ data, loading, holderData = [] }: DailyChartProps) 
                   cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                   content={<ChartTooltipContent />}
                 />
+                {/* Previous period bars (behind current) */}
+                {comparisonData?.length && (
+                  <>
+                    <Bar
+                      yAxisId="left"
+                      dataKey={`prev_${metricLeft}`}
+                      fill={COLOR_LEFT}
+                      opacity={0.2}
+                      radius={[3, 3, 0, 0]}
+                    />
+                    <Bar
+                      yAxisId="right"
+                      dataKey={`prev_${metricRight}`}
+                      fill={COLOR_RIGHT}
+                      opacity={0.2}
+                      radius={[3, 3, 0, 0]}
+                    />
+                  </>
+                )}
                 <Bar
                   yAxisId="left"
                   dataKey={metricLeft}

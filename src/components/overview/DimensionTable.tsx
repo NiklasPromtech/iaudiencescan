@@ -100,6 +100,7 @@ interface DimensionTableProps {
   selectedCostSourceId?: string | null;
   onCostSourceChange?: (costSourceId: string | null) => void;
   onAddCostSource?: () => void;
+  comparisonRows?: ApiTableRow[];
 }
 
 const DIMENSION_OPTIONS: { value: TableDimension; label: string }[] = [
@@ -259,6 +260,7 @@ export function DimensionTable({
   selectedCostSourceId,
   onCostSourceChange,
   onAddCostSource,
+  comparisonRows,
 }: DimensionTableProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   // Filter cost sources for current dimension
@@ -279,6 +281,14 @@ export function DimensionTable({
     }
     return enriched.sort((a, b) => (b.pageviews ?? 0) - (a.pageviews ?? 0));
   }, [data, dimension]);
+
+  // Create comparison lookup by dim_value
+  const comparisonMap = useMemo(() => {
+    if (!comparisonRows?.length) return null;
+    const map = new Map<string, ApiTableRow>();
+    comparisonRows.forEach(row => map.set(row.dim_value, row));
+    return map;
+  }, [comparisonRows]);
 
   // Slice data based on expansion state
   const visibleData = useMemo(() => {
@@ -457,12 +467,20 @@ export function DimensionTable({
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
-                      <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px] border-r border-border/50">
+                      <TableHead className={cn(
+                        "font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[80px]",
+                        !comparisonMap && "border-r border-border/50"
+                      )}>
                         <div className="flex items-center justify-end gap-1">
                           Visitors
                           <TrackingBadge source="main" />
                         </div>
                       </TableHead>
+                      {comparisonMap && (
+                        <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right font-medium min-w-[60px] border-r border-border/50">
+                          Δ
+                        </TableHead>
+                      )}
                     </>
                   )}
 
@@ -586,7 +604,7 @@ export function DimensionTable({
                               costPer={row.cost_per_pageview}
                             />
                           </TableCell>
-                          <TableCell className="text-right py-3 border-r border-border/50">
+                          <TableCell className={cn("text-right py-3", !comparisonMap && "border-r border-border/50")}>
                             <MetricCell
                               count={visitors}
                               showRate={false}
@@ -594,6 +612,27 @@ export function DimensionTable({
                               costPer={row.cost_per_visitor}
                             />
                           </TableCell>
+                          {comparisonMap && (() => {
+                            const prev = comparisonMap.get(row.dim_value);
+                            const prevVisitors = prev?.unique_visitors ?? null;
+                            const pctChange = prevVisitors !== null && prevVisitors > 0
+                              ? Math.round(((visitors - prevVisitors) / prevVisitors) * 100)
+                              : null;
+                            return (
+                              <TableCell className="text-right py-3 border-r border-border/50">
+                                {pctChange !== null ? (
+                                  <span className={cn(
+                                    "font-mono text-[11px] tabular-nums",
+                                    pctChange > 0 ? "text-emerald-500" : pctChange < 0 ? "text-red-500" : "text-muted-foreground"
+                                  )}>
+                                    {pctChange > 0 ? "+" : ""}{pctChange}%
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground text-[11px]">—</span>
+                                )}
+                              </TableCell>
+                            );
+                          })()}
                         </>
                       )}
 
