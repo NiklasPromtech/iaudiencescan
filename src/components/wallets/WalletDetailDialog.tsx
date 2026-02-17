@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Coins, Layers, DollarSign } from "lucide-react";
-import { fetchWalletBalances, WalletBalancesResponse, SUPPORTED_CHAINS } from "@/lib/api";
+import { ExternalLink, Coins, Layers, DollarSign, Clock } from "lucide-react";
+import { fetchWalletBalances, WalletBalanceRow } from "@/lib/api";
+import { formatDistanceToNow } from "date-fns";
 
 interface WalletDetailDialogProps {
   walletAddress: string | null;
@@ -25,13 +26,13 @@ interface WalletDetailDialogProps {
 }
 
 export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: WalletDetailDialogProps) {
-  const [data, setData] = useState<WalletBalancesResponse | null>(null);
+  const [rows, setRows] = useState<WalletBalanceRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!walletAddress) {
-      setData(null);
+      setRows([]);
       setError(null);
       return;
     }
@@ -40,10 +41,10 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     setError(null);
 
     fetchWalletBalances(walletAddress, websiteId)
-      .then(setData)
+      .then((data) => setRows(data.filter((r) => r.is_spam !== "true")))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [walletAddress]);
+  }, [walletAddress, websiteId]);
 
   const formatUsd = (value: number, compact = false) => {
     if (compact && Math.abs(value) >= 1_000_000) {
@@ -62,26 +63,40 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     }).format(value);
   };
 
-  const formatTokenBalance = (value: number) => {
-    if (value === 0) return "0";
-    if (value < 0.0001) return "<0.0001";
+  const formatBalance = (val: string) => {
+    const num = parseFloat(val);
+    if (isNaN(num) || num === 0) return "0";
+    if (num < 0.0001) return "<0.0001";
     return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 4,
-    }).format(value);
-  };
-
-  const getChainLabel = (chainValue: string) => {
-    const chain = SUPPORTED_CHAINS.find((c) => c.value === chainValue);
-    return chain?.label || chainValue;
+    }).format(num);
   };
 
   const truncate = (addr: string) =>
     addr.length <= 12 ? addr : `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
+  // Derived stats
+  const totalUsd = rows.reduce((sum, r) => sum + parseFloat(r.quote_usd || "0"), 0);
+  const uniqueChains = new Set(rows.map((r) => r.chain_name)).size;
+  const tokenCount = rows.length;
+
+  // First / last transfer across all rows
+  const transferDates = rows
+    .map((r) => r.last_transferred_at)
+    .filter(Boolean)
+    .map((d) => new Date(d!).getTime());
+  const firstTransfer = transferDates.length ? new Date(Math.min(...transferDates)) : null;
+  const lastTransfer = transferDates.length ? new Date(Math.max(...transferDates)) : null;
+
+  // Sort by value descending
+  const sorted = [...rows].sort(
+    (a, b) => parseFloat(b.quote_usd || "0") - parseFloat(a.quote_usd || "0")
+  );
+
   return (
     <Dialog open={!!walletAddress} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-mono text-sm">
             {walletAddress && truncate(walletAddress)}
@@ -115,28 +130,46 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
           <div className="py-8 text-center text-destructive text-sm">{error}</div>
         )}
 
-        {data && !loading && (
+        {!loading && !error && rows.length > 0 && (
           <>
             {/* Top-line stats */}
-            <div className="flex items-center divide-x divide-border border-b border-border pb-3 mb-1">
+            <div className="flex flex-wrap items-center divide-x divide-border border-b border-border pb-3 mb-1">
               {[
                 {
                   label: "Total Balance",
-                  value: formatUsd(data.total_balance_usd, true),
+                  value: formatUsd(totalUsd, true),
                   icon: <DollarSign className="h-4 w-4 text-primary" />,
                 },
                 {
                   label: "Tokens",
-                  value: String(data.token_count ?? data.balances.length),
+                  value: String(tokenCount),
                   icon: <Coins className="h-4 w-4 text-primary" />,
                 },
                 {
                   label: "Chains",
-                  value: String(data.chain_count ?? new Set(data.balances.map((b) => b.chain)).size),
+                  value: String(uniqueChains),
                   icon: <Layers className="h-4 w-4 text-primary" />,
                 },
+                ...(firstTransfer
+                  ? [
+                      {
+                        label: "First Transfer",
+                        value: formatDistanceToNow(firstTransfer, { addSuffix: true }),
+                        icon: <Clock className="h-4 w-4 text-muted-foreground" />,
+                      },
+                    ]
+                  : []),
+                ...(lastTransfer
+                  ? [
+                      {
+                        label: "Last Transfer",
+                        value: formatDistanceToNow(lastTransfer, { addSuffix: true }),
+                        icon: <Clock className="h-4 w-4 text-muted-foreground" />,
+                      },
+                    ]
+                  : []),
               ].map((stat) => (
-                <div key={stat.label} className="flex items-center gap-2 px-5 first:pl-0">
+                <div key={stat.label} className="flex items-center gap-2 px-5 first:pl-0 py-1">
                   {stat.icon}
                   <div>
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -158,59 +191,61 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
                     <TableHead className="text-right">Balance</TableHead>
                     <TableHead className="text-right">Price</TableHead>
                     <TableHead className="text-right">Value</TableHead>
+                    <TableHead className="text-right">Last Transfer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.balances.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                        No token balances found
+                  {sorted.map((row, i) => (
+                    <TableRow key={`${row.contract_address}-${row.chain_name}-${i}`}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {row.logo_url && (
+                            <img
+                              src={row.logo_url}
+                              alt=""
+                              className="h-5 w-5 rounded-full"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                              }}
+                            />
+                          )}
+                          <span className="font-medium">{row.contract_ticker}</span>
+                          <span className="text-muted-foreground text-xs hidden sm:inline truncate max-w-[140px]">
+                            {row.contract_name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                          {row.chain_display_name}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums text-sm">
+                        {formatBalance(row.balance)}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground text-sm tabular-nums">
+                        {row.quote_rate_usd ? formatUsd(parseFloat(row.quote_rate_usd)) : "—"}
+                      </TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">
+                        {formatUsd(parseFloat(row.quote_usd || "0"))}
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground text-sm whitespace-nowrap">
+                        {row.last_transferred_at
+                          ? formatDistanceToNow(new Date(row.last_transferred_at), { addSuffix: true })
+                          : "—"}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    data.balances
-                      .sort((a, b) => b.balance_usd - a.balance_usd)
-                      .map((b, i) => (
-                        <TableRow key={`${b.contract_address}-${b.chain}-${i}`}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {b.logo_url && (
-                                <img
-                                  src={b.logo_url}
-                                  alt=""
-                                  className="h-5 w-5 rounded-full"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = "none";
-                                  }}
-                                />
-                              )}
-                              <span className="font-medium">{b.token_symbol}</span>
-                              <span className="text-muted-foreground text-xs hidden sm:inline">
-                                {b.token_name}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {getChainLabel(b.chain)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right font-mono tabular-nums text-sm">
-                            {formatTokenBalance(b.balance)}
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground text-sm tabular-nums">
-                            {b.price_usd ? formatUsd(b.price_usd) : "—"}
-                          </TableCell>
-                          <TableCell className="text-right font-medium tabular-nums">
-                            {formatUsd(b.balance_usd)}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
           </>
+        )}
+
+        {!loading && !error && rows.length === 0 && walletAddress && (
+          <div className="py-8 text-center text-muted-foreground text-sm">
+            No token balances found for this wallet
+          </div>
         )}
       </DialogContent>
     </Dialog>
