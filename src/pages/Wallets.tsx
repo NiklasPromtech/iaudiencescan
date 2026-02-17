@@ -157,7 +157,7 @@ export default function Wallets() {
         search: debouncedSearch || undefined,
         balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
         
-        chains: selectedChains.length > 0 ? selectedChains : undefined,
+        
         sort_by: sortBy,
         sort_dir: sortDir,
         limit: PAGE_SIZE,
@@ -200,7 +200,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, selectedChains, toast]);
+  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -502,6 +502,7 @@ export default function Wallets() {
                   wallets
                     .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
                     .filter((wallet) => selectedTypes.length === 0 || wallet.types.some(t => selectedTypes.includes(t)))
+                    .filter((wallet) => selectedChains.length === 0 || (wallet.chains || []).some(c => selectedChains.includes(c)))
                     .map((wallet) => {
                     // Determine if we should show Enrich button
                     const isEnriched = wallet.enrichment_status === "completed";
