@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,17 +12,19 @@ import {
 import { Target, ChevronDown, ChevronUp } from "lucide-react";
 import { EventsTableRow } from "@/lib/api";
 import { format } from "date-fns";
+import { calcDeltaPct, DeltaBadge } from "./MetricCell";
 
 interface EventsTableProps {
   data: EventsTableRow[];
   loading: boolean;
   totalRows: number;
   hideHeader?: boolean;
+  comparisonData?: EventsTableRow[];
 }
 
 const DEFAULT_VISIBLE_COUNT = 5;
 
-export const EventsTable = ({ data, loading, totalRows, hideHeader }: EventsTableProps) => {
+export const EventsTable = ({ data, loading, totalRows, hideHeader, comparisonData }: EventsTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const formatDate = (dateStr: string) => {
@@ -32,6 +34,13 @@ export const EventsTable = ({ data, loading, totalRows, hideHeader }: EventsTabl
       return dateStr;
     }
   };
+
+  const comparisonMap = useMemo(() => {
+    if (!comparisonData?.length) return null;
+    const map = new Map<string, EventsTableRow>();
+    comparisonData.forEach(r => map.set(r.event_type, r));
+    return map;
+  }, [comparisonData]);
 
   const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
   const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
@@ -103,10 +112,16 @@ export const EventsTable = ({ data, loading, totalRows, hideHeader }: EventsTabl
                   {row.event_type}
                 </TableCell>
                 <TableCell className="font-mono text-right text-foreground tabular-nums">
-                  {row.event_count.toLocaleString()}
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.event_count.toLocaleString()}
+                    <DeltaBadge delta={calcDeltaPct(row.event_count, comparisonMap?.get(row.event_type)?.event_count)} />
+                  </div>
                 </TableCell>
                 <TableCell className="font-mono text-right text-foreground tabular-nums">
-                  {row.unique_users.toLocaleString()}
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.unique_users.toLocaleString()}
+                    <DeltaBadge delta={calcDeltaPct(row.unique_users, comparisonMap?.get(row.event_type)?.unique_users)} />
+                  </div>
                 </TableCell>
                 <TableCell className="font-mono text-right text-muted-foreground text-sm tabular-nums">
                   {formatDate(row.first_seen)}

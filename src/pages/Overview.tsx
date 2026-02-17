@@ -639,7 +639,18 @@ const Overview = () => {
               dateRangeLabel={getDateRangeLabel()}
               comparisonData={
                 comparisonMode === "active" && comparisonData?.scorecard?.data?.data
-                  ? comparisonData.scorecard.data.data
+                  ? (() => {
+                      const compScorecard = comparisonData.scorecard.data.data;
+                      // Compute comparison holder total
+                      const compHolderData = comparisonData.holders?.data?.data;
+                      if (compHolderData && compHolderData.length > 0) {
+                        const latestDate = compHolderData.reduce((latest: string, item: any) => item.date > latest ? item.date : latest, compHolderData[0].date);
+                        const latestDayData = compHolderData.filter((item: any) => item.date === latestDate);
+                        const compHolderTotal = latestDayData.reduce((sum: number, item: any) => sum + item.holder_count, 0);
+                        return { ...compScorecard, token_holders: compHolderTotal };
+                      }
+                      return compScorecard;
+                    })()
                   : undefined
               }
             />
@@ -714,6 +725,11 @@ const Overview = () => {
                     loading={eventsLoading}
                     totalRows={eventsData?.pagination?.total_rows ?? 0}
                     hideHeader
+                    comparisonData={
+                      comparisonMode === "active" && comparisonData?.events?.data?.rows
+                        ? comparisonData.events.data.rows
+                        : undefined
+                    }
                   />
                 </TabsContent>
                 <TabsContent value="wallets" className="mt-0">
@@ -722,6 +738,11 @@ const Overview = () => {
                     loading={walletsLoading}
                     totalRows={walletsData?.pagination?.total_rows ?? 0}
                     hideHeader
+                    comparisonData={
+                      comparisonMode === "active" && comparisonData?.wallets?.data?.rows
+                        ? comparisonData.wallets.data.rows
+                        : undefined
+                    }
                   />
                 </TabsContent>
                 <TabsContent value="extensions" className="mt-0">
@@ -730,6 +751,11 @@ const Overview = () => {
                     loading={walletExtensionsLoading}
                     totalRows={walletExtensionsData?.total_with_extension ?? walletExtensionsData?.rows?.length ?? 0}
                     hideHeader
+                    comparisonData={
+                      comparisonMode === "active" && comparisonData?.wallet_extensions?.data?.rows
+                        ? comparisonData.wallet_extensions.data.rows
+                        : undefined
+                    }
                   />
                 </TabsContent>
                 <TabsContent value="distribution" className="mt-0">
@@ -738,6 +764,11 @@ const Overview = () => {
                     loading={walletDistributionLoading}
                     totalRows={walletDistributionData?.rows?.length ?? 0}
                     hideHeader
+                    comparisonData={
+                      comparisonMode === "active" && comparisonData?.wallet_distribution?.data?.rows
+                        ? comparisonData.wallet_distribution.data.rows
+                        : undefined
+                    }
                   />
                 </TabsContent>
                 <TabsContent value="clicks" className="mt-0">
@@ -746,6 +777,11 @@ const Overview = () => {
                     loading={clicksLoading}
                     totalRows={clicksData?.pagination?.total_rows ?? 0}
                     hideHeader
+                    comparisonData={
+                      comparisonMode === "active" && comparisonData?.clicks?.data?.rows
+                        ? comparisonData.clicks.data.rows
+                        : undefined
+                    }
                   />
                 </TabsContent>
               </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/table";
 import { Puzzle, ChevronDown, ChevronUp } from "lucide-react";
 import { WalletExtensionsRow } from "@/lib/api";
+import { calcDeltaPct, DeltaBadge } from "./MetricCell";
 
 interface WalletExtensionsTableProps {
   data: WalletExtensionsRow[];
   loading: boolean;
   totalRows: number;
   hideHeader?: boolean;
+  comparisonData?: WalletExtensionsRow[];
 }
 
 const DEFAULT_VISIBLE_COUNT = 5;
@@ -25,9 +27,17 @@ export const WalletExtensionsTable = ({
   data, 
   loading, 
   totalRows,
-  hideHeader 
+  hideHeader,
+  comparisonData,
 }: WalletExtensionsTableProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const comparisonMap = useMemo(() => {
+    if (!comparisonData?.length) return null;
+    const map = new Map<string, WalletExtensionsRow>();
+    comparisonData.forEach(r => map.set(r.wallet_type, r));
+    return map;
+  }, [comparisonData]);
 
   const visibleData = isExpanded ? data : data.slice(0, DEFAULT_VISIBLE_COUNT);
   const hasMore = data.length > DEFAULT_VISIBLE_COUNT;
@@ -96,7 +106,10 @@ export const WalletExtensionsTable = ({
                   {row.wallet_type}
                 </TableCell>
                 <TableCell className="font-mono text-right text-foreground font-medium tabular-nums">
-                  {row.count?.toLocaleString() ?? "—"}
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.count?.toLocaleString() ?? "—"}
+                    <DeltaBadge delta={calcDeltaPct(row.count, comparisonMap?.get(row.wallet_type)?.count)} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

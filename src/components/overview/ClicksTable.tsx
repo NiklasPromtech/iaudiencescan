@@ -1,13 +1,16 @@
+import { useMemo } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ClicksTableRow } from "@/lib/api";
+import { calcDeltaPct, DeltaBadge } from "./MetricCell";
 
 interface ClicksTableProps {
   data: ClicksTableRow[];
   loading: boolean;
   totalRows: number;
   hideHeader?: boolean;
+  comparisonData?: ClicksTableRow[];
 }
 
 const TruncatedCell = ({ value, maxWidth = "200px" }: { value: string; maxWidth?: string }) => (
@@ -25,7 +28,13 @@ const TruncatedCell = ({ value, maxWidth = "200px" }: { value: string; maxWidth?
   </TooltipProvider>
 );
 
-export const ClicksTable = ({ data, loading, totalRows, hideHeader }: ClicksTableProps) => {
+export const ClicksTable = ({ data, loading, totalRows, hideHeader, comparisonData }: ClicksTableProps) => {
+  const comparisonMap = useMemo(() => {
+    if (!comparisonData?.length) return null;
+    const map = new Map<string, ClicksTableRow>();
+    comparisonData.forEach(r => map.set(`${r.click_text}||${r.href}`, r));
+    return map;
+  }, [comparisonData]);
   if (loading) {
     return (
       <div className="space-y-2">
@@ -71,8 +80,18 @@ export const ClicksTable = ({ data, loading, totalRows, hideHeader }: ClicksTabl
               <TableCell className="text-sm text-muted-foreground">
                 <TruncatedCell value={row.page_path} maxWidth="150px" />
               </TableCell>
-              <TableCell className="text-sm tabular-nums text-foreground text-right">{row.click_count.toLocaleString()}</TableCell>
-              <TableCell className="text-sm tabular-nums text-foreground text-right">{row.unique_visitors.toLocaleString()}</TableCell>
+              <TableCell className="text-sm tabular-nums text-foreground text-right">
+                <div className="flex items-baseline justify-end gap-1">
+                  {row.click_count.toLocaleString()}
+                  <DeltaBadge delta={calcDeltaPct(row.click_count, comparisonMap?.get(`${row.click_text}||${row.href}`)?.click_count)} />
+                </div>
+              </TableCell>
+              <TableCell className="text-sm tabular-nums text-foreground text-right">
+                <div className="flex items-baseline justify-end gap-1">
+                  {row.unique_visitors.toLocaleString()}
+                  <DeltaBadge delta={calcDeltaPct(row.unique_visitors, comparisonMap?.get(`${row.click_text}||${row.href}`)?.unique_visitors)} />
+                </div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
