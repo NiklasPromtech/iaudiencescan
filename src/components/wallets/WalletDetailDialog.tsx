@@ -16,9 +16,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Coins, Layers, DollarSign, Clock, RefreshCw, Loader2 } from "lucide-react";
-import { fetchWalletBalances, enrichWallets, WalletBalanceResponse, WalletBalanceToken } from "@/lib/api";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ExternalLink, Coins, Layers, DollarSign, Clock, RefreshCw, Loader2, ChevronDown, History } from "lucide-react";
+import { fetchWalletBalances, enrichWallets, WalletBalanceResponse } from "@/lib/api";
+import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 
 interface WalletDetailDialogProps {
@@ -32,6 +37,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
   const [loading, setLoading] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const loadBalances = useCallback(() => {
     if (!walletAddress) return;
@@ -47,6 +53,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     if (!walletAddress) {
       setData(null);
       setError(null);
+      setHistoryOpen(false);
       return;
     }
     loadBalances();
@@ -101,14 +108,12 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
   const truncate = (addr: string) =>
     addr.length <= 12 ? addr : `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-  // Use most recent enrichment (index 0)
   const latestEnrichment = data?.enrichments?.[0] ?? null;
   const tokens = latestEnrichment?.tokens?.filter((t) => t.is_spam !== "true") ?? [];
   const totalUsd = latestEnrichment?.total_balance_usd ?? 0;
   const tokenCount = latestEnrichment?.token_count ?? tokens.length;
   const uniqueChains = new Set(tokens.map((t) => t.chain_name)).size;
 
-  // First / last transfer across all tokens in latest enrichment
   const transferDates = tokens
     .map((t) => t.last_transferred_at)
     .filter(Boolean)
@@ -116,7 +121,6 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
   const firstTransfer = transferDates.length ? new Date(Math.min(...transferDates)) : null;
   const lastTransfer = transferDates.length ? new Date(Math.max(...transferDates)) : null;
 
-  // Sort by value descending
   const sorted = [...tokens].sort(
     (a, b) => parseFloat(b.quote_usd || "0") - parseFloat(a.quote_usd || "0")
   );
@@ -157,14 +161,10 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
         </DialogHeader>
 
         {loading && (
-          <div className="space-y-4">
-            <div className="flex gap-6">
-              <Skeleton className="h-12 w-40" />
-              <Skeleton className="h-12 w-24" />
-              <Skeleton className="h-12 w-24" />
-            </div>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-full" />
+          <div className="space-y-3">
+            <Skeleton className="h-8 w-full" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-6 w-full" />
             ))}
           </div>
         )}
@@ -175,104 +175,130 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
 
         {!loading && !error && tokens.length > 0 && (
           <>
-            {/* Top-line stats */}
-            <div className="flex flex-wrap items-center divide-x divide-border border-b border-border pb-3 mb-1">
-              {[
-                {
-                  label: "Total Balance",
-                  value: formatUsd(totalUsd, true),
-                  icon: <DollarSign className="h-4 w-4 text-primary" />,
-                },
-                {
-                  label: "Tokens",
-                  value: String(tokenCount),
-                  icon: <Coins className="h-4 w-4 text-primary" />,
-                },
-                {
-                  label: "Chains",
-                  value: String(uniqueChains),
-                  icon: <Layers className="h-4 w-4 text-primary" />,
-                },
-                ...(firstTransfer
-                  ? [
-                      {
-                        label: "First Transfer",
-                        value: formatDistanceToNow(firstTransfer, { addSuffix: true }),
-                        icon: <Clock className="h-4 w-4 text-muted-foreground" />,
-                      },
-                    ]
-                  : []),
-                ...(lastTransfer
-                  ? [
-                      {
-                        label: "Last Transfer",
-                        value: formatDistanceToNow(lastTransfer, { addSuffix: true }),
-                        icon: <Clock className="h-4 w-4 text-muted-foreground" />,
-                      },
-                    ]
-                  : []),
-              ].map((stat) => (
-                <div key={stat.label} className="flex items-center gap-2 px-5 first:pl-0 py-1">
-                  {stat.icon}
-                  <div>
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {stat.label}
-                    </p>
-                    <p className="font-mono text-lg font-bold tabular-nums">{stat.value}</p>
-                  </div>
-                </div>
-              ))}
+            {/* Compact stats row */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs border-b border-border pb-2 mb-1">
+              <span className="flex items-center gap-1">
+                <DollarSign className="h-3 w-3 text-primary" />
+                <span className="text-muted-foreground">Balance:</span>
+                <span className="font-mono font-semibold">{formatUsd(totalUsd, true)}</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <Coins className="h-3 w-3 text-primary" />
+                <span className="text-muted-foreground">Tokens:</span>
+                <span className="font-mono font-semibold">{tokenCount}</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <Layers className="h-3 w-3 text-primary" />
+                <span className="text-muted-foreground">Chains:</span>
+                <span className="font-mono font-semibold">{uniqueChains}</span>
+              </span>
+              {firstTransfer && (
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">First:</span>
+                  <span className="font-mono font-semibold">{formatDistanceToNow(firstTransfer, { addSuffix: true })}</span>
+                </span>
+              )}
+              {lastTransfer && (
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Last:</span>
+                  <span className="font-mono font-semibold">{formatDistanceToNow(lastTransfer, { addSuffix: true })}</span>
+                </span>
+              )}
             </div>
+
+            {/* Enrichment history collapsible */}
+            {data && data.enrichments.length > 1 && (
+              <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1">
+                    <History className="h-3 w-3" />
+                    <span>{data.enrichment_count} enrichments</span>
+                    <ChevronDown className={`h-3 w-3 transition-transform ${historyOpen ? "rotate-180" : ""}`} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="border border-border rounded-sm mb-2 max-h-32 overflow-y-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border text-muted-foreground">
+                          <th className="text-left px-3 py-1.5 font-medium">Enriched At</th>
+                          <th className="text-right px-3 py-1.5 font-medium">Balance</th>
+                          <th className="text-right px-3 py-1.5 font-medium">Tokens</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.enrichments.map((e, i) => (
+                          <tr key={e.enriched_at} className={`border-b border-border last:border-0 ${i === 0 ? "bg-muted/30" : ""}`}>
+                            <td className="px-3 py-1.5 font-mono">
+                              {format(new Date(e.enriched_at), "MMM d, HH:mm")}
+                              {i === 0 && <Badge variant="outline" className="ml-2 text-[10px] py-0 px-1">latest</Badge>}
+                            </td>
+                            <td className="text-right px-3 py-1.5 font-mono tabular-nums">
+                              {formatUsd(e.total_balance_usd, true)}
+                            </td>
+                            <td className="text-right px-3 py-1.5 font-mono tabular-nums">
+                              {e.token_count}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
 
             {/* Balances table */}
             <div className="overflow-y-auto flex-1 -mx-6 px-6">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Token</TableHead>
-                    <TableHead>Chain</TableHead>
-                    <TableHead className="text-right">Balance</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
-                    <TableHead className="text-right">Last Transfer</TableHead>
+                    <TableHead className="h-8 text-xs">Token</TableHead>
+                    <TableHead className="h-8 text-xs">Chain</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Balance</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Price</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Value</TableHead>
+                    <TableHead className="h-8 text-xs text-right">Last Transfer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sorted.map((row, i) => (
                     <TableRow key={`${row.contract_address}-${row.chain_name}-${i}`}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                      <TableCell className="py-1.5">
+                        <div className="flex items-center gap-1.5">
                           {row.logo_url && (
                             <img
                               src={row.logo_url}
                               alt=""
-                              className="h-5 w-5 rounded-full"
+                              className="h-4 w-4 rounded-full"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = "none";
                               }}
                             />
                           )}
-                          <span className="font-medium">{row.contract_ticker}</span>
-                          <span className="text-muted-foreground text-xs hidden sm:inline truncate max-w-[140px]">
+                          <span className="font-medium text-xs">{row.contract_ticker}</span>
+                          <span className="text-muted-foreground text-[11px] hidden sm:inline truncate max-w-[120px]">
                             {row.contract_name}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                      <TableCell className="py-1.5">
+                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 whitespace-nowrap">
                           {row.chain_display_name}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums text-sm">
+                      <TableCell className="text-right font-mono tabular-nums text-xs py-1.5">
                         {formatBalance(row.balance)}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground text-sm tabular-nums">
+                      <TableCell className="text-right text-muted-foreground text-xs tabular-nums py-1.5">
                         {row.quote_rate_usd ? formatUsd(parseFloat(row.quote_rate_usd)) : "—"}
                       </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">
+                      <TableCell className="text-right font-medium tabular-nums text-xs py-1.5">
                         {formatUsd(parseFloat(row.quote_usd || "0"))}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground text-sm whitespace-nowrap">
+                      <TableCell className="text-right text-muted-foreground text-xs whitespace-nowrap py-1.5">
                         {row.last_transferred_at
                           ? formatDistanceToNow(new Date(row.last_transferred_at), { addSuffix: true })
                           : "—"}
