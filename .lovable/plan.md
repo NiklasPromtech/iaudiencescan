@@ -1,62 +1,77 @@
 
 
-# Unified Chronological Timeline with Session Grouping
+# Merge Sessions + Visual Timeline Connector
 
 ## What changes
 
-The Journey tab currently shows Sessions, Events, and Wallet Actions as three separate sections. This refactor merges them into a **single chronological timeline** (oldest first), where events and wallet actions are nested under the session they belong to.
+Two improvements to the Journey tab:
 
-### Session matching logic
-- Each session has `started_at` and `duration_seconds` -- events/actions whose `created_at` falls within that window are nested under it
-- **30-minute gap rule**: If a session's explicit duration is 0 (bounce) or missing, we use a 30-minute window from `started_at` as the session boundary. This is the standard analytics convention (Google Analytics uses 30 min inactivity to define session boundaries)
-- `wallet_detected` events are **always standalone** (script-triggered, not tied to user browsing)
-- Any other events/actions that don't fall within a session window also appear as standalone entries
+### 1. Merge nearby sessions into single groups
+Sessions within 30 minutes of each other get consolidated into one expandable row. This eliminates the wall of "bounce" rows and nested `wallet_detected` spam.
 
-### Visual structure (oldest first)
+**Before:** 8 separate bounce rows + 8 standalone wallet_detected rows = 16 lines of noise
+
+**After:** 2-3 merged session groups with everything nested inside
+
+### 2. Visual timeline connector
+A vertical line runs down the left edge connecting all timeline items, with dots/nodes at each item -- giving a clear sense of chronological flow.
 
 ```text
-[Jan 5, 10:30] Session -- /stake -- 4m 5s -- twitter.com
-   10:31  click "Stake Now" on /stake
-   10:32  wallet action: connected
-   10:34  wallet action: staked
-   Pages: /stake -> /docs -> /faq
+    o  Feb 10, 15:36  / -> /en/swap  4 events  3 pg  7m
+    |    15:36  wallet_detected  MetaMask, Rabby
+    |    15:36  click "Swap" on /en/swap
+    |    15:43  click "Connect" on /
+    |    Pages: / -> /en/swap -> / -> /en/swap
+    |
+    o  Feb 10, 15:56  /en/deposit  2 events  2 pg  0s
+    |    15:56  wallet_detected  MetaMask, Rabby
+    |    Pages: /en/deposit -> /en/
+    |
+    o  Feb 14, 18:22  /stake  4 events  5 pg  4m 5s
+         18:23  click "Stake Now"
+         18:24  connected
+         18:26  staked
+         Pages: /stake -> /docs -> /faq -> /stake -> /dashboard
 
-[Jan 8, 14:00] wallet_detected -- MetaMask (standalone)
-
-[Feb 14, 18:22] Session -- /stake -- 4m 5s -- twitter.com
-   18:23  click "Stake Now"
-   18:24  wallet action: connected
-   18:26  wallet action: staked
-   Pages: /stake -> /docs -> /faq -> /stake -> /dashboard
-
---- Transactions (separate section, unchanged) ---
+    --- Transactions (unchanged) ---
 ```
-
-### Transactions stay separate
-On-chain transaction data remains in its own section at the bottom -- it's blockchain data, not website session activity.
 
 ## Technical details
 
 ### File: `src/components/wallets/WalletJourneyTab.tsx`
 
-**New timeline-building logic** (runs via `useMemo`):
+**Session merging step** (new function `mergeSessions`, called before `buildTimeline`):
 
-1. For each session, compute its time window: `started_at` to `started_at + max(duration_seconds, 1800)` seconds (30 min minimum)
-2. For each event (non-`wallet_detected`) and wallet action, find the first session whose window contains it
-3. Build timeline items:
-   - `{ type: "session", session, nestedEvents, nestedActions }` -- sorted internally by timestamp
-   - `{ type: "standalone", event }` -- for `wallet_detected` + unmatched items
-4. Sort all timeline items chronologically (oldest first)
+1. Sort all sessions by `started_at` ascending
+2. Walk through sessions: if the next session starts within 30 minutes of the current group's latest end time, merge it in
+3. Merged group properties:
+   - `ts` = earliest session's `started_at`
+   - `pages` = concatenated from all constituent sessions
+   - `page_count` = sum of all page counts
+   - `duration_seconds` = span from first `started_at` to last session's end
+   - `is_bounce` = false if more than one session merged
+   - `entry_page` from the first session
+   - Metadata (`referrer_domain`, UTMs, geo, device) from the first session that has them
+   - `session_id` = first session's ID (used as the collapsible key)
 
-**Updated rendering**:
-- Remove the separate "Events" and "Wallet Actions" sections entirely
-- Replace "Sessions" heading with "Timeline"
-- Each session collapsible now shows nested events/actions as a mini chronological list (timestamp + type badge + detail) between the metadata row and the page flow
-- Standalone `wallet_detected` entries render as simple rows with a "script" badge
-- Summary row and quick badges remain unchanged
-- Transactions section remains unchanged at the bottom
+**Nest wallet_detected inside merged groups**:
+
+Remove the blanket exclusion of `wallet_detected` from session matching. After merging, all events (including `wallet_detected`) that fall within a merged group's time window get nested inside it. Only truly orphaned events stay standalone.
+
+**Visual timeline connector** (CSS/JSX changes):
+
+- Wrap the timeline list in a `relative` container
+- Each timeline item gets a `relative pl-6` wrapper
+- A continuous vertical line: `absolute left-[7px] top-0 bottom-0 w-px bg-border` on the container
+- Each item gets a dot node: `absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full bg-primary border-2 border-background`
+- Session items use a filled primary dot; standalone items use an outline dot
+- The last item's vertical line is clipped so it doesn't extend past the final dot
+
+**Updated session header display**:
+
+For merged sessions with multiple entry pages, show `first_entry -> last_entry` in the trigger row. Single-session groups show the entry page as before.
 
 ### No changes to:
-- `src/lib/api.ts` -- types stay the same
-- `src/components/wallets/WalletDetailDialog.tsx` -- no changes needed
+- `src/lib/api.ts`
+- `src/components/wallets/WalletDetailDialog.tsx`
 
