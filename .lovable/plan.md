@@ -1,43 +1,77 @@
 
 
-# Move Sort and Pagination Client-Side (Fetch All Wallets Once)
+# Add Comparison Deltas to Holders, Dimension Table, and Bottom Tabs
 
 ## Problem
 
-Currently, `sortBy`, `sortDir`, and `currentPage` are in the `loadWallets` dependency array, meaning every sort change or page navigation triggers a new backend request. Since we've already moved search, chains, types, and balance filters to client-side, sorting and pagination are the last remaining unnecessary API calls.
+When comparison mode is active, percentage change deltas are shown for most scorecard metrics but **not** for:
+1. **Token Holders** in the scorecard (shows "487" but no delta)
+2. **Breakdown by Referrer table** - has a delta column for visitors only, but no deltas for engagement, wallets, or conversions columns
+3. **Bottom tabs** (Events, Wallet Actions, Wallet Extensions, Wallet Distribution, Clicks) - no comparison data at all
 
-## Approach
+## Changes
 
-Fetch **all** wallet rows in a single request (remove `limit`/`offset` from the API call), then handle sorting and pagination entirely client-side. This means:
+### 1. Token Holders delta in ScorecardChips
 
-- One API call when the page loads or the date range / website changes
-- Everything else (search, filter, sort, paginate) happens instantly in the browser
+**File: `src/pages/Overview.tsx`**
 
-## Changes to `src/pages/Wallets.tsx`
+The current period merges `token_holders` into the scorecard data (lines 531-548), but the comparison scorecard data doesn't get the same treatment. Fix: compute the comparison holder total from `comparisonData.holders` and merge it into the comparison scorecard data before passing to `ScorecardChips`.
 
-### 1. Remove sort and pagination from the API call
+### 2. Dimension Table - more delta columns
 
-- Remove `sort_by`, `sort_dir`, `limit`, `offset` from the `fetchWallets` params
-- Remove `sortBy`, `sortDir`, `currentPage` from the `loadWallets` dependency array
-- Keep only `selectedWebsite` and `dateRange` as triggers for a new fetch
+**File: `src/components/overview/DimensionTable.tsx`**
 
-### 2. Add client-side sorting
+Currently only the Visitors column gets a delta (percentage change) column. Extend the comparison logic to show deltas for key metrics across each column group:
+- Add a delta badge (inline, not a separate column) to each metric cell showing the % change vs the comparison row
+- Modify `MetricCell` and `WalletMetricCell` to accept an optional `comparisonValue` prop and render the delta inline beneath the rate
 
-After the existing `.filter()` chain, add a `.sort()` step that compares rows by the selected `sortBy` field and `sortDir`.
+### 3. Bottom tabs - pass comparison data through
 
-### 3. Add client-side pagination
+**File: `src/pages/Overview.tsx`**
 
-After sorting, `.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)` to show only the current page.
+Pass comparison data to each bottom tab component:
+- `EventsTable` gets `comparisonData.events`
+- `WalletsOverviewTable` gets `comparisonData.wallets`
+- `WalletExtensionsTable` gets `comparisonData.wallet_extensions`
+- `WalletDistributionTable` gets `comparisonData.wallet_distribution`
+- `ClicksTable` gets `comparisonData.clicks`
 
-### 4. Fix total count for pagination
+**Files: Each tab component**
 
-The pagination footer currently uses `totalRows` from the API. After client-side filtering, `totalRows` should reflect the filtered count, not the raw API total. Compute this from the filtered array length so the "Showing X-Y of Z" text and page buttons stay accurate.
+Add an optional `comparisonData` prop to each component. When present, show a delta column or inline delta for the primary count metric (e.g., event_count, action_count, wallet_count, click_count).
 
-### 5. Reset page on filter/sort changes
+## Detailed File Changes
 
-Sorting or filter changes should reset `currentPage` to 0. The `handleSort` function already does this. The filter `onChange` handlers already do this too.
+### `src/pages/Overview.tsx`
+- Compute comparison holder total from `comparisonData?.holders?.data?.data`
+- Merge `token_holders` into comparison scorecard data before passing to `ScorecardChips`
+- Pass comparison sub-results to each bottom tab component
 
-## Risk consideration
+### `src/components/overview/MetricCell.tsx`
+- Add optional `comparisonCount` prop
+- When present, render a small delta percentage below the rate row
 
-If a website has thousands of wallets, fetching all at once could be slow. However, the current pagination is 50 rows, and the typical dataset appears manageable. If needed in the future, a hybrid approach (server-side for large sets) can be added back.
+### `src/components/overview/DimensionTable.tsx`
+- Pass `comparisonMap` values into each `MetricCell` / `WalletMetricCell` as `comparisonCount`
+- Remove the dedicated delta column for visitors (replace with inline delta in the MetricCell itself, consistent across all metrics)
+
+### `src/components/overview/WalletDistributionTable.tsx`
+- Add optional `comparisonData` prop (array of `WalletDistributionRow[]`)
+- When present, show a delta column for wallet_count and total_usd
+
+### `src/components/overview/EventsTable.tsx`
+- Add optional `comparisonData` prop
+- Match by event_name, show delta on event_count
+
+### `src/components/overview/WalletsOverviewTable.tsx`
+- Add optional `comparisonData` prop
+- Match by action, show delta on action_count
+
+### `src/components/overview/WalletExtensionsTable.tsx`
+- Add optional `comparisonData` prop
+- Match by extension_name, show delta on visitor_count
+
+### `src/components/overview/ClicksTable.tsx`
+- Add optional `comparisonData` prop
+- Match by click_text + href, show delta on click_count
 
