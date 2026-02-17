@@ -1,57 +1,67 @@
 
 
-# Improve Wallet Tier Filter Dropdown Readability
+# Compare Periods on Overview
 
-## Problem
+## What this does
+Adds a "Compare periods" button to the Overview page that lets you see how your current date range compares to the equivalent previous period -- surfacing positive/negative deltas across all metrics (scorecard, daily chart, dimension table, events, wallets, etc.).
 
-The Wallet Tier dropdown looks identical to every other text filter (Source, Campaign, etc.), but tiers are hierarchical financial ranges that benefit from visual context. The raw "$1 - $100" text with a count feels flat and hard to scan.
+## How it works
 
-## Solution
+1. **Button placement** -- Below the filter bar, a distinct button (not styled like filters) reading **"Compare to previous period"** appears. It uses a secondary/outline style with a compare icon (e.g., `ArrowLeftRight`) so it stands out from filters.
 
-Add a subtle horizontal bar behind each tier row that represents its relative proportion of the total count. This gives immediate visual weight to each tier without adding clutter. Additionally, add a small muted label describing the tier (e.g., "Micro", "Small", "Mid", "Large", "Whale") in a secondary text style.
+2. **Confirmation step** -- Clicking the button opens a small inline card (not a dialog) that explains:
+   - "Compare **[date range label]** against the **previous [N] days**"
+   - Shows any active filters as badges (e.g., `utm_source: ChainView`, `Country: India`)
+   - A **"Run Comparison"** button and a **"Cancel"** link
 
-The approach:
-- Introduce a `renderOption` callback prop on `FilterButton` (optional) so wallet tiers can have a custom row layout while all other filters stay unchanged.
-- For the Wallet Tier section specifically, each row renders:
-  - A background proportional bar (very subtle, using `primary/5` opacity) spanning the percentage of that tier relative to the total
-  - The tier value label (e.g., "$1 - $100")
-  - A small muted descriptor word (e.g., "Micro") right-aligned before the count
-  - The count, same as other filters
+3. **Two parallel API calls** -- On confirm, two `fetchOverview` requests fire simultaneously:
+   - **Current period**: uses the existing `getRangeConfig()` and `activeFilters`
+   - **Previous period**: same filters, but the date range is shifted back by the period length (e.g., Feb 11-17 becomes Feb 3-10)
 
-### Visual layout per row (Wallet Tier only)
+4. **Comparison mode UI** -- Once both responses arrive:
+   - The button changes to **"Exit comparison"** (with an X icon)
+   - **ScorecardChips** receives both current and previous data, showing a small green/red delta badge next to each metric value (e.g., `+12%` or `-5%`)
+   - **DimensionTable** gains a delta column showing change per row for the sorted metric
+   - **DailyChart** overlays the previous period as a dashed/faded line behind the current period
 
-```text
-[x] $1 - $100          Micro      135
-    |====== 42% bar ===============|
-```
+5. **Exiting comparison** -- Clicking "Exit comparison" clears the comparison state and returns to normal view.
 
-The bar sits behind the text as an absolutely-positioned element. The descriptor labels are:
+## Date range calculation
+- **Preset "Last 7 days"** (Feb 11-17): previous = Feb 3-10 (7 days before)
+- **Preset "Last 30 days"**: previous = 30 days before that range
+- **Custom range** (e.g., Feb 5-12, 8 days): previous = Jan 28 - Feb 4
+- **"Today"**: previous = yesterday
+- **"Yesterday"**: previous = day before yesterday
 
-| Tier | Descriptor |
-|---|---|
-| $0 | Zero balance |
-| $1 - $100 | Micro |
-| $100 - $1K | Small |
-| $1K - $10K | Mid |
-| $10K - $100K | Large |
-| $100K+ | Whale |
-| Not enriched | Unknown |
+## Technical details
 
-## Technical Details
+### New files
+- **`src/components/overview/ComparisonConfirmCard.tsx`** -- The inline confirmation card showing the comparison explanation, active filter badges, and Run/Cancel buttons.
 
-### Files modified
+### Modified files
 
-**`src/components/overview/FilterDialog.tsx`**
+- **`src/pages/Overview.tsx`**:
+  - Add state: `comparisonData` (the previous-period overview response), `comparisonLoading`, `comparisonMode` boolean
+  - Add `getPreviousRangeConfig()` that calculates the shifted date range
+  - Add `handleStartComparison()` that fires the second API call
+  - Add `handleExitComparison()` that clears comparison state
+  - Render the "Compare to previous period" / "Exit comparison" button between FilterDialog and ScorecardChips
+  - Render ComparisonConfirmCard inline when user clicks the button (before data loads)
+  - Pass `comparisonData` down to ScorecardChips and DimensionTable
 
-1. Add a `WALLET_TIER_LABELS` map with the descriptor words above
-2. Add an optional `renderCustomLabel` prop to `FilterButton` -- a function `(option: FilterOptionItem, allOptions: FilterOptionItem[]) => ReactNode`
-3. In the Wallet Tier section of `FILTER_SECTIONS`, wire up a custom renderer
-4. The custom renderer:
-   - Calculates `percentage = option.count / totalCount * 100`
-   - Renders a `<div className="absolute inset-y-0 left-0 bg-primary/5">` with `width: ${percentage}%`
-   - Renders the tier descriptor in `text-[10px] font-mono uppercase text-muted-foreground/60`
-   - Keeps checkbox, value label, and count in the same layout
+- **`src/components/overview/ScorecardChips.tsx`**:
+  - Accept optional `comparisonData` prop (previous period scorecard)
+  - When present, render a small delta badge next to each metric value showing percentage change with green (positive) / red (negative) coloring
 
-5. For all other filter sections, nothing changes -- `renderCustomLabel` is simply not provided
+- **`src/components/overview/DimensionTable.tsx`**:
+  - Accept optional `comparisonRows` prop
+  - When present, match rows by `dim_value` and show a small delta indicator next to the primary sorted metric
 
-No other files are modified. This is purely a visual enhancement inside the filter dropdown.
+- **`src/components/overview/DailyChart.tsx`**:
+  - Accept optional `comparisonData` prop (previous period daily rows)
+  - When present, render a second line/area with reduced opacity and dashed stroke, offset so dates align visually
+
+### Styling
+- Compare button: `variant="outline"` with `border-dashed border-primary/40` and `ArrowLeftRight` icon -- visually distinct from the solid filter buttons
+- Delta badges: `text-[11px] font-mono` with `text-green-500` for positive, `text-red-500` for negative
+- All elements use `rounded-none` per the Dune aesthetic
