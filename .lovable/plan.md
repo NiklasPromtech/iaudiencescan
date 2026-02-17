@@ -1,64 +1,42 @@
 
+# Clean Up Session Display: Remove "Merged" Label + Add All Approved Changes
 
-# Redesign Session Activity Log for Readability
+## Summary of all accumulated changes to apply
 
-## Problems
+This plan rolls together all previously approved-but-not-yet-implemented changes plus the new request:
 
-1. **Confusing page flow**: When sessions merge, the pages array concatenates raw data, producing `/en/deposit -> /en/deposit` (same page repeated). This adds no value and is confusing.
+### 1. Remove "X sessions merged" label
+Since we present merged sessions as a single session, showing "8 sessions merged" breaks the illusion and confuses the user. Remove this line entirely (lines 472-476).
 
-2. **Nested events are hard to read**: The current layout dumps raw event types (`wallet_detected`, `click`) with badges and scattered details. It's not immediately clear what the user actually did.
+### 2. Simplify session header to "Session on [date]"
+Replace `entry_page -> exit_page` path display with a clean `Session on Feb 10, 15:36` label. Page paths belong inside the expanded detail, not the header.
 
-## Changes
+### 3. Promote wallet names to top-level badges
+Extract unique wallet names from all `wallet_detected` events and show them as badges in the badges row (alongside country, device). Filter `wallet_detected` events out of the nested feed and standalone items entirely.
 
-### 1. Deduplicate consecutive pages in the page flow
+### 4. Group nested events by page path
+Inside expanded sessions, group remaining events into bordered blocks by page path. Each block has the path as a header and chronological events listed inside.
 
-Remove consecutive duplicate pages from the flow display. If the user visited `/en/deposit` twice in a row (from merged sessions), only show it once. The flow becomes a unique path, e.g. `/en/deposit -> /en/swap -> /en/deposit` only if they actually navigated away and back.
-
-### 2. Redesign nested events as a readable activity feed
-
-Replace the current event/action rendering with a human-readable format. Each row tells you what happened in plain language:
-
-```text
-16:07   Landed on /en/deposit                    MetaMask, Rabby detected
-16:10   Pageview /en/swap                         MetaMask, Rabby detected  
-16:13   Clicked "Withdrawn"  /en/deposit          
-16:15   Wallet connected                          
-16:18   Clicked "Stake Now"  /stake               (outbound)
-```
-
-Each row has 3 columns:
-- **Time** -- `HH:mm` timestamp
-- **What happened** -- human-readable description based on event type:
-  - `wallet_detected` -> "Wallet detected" (with wallet names shown inline)
-  - `click` -> "Clicked [click_text]" + page path
-  - `pageview` -> "Viewed [page_path]"  
-  - `conversion` -> "Conversion: [detail]"
-  - wallet action types -> "Wallet [type]" (e.g. "Wallet connected", "Wallet staked")
-  - Other event types shown as-is with a label
-- **Wallet indicator** -- if wallets were detected at that moment, show them as a subtle tag
-
-### 3. Remove the separate page flow section
-
-Since the activity feed now shows pageviews and clicks with their paths inline, the bottom page flow (`/en/deposit -> /en/deposit`) becomes redundant. Remove it entirely -- the chronological activity log already tells the full story.
+### 5. Add "Left" indicator at end of each session
+After the page-grouped events, show a subtle row with the exit timestamp and "Left" label (LogOut icon), confirming the user was inactive for 30+ minutes after.
 
 ## Technical details
 
 ### File: `src/components/wallets/WalletJourneyTab.tsx`
 
-**Refactor `NestedItemRow`** to render human-readable descriptions:
+**Imports:** Add `LogOut` from lucide-react.
 
-- Map `event_type` to readable labels:
-  - `"wallet_detected"` -> icon + "Wallet detected" + wallet names
-  - `"click"` -> mouse icon + "Clicked" + `click_text` + page_path
-  - `"pageview"` -> eye icon + "Viewed" + `page_path`  
-  - `"conversion"` / custom events -> zap icon + event label + detail
-- For wallet actions (`item.kind === "action"`): arrow icon + "Wallet " + action type (connected, staked, etc.)
-- Each row: `[time mono] [icon] [description] [page if relevant] [wallet names if wallet_detected]`
+**Wallet badges (lines 368-385):** Extract unique wallet names from `journey.events` where `event_type === "wallet_detected"`. Render as badges with Radio icon in the existing badges section.
 
-**Remove the page flow section** (lines 450-460) from the collapsible content -- the nested activity feed replaces it.
+**Filter wallet_detected from timeline (buildTimeline, lines 155-165):** Skip events where `event_type === "wallet_detected"` when pushing to `item.nested`. Also skip them from standalone items (lines 187-195).
 
-**Deduplicate pages** (as fallback/safety): In `mergeSessions`, filter consecutive duplicate pages from the combined `pages` array. This ensures if the page flow is ever shown elsewhere, it won't repeat.
+**Session header (lines 417-453):** Replace the entry/exit page display with `Session on {formatted date}`. Keep the right-side stats (page count, duration, referrer, chevron).
 
-### No changes to:
-- `src/lib/api.ts` -- types unchanged
-- `src/components/wallets/WalletDetailDialog.tsx` -- unchanged
+**Remove "sessions merged" (lines 472-476):** Delete this block entirely.
+
+**Page-grouped rendering (lines 479-486):** Replace the flat event list with:
+1. Group nested items by `page_path` (fallback to session entry page for actions or events without a path)
+2. Render each group as a bordered div with the page path as a mono header and events listed chronologically inside
+3. After all page groups, render a "Left" row: subtle divider + `[exit time] Left` with LogOut icon in muted styling
+
+**Exit time calculation:** `new Date(session.started_at).getTime() + session.duration_seconds * 1000`, formatted as `HH:mm`.
