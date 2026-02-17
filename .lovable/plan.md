@@ -1,75 +1,55 @@
 
 
-# Fix Page Grouping to Preserve Chronological Order
+# Fix "Left" Timestamp and Absorb Late Events into Sessions
 
 ## Problem
 
-The current `groupByPage` function uses a Map to collect all events by page path. This means if a user navigates `/` then `/en/swap` then back to `/`, all the `/` events get merged into one group and all `/en/swap` events into another. The chronological story is completely lost.
+Two bugs visible in the timeline:
+
+1. **"Left" shows 01:00** even though events continue until 01:07+. The exit time is calculated from `started_at + duration_seconds` (raw session data), which doesn't account for events that extend beyond the session window.
+
+2. **Standalone click items at 01:07, 01:09, 01:10** leak out of the session as bare "click" entries. These events fall just outside the session's 30-minute window but clearly belong to the same session.
 
 ## Solution
 
-Replace the Map-based grouping with **sequential grouping**: walk through events in timestamp order and start a new page group every time the page path changes from the previous event. If the user visits the same page twice at different points, it appears as two separate groups.
+### 1. Extend session windows after initial event matching
 
-**Before (broken):**
+After the first pass of matching events/actions to sessions, do a second pass:
+- For each session that has nested events, extend its `_endMs` to `max(_endMs, lastNestedTs + 5 minutes)`
+- Re-scan unclaimed events and actions against the extended windows
+- Re-sort nested items after the second pass
+
+### 2. Calculate "Left" from actual last activity
+
+Replace the static `started_at + duration_seconds` exit time with:
 ```
-/                          <- all / events merged
-  15:36 Clicked "Launch App"
-  15:43 Clicked "Launch App"
-  15:58 Clicked "Launch App"
-
-/en/swap                   <- all /en/swap events merged
-  15:42 Clicked "Swap"
-  15:58 Clicked "Earn"
-```
-
-**After (chronological):**
-```
-/
-  15:36 Clicked "Launch App"
-
-/en/swap
-  15:42 Clicked "Swap"
-  15:42 Clicked "BOB"
-
-/en/
-  15:42 Clicked "Swap now"
-
-/en/swap
-  15:43 Clicked "Stake"
-
-/
-  15:43 Clicked "Launch App"
-
-...and so on in exact order
+max(started_at + duration_seconds, last nested event timestamp)
 ```
 
-## Technical details
+This ensures "Left" always shows a time at or after the last visible event.
+
+## Technical Details
 
 ### File: `src/components/wallets/WalletJourneyTab.tsx`
 
-**Rewrite `groupByPage` function (lines 229-243):**
+**In `buildTimeline` (after line 178, before standalone items):**
 
-Replace the Map-based approach with sequential grouping:
+Add a session window extension + second-pass claiming loop:
+- Extend each session's `_endMs` to `max(_endMs, lastNestedTs + 300000)` (5 min buffer)
+- Re-run unclaimed events and actions against extended windows
+- Re-sort nested items
 
+**Exit time calculation (line 418):**
+
+Replace:
 ```typescript
-function groupByPage(nested: NestedItem[], fallbackPage: string): PageGroup[] {
-  const groups: PageGroup[] = [];
-  let current: PageGroup | null = null;
-
-  for (const item of nested) {
-    const path = getItemPagePath(item, fallbackPage);
-    if (!current || current.pagePath !== path) {
-      current = { pagePath: path, items: [] };
-      groups.push(current);
-    }
-    current.items.push(item);
-  }
-
-  return groups;
-}
+const exitTimeMs = new Date(s.started_at).getTime() + s.duration_seconds * 1000;
 ```
 
-This relies on the fact that `nested` is already sorted chronologically (which it is -- `buildTimeline` sorts by timestamp at line 178). Each time the page path differs from the previous event, a new group starts. Same page visited later gets its own separate group.
-
-No other files or functions need to change -- the rendering code already iterates over the groups array in order.
+With:
+```typescript
+const rawEndMs = new Date(s.started_at).getTime() + s.duration_seconds * 1000;
+const lastEventMs = item.nested.length > 0 ? item.nested[item.nested.length - 1].ts : 0;
+const exitTimeMs = Math.max(rawEndMs, lastEventMs);
+```
 
