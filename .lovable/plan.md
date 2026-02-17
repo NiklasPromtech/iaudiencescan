@@ -1,77 +1,64 @@
 
 
-# Merge Sessions + Visual Timeline Connector
+# Redesign Session Activity Log for Readability
 
-## What changes
+## Problems
 
-Two improvements to the Journey tab:
+1. **Confusing page flow**: When sessions merge, the pages array concatenates raw data, producing `/en/deposit -> /en/deposit` (same page repeated). This adds no value and is confusing.
 
-### 1. Merge nearby sessions into single groups
-Sessions within 30 minutes of each other get consolidated into one expandable row. This eliminates the wall of "bounce" rows and nested `wallet_detected` spam.
+2. **Nested events are hard to read**: The current layout dumps raw event types (`wallet_detected`, `click`) with badges and scattered details. It's not immediately clear what the user actually did.
 
-**Before:** 8 separate bounce rows + 8 standalone wallet_detected rows = 16 lines of noise
+## Changes
 
-**After:** 2-3 merged session groups with everything nested inside
+### 1. Deduplicate consecutive pages in the page flow
 
-### 2. Visual timeline connector
-A vertical line runs down the left edge connecting all timeline items, with dots/nodes at each item -- giving a clear sense of chronological flow.
+Remove consecutive duplicate pages from the flow display. If the user visited `/en/deposit` twice in a row (from merged sessions), only show it once. The flow becomes a unique path, e.g. `/en/deposit -> /en/swap -> /en/deposit` only if they actually navigated away and back.
+
+### 2. Redesign nested events as a readable activity feed
+
+Replace the current event/action rendering with a human-readable format. Each row tells you what happened in plain language:
 
 ```text
-    o  Feb 10, 15:36  / -> /en/swap  4 events  3 pg  7m
-    |    15:36  wallet_detected  MetaMask, Rabby
-    |    15:36  click "Swap" on /en/swap
-    |    15:43  click "Connect" on /
-    |    Pages: / -> /en/swap -> / -> /en/swap
-    |
-    o  Feb 10, 15:56  /en/deposit  2 events  2 pg  0s
-    |    15:56  wallet_detected  MetaMask, Rabby
-    |    Pages: /en/deposit -> /en/
-    |
-    o  Feb 14, 18:22  /stake  4 events  5 pg  4m 5s
-         18:23  click "Stake Now"
-         18:24  connected
-         18:26  staked
-         Pages: /stake -> /docs -> /faq -> /stake -> /dashboard
-
-    --- Transactions (unchanged) ---
+16:07   Landed on /en/deposit                    MetaMask, Rabby detected
+16:10   Pageview /en/swap                         MetaMask, Rabby detected  
+16:13   Clicked "Withdrawn"  /en/deposit          
+16:15   Wallet connected                          
+16:18   Clicked "Stake Now"  /stake               (outbound)
 ```
+
+Each row has 3 columns:
+- **Time** -- `HH:mm` timestamp
+- **What happened** -- human-readable description based on event type:
+  - `wallet_detected` -> "Wallet detected" (with wallet names shown inline)
+  - `click` -> "Clicked [click_text]" + page path
+  - `pageview` -> "Viewed [page_path]"  
+  - `conversion` -> "Conversion: [detail]"
+  - wallet action types -> "Wallet [type]" (e.g. "Wallet connected", "Wallet staked")
+  - Other event types shown as-is with a label
+- **Wallet indicator** -- if wallets were detected at that moment, show them as a subtle tag
+
+### 3. Remove the separate page flow section
+
+Since the activity feed now shows pageviews and clicks with their paths inline, the bottom page flow (`/en/deposit -> /en/deposit`) becomes redundant. Remove it entirely -- the chronological activity log already tells the full story.
 
 ## Technical details
 
 ### File: `src/components/wallets/WalletJourneyTab.tsx`
 
-**Session merging step** (new function `mergeSessions`, called before `buildTimeline`):
+**Refactor `NestedItemRow`** to render human-readable descriptions:
 
-1. Sort all sessions by `started_at` ascending
-2. Walk through sessions: if the next session starts within 30 minutes of the current group's latest end time, merge it in
-3. Merged group properties:
-   - `ts` = earliest session's `started_at`
-   - `pages` = concatenated from all constituent sessions
-   - `page_count` = sum of all page counts
-   - `duration_seconds` = span from first `started_at` to last session's end
-   - `is_bounce` = false if more than one session merged
-   - `entry_page` from the first session
-   - Metadata (`referrer_domain`, UTMs, geo, device) from the first session that has them
-   - `session_id` = first session's ID (used as the collapsible key)
+- Map `event_type` to readable labels:
+  - `"wallet_detected"` -> icon + "Wallet detected" + wallet names
+  - `"click"` -> mouse icon + "Clicked" + `click_text` + page_path
+  - `"pageview"` -> eye icon + "Viewed" + `page_path`  
+  - `"conversion"` / custom events -> zap icon + event label + detail
+- For wallet actions (`item.kind === "action"`): arrow icon + "Wallet " + action type (connected, staked, etc.)
+- Each row: `[time mono] [icon] [description] [page if relevant] [wallet names if wallet_detected]`
 
-**Nest wallet_detected inside merged groups**:
+**Remove the page flow section** (lines 450-460) from the collapsible content -- the nested activity feed replaces it.
 
-Remove the blanket exclusion of `wallet_detected` from session matching. After merging, all events (including `wallet_detected`) that fall within a merged group's time window get nested inside it. Only truly orphaned events stay standalone.
-
-**Visual timeline connector** (CSS/JSX changes):
-
-- Wrap the timeline list in a `relative` container
-- Each timeline item gets a `relative pl-6` wrapper
-- A continuous vertical line: `absolute left-[7px] top-0 bottom-0 w-px bg-border` on the container
-- Each item gets a dot node: `absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full bg-primary border-2 border-background`
-- Session items use a filled primary dot; standalone items use an outline dot
-- The last item's vertical line is clipped so it doesn't extend past the final dot
-
-**Updated session header display**:
-
-For merged sessions with multiple entry pages, show `first_entry -> last_entry` in the trigger row. Single-session groups show the entry page as before.
+**Deduplicate pages** (as fallback/safety): In `mergeSessions`, filter consecutive duplicate pages from the combined `pages` array. This ensures if the page flow is ever shown elsewhere, it won't repeat.
 
 ### No changes to:
-- `src/lib/api.ts`
-- `src/components/wallets/WalletDetailDialog.tsx`
-
+- `src/lib/api.ts` -- types unchanged
+- `src/components/wallets/WalletDetailDialog.tsx` -- unchanged
