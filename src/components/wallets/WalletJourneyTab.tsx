@@ -227,19 +227,19 @@ interface PageGroup {
 }
 
 function groupByPage(nested: NestedItem[], fallbackPage: string): PageGroup[] {
-  const map = new Map<string, NestedItem[]>();
-  const order: string[] = [];
+  const groups: PageGroup[] = [];
+  let current: PageGroup | null = null;
 
   for (const item of nested) {
     const path = getItemPagePath(item, fallbackPage);
-    if (!map.has(path)) {
-      map.set(path, []);
-      order.push(path);
+    if (!current || current.pagePath !== path) {
+      current = { pagePath: path, items: [] };
+      groups.push(current);
     }
-    map.get(path)!.push(item);
+    current.items.push(item);
   }
 
-  return order.map((p) => ({ pagePath: p, items: map.get(p)! }));
+  return groups;
 }
 
 // --- sub-components ---
