@@ -1697,13 +1697,7 @@ export async function fetchOverview(request: OverviewRequest): Promise<OverviewR
 }
 
 // ============= WALLET BALANCES =============
-export interface WalletBalanceRow {
-  wallet_address: string;
-  website_id: string;
-  scan_id: string | null;
-  chain_id: string;
-  chain_name: string;
-  chain_display_name: string;
+export interface WalletBalanceToken {
   contract_address: string;
   contract_name: string;
   contract_ticker: string;
@@ -1717,10 +1711,28 @@ export interface WalletBalanceRow {
   quote_usd: string;
   last_transferred_at: string | null;
   logo_url: string | null;
-  enriched_at: string;
+  chain_id: string;
+  chain_name: string;
+  chain_display_name: string;
 }
 
-export async function fetchWalletBalances(walletAddress: string, websiteId: string): Promise<WalletBalanceRow[]> {
+export interface WalletEnrichment {
+  enriched_at: string;
+  total_balance_usd: number;
+  token_count: number;
+  tokens: WalletBalanceToken[];
+}
+
+export interface WalletBalanceResponse {
+  wallet_address: string;
+  website_id: string;
+  enrichment_count: number;
+  current_balance_usd: number;
+  balance_history: number[];
+  enrichments: WalletEnrichment[];
+}
+
+export async function fetchWalletBalances(walletAddress: string, websiteId: string): Promise<WalletBalanceResponse> {
   const token = await getAuthToken();
   if (!token) throw new Error("Not authenticated");
 

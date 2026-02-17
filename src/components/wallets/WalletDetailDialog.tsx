@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Coins, Layers, DollarSign, Clock, RefreshCw, Loader2 } from "lucide-react";
-import { fetchWalletBalances, enrichWallets, WalletBalanceRow } from "@/lib/api";
+import { fetchWalletBalances, enrichWallets, WalletBalanceResponse, WalletBalanceToken } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
@@ -28,7 +28,7 @@ interface WalletDetailDialogProps {
 }
 
 export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: WalletDetailDialogProps) {
-  const [rows, setRows] = useState<WalletBalanceRow[]>([]);
+  const [data, setData] = useState<WalletBalanceResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,14 +38,14 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     setLoading(true);
     setError(null);
     fetchWalletBalances(walletAddress, websiteId)
-      .then((data) => setRows(data.filter((r) => r.is_spam !== "true")))
+      .then((res) => setData(res))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [walletAddress, websiteId]);
 
   useEffect(() => {
     if (!walletAddress) {
-      setRows([]);
+      setData(null);
       setError(null);
       return;
     }
@@ -101,21 +101,23 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
   const truncate = (addr: string) =>
     addr.length <= 12 ? addr : `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-  // Derived stats
-  const totalUsd = rows.reduce((sum, r) => sum + parseFloat(r.quote_usd || "0"), 0);
-  const uniqueChains = new Set(rows.map((r) => r.chain_name)).size;
-  const tokenCount = rows.length;
+  // Use most recent enrichment (index 0)
+  const latestEnrichment = data?.enrichments?.[0] ?? null;
+  const tokens = latestEnrichment?.tokens?.filter((t) => t.is_spam !== "true") ?? [];
+  const totalUsd = latestEnrichment?.total_balance_usd ?? 0;
+  const tokenCount = latestEnrichment?.token_count ?? tokens.length;
+  const uniqueChains = new Set(tokens.map((t) => t.chain_name)).size;
 
-  // First / last transfer across all rows
-  const transferDates = rows
-    .map((r) => r.last_transferred_at)
+  // First / last transfer across all tokens in latest enrichment
+  const transferDates = tokens
+    .map((t) => t.last_transferred_at)
     .filter(Boolean)
     .map((d) => new Date(d!).getTime());
   const firstTransfer = transferDates.length ? new Date(Math.min(...transferDates)) : null;
   const lastTransfer = transferDates.length ? new Date(Math.max(...transferDates)) : null;
 
   // Sort by value descending
-  const sorted = [...rows].sort(
+  const sorted = [...tokens].sort(
     (a, b) => parseFloat(b.quote_usd || "0") - parseFloat(a.quote_usd || "0")
   );
 
@@ -171,7 +173,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
           <div className="py-8 text-center text-destructive text-sm">{error}</div>
         )}
 
-        {!loading && !error && rows.length > 0 && (
+        {!loading && !error && tokens.length > 0 && (
           <>
             {/* Top-line stats */}
             <div className="flex flex-wrap items-center divide-x divide-border border-b border-border pb-3 mb-1">
@@ -283,7 +285,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
           </>
         )}
 
-        {!loading && !error && rows.length === 0 && walletAddress && (
+        {!loading && !error && tokens.length === 0 && walletAddress && (
           <div className="py-8 text-center text-muted-foreground text-sm">
             No token balances found for this wallet
           </div>
