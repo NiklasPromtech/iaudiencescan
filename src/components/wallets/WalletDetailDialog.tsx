@@ -109,12 +109,15 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
     addr.length <= 12 ? addr : `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   const latestEnrichment = data?.enrichments?.[0] ?? null;
-  const tokens = latestEnrichment?.tokens?.filter((t) => t.is_spam !== "true") ?? [];
+  const allTokens = latestEnrichment?.tokens?.filter((t) => t.is_spam !== "true") ?? [];
+  // Hide dust: filter out tokens worth less than $1
+  const tokens = allTokens.filter((t) => parseFloat(t.quote_usd || "0") >= 1);
+  const dustCount = allTokens.length - tokens.length;
   const totalUsd = latestEnrichment?.total_balance_usd ?? 0;
-  const tokenCount = latestEnrichment?.token_count ?? tokens.length;
+  const tokenCount = latestEnrichment?.token_count ?? allTokens.length;
   const uniqueChains = new Set(tokens.map((t) => t.chain_name)).size;
 
-  const transferDates = tokens
+  const transferDates = allTokens
     .map((t) => t.last_transferred_at)
     .filter(Boolean)
     .map((d) => new Date(d!).getTime());
@@ -163,7 +166,7 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs border-b border-border pb-2 mb-1">
               <span className="flex items-center gap-1">
                 <DollarSign className="h-3 w-3 text-primary" />
-                <span className="text-muted-foreground">Balance:</span>
+                <span className="text-muted-foreground">Balance (USD):</span>
                 <span className="font-mono font-semibold">{formatUsd(totalUsd, true)}</span>
               </span>
               <span className="flex items-center gap-1">
@@ -306,6 +309,11 @@ export function WalletDetailDialog({ walletAddress, websiteId, onOpenChange }: W
                 </TableBody>
               </Table>
             </div>
+            {dustCount > 0 && (
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {dustCount} token{dustCount > 1 ? "s" : ""} under $1 hidden
+              </p>
+            )}
           </>
         )}
 
