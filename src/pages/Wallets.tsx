@@ -124,8 +124,6 @@ export default function Wallets() {
 
     try {
       const balanceFilter: { min?: number; max?: number } = {};
-      if (minBalance) balanceFilter.min = parseFloat(minBalance);
-      if (maxBalance) balanceFilter.max = parseFloat(maxBalance);
 
       // Build range config based on dateRange state
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -155,7 +153,7 @@ export default function Wallets() {
         tag_id: selectedWebsite.id,
         range: rangeConfig,
         search: debouncedSearch || undefined,
-        balance: Object.keys(balanceFilter).length > 0 ? balanceFilter : undefined,
+        balance: undefined,
         
         
         sort_by: sortBy,
@@ -200,7 +198,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, minBalance, maxBalance, currentPage, dateRange, toast]);
+  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, currentPage, dateRange, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -503,6 +501,14 @@ export default function Wallets() {
                     .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
                     .filter((wallet) => selectedTypes.length === 0 || wallet.types.some(t => selectedTypes.includes(t)))
                     .filter((wallet) => selectedChains.length === 0 || (wallet.chains || []).some(c => selectedChains.includes(c)))
+                    .filter((wallet) => {
+                      const bal = wallet.total_balance_usd ?? 0;
+                      const min = minBalance ? parseFloat(minBalance) : undefined;
+                      const max = maxBalance ? parseFloat(maxBalance) : undefined;
+                      if (min !== undefined && !isNaN(min) && bal < min) return false;
+                      if (max !== undefined && !isNaN(max) && bal > max) return false;
+                      return true;
+                    })
                     .map((wallet) => {
                     // Determine if we should show Enrich button
                     const isEnriched = wallet.enrichment_status === "completed";
