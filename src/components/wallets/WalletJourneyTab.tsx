@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   Globe, Monitor, MousePointerClick, ArrowRightLeft, ChevronDown,
-  MapPin, Calendar, Eye, Zap, ExternalLink, Radio,
+  MapPin, Calendar, Eye, Zap, ExternalLink, Radio, LogOut,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { WalletJourney, WalletJourneyEvent, WalletJourneyAction, WalletJourneySession } from "@/lib/api";
@@ -80,10 +80,10 @@ function mergeSessions(sessions: WalletJourneySession[]): MergedSession[] {
 
     if (sStartMs <= latestEndMs) {
       // Merge into current group
-  // Deduplicate consecutive pages
-  const lastPage = current.pages[current.pages.length - 1];
-  const newPages = s.pages.filter((p, i) => i === 0 ? p !== lastPage : p !== s.pages[i - 1]);
-  current.pages = [...current.pages, ...newPages];
+      // Deduplicate consecutive pages
+      const lastPage = current.pages[current.pages.length - 1];
+      const newPages = s.pages.filter((p, i) => i === 0 ? p !== lastPage : p !== s.pages[i - 1]);
+      current.pages = [...current.pages, ...newPages];
       current.page_count += s.page_count;
       const newEndMs = new Date(s.started_at).getTime() + Math.max(s.duration_seconds, 0) * 1000;
       current.duration_seconds = Math.round(
@@ -135,12 +135,10 @@ type TimelineItem =
 function buildTimeline(journey: WalletJourney): TimelineItem[] {
   const SESSION_MIN_WINDOW = 1800; // 30 min in seconds
 
-  // Step 1: merge nearby sessions
   const mergedSessions = mergeSessions(journey.sessions);
 
   type SessionTimelineItem = { type: "session"; ts: number; session: MergedSession; nested: NestedItem[]; _endMs: number };
 
-  // Build session windows
   const sessionItems: SessionTimelineItem[] = mergedSessions.map((s) => {
     const startMs = new Date(s.started_at).getTime();
     const windowSec = Math.max(s.duration_seconds, SESSION_MIN_WINDOW);
@@ -148,12 +146,12 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     return { type: "session" as const, ts: startMs, session: s, nested: [], _endMs: endMs };
   });
 
-  // Track which events/actions are claimed
   const claimedEvents = new Set<number>();
   const claimedActions = new Set<number>();
 
-  // Match ALL events (including wallet_detected) to sessions
+  // Match events to sessions — skip wallet_detected
   journey.events.forEach((e, idx) => {
+    if (e.event_type === "wallet_detected") return;
     const eMs = new Date(e.created_at).getTime();
     for (const item of sessionItems) {
       if (eMs >= item.ts && eMs <= item._endMs) {
@@ -176,15 +174,15 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     }
   });
 
-  // Sort nested items within each session
   sessionItems.forEach((item) => {
     item.nested.sort((a, b) => a.ts - b.ts);
   });
 
-  // Standalone items: unclaimed events + unclaimed actions
+  // Standalone items: unclaimed non-wallet_detected events + unclaimed actions
   const standaloneItems: TimelineItem[] = [];
 
   journey.events.forEach((e, idx) => {
+    if (e.event_type === "wallet_detected") return;
     if (!claimedEvents.has(idx)) {
       standaloneItems.push({
         type: "standalone",
@@ -212,9 +210,36 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     }
   });
 
-  // Clean up internal property and return sorted
   const cleaned: TimelineItem[] = sessionItems.map(({ _endMs, ...rest }) => rest);
   return [...cleaned, ...standaloneItems].sort((a, b) => a.ts - b.ts);
+}
+
+// --- helpers for page grouping ---
+
+function getItemPagePath(item: NestedItem, fallback: string): string {
+  if (item.kind === "event") return item.data.page_path || fallback;
+  return fallback;
+}
+
+interface PageGroup {
+  pagePath: string;
+  items: NestedItem[];
+}
+
+function groupByPage(nested: NestedItem[], fallbackPage: string): PageGroup[] {
+  const map = new Map<string, NestedItem[]>();
+  const order: string[] = [];
+
+  for (const item of nested) {
+    const path = getItemPagePath(item, fallbackPage);
+    if (!map.has(path)) {
+      map.set(path, []);
+      order.push(path);
+    }
+    map.get(path)!.push(item);
+  }
+
+  return order.map((p) => ({ pagePath: p, items: map.get(p)! }));
 }
 
 // --- sub-components ---
@@ -233,49 +258,29 @@ function NestedItemRow({ item }: { item: NestedItem }) {
   }
 
   const e = item.data;
-  const walletData = e.event_data as Record<string, any> | undefined;
-  const wallets = walletData?.wallets_detected as string[] | undefined;
 
-  // Build human-readable description
   let icon: React.ReactNode;
   let description: React.ReactNode;
 
   switch (e.event_type) {
-    case "wallet_detected":
-      icon = <Radio className="h-3 w-3 text-primary shrink-0" />;
-      description = (
-        <span>
-          Wallet detected
-          {wallets && wallets.length > 0 && (
-            <span className="text-muted-foreground ml-1">— {wallets.join(", ")}</span>
-          )}
-        </span>
-      );
-      break;
     case "click":
       icon = <MousePointerClick className="h-3 w-3 text-primary shrink-0" />;
       description = (
         <span className="flex items-center gap-1 min-w-0">
           Clicked{e.click_text ? <> "<span className="font-medium truncate">{e.click_text}</span>"</> : ""}
-          {e.page_path && <span className="font-mono text-muted-foreground ml-1 shrink-0">{e.page_path}</span>}
           {e.is_outbound && <ExternalLink className="h-2.5 w-2.5 text-muted-foreground shrink-0" />}
         </span>
       );
       break;
     case "pageview":
       icon = <Eye className="h-3 w-3 text-primary shrink-0" />;
-      description = (
-        <span>
-          Viewed <span className="font-mono">{e.page_path || "—"}</span>
-        </span>
-      );
+      description = <span>Viewed</span>;
       break;
     case "conversion":
       icon = <Zap className="h-3 w-3 text-primary shrink-0" />;
       description = (
         <span>
           Conversion{e.click_text ? `: ${e.click_text}` : ""}
-          {e.page_path && <span className="font-mono text-muted-foreground ml-1">{e.page_path}</span>}
         </span>
       );
       break;
@@ -285,7 +290,6 @@ function NestedItemRow({ item }: { item: NestedItem }) {
         <span>
           {e.event_type}
           {e.click_text && <span className="ml-1">"{e.click_text}"</span>}
-          {e.page_path && <span className="font-mono text-muted-foreground ml-1">{e.page_path}</span>}
         </span>
       );
   }
@@ -300,11 +304,8 @@ function NestedItemRow({ item }: { item: NestedItem }) {
 }
 
 function StandaloneRow({ event }: { event: WalletJourneyEvent }) {
-  const walletData = event.event_data as Record<string, any> | undefined;
-  const wallets = walletData?.wallets_detected as string[] | undefined;
   return (
     <div className="relative pl-6">
-      {/* Dot */}
       <div className="absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full border-2 border-primary bg-background" />
       <div className="flex items-center gap-2 text-xs px-3 py-2 border border-border">
         <span className="font-mono text-muted-foreground">
@@ -313,15 +314,23 @@ function StandaloneRow({ event }: { event: WalletJourneyEvent }) {
         <Badge variant="outline" className="text-[10px] py-0 px-1.5">
           {event.event_type}
         </Badge>
-        <Badge variant="secondary" className="text-[9px] py-0 px-1">
-          <Radio className="h-2.5 w-2.5 mr-0.5" /> script
-        </Badge>
-        {wallets && wallets.length > 0 && (
-          <span className="text-muted-foreground text-[11px]">{wallets.join(", ")}</span>
-        )}
       </div>
     </div>
   );
+}
+
+// --- extract wallet names from journey ---
+
+function extractWalletNames(journey: WalletJourney): string[] {
+  const names = new Set<string>();
+  for (const e of journey.events) {
+    if (e.event_type === "wallet_detected") {
+      const walletData = e.event_data as Record<string, any> | undefined;
+      const wallets = walletData?.wallets_detected as string[] | undefined;
+      if (wallets) wallets.forEach((w) => names.add(w));
+    }
+  }
+  return Array.from(names);
 }
 
 // --- main component ---
@@ -329,6 +338,7 @@ function StandaloneRow({ event }: { event: WalletJourneyEvent }) {
 export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const timeline = useMemo(() => buildTimeline(journey), [journey]);
+  const walletNames = useMemo(() => extractWalletNames(journey), [journey]);
 
   return (
     <div className="space-y-5">
@@ -367,6 +377,11 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
 
       {/* Quick badges */}
       <div className="flex flex-wrap gap-2">
+        {walletNames.map((w) => (
+          <Badge key={w} variant="outline" className="text-[10px] gap-1 py-0.5">
+            <Radio className="h-2.5 w-2.5" /> {w}
+          </Badge>
+        ))}
         {journey.countries.map((c) => (
           <Badge key={c} variant="outline" className="text-[10px] gap-1 py-0.5">
             <MapPin className="h-2.5 w-2.5" /> {c}
@@ -384,30 +399,28 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
         ))}
       </div>
 
-      {/* Timeline with visual connector */}
+      {/* Timeline */}
       {timeline.length > 0 && (
         <div>
           <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
             <Eye className="h-3.5 w-3.5 text-primary" /> Timeline
           </h4>
           <div className="relative">
-            {/* Vertical connector line */}
             <div className="absolute left-[7px] top-0 bottom-0 w-px bg-border" />
 
             <div className="space-y-1">
               {timeline.map((item, idx) => {
-                const isLast = idx === timeline.length - 1;
-
                 if (item.type === "standalone") {
                   return <StandaloneRow key={`standalone-${idx}`} event={item.event} />;
                 }
 
                 const s = item.session;
-                const showArrow = s.session_count > 1 && s.entry_page !== s.exit_page;
+                const exitTimeMs = new Date(s.started_at).getTime() + s.duration_seconds * 1000;
+                const exitTime = format(new Date(exitTimeMs), "HH:mm");
+                const pageGroups = groupByPage(item.nested, s.entry_page);
 
                 return (
                   <div key={s.session_id} className="relative pl-6">
-                    {/* Filled dot */}
                     <div className="absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full bg-primary" />
 
                     <Collapsible
@@ -418,13 +431,7 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                         <button className="w-full flex items-center justify-between gap-2 text-xs px-3 py-2 border border-border hover:bg-muted/50 transition-colors">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="font-mono text-muted-foreground">
-                              {format(new Date(s.started_at), "MMM d, HH:mm")}
-                            </span>
-                            <span className="font-medium truncate">
-                              {s.entry_page}
-                              {showArrow && (
-                                <span className="text-muted-foreground"> → {s.exit_page}</span>
-                              )}
+                              Session on {format(new Date(s.started_at), "MMM d, HH:mm")}
                             </span>
                             {s.is_bounce && s.session_count === 1 && (
                               <Badge variant="destructive" className="text-[9px] py-0 px-1">bounce</Badge>
@@ -453,7 +460,7 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                         </button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <div className="px-3 py-2 text-[11px] space-y-2 bg-muted/20 border-x border-b border-border">
+                        <div className="px-3 py-2 text-[11px] space-y-3 bg-muted/20 border-x border-b border-border">
                           {/* Session metadata */}
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
                             {s.country && (
@@ -469,22 +476,32 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                                 {s.utm_campaign ? ` (${s.utm_campaign})` : ""}
                               </span>
                             )}
-                            {s.session_count > 1 && (
-                              <span className="text-primary font-medium">
-                                {s.session_count} sessions merged
-                              </span>
-                            )}
                           </div>
 
-                          {/* Nested events & actions */}
-                          {item.nested.length > 0 && (
-                            <div className="space-y-1 border-l-2 border-primary/20 pl-2">
-                              {item.nested.map((n, ni) => (
-                                <NestedItemRow key={ni} item={n} />
+                          {/* Page-grouped events */}
+                          {pageGroups.length > 0 && (
+                            <div className="space-y-2">
+                              {pageGroups.map((group, gi) => (
+                                <div key={gi} className="border border-border/50 px-2 py-1.5">
+                                  <div className="font-mono text-[10px] text-muted-foreground mb-1">
+                                    {group.pagePath}
+                                  </div>
+                                  <div className="space-y-0.5 border-l-2 border-primary/20 pl-2">
+                                    {group.items.map((n, ni) => (
+                                      <NestedItemRow key={ni} item={n} />
+                                    ))}
+                                  </div>
+                                </div>
                               ))}
                             </div>
                           )}
 
+                          {/* Left indicator */}
+                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                            <span className="font-mono w-10 shrink-0">{exitTime}</span>
+                            <LogOut className="h-3 w-3 shrink-0" />
+                            <span>Left</span>
+                          </div>
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
