@@ -440,14 +440,45 @@ const Overview = () => {
 
   const handleFiltersChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
+    setTableDimension("referrer_domain");
     handleExitComparison();
-    loadAllData(newFilters, tableDimension, getRangeConfig());
+    loadAllData(newFilters, "referrer_domain", getRangeConfig());
+  };
+
+  const fetchComparisonTableData = async (
+    dimension: TableDimension,
+    prevRange: RangeConfig
+  ) => {
+    if (!selectedWebsite) return;
+    const { conversion_events: convEvents, ...restFilters } = activeFilters;
+    try {
+      const data = await fetchTableData({
+        tag_id: selectedWebsite.id,
+        dimension,
+        range: prevRange,
+        filters: getFiltersParam(restFilters),
+        conversion_events: convEvents?.length ? convEvents : undefined,
+        cost: { mode: "none" },
+        pagination: { limit: 50 },
+      });
+      setComparisonData(prev => prev ? {
+        ...prev,
+        table_referrer_domain: { success: true, data: data }
+      } : null);
+    } catch (err) {
+      console.error("Comparison table fetch failed:", err);
+    }
   };
 
   const handleDimensionChange = (newDimension: TableDimension) => {
     setTableDimension(newDimension);
     setSelectedCostSourceId(null);
     loadTableData(newDimension, activeFilters, getRangeConfig(), null);
+
+    if (comparisonMode === "active" && comparisonData) {
+      const { range: prevRange } = getPreviousRangeConfig();
+      fetchComparisonTableData(newDimension, prevRange);
+    }
   };
 
   const handleCostSourceChange = (costSourceId: string | null) => {
