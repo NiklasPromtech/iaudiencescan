@@ -378,6 +378,10 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const timeline = useMemo(() => buildTimeline(journey), [journey]);
   const walletNames = useMemo(() => extractWalletNames(journey), [journey]);
+  const mergedSessionCount = useMemo(
+    () => timeline.filter(t => t.type === "session").length,
+    [timeline]
+  );
 
   return (
     <div className="space-y-5">
@@ -400,7 +404,7 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
         <span className="flex items-center gap-1">
           <Eye className="h-3 w-3 text-primary" />
           <span className="text-muted-foreground">Sessions:</span>
-          <span className="font-mono font-semibold">{journey.total_sessions}</span>
+          <span className="font-mono font-semibold">{mergedSessionCount}</span>
         </span>
         <span className="flex items-center gap-1">
           <Eye className="h-3 w-3 text-primary" />
@@ -524,8 +528,19 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
                             <div className="space-y-2">
                               {pageGroups.map((group, gi) => (
                                 <div key={gi} className="border border-border/50 px-2 py-1.5">
-                                  <div className="font-mono text-[10px] text-muted-foreground mb-1">
-                                    {group.pagePath}
+                                  <div className="font-mono text-[10px] text-muted-foreground mb-1 flex items-center gap-2 flex-wrap">
+                                    <span>{group.pagePath}</span>
+                                    {gi === 0 && s.referrer_domain && (
+                                      <Badge variant="outline" className="text-[9px] py-0 px-1 font-sans">
+                                        via {s.referrer_domain}
+                                      </Badge>
+                                    )}
+                                    {gi === 0 && s.utm_source && (
+                                      <Badge variant="outline" className="text-[9px] py-0 px-1 font-sans">
+                                        utm: {s.utm_source}{s.utm_medium ? `/${s.utm_medium}` : ""}
+                                        {s.utm_campaign ? ` (${s.utm_campaign})` : ""}
+                                      </Badge>
+                                    )}
                                   </div>
                                   <div className="space-y-0.5 border-l-2 border-primary/20 pl-2">
                                     {group.items.map((n, ni) => (
