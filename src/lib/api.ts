@@ -1717,11 +1717,11 @@ export interface WalletBalancesResponse {
   balances: WalletBalance[];
 }
 
-export async function fetchWalletBalances(walletAddress: string): Promise<WalletBalancesResponse> {
+export async function fetchWalletBalances(walletAddress: string, websiteId: string): Promise<WalletBalancesResponse> {
   const token = await getAuthToken();
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallet-balances/${walletAddress}`, {
+  const response = await fetch(`${ANALYTICS_API_URL}/analytics/wallet-balances/${walletAddress}?website_id=${encodeURIComponent(websiteId)}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
