@@ -152,7 +152,7 @@ export default function Wallets() {
       const response = await fetchWallets({
         tag_id: selectedWebsite.id,
         range: rangeConfig,
-        search: debouncedSearch || undefined,
+        search: undefined,
         balance: undefined,
         
         
@@ -198,7 +198,7 @@ export default function Wallets() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWebsite, debouncedSearch, sortBy, sortDir, currentPage, dateRange, toast]);
+  }, [selectedWebsite, sortBy, sortDir, currentPage, dateRange, toast]);
 
   useEffect(() => {
     loadWallets();
@@ -498,6 +498,7 @@ export default function Wallets() {
                   </TableRow>
                 ) : (
                   wallets
+                    .filter((wallet) => !debouncedSearch || wallet.wallet_id.toLowerCase().includes(debouncedSearch.toLowerCase()))
                     .filter((wallet) => showFailed || wallet.enrichment_status !== "failed")
                     .filter((wallet) => selectedTypes.length === 0 || wallet.types.some(t => selectedTypes.includes(t)))
                     .filter((wallet) => selectedChains.length === 0 || (wallet.chains || []).some(c => selectedChains.includes(c)))
