@@ -10,7 +10,7 @@ import {
   MapPin, Calendar, Eye, Zap, ExternalLink, Radio,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import { WalletJourney, WalletJourneyEvent, WalletJourneyAction } from "@/lib/api";
+import { WalletJourney, WalletJourneyEvent, WalletJourneyAction, WalletJourneySession } from "@/lib/api";
 import { useState, useMemo } from "react";
 
 interface WalletJourneyTabProps {
@@ -32,6 +32,91 @@ const formatUsd = (value: number) =>
     minimumFractionDigits: 2, maximumFractionDigits: 2,
   }).format(value);
 
+// --- session merging ---
+
+interface MergedSession {
+  session_id: string;
+  started_at: string;
+  duration_seconds: number;
+  is_bounce: boolean;
+  page_count: number;
+  entry_page: string;
+  exit_page: string;
+  referrer_domain: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  device_type: string | null;
+  browser: string | null;
+  os: string | null;
+  pages: string[];
+  session_count: number;
+}
+
+function mergeSessions(sessions: WalletJourneySession[]): MergedSession[] {
+  if (sessions.length === 0) return [];
+
+  const sorted = [...sessions].sort(
+    (a, b) => new Date(a.started_at).getTime() - new Date(b.started_at).getTime()
+  );
+
+  const MERGE_GAP = 1800; // 30 minutes in seconds
+  const groups: MergedSession[] = [];
+
+  let current: MergedSession = sessionToMerged(sorted[0]);
+
+  for (let i = 1; i < sorted.length; i++) {
+    const s = sorted[i];
+    const sStartMs = new Date(s.started_at).getTime();
+    const currentEndMs =
+      new Date(current.started_at).getTime() + current.duration_seconds * 1000;
+    const latestEndMs = Math.max(
+      currentEndMs,
+      new Date(current.started_at).getTime() + (current.pages.length > 0 ? MERGE_GAP * 1000 : 0)
+    );
+
+    if (sStartMs <= latestEndMs) {
+      // Merge into current group
+      current.pages = [...current.pages, ...s.pages];
+      current.page_count += s.page_count;
+      const newEndMs = new Date(s.started_at).getTime() + Math.max(s.duration_seconds, 0) * 1000;
+      current.duration_seconds = Math.round(
+        (Math.max(newEndMs, currentEndMs) - new Date(current.started_at).getTime()) / 1000
+      );
+      current.is_bounce = false;
+      current.exit_page = s.pages[s.pages.length - 1] || s.entry_page;
+      current.session_count += 1;
+      // Fill missing metadata from later sessions
+      current.referrer_domain = current.referrer_domain || s.referrer_domain;
+      current.utm_source = current.utm_source || s.utm_source;
+      current.utm_medium = current.utm_medium || s.utm_medium;
+      current.utm_campaign = current.utm_campaign || s.utm_campaign;
+      current.country = current.country || s.country;
+      current.region = current.region || s.region;
+      current.city = current.city || s.city;
+      current.device_type = current.device_type || s.device_type;
+      current.browser = current.browser || s.browser;
+      current.os = current.os || s.os;
+    } else {
+      groups.push(current);
+      current = sessionToMerged(s);
+    }
+  }
+  groups.push(current);
+  return groups;
+}
+
+function sessionToMerged(s: WalletJourneySession): MergedSession {
+  return {
+    ...s,
+    exit_page: s.pages[s.pages.length - 1] || s.entry_page,
+    session_count: 1,
+  };
+}
+
 // --- timeline types ---
 
 type NestedItem =
@@ -39,7 +124,7 @@ type NestedItem =
   | { kind: "action"; data: WalletJourneyAction; ts: number };
 
 type TimelineItem =
-  | { type: "session"; ts: number; session: WalletJourney["sessions"][0]; nested: NestedItem[] }
+  | { type: "session"; ts: number; session: MergedSession; nested: NestedItem[] }
   | { type: "standalone"; ts: number; event: WalletJourneyEvent };
 
 // --- timeline builder ---
@@ -47,8 +132,13 @@ type TimelineItem =
 function buildTimeline(journey: WalletJourney): TimelineItem[] {
   const SESSION_MIN_WINDOW = 1800; // 30 min in seconds
 
+  // Step 1: merge nearby sessions
+  const mergedSessions = mergeSessions(journey.sessions);
+
+  type SessionTimelineItem = { type: "session"; ts: number; session: MergedSession; nested: NestedItem[]; _endMs: number };
+
   // Build session windows
-  const sessionItems: TimelineItem[] = journey.sessions.map((s) => {
+  const sessionItems: SessionTimelineItem[] = mergedSessions.map((s) => {
     const startMs = new Date(s.started_at).getTime();
     const windowSec = Math.max(s.duration_seconds, SESSION_MIN_WINDOW);
     const endMs = startMs + windowSec * 1000;
@@ -59,14 +149,11 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
   const claimedEvents = new Set<number>();
   const claimedActions = new Set<number>();
 
-  // Match events to sessions
+  // Match ALL events (including wallet_detected) to sessions
   journey.events.forEach((e, idx) => {
-    if (e.event_type === "wallet_detected") return; // standalone
     const eMs = new Date(e.created_at).getTime();
     for (const item of sessionItems) {
-      if (item.type !== "session") continue;
-      const si = item as typeof item & { _endMs: number };
-      if (eMs >= item.ts && eMs <= si._endMs) {
+      if (eMs >= item.ts && eMs <= item._endMs) {
         item.nested.push({ kind: "event", data: e, ts: eMs });
         claimedEvents.add(idx);
         break;
@@ -78,9 +165,7 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
   journey.wallet_actions.forEach((a, idx) => {
     const aMs = new Date(a.created_at).getTime();
     for (const item of sessionItems) {
-      if (item.type !== "session") continue;
-      const si = item as typeof item & { _endMs: number };
-      if (aMs >= item.ts && aMs <= si._endMs) {
+      if (aMs >= item.ts && aMs <= item._endMs) {
         item.nested.push({ kind: "action", data: a, ts: aMs });
         claimedActions.add(idx);
         break;
@@ -90,14 +175,14 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
 
   // Sort nested items within each session
   sessionItems.forEach((item) => {
-    if (item.type === "session") item.nested.sort((a, b) => a.ts - b.ts);
+    item.nested.sort((a, b) => a.ts - b.ts);
   });
 
-  // Standalone items: wallet_detected + unclaimed events + unclaimed actions
+  // Standalone items: unclaimed events + unclaimed actions
   const standaloneItems: TimelineItem[] = [];
 
   journey.events.forEach((e, idx) => {
-    if (e.event_type === "wallet_detected" || !claimedEvents.has(idx)) {
+    if (!claimedEvents.has(idx)) {
       standaloneItems.push({
         type: "standalone",
         ts: new Date(e.created_at).getTime(),
@@ -106,7 +191,6 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     }
   });
 
-  // Unclaimed actions as standalone pseudo-events
   journey.wallet_actions.forEach((a, idx) => {
     if (!claimedActions.has(idx)) {
       standaloneItems.push({
@@ -125,12 +209,9 @@ function buildTimeline(journey: WalletJourney): TimelineItem[] {
     }
   });
 
-  // Clean up internal property
-  sessionItems.forEach((item) => {
-    delete (item as any)._endMs;
-  });
-
-  return [...sessionItems, ...standaloneItems].sort((a, b) => a.ts - b.ts);
+  // Clean up internal property and return sorted
+  const cleaned: TimelineItem[] = sessionItems.map(({ _endMs, ...rest }) => rest);
+  return [...cleaned, ...standaloneItems].sort((a, b) => a.ts - b.ts);
 }
 
 // --- sub-components ---
@@ -148,21 +229,32 @@ function NestedItemRow({ item }: { item: NestedItem }) {
     );
   }
   const e = item.data;
+  const isWalletDetected = e.event_type === "wallet_detected";
+  const walletData = e.event_data as Record<string, any> | undefined;
+  const wallets = walletData?.wallets_detected as string[] | undefined;
+
   return (
     <div className="flex items-center gap-2 text-[11px] min-w-0">
       <span className="font-mono text-muted-foreground w-10 shrink-0">{time}</span>
       <Badge variant="outline" className="text-[10px] py-0 px-1.5 shrink-0">
         {e.event_type}
       </Badge>
-      {e.click_text ? (
+      {isWalletDetected && (
+        <Badge variant="secondary" className="text-[9px] py-0 px-1">
+          <Radio className="h-2.5 w-2.5 mr-0.5" /> script
+        </Badge>
+      )}
+      {isWalletDetected && wallets && wallets.length > 0 ? (
+        <span className="text-muted-foreground text-[11px] truncate">{wallets.join(", ")}</span>
+      ) : e.click_text ? (
         <span className="truncate flex items-center gap-1">
           {e.click_text}
           {e.is_outbound && <ExternalLink className="h-2.5 w-2.5 text-muted-foreground shrink-0" />}
         </span>
       ) : (
-        <span className="text-muted-foreground">—</span>
+        !isWalletDetected && <span className="text-muted-foreground">—</span>
       )}
-      {e.page_path && (
+      {e.page_path && !isWalletDetected && (
         <span className="font-mono text-muted-foreground ml-auto shrink-0">{e.page_path}</span>
       )}
     </div>
@@ -173,19 +265,23 @@ function StandaloneRow({ event }: { event: WalletJourneyEvent }) {
   const walletData = event.event_data as Record<string, any> | undefined;
   const wallets = walletData?.wallets_detected as string[] | undefined;
   return (
-    <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-sm border border-border">
-      <span className="font-mono text-muted-foreground">
-        {format(new Date(event.created_at), "MMM d, HH:mm")}
-      </span>
-      <Badge variant="outline" className="text-[10px] py-0 px-1.5">
-        {event.event_type}
-      </Badge>
-      <Badge variant="secondary" className="text-[9px] py-0 px-1">
-        <Radio className="h-2.5 w-2.5 mr-0.5" /> script
-      </Badge>
-      {wallets && wallets.length > 0 && (
-        <span className="text-muted-foreground text-[11px]">{wallets.join(", ")}</span>
-      )}
+    <div className="relative pl-6">
+      {/* Dot */}
+      <div className="absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full border-2 border-primary bg-background" />
+      <div className="flex items-center gap-2 text-xs px-3 py-2 border border-border">
+        <span className="font-mono text-muted-foreground">
+          {format(new Date(event.created_at), "MMM d, HH:mm")}
+        </span>
+        <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+          {event.event_type}
+        </Badge>
+        <Badge variant="secondary" className="text-[9px] py-0 px-1">
+          <Radio className="h-2.5 w-2.5 mr-0.5" /> script
+        </Badge>
+        {wallets && wallets.length > 0 && (
+          <span className="text-muted-foreground text-[11px]">{wallets.join(", ")}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -250,102 +346,125 @@ export function WalletJourneyTab({ journey }: WalletJourneyTabProps) {
         ))}
       </div>
 
-      {/* Timeline */}
+      {/* Timeline with visual connector */}
       {timeline.length > 0 && (
         <div>
           <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
             <Eye className="h-3.5 w-3.5 text-primary" /> Timeline
           </h4>
-          <div className="space-y-1">
-            {timeline.map((item, idx) => {
-              if (item.type === "standalone") {
-                return <StandaloneRow key={`standalone-${idx}`} event={item.event} />;
-              }
+          <div className="relative">
+            {/* Vertical connector line */}
+            <div className="absolute left-[7px] top-0 bottom-0 w-px bg-border" />
 
-              const s = item.session;
-              return (
-                <Collapsible
-                  key={s.session_id}
-                  open={expandedSession === s.session_id}
-                  onOpenChange={(open) => setExpandedSession(open ? s.session_id : null)}
-                >
-                  <CollapsibleTrigger asChild>
-                    <button className="w-full flex items-center justify-between gap-2 text-xs px-3 py-2 rounded-sm border border-border hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-mono text-muted-foreground">
-                          {format(new Date(s.started_at), "MMM d, HH:mm")}
-                        </span>
-                        <span className="font-medium truncate">{s.entry_page}</span>
-                        {s.is_bounce && (
-                          <Badge variant="destructive" className="text-[9px] py-0 px-1">bounce</Badge>
-                        )}
-                        {item.nested.length > 0 && (
-                          <Badge variant="secondary" className="text-[9px] py-0 px-1">
-                            {item.nested.length} event{item.nested.length !== 1 ? "s" : ""}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-muted-foreground">
-                          {s.page_count} pg · {formatDuration(s.duration_seconds)}
-                        </span>
-                        {s.referrer_domain && (
-                          <Badge variant="outline" className="text-[10px] py-0 px-1.5">
-                            {s.referrer_domain}
-                          </Badge>
-                        )}
-                        <ChevronDown
-                          className={`h-3 w-3 text-muted-foreground transition-transform ${
-                            expandedSession === s.session_id ? "rotate-180" : ""
-                          }`}
-                        />
-                      </div>
-                    </button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="px-3 py-2 text-[11px] space-y-2 bg-muted/20 rounded-b-sm border-x border-b border-border">
-                      {/* Session metadata */}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
-                        {s.country && (
-                          <span>📍 {s.city ? `${s.city}, ` : ""}{s.country}</span>
-                        )}
-                        {s.device_type && <span>💻 {s.device_type}</span>}
-                        {s.browser && <span>🌐 {s.browser}</span>}
-                        {s.os && <span>🖥️ {s.os}</span>}
-                        {s.utm_source && (
-                          <span>
-                            utm: {s.utm_source}
-                            {s.utm_medium ? `/${s.utm_medium}` : ""}
-                            {s.utm_campaign ? ` (${s.utm_campaign})` : ""}
-                          </span>
-                        )}
-                      </div>
+            <div className="space-y-1">
+              {timeline.map((item, idx) => {
+                const isLast = idx === timeline.length - 1;
 
-                      {/* Nested events & actions */}
-                      {item.nested.length > 0 && (
-                        <div className="space-y-1 border-l-2 border-primary/20 pl-2">
-                          {item.nested.map((n, ni) => (
-                            <NestedItemRow key={ni} item={n} />
-                          ))}
-                        </div>
-                      )}
+                if (item.type === "standalone") {
+                  return <StandaloneRow key={`standalone-${idx}`} event={item.event} />;
+                }
 
-                      {/* Page flow */}
-                      <div className="flex flex-wrap gap-1">
-                        {s.pages.map((p, i) => (
-                          <span key={i} className="inline-flex items-center">
-                            <code className="bg-muted px-1 py-0.5 rounded text-[10px] font-mono">{p}</code>
-                            {i < s.pages.length - 1 && (
-                              <span className="text-muted-foreground mx-0.5">→</span>
+                const s = item.session;
+                const showArrow = s.session_count > 1 && s.entry_page !== s.exit_page;
+
+                return (
+                  <div key={s.session_id} className="relative pl-6">
+                    {/* Filled dot */}
+                    <div className="absolute left-[4px] top-3 w-[7px] h-[7px] rounded-full bg-primary" />
+
+                    <Collapsible
+                      open={expandedSession === s.session_id}
+                      onOpenChange={(open) => setExpandedSession(open ? s.session_id : null)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <button className="w-full flex items-center justify-between gap-2 text-xs px-3 py-2 border border-border hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-muted-foreground">
+                              {format(new Date(s.started_at), "MMM d, HH:mm")}
+                            </span>
+                            <span className="font-medium truncate">
+                              {s.entry_page}
+                              {showArrow && (
+                                <span className="text-muted-foreground"> → {s.exit_page}</span>
+                              )}
+                            </span>
+                            {s.is_bounce && s.session_count === 1 && (
+                              <Badge variant="destructive" className="text-[9px] py-0 px-1">bounce</Badge>
                             )}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            })}
+                            {item.nested.length > 0 && (
+                              <Badge variant="secondary" className="text-[9px] py-0 px-1">
+                                {item.nested.length} event{item.nested.length !== 1 ? "s" : ""}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-muted-foreground">
+                              {s.page_count} pg · {formatDuration(s.duration_seconds)}
+                            </span>
+                            {s.referrer_domain && (
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+                                {s.referrer_domain}
+                              </Badge>
+                            )}
+                            <ChevronDown
+                              className={`h-3 w-3 text-muted-foreground transition-transform ${
+                                expandedSession === s.session_id ? "rotate-180" : ""
+                              }`}
+                            />
+                          </div>
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-3 py-2 text-[11px] space-y-2 bg-muted/20 border-x border-b border-border">
+                          {/* Session metadata */}
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                            {s.country && (
+                              <span>📍 {s.city ? `${s.city}, ` : ""}{s.country}</span>
+                            )}
+                            {s.device_type && <span>💻 {s.device_type}</span>}
+                            {s.browser && <span>🌐 {s.browser}</span>}
+                            {s.os && <span>🖥️ {s.os}</span>}
+                            {s.utm_source && (
+                              <span>
+                                utm: {s.utm_source}
+                                {s.utm_medium ? `/${s.utm_medium}` : ""}
+                                {s.utm_campaign ? ` (${s.utm_campaign})` : ""}
+                              </span>
+                            )}
+                            {s.session_count > 1 && (
+                              <span className="text-primary font-medium">
+                                {s.session_count} sessions merged
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Nested events & actions */}
+                          {item.nested.length > 0 && (
+                            <div className="space-y-1 border-l-2 border-primary/20 pl-2">
+                              {item.nested.map((n, ni) => (
+                                <NestedItemRow key={ni} item={n} />
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Page flow */}
+                          <div className="flex flex-wrap gap-1">
+                            {s.pages.map((p, i) => (
+                              <span key={i} className="inline-flex items-center">
+                                <code className="bg-muted px-1 py-0.5 text-[10px] font-mono">{p}</code>
+                                {i < s.pages.length - 1 && (
+                                  <span className="text-muted-foreground mx-0.5">→</span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
