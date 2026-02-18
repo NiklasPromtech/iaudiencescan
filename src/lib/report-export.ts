@@ -50,7 +50,7 @@ function buildTableRows(items: { name: string; symbol: string; handle: string; m
 function buildPlatformSection(title: string, icon: string, items: ReturnType<typeof getPlatformTokens>): string {
   if (items.length === 0) return "";
   return `
-    <div style="page-break-inside:avoid;margin-bottom:32px;">
+    <div class="section" style="page-break-inside:avoid;margin-bottom:32px;">
       <h3 style="font-size:16px;font-weight:600;margin:0 0 12px 0;display:flex;align-items:center;gap:8px;">
         <span style="font-size:20px;">${icon}</span> ${title}
         <span style="font-size:12px;color:#888;font-weight:400;margin-left:4px;">${items.length} found</span>
@@ -127,7 +127,7 @@ function buildWebsitesSection(tokens: ScanResultsTopToken[]): string {
     .join("");
 
   return `
-    <div style="page-break-inside:avoid;margin-bottom:32px;">
+    <div class="page-break section" style="page-break-before:always;page-break-inside:avoid;margin-bottom:32px;">
       <h2 style="font-size:20px;font-weight:700;margin:0 0 16px 0;padding-bottom:8px;border-bottom:3px solid #F97316;">🌐 Project Websites</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <thead>
@@ -157,7 +157,7 @@ export function generateReport(scan: Scan, results: ScanResultsResponse): string
   const discordTokens = getPlatformTokens(tokens, "discord");
 
   // Use the hosted logo URL from the live site
-  const logoUrl = "https://iaudiencescan.lovable.app/lovable-uploads/16e32559-c9cc-4d02-95ce-484236936478.png";
+  const logoUrl = "https://iaudiencescan.lovable.app/favicon.png";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -171,8 +171,11 @@ export function generateReport(scan: Scan, results: ScanResultsResponse): string
     @media print {
       body { padding:20px; }
       .no-print { display:none !important; }
-      table { page-break-inside:auto; }
+      h2, h3 { page-break-after:avoid; }
+      thead { display:table-header-group; }
       tr { page-break-inside:avoid; }
+      .section { page-break-inside:avoid; }
+      .page-break { page-break-before:always; }
     }
   </style>
 </head>
