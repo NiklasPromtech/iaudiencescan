@@ -16,6 +16,7 @@ interface WalletTableProps {
   wallets: WalletRow[];
   selectedWallets: string[];
   onSelectionChange: (wallets: string[]) => void;
+  onWalletClick?: (walletId: string) => void;
   loading?: boolean;
 }
 
@@ -23,6 +24,7 @@ export function WalletTable({
   wallets,
   selectedWallets,
   onSelectionChange,
+  onWalletClick,
   loading,
 }: WalletTableProps) {
   const allSelected = wallets.length > 0 && wallets.every(w => selectedWallets.includes(w.wallet_id));
@@ -121,7 +123,17 @@ export function WalletTable({
               </TableCell>
               <TableCell className="font-mono text-sm">
                 <div className="flex items-center gap-2">
-                  {truncateAddress(wallet.wallet_id)}
+                  {onWalletClick ? (
+                    <button
+                      type="button"
+                      className="hover:text-primary hover:underline transition-colors"
+                      onClick={(e) => { e.stopPropagation(); onWalletClick(wallet.wallet_id); }}
+                    >
+                      {truncateAddress(wallet.wallet_id)}
+                    </button>
+                  ) : (
+                    truncateAddress(wallet.wallet_id)
+                  )}
                   <a
                     href={`https://etherscan.io/address/${wallet.wallet_id}#asset-multichain`}
                     target="_blank"
