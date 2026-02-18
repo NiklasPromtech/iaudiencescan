@@ -38,6 +38,8 @@ interface OverviewExportData {
   compHolderData?: HolderDataPoint[];
 }
 
+// ── Helpers ──
+
 function num(n: number | null | undefined): string {
   if (n === null || n === undefined) return "–";
   if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
@@ -72,6 +74,17 @@ function ppDelta(current: number | null, previous: number | null): string {
   return ` (${sign}${diff.toFixed(1)}pp)`;
 }
 
+function bounceRate(pv: number, bc: number): number | null {
+  return pv > 0 ? (bc / pv) * 100 : null;
+}
+
+/** Append a metric to parts array if non-null */
+function m(parts: string[], label: string, val: number | null | undefined, compVal?: number | null | undefined, fmt: "num" | "usd" | "pct" = "num") {
+  if (val === null || val === undefined) return;
+  const formatted = fmt === "usd" ? usd(val) : fmt === "pct" ? pct(val) : num(val);
+  parts.push(`${label} ${formatted}${delta(val, compVal)}`);
+}
+
 function getDateLabel(dr: DateRangeValue): string {
   const today = new Date();
   if (dr.type === "custom" && dr.from && dr.to) {
@@ -79,21 +92,9 @@ function getDateLabel(dr: DateRangeValue): string {
   }
   if (dr.includeToday && dr.days === 0) return format(today, "MMM d yyyy");
   const days = dr.days || 7;
-  const from = dr.includeToday
-    ? subDays(today, days - 1)
-    : subDays(today, days);
+  const from = dr.includeToday ? subDays(today, days - 1) : subDays(today, days);
   const to = dr.includeToday ? today : subDays(today, 1);
   return `${format(from, "MMM d")}–${format(to, "MMM d yyyy")}`;
-}
-
-function holderTotal(data: HolderDataPoint[]): number | null {
-  if (!data || data.length === 0) return null;
-  const latestDate = data.reduce((l, i) => (i.date > l ? i.date : l), data[0].date);
-  return data.filter(i => i.date === latestDate).reduce((s, i) => s + i.holder_count, 0);
-}
-
-function bounceRate(pv: number, bc: number): number | null {
-  return pv > 0 ? (bc / pv) * 100 : null;
 }
 
 // ── Formatters ──
@@ -120,64 +121,89 @@ function formatScorecard(data: OverviewExportData): string[] {
   const br = bounceRate(s.pageviews, s.bounce_count);
   const cbr = cs ? bounceRate(cs.pageviews, cs.bounce_count) : null;
 
-  lines.push(
-    `Pageviews: ${num(s.pageviews)}${delta(s.pageviews, cs?.pageviews)}  ` +
-    `Visitors: ${num(s.unique_visitors)}${delta(s.unique_visitors, cs?.unique_visitors)}  ` +
-    `Bounce: ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`
-  );
+  // Traffic
+  const traffic: string[] = [];
+  m(traffic, "pv", s.pageviews, cs?.pageviews);
+  m(traffic, "vis", s.unique_visitors, cs?.unique_visitors);
+  traffic.push(`bounce ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`);
+  lines.push(traffic.join(" | "));
 
   // Engagement
-  lines.push(
-    `Stayed 10s: ${num(s.stayed_10s)}${delta(s.stayed_10s, cs?.stayed_10s)}  ` +
-    `30s: ${num(s.stayed_30s)}${delta(s.stayed_30s, cs?.stayed_30s)}  ` +
-    `60s: ${num(s.stayed_60s)}${delta(s.stayed_60s, cs?.stayed_60s)}  ` +
-    `5m: ${num(s.stayed_5m)}${delta(s.stayed_5m, cs?.stayed_5m)}`
-  );
+  const eng: string[] = [];
+  m(eng, "stayed10s", s.stayed_10s, cs?.stayed_10s);
+  m(eng, "stayed30s", s.stayed_30s, cs?.stayed_30s);
+  m(eng, "stayed60s", s.stayed_60s, cs?.stayed_60s);
+  m(eng, "stayed5m", s.stayed_5m, cs?.stayed_5m);
+  if (eng.length) lines.push(eng.join(" | "));
 
   // Bots
   if (s.bot_visitors !== null) {
-    lines.push(`Bots: ${num(s.bot_visitors)}${delta(s.bot_visitors, cs?.bot_visitors)} / ${num(s.bot_checked)} checked`);
+    lines.push(`bots ${num(s.bot_visitors)}${delta(s.bot_visitors, cs?.bot_visitors)} / ${num(s.bot_checked)} checked`);
   }
 
-  // Wallets, extensions, conversions, holders
-  const parts: string[] = [];
-  if (s.wallet_users !== null) parts.push(`Wallets: ${num(s.wallet_users)}${delta(s.wallet_users, cs?.wallet_users)}`);
-  if (s.visitors_with_wallet_extension !== null) parts.push(`Wallet Ext: ${num(s.visitors_with_wallet_extension)}${delta(s.visitors_with_wallet_extension, cs?.visitors_with_wallet_extension)}`);
-  if (s.converted_users !== null) parts.push(`Conversions: ${num(s.converted_users)}${delta(s.converted_users, cs?.converted_users)}`);
-  if (s.conversions_total !== null) parts.push(`Conv Total: ${num(s.conversions_total)}${delta(s.conversions_total, cs?.conversions_total)}`);
-  const ht = holderTotal(data.holderData);
-  const cht = data.compHolderData ? holderTotal(data.compHolderData) : null;
-  if (ht !== null) parts.push(`Holders: ${num(ht)}${delta(ht, cht)}`);
-  if (parts.length) lines.push(parts.join("  "));
+  // Wallets, extensions, conversions
+  const conv: string[] = [];
+  m(conv, "wallets", s.wallet_users, cs?.wallet_users);
+  m(conv, "wallet_ext", s.visitors_with_wallet_extension, cs?.visitors_with_wallet_extension);
+  m(conv, "conv", s.converted_users, cs?.converted_users);
+  m(conv, "conv_tot", s.conversions_total, cs?.conversions_total);
+  if (conv.length) lines.push(conv.join(" | "));
 
   // Enrichment
-  if (s.wallets_enriched !== null) {
-    lines.push(
-      `Enriched: ${num(s.wallets_enriched)}${delta(s.wallets_enriched, cs?.wallets_enriched)}/${num(s.wallet_users)} (${pct(s.percent_enriched)})  ` +
-      `Median Bal: ${usd(s.median_balance_usd)}${delta(s.median_balance_usd, cs?.median_balance_usd)}  ` +
-      `Total Bal: ${usd(s.total_balance_usd)}${delta(s.total_balance_usd, cs?.total_balance_usd)}`
-    );
-  }
+  const enrich: string[] = [];
+  m(enrich, "enriched", s.wallets_enriched, cs?.wallets_enriched);
+  if (s.percent_enriched !== null) enrich.push(`(${pct(s.percent_enriched)})`);
+  m(enrich, "med_bal", s.median_balance_usd, cs?.median_balance_usd, "usd");
+  m(enrich, "tot_bal", s.total_balance_usd, cs?.total_balance_usd, "usd");
+  m(enrich, "not_enriched", (s as any).wallets_not_enriched, (cs as any)?.wallets_not_enriched);
+  m(enrich, "enrich_failed", (s as any).wallets_enrichment_failed, (cs as any)?.wallets_enrichment_failed);
+  if (enrich.length) lines.push(enrich.join(" | "));
 
+  // Cost
   if (s.cost_total !== null) {
-    lines.push(`Cost Total: ${usd(s.cost_total)}${delta(s.cost_total, cs?.cost_total)}`);
+    lines.push(`cost_total ${usd(s.cost_total)}${delta(s.cost_total, cs?.cost_total)}`);
   }
 
   lines.push("");
   return lines;
 }
 
+/** Format a full TableRow into compact key-value pairs with deltas */
+function formatTableRowMetrics(r: TableRow, cr?: TableRow): string {
+  const p: string[] = [];
+  const br = bounceRate(r.pageviews, r.bounce_count);
+  const cbr = cr ? bounceRate(cr.pageviews, cr.bounce_count) : null;
+
+  m(p, "pv", r.pageviews, cr?.pageviews);
+  m(p, "vis", r.unique_visitors, cr?.unique_visitors);
+  p.push(`bounce ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`);
+  m(p, "stayed10s", r.stayed_10s, cr?.stayed_10s);
+  m(p, "stayed30s", r.stayed_30s, cr?.stayed_30s);
+  m(p, "stayed60s", r.stayed_60s, cr?.stayed_60s);
+  m(p, "stayed5m", r.stayed_5m, cr?.stayed_5m);
+  m(p, "bots", r.bot_visitors, cr?.bot_visitors);
+  m(p, "bot_checked", r.bot_checked, cr?.bot_checked);
+  m(p, "wallets", r.wallet_users, cr?.wallet_users);
+  m(p, "conv", r.converted_users, cr?.converted_users);
+  m(p, "conv_tot", r.conversions_total, cr?.conversions_total);
+  m(p, "cost", r.cost_total, cr?.cost_total, "usd");
+  m(p, "enriched", r.wallets_enriched, cr?.wallets_enriched);
+  if (r.percent_enriched !== null) p.push(`enrich% ${pct(r.percent_enriched)}`);
+  m(p, "med_bal", r.median_balance_usd, cr?.median_balance_usd, "usd");
+  m(p, "tot_bal", r.total_balance_usd, cr?.total_balance_usd, "usd");
+  m(p, "wallet_ext", r.visitors_with_wallet_extension, cr?.visitors_with_wallet_extension);
+
+  return p.join(" | ");
+}
+
 function formatDailyTrend(data: OverviewExportData): string[] {
   if (data.dailyRows.length === 0) return [];
-  const lines: string[] = ["DAILY TREND (date | visitors | wallets | conversions)"];
+  const lines: string[] = ["DAILY TREND"];
   const compMap = new Map((data.compDailyRows ?? []).map(r => [r.dim_value, r]));
 
   for (const r of data.dailyRows) {
     const cr = compMap.get(r.dim_value);
-    let line = `${r.dim_value}: ${r.unique_visitors}${delta(r.unique_visitors, cr?.unique_visitors)}`;
-    if (r.wallet_users !== null) line += ` | ${r.wallet_users}${delta(r.wallet_users, cr?.wallet_users)}`;
-    if (r.converted_users !== null) line += ` | ${r.converted_users}${delta(r.converted_users, cr?.converted_users)}`;
-    lines.push(line);
+    lines.push(`${r.dim_value}: ${formatTableRowMetrics(r, cr)}`);
   }
   lines.push("");
   return lines;
@@ -186,22 +212,12 @@ function formatDailyTrend(data: OverviewExportData): string[] {
 function formatDimensionTable(data: OverviewExportData): string[] {
   if (data.dimensionRows.length === 0) return [];
   const dimLabel = data.dimensionName.replace(/_/g, " ").toUpperCase();
-  const lines: string[] = [`TOP ${dimLabel} (source | pv | visitors | bounce% | wallets | conversions)`];
+  const lines: string[] = [`BY ${dimLabel}`];
   const compMap = new Map((data.compDimensionRows ?? []).map(r => [r.dim_value, r]));
 
   for (const r of data.dimensionRows) {
     const cr = compMap.get(r.dim_value);
-    const br = bounceRate(r.pageviews, r.bounce_count);
-    const cbr = cr ? bounceRate(cr.pageviews, cr.bounce_count) : null;
-
-    let line = `${r.dim_value}: pv ${num(r.pageviews)}${delta(r.pageviews, cr?.pageviews)}`;
-    line += ` | ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`;
-    line += ` | bounce ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`;
-    if (r.wallet_users !== null) line += ` | wallets ${r.wallet_users}${delta(r.wallet_users, cr?.wallet_users)}`;
-    if (r.converted_users !== null) line += ` | conv ${r.converted_users}${delta(r.converted_users, cr?.converted_users)}`;
-    if (r.wallets_enriched !== null) line += ` | enriched ${r.wallets_enriched}${delta(r.wallets_enriched, cr?.wallets_enriched)}`;
-    if (r.median_balance_usd !== null) line += ` | med_bal ${usd(r.median_balance_usd)}${delta(r.median_balance_usd, cr?.median_balance_usd)}`;
-    lines.push(line);
+    lines.push(`${r.dim_value}: ${formatTableRowMetrics(r, cr)}`);
   }
   lines.push("");
   return lines;
@@ -209,11 +225,17 @@ function formatDimensionTable(data: OverviewExportData): string[] {
 
 function formatEvents(data: OverviewExportData): string[] {
   if (data.eventsRows.length === 0) return [];
-  const lines: string[] = ["EVENTS (type | count | delta)"];
+  const lines: string[] = ["EVENTS"];
   const compMap = new Map((data.compEventsRows ?? []).map(r => [r.event_type, r]));
   for (const r of data.eventsRows) {
     const cr = compMap.get(r.event_type);
-    lines.push(`${r.event_type}: ${num(r.event_count)}${delta(r.event_count, cr?.event_count)}`);
+    const p: string[] = [
+      `count ${num(r.event_count)}${delta(r.event_count, cr?.event_count)}`,
+      `users ${num(r.unique_users)}${delta(r.unique_users, cr?.unique_users)}`,
+    ];
+    if (r.first_seen) p.push(`first ${r.first_seen}`);
+    if (r.last_seen) p.push(`last ${r.last_seen}`);
+    lines.push(`${r.event_type}: ${p.join(" | ")}`);
   }
   lines.push("");
   return lines;
@@ -221,11 +243,17 @@ function formatEvents(data: OverviewExportData): string[] {
 
 function formatWalletActions(data: OverviewExportData): string[] {
   if (data.walletsRows.length === 0) return [];
-  const lines: string[] = ["WALLET ACTIONS (action | count | delta)"];
+  const lines: string[] = ["WALLET ACTIONS"];
   const compMap = new Map((data.compWalletsRows ?? []).map(r => [r.action_type, r]));
   for (const r of data.walletsRows) {
     const cr = compMap.get(r.action_type);
-    lines.push(`${r.action_type}: ${num(r.action_count)}${delta(r.action_count, cr?.action_count)}`);
+    const p: string[] = [
+      `count ${num(r.action_count)}${delta(r.action_count, cr?.action_count)}`,
+      `unique ${num(r.unique_wallets)}${delta(r.unique_wallets, cr?.unique_wallets)}`,
+    ];
+    if (r.first_seen) p.push(`first ${r.first_seen}`);
+    if (r.last_seen) p.push(`last ${r.last_seen}`);
+    lines.push(`${r.action_type}: ${p.join(" | ")}`);
   }
   lines.push("");
   return lines;
@@ -233,7 +261,7 @@ function formatWalletActions(data: OverviewExportData): string[] {
 
 function formatWalletExtensions(data: OverviewExportData): string[] {
   if (data.walletExtensionsRows.length === 0) return [];
-  const lines: string[] = ["WALLET EXTENSIONS (type | count | delta)"];
+  const lines: string[] = ["WALLET EXTENSIONS"];
   const compMap = new Map((data.compWalletExtensionsRows ?? []).map(r => [r.wallet_type, r]));
   for (const r of data.walletExtensionsRows) {
     const cr = compMap.get(r.wallet_type);
@@ -245,11 +273,11 @@ function formatWalletExtensions(data: OverviewExportData): string[] {
 
 function formatWalletDistribution(data: OverviewExportData): string[] {
   if (data.walletDistributionRows.length === 0) return [];
-  const lines: string[] = ["WALLET DISTRIBUTION (tier | wallets | total_usd)"];
+  const lines: string[] = ["WALLET DISTRIBUTION"];
   const compMap = new Map((data.compWalletDistributionRows ?? []).map(r => [r.tier, r]));
   for (const r of data.walletDistributionRows) {
     const cr = compMap.get(r.tier);
-    lines.push(`${r.tier}: ${r.wallet_count}${delta(r.wallet_count, cr?.wallet_count)} | ${usd(r.total_usd)}${delta(r.total_usd, cr?.total_usd)}`);
+    lines.push(`${r.tier}: ${r.wallet_count}${delta(r.wallet_count, cr?.wallet_count)} wallets | ${usd(r.total_usd)}${delta(r.total_usd, cr?.total_usd)} | ${pct(r.percentage)}`);
   }
   lines.push("");
   return lines;
@@ -257,11 +285,36 @@ function formatWalletDistribution(data: OverviewExportData): string[] {
 
 function formatClicks(data: OverviewExportData): string[] {
   if (data.clicksRows.length === 0) return [];
-  const lines: string[] = ["CLICKS (text | url | clicks | visitors)"];
+  const lines: string[] = ["CLICKS"];
   const compMap = new Map((data.compClicksRows ?? []).map(r => [`${r.click_text}|${r.href}`, r]));
   for (const r of data.clicksRows) {
     const cr = compMap.get(`${r.click_text}|${r.href}`);
-    lines.push(`${r.click_text}: ${r.href} | ${num(r.click_count)}${delta(r.click_count, cr?.click_count)} | visitors ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`);
+    lines.push(`${r.click_text}: ${r.href} (page: ${r.page_path}) | clicks ${num(r.click_count)}${delta(r.click_count, cr?.click_count)} | vis ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+function formatHolderTrend(data: OverviewExportData): string[] {
+  if (!data.holderData || data.holderData.length === 0) return [];
+  const lines: string[] = ["HOLDER TREND"];
+  const compMap = new Map<string, number>();
+  if (data.compHolderData) {
+    for (const h of data.compHolderData) {
+      const key = `${h.date}|${h.contract_address}`;
+      compMap.set(key, (compMap.get(key) || 0) + h.holder_count);
+    }
+  }
+
+  // Sort by date desc
+  const sorted = [...data.holderData].sort((a, b) => b.date.localeCompare(a.date));
+  for (const h of sorted) {
+    const key = `${h.date}|${h.contract_address}`;
+    const ch = compMap.get(key);
+    const addr = h.contract_address.length > 10
+      ? `${h.contract_address.slice(0, 6)}...${h.contract_address.slice(-4)}`
+      : h.contract_address;
+    lines.push(`${h.date}: ${h.chain_id} | ${addr} | ${num(h.holder_count)}${delta(h.holder_count, ch)}`);
   }
   lines.push("");
   return lines;
@@ -278,5 +331,6 @@ export function formatOverviewForAI(data: OverviewExportData): string {
     ...formatWalletExtensions(data),
     ...formatWalletDistribution(data),
     ...formatClicks(data),
+    ...formatHolderTrend(data),
   ].join("\n").trim();
 }
