@@ -1,63 +1,48 @@
 
 
-# "Copy to AI" Button for Overview Data
+# Add Complete Comparison Deltas to "Copy to AI" Export
 
-## What It Does
+## Problem
+The current export only includes deltas for some metrics. Several sections are missing comparison deltas when in comparison mode:
 
-Adds a small "Copy to AI" button near the date range picker on the Overview page. When clicked, it serializes all the currently loaded analytics data into a compact, token-efficient text format and copies it to your clipboard. You can then paste it into any AI chat (ChatGPT, Claude, etc.) to ask for analysis, insights, or a written update.
+1. **Scorecard**: Missing deltas for `stayed_10s/30s/60s/5m`, `bot_visitors`, `wallets_enriched`, `median_balance_usd`, `total_balance_usd`, `visitors_with_wallet_extension`, `conversions_total`
+2. **Daily Trend**: No deltas at all for any metric (visitors, wallets, conversions)
+3. **Dimension Table**: Only visitors have deltas; missing for pageviews, wallets, bounce%, conversions, enriched, balance
+4. **Wallet Extensions**: No deltas (comparison data is available but ignored)
+5. **Wallet Distribution**: Missing delta on `total_usd`
+6. **Clicks**: Missing delta on `unique_visitors`
 
-## Format Design
+## Changes
 
-The export will be a compact plaintext summary -- not raw JSON -- to minimize token usage. Example output:
+### File: `src/lib/overview-export.ts`
 
-```text
-AudienceScan Overview | example.com | Jan 10-17 2026 (vs Jan 3-10)
+**Scorecard section** -- add deltas for all remaining fields:
+- Engagement: `Stayed 10s: X (+Y%) 30s: X (+Y%) 60s: X (+Y%) 5m: X (+Y%)`
+- Bots: `Bots: X (+Y%) / Z checked`
+- Wallet extensions: `Wallet Ext: X (+Y%)`
+- Conversions total: `Conv Total: X (+Y%)`
+- Enrichment line: add deltas to `wallets_enriched`, `median_balance_usd`, `total_balance_usd`
 
-SCORECARD
-Pageviews: 1,234 (+12%)  Visitors: 890 (+8%)  Bounce: 34% (-3%)
-Wallets: 45 (+50%)  Conversions: 12 (+20%)  Holders: 487 (+5%)
-Enriched: 38/45 (84%)  Median Balance: $2,400  Total Balance: $91,200
+**Daily Trend** -- add deltas per row by matching on the comparison map (already built but unused):
+- Format: `2026-02-12: 7115 (+8%) | 5 (+25%) | 2 (+100%)`
 
-DAILY TREND (date | visitors | wallets | conversions)
-Jan 10: 120 | 5 | 2
-Jan 11: 135 | 7 | 3
-...
+**Dimension Table** -- add deltas for all metrics per row:
+- Format: `source: 340 (+12%) | pv: 500 (+5%) | wallets: 15 (+50%) | bounce: 28%`
 
-TOP REFERRERS (source | visitors | delta | wallets | bounce%)
-google.com: 340 +12% | 15 | 28%
-twitter.com: 210 -5% | 22 | 41%
-...
+**Wallet Extensions** -- wire up `compWalletExtensionsRows` to show deltas:
+- Build a comparison map keyed by `wallet_type` and show delta on count
 
-EVENTS (type | count | delta)
-page_view: 1200 +10%
-wallet_connect: 45 +50%
-...
+**Wallet Distribution** -- add delta on `total_usd`:
+- Format: `$0-100: 12 (+20%) | $600 (+15%)`
 
-WALLET ACTIONS (action | count | delta)
-...
+**Clicks** -- add delta on `unique_visitors`:
+- Format: `link text: /url | clicks: 50 (+10%) | visitors: 30 (+5%)`
 
-CLICKS (text | url | count | delta)
-...
+**Also**:
+- Remove the `slice(0, 20)` cap on dimension rows and clicks so all data is exported
+- Add `activeFilters` field to interface and print them in the header when present
 
-WALLET DISTRIBUTION (tier | wallets | total_usd)
-$0-100: 12 | $600
-$100-1K: 18 | $9,000
-...
-```
+### File: `src/pages/Overview.tsx`
 
-## Technical Details
+- Pass `activeFilters` (the current filter state) into `formatOverviewForAI()`
 
-### New file: `src/lib/overview-export.ts`
-- A pure function `formatOverviewForAI(...)` that takes all the state data (scorecard, tableData, dailyData, eventsData, walletsData, walletExtensionsData, walletDistributionData, clicksData, holderData, comparisonData, dateRange, websiteName) and returns a compact string
-- Uses tab-separated values and abbreviations to keep token count low
-- Includes comparison deltas inline when comparison mode is active
-- Skips null/empty sections entirely
-
-### Modified file: `src/pages/Overview.tsx`
-- Import the formatter and `copyToClipboard` from export-utils
-- Add a small button (clipboard icon + "Copy to AI") next to the date range picker
-- On click: call `formatOverviewForAI(...)` with all current state, then `copyToClipboard(...)` with success toast "Copied overview data for AI"
-
-### No new dependencies needed
-- Uses existing `copyToClipboard` from `src/lib/export-utils.ts`
-- Uses existing `lucide-react` icons (e.g., `ClipboardCopy`)
