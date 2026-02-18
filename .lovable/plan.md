@@ -1,60 +1,34 @@
 
 
-# Export ALL Backend Fields with Full Comparison Deltas
+# Make Wallet Addresses Clickable in Overview (Open Detail Dialog)
 
-## What's Missing Today
+## What Changes
 
-The export currently cherry-picks a handful of fields from each section while the backend returns much more. Here's what gets dropped:
+When you're in the Overview and click the wallet count to open the "Create New Audience" dialog, the wallet addresses shown (e.g. "0xdc35...5209") are currently plain text. This change makes them clickable -- clicking one opens the same wallet deep-dive dialog (balances, journey, enrichment history) that you see on the /wallets page.
 
-**Daily Trend** -- only exports 3 of 18 fields:
-- Missing: pageviews, bounce_count, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, conversions_total, cost_total, wallets_enriched, percent_enriched, total/median_balance_usd, visitors_with_wallet_extension
+## Technical Details
 
-**Dimension Table** -- missing 9 fields:
-- Missing: conversions_total, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, cost_total, total_balance_usd, visitors_with_wallet_extension
+### File 1: `src/components/audiences/WalletTable.tsx`
 
-**Events** -- missing unique_users, first_seen, last_seen
+- Add an `onWalletClick` optional callback prop to `WalletTableProps`
+- Make the truncated wallet address a `<button>` (same styling as in `/wallets` page: `hover:text-primary hover:underline`) that calls `onWalletClick(wallet.wallet_id)` when clicked
+- If `onWalletClick` is not provided, keep the address as plain text (backward-compatible)
 
-**Wallet Actions** -- missing unique_wallets (with delta), first_seen, last_seen
+### File 2: `src/components/audiences/WalletSelector.tsx`
 
-**Wallet Distribution** -- missing percentage field
+- Add an `onWalletClick` optional callback prop to `WalletSelectorProps`
+- Pass it through to `<WalletTable onWalletClick={onWalletClick} />`
 
-**Clicks** -- missing page_path
+### File 3: `src/components/audiences/AudienceDialog.tsx`
 
-**Holders** -- collapsed to a single number instead of the full time series with chain and contract info
+- Add an `onWalletClick` optional callback prop to `AudienceDialogProps`
+- Pass it through to `<WalletSelector onWalletClick={onWalletClick} />`
 
-**Scorecard** -- missing wallets_not_enriched, wallets_enrichment_failed
+### File 4: `src/pages/Overview.tsx`
 
-Every one of these fields will also include a comparison delta when comparison mode is active.
+- Import `WalletDetailDialog` from `@/components/wallets/WalletDetailDialog`
+- Add state: `const [detailWalletAddress, setDetailWalletAddress] = useState<string | null>(null)`
+- Pass `onWalletClick={setDetailWalletAddress}` to the `<AudienceDialog>` component
+- Render `<WalletDetailDialog walletAddress={detailWalletAddress} websiteId={selectedWebsite.id} onOpenChange={() => setDetailWalletAddress(null)} />` alongside the AudienceDialog
 
-## Changes
-
-### File: `src/lib/overview-export.ts`
-
-**formatDailyTrend** -- rewrite to export all non-null fields per row with deltas:
-```
-DAILY TREND
-2026-02-17: pv 7527 (+5%) | vis 5940 (+8%) | bounce 2291 (-3%) | stayed10s 1761 (+12%) | stayed30s 942 (+10%) | stayed60s 637 (+7%) | stayed5m 277 (+15%) | bots 165 (-20%)/6107 | wallets 1 | enriched 1 (100%) | med_bal $8,071 | tot_bal $24,212 (+30%) | wallet_ext 7 (+40%) | conv 0 | conv_tot 0
-```
-Null fields are skipped to keep output compact.
-
-**formatDimensionTable** -- add all missing fields with deltas:
-- conversions_total, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, cost_total, total_balance_usd, visitors_with_wallet_extension
-
-**formatEvents** -- add unique_users (with delta), first_seen, last_seen
-
-**formatWalletActions** -- add unique_wallets (with delta), first_seen, last_seen
-
-**formatWalletDistribution** -- add percentage field
-
-**formatClicks** -- add page_path to each row
-
-**formatScorecard** -- add wallets_not_enriched, wallets_enrichment_failed (with deltas)
-
-**New: formatHolderTrend** -- export full time series instead of a single total:
-```
-HOLDER TREND (date | chain | contract | count)
-2026-02-18: eth-mainnet | 0xC974...Cedd | 486
-2026-02-17: eth-mainnet | 0xC974...Cedd | 482
-```
-
-All of these changes are in a single file: `src/lib/overview-export.ts`. No other files need changes since all the data is already being passed through from the Overview page.
+This reuses the exact same `WalletDetailDialog` component, so any future updates to the detail view automatically apply everywhere.
