@@ -71,7 +71,7 @@ export function AudienceDetailDialog({
   const { selectedWebsite } = useSelectedWebsite();
   const [search, setSearch] = useState("");
   const [selectedWallets, setSelectedWallets] = useState<Set<string>>(new Set());
-  const [scanChain, setScanChain] = useState<SupportedChain>("eth-mainnet");
+  const [scanChain, setScanChain] = useState<SupportedChain | "">("");
   const [loading, setLoading] = useState(false);
   const [walletDataLoading, setWalletDataLoading] = useState(false);
   const [walletData, setWalletData] = useState<Map<string, WalletRow>>(new Map());
@@ -86,7 +86,7 @@ export function AudienceDetailDialog({
     if (open && audience) {
       setSearch("");
       setSelectedWallets(new Set());
-      setScanChain("eth-mainnet");
+      setScanChain("");
       setFilterChain("all");
       setFilterMinBalance("");
       setFilterEnriched("all");
@@ -218,7 +218,7 @@ export function AudienceDetailDialog({
     try {
       const response = await createScan({
         wallets: walletsToScan,
-        chain: scanChain,
+        chain: scanChain as SupportedChain,
         name: `Scan from "${audience.name}"${selectedWallets.size > 0 ? ` (${selectedWallets.size} selected)` : ""}`,
         audience_id: audience.id,
         website_id: audience.website_id,
@@ -483,9 +483,9 @@ export function AudienceDetailDialog({
           {/* Scan Chain Selection */}
           <div className="flex items-center gap-3 pt-2 border-t">
             <span className="text-sm text-muted-foreground">Scan on:</span>
-            <Select value={scanChain} onValueChange={(v) => setScanChain(v as SupportedChain)}>
+            <Select value={scanChain || undefined} onValueChange={(v) => setScanChain(v as SupportedChain)}>
               <SelectTrigger className="w-48">
-                <SelectValue />
+                <SelectValue placeholder="Select chain" />
               </SelectTrigger>
               <SelectContent>
                 {SUPPORTED_CHAINS.map((c) => (
@@ -510,7 +510,7 @@ export function AudienceDetailDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={handleStartScan} disabled={loading || walletsToScan.length === 0}>
+            <Button onClick={handleStartScan} disabled={loading || walletsToScan.length === 0 || !scanChain}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
