@@ -484,7 +484,7 @@ export function AudienceDetailDialog({
           <div className="flex items-center gap-3 pt-2 border-t">
             <span className="text-sm text-muted-foreground">Scan on:</span>
             <Select value={scanChain || undefined} onValueChange={(v) => setScanChain(v as SupportedChain)}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-56">
                 <SelectValue placeholder="Select chain" />
               </SelectTrigger>
               <SelectContent>
