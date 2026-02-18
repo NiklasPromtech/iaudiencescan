@@ -1,77 +1,63 @@
 
 
-# Add Comparison Deltas to Holders, Dimension Table, and Bottom Tabs
+# "Copy to AI" Button for Overview Data
 
-## Problem
+## What It Does
 
-When comparison mode is active, percentage change deltas are shown for most scorecard metrics but **not** for:
-1. **Token Holders** in the scorecard (shows "487" but no delta)
-2. **Breakdown by Referrer table** - has a delta column for visitors only, but no deltas for engagement, wallets, or conversions columns
-3. **Bottom tabs** (Events, Wallet Actions, Wallet Extensions, Wallet Distribution, Clicks) - no comparison data at all
+Adds a small "Copy to AI" button near the date range picker on the Overview page. When clicked, it serializes all the currently loaded analytics data into a compact, token-efficient text format and copies it to your clipboard. You can then paste it into any AI chat (ChatGPT, Claude, etc.) to ask for analysis, insights, or a written update.
 
-## Changes
+## Format Design
 
-### 1. Token Holders delta in ScorecardChips
+The export will be a compact plaintext summary -- not raw JSON -- to minimize token usage. Example output:
 
-**File: `src/pages/Overview.tsx`**
+```text
+AudienceScan Overview | example.com | Jan 10-17 2026 (vs Jan 3-10)
 
-The current period merges `token_holders` into the scorecard data (lines 531-548), but the comparison scorecard data doesn't get the same treatment. Fix: compute the comparison holder total from `comparisonData.holders` and merge it into the comparison scorecard data before passing to `ScorecardChips`.
+SCORECARD
+Pageviews: 1,234 (+12%)  Visitors: 890 (+8%)  Bounce: 34% (-3%)
+Wallets: 45 (+50%)  Conversions: 12 (+20%)  Holders: 487 (+5%)
+Enriched: 38/45 (84%)  Median Balance: $2,400  Total Balance: $91,200
 
-### 2. Dimension Table - more delta columns
+DAILY TREND (date | visitors | wallets | conversions)
+Jan 10: 120 | 5 | 2
+Jan 11: 135 | 7 | 3
+...
 
-**File: `src/components/overview/DimensionTable.tsx`**
+TOP REFERRERS (source | visitors | delta | wallets | bounce%)
+google.com: 340 +12% | 15 | 28%
+twitter.com: 210 -5% | 22 | 41%
+...
 
-Currently only the Visitors column gets a delta (percentage change) column. Extend the comparison logic to show deltas for key metrics across each column group:
-- Add a delta badge (inline, not a separate column) to each metric cell showing the % change vs the comparison row
-- Modify `MetricCell` and `WalletMetricCell` to accept an optional `comparisonValue` prop and render the delta inline beneath the rate
+EVENTS (type | count | delta)
+page_view: 1200 +10%
+wallet_connect: 45 +50%
+...
 
-### 3. Bottom tabs - pass comparison data through
+WALLET ACTIONS (action | count | delta)
+...
 
-**File: `src/pages/Overview.tsx`**
+CLICKS (text | url | count | delta)
+...
 
-Pass comparison data to each bottom tab component:
-- `EventsTable` gets `comparisonData.events`
-- `WalletsOverviewTable` gets `comparisonData.wallets`
-- `WalletExtensionsTable` gets `comparisonData.wallet_extensions`
-- `WalletDistributionTable` gets `comparisonData.wallet_distribution`
-- `ClicksTable` gets `comparisonData.clicks`
+WALLET DISTRIBUTION (tier | wallets | total_usd)
+$0-100: 12 | $600
+$100-1K: 18 | $9,000
+...
+```
 
-**Files: Each tab component**
+## Technical Details
 
-Add an optional `comparisonData` prop to each component. When present, show a delta column or inline delta for the primary count metric (e.g., event_count, action_count, wallet_count, click_count).
+### New file: `src/lib/overview-export.ts`
+- A pure function `formatOverviewForAI(...)` that takes all the state data (scorecard, tableData, dailyData, eventsData, walletsData, walletExtensionsData, walletDistributionData, clicksData, holderData, comparisonData, dateRange, websiteName) and returns a compact string
+- Uses tab-separated values and abbreviations to keep token count low
+- Includes comparison deltas inline when comparison mode is active
+- Skips null/empty sections entirely
 
-## Detailed File Changes
+### Modified file: `src/pages/Overview.tsx`
+- Import the formatter and `copyToClipboard` from export-utils
+- Add a small button (clipboard icon + "Copy to AI") next to the date range picker
+- On click: call `formatOverviewForAI(...)` with all current state, then `copyToClipboard(...)` with success toast "Copied overview data for AI"
 
-### `src/pages/Overview.tsx`
-- Compute comparison holder total from `comparisonData?.holders?.data?.data`
-- Merge `token_holders` into comparison scorecard data before passing to `ScorecardChips`
-- Pass comparison sub-results to each bottom tab component
-
-### `src/components/overview/MetricCell.tsx`
-- Add optional `comparisonCount` prop
-- When present, render a small delta percentage below the rate row
-
-### `src/components/overview/DimensionTable.tsx`
-- Pass `comparisonMap` values into each `MetricCell` / `WalletMetricCell` as `comparisonCount`
-- Remove the dedicated delta column for visitors (replace with inline delta in the MetricCell itself, consistent across all metrics)
-
-### `src/components/overview/WalletDistributionTable.tsx`
-- Add optional `comparisonData` prop (array of `WalletDistributionRow[]`)
-- When present, show a delta column for wallet_count and total_usd
-
-### `src/components/overview/EventsTable.tsx`
-- Add optional `comparisonData` prop
-- Match by event_name, show delta on event_count
-
-### `src/components/overview/WalletsOverviewTable.tsx`
-- Add optional `comparisonData` prop
-- Match by action, show delta on action_count
-
-### `src/components/overview/WalletExtensionsTable.tsx`
-- Add optional `comparisonData` prop
-- Match by extension_name, show delta on visitor_count
-
-### `src/components/overview/ClicksTable.tsx`
-- Add optional `comparisonData` prop
-- Match by click_text + href, show delta on click_count
-
+### No new dependencies needed
+- Uses existing `copyToClipboard` from `src/lib/export-utils.ts`
+- Uses existing `lucide-react` icons (e.g., `ClipboardCopy`)
