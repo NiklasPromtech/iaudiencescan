@@ -40,6 +40,7 @@ interface WalletSelectorProps {
   websiteId: string;
   selectedWallets: string[];
   onSelectionChange: (wallets: string[]) => void;
+  onWalletClick?: (walletId: string) => void;
   initialFilters?: InitialFilters;
 }
 
@@ -342,6 +343,7 @@ export function WalletSelector({
   websiteId,
   selectedWallets,
   onSelectionChange,
+  onWalletClick,
   initialFilters,
 }: WalletSelectorProps) {
   const [wallets, setWallets] = useState<WalletRow[]>([]);
@@ -822,6 +824,7 @@ export function WalletSelector({
         wallets={wallets}
         selectedWallets={selectedWallets}
         onSelectionChange={onSelectionChange}
+        onWalletClick={onWalletClick}
         loading={loading && wallets.length === 0}
       />
 

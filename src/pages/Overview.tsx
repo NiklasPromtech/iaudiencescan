@@ -42,6 +42,7 @@ import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
 import { AudienceDialog, AudienceDialogInitialFilters } from "@/components/audiences/AudienceDialog";
+import { WalletDetailDialog } from "@/components/wallets/WalletDetailDialog";
 import { ScorecardChips } from "@/components/overview/ScorecardChips";
 import { useStarredMetrics } from "@/hooks/use-starred-metrics";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
@@ -85,6 +86,7 @@ const Overview = () => {
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
   const [audienceDialogFilters, setAudienceDialogFilters] = useState<AudienceDialogInitialFilters | undefined>(undefined);
+  const [detailWalletAddress, setDetailWalletAddress] = useState<string | null>(null);
 
   // Comparison state
   const [comparisonMode, setComparisonMode] = useState<"idle" | "confirming" | "loading" | "active">("idle");
@@ -846,7 +848,15 @@ const Overview = () => {
               audience={null}
               website={selectedWebsite as Website}
               onSuccess={handleAudienceDialogSuccess}
+              onWalletClick={setDetailWalletAddress}
               initialFilters={audienceDialogFilters}
+            />
+          )}
+          {selectedWebsite && (
+            <WalletDetailDialog
+              walletAddress={detailWalletAddress}
+              websiteId={selectedWebsite.id}
+              onOpenChange={() => setDetailWalletAddress(null)}
             />
           )}
         </div>

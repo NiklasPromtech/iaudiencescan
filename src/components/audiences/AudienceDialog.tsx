@@ -32,6 +32,7 @@ interface AudienceDialogProps {
   audience: Audience | null;
   website: Website;
   onSuccess: () => void;
+  onWalletClick?: (walletId: string) => void;
   initialFilters?: AudienceDialogInitialFilters;
 }
 
@@ -41,6 +42,7 @@ export function AudienceDialog({
   audience,
   website,
   onSuccess,
+  onWalletClick,
   initialFilters,
 }: AudienceDialogProps) {
   const [name, setName] = useState("");
@@ -157,6 +159,7 @@ export function AudienceDialog({
               websiteId={website.id}
               selectedWallets={selectedWallets}
               onSelectionChange={setSelectedWallets}
+              onWalletClick={onWalletClick}
               initialFilters={initialFilters}
             />
           </div>
