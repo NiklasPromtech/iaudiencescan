@@ -568,11 +568,10 @@ const Overview = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="h-8 text-xs font-mono border-dashed border-primary/40 text-muted-foreground hover:text-foreground"
+                  size="default"
+                  className="h-10 text-xs font-mono border-dashed border-primary/40 text-muted-foreground hover:text-foreground"
                   onClick={() => {
                     const text = formatOverviewForAI({
                       websiteName: selectedWebsite?.name || "Unknown",
@@ -603,6 +602,7 @@ const Overview = () => {
                   <ClipboardCopy className="h-3.5 w-3.5 mr-1" />
                   Copy to AI
                 </Button>
+                <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
               </div>
             </div>
           </div>
