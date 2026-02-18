@@ -1,48 +1,60 @@
 
 
-# Add Complete Comparison Deltas to "Copy to AI" Export
+# Export ALL Backend Fields with Full Comparison Deltas
 
-## Problem
-The current export only includes deltas for some metrics. Several sections are missing comparison deltas when in comparison mode:
+## What's Missing Today
 
-1. **Scorecard**: Missing deltas for `stayed_10s/30s/60s/5m`, `bot_visitors`, `wallets_enriched`, `median_balance_usd`, `total_balance_usd`, `visitors_with_wallet_extension`, `conversions_total`
-2. **Daily Trend**: No deltas at all for any metric (visitors, wallets, conversions)
-3. **Dimension Table**: Only visitors have deltas; missing for pageviews, wallets, bounce%, conversions, enriched, balance
-4. **Wallet Extensions**: No deltas (comparison data is available but ignored)
-5. **Wallet Distribution**: Missing delta on `total_usd`
-6. **Clicks**: Missing delta on `unique_visitors`
+The export currently cherry-picks a handful of fields from each section while the backend returns much more. Here's what gets dropped:
+
+**Daily Trend** -- only exports 3 of 18 fields:
+- Missing: pageviews, bounce_count, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, conversions_total, cost_total, wallets_enriched, percent_enriched, total/median_balance_usd, visitors_with_wallet_extension
+
+**Dimension Table** -- missing 9 fields:
+- Missing: conversions_total, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, cost_total, total_balance_usd, visitors_with_wallet_extension
+
+**Events** -- missing unique_users, first_seen, last_seen
+
+**Wallet Actions** -- missing unique_wallets (with delta), first_seen, last_seen
+
+**Wallet Distribution** -- missing percentage field
+
+**Clicks** -- missing page_path
+
+**Holders** -- collapsed to a single number instead of the full time series with chain and contract info
+
+**Scorecard** -- missing wallets_not_enriched, wallets_enrichment_failed
+
+Every one of these fields will also include a comparison delta when comparison mode is active.
 
 ## Changes
 
 ### File: `src/lib/overview-export.ts`
 
-**Scorecard section** -- add deltas for all remaining fields:
-- Engagement: `Stayed 10s: X (+Y%) 30s: X (+Y%) 60s: X (+Y%) 5m: X (+Y%)`
-- Bots: `Bots: X (+Y%) / Z checked`
-- Wallet extensions: `Wallet Ext: X (+Y%)`
-- Conversions total: `Conv Total: X (+Y%)`
-- Enrichment line: add deltas to `wallets_enriched`, `median_balance_usd`, `total_balance_usd`
+**formatDailyTrend** -- rewrite to export all non-null fields per row with deltas:
+```
+DAILY TREND
+2026-02-17: pv 7527 (+5%) | vis 5940 (+8%) | bounce 2291 (-3%) | stayed10s 1761 (+12%) | stayed30s 942 (+10%) | stayed60s 637 (+7%) | stayed5m 277 (+15%) | bots 165 (-20%)/6107 | wallets 1 | enriched 1 (100%) | med_bal $8,071 | tot_bal $24,212 (+30%) | wallet_ext 7 (+40%) | conv 0 | conv_tot 0
+```
+Null fields are skipped to keep output compact.
 
-**Daily Trend** -- add deltas per row by matching on the comparison map (already built but unused):
-- Format: `2026-02-12: 7115 (+8%) | 5 (+25%) | 2 (+100%)`
+**formatDimensionTable** -- add all missing fields with deltas:
+- conversions_total, bot_visitors/bot_checked, stayed_10s/30s/60s/5m, cost_total, total_balance_usd, visitors_with_wallet_extension
 
-**Dimension Table** -- add deltas for all metrics per row:
-- Format: `source: 340 (+12%) | pv: 500 (+5%) | wallets: 15 (+50%) | bounce: 28%`
+**formatEvents** -- add unique_users (with delta), first_seen, last_seen
 
-**Wallet Extensions** -- wire up `compWalletExtensionsRows` to show deltas:
-- Build a comparison map keyed by `wallet_type` and show delta on count
+**formatWalletActions** -- add unique_wallets (with delta), first_seen, last_seen
 
-**Wallet Distribution** -- add delta on `total_usd`:
-- Format: `$0-100: 12 (+20%) | $600 (+15%)`
+**formatWalletDistribution** -- add percentage field
 
-**Clicks** -- add delta on `unique_visitors`:
-- Format: `link text: /url | clicks: 50 (+10%) | visitors: 30 (+5%)`
+**formatClicks** -- add page_path to each row
 
-**Also**:
-- Remove the `slice(0, 20)` cap on dimension rows and clicks so all data is exported
-- Add `activeFilters` field to interface and print them in the header when present
+**formatScorecard** -- add wallets_not_enriched, wallets_enrichment_failed (with deltas)
 
-### File: `src/pages/Overview.tsx`
+**New: formatHolderTrend** -- export full time series instead of a single total:
+```
+HOLDER TREND (date | chain | contract | count)
+2026-02-18: eth-mainnet | 0xC974...Cedd | 486
+2026-02-17: eth-mainnet | 0xC974...Cedd | 482
+```
 
-- Pass `activeFilters` (the current filter state) into `formatOverviewForAI()`
-
+All of these changes are in a single file: `src/lib/overview-export.ts`. No other files need changes since all the data is already being passed through from the Overview page.
