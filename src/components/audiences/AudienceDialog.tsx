@@ -10,10 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WalletSelector } from "./WalletSelector";
 import { Audience, createAudience, updateAudience, Website } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardPaste } from "lucide-react";
 
 export interface AudienceDialogInitialFilters {
   dateRange?: {
@@ -48,6 +50,8 @@ export function AudienceDialog({
   const [name, setName] = useState("");
   const [selectedWallets, setSelectedWallets] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [pasteResult, setPasteResult] = useState<{ valid: number; duplicates: number; invalid: number } | null>(null);
   const { toast } = useToast();
 
   const isEditing = !!audience;
@@ -62,8 +66,39 @@ export function AudienceDialog({
         setName("");
         setSelectedWallets([]);
       }
+      setPasteText("");
+      setPasteResult(null);
     }
   }, [open, audience]);
+
+  const handleAddPastedWallets = () => {
+    const lines = pasteText.split("\n").map((l) => l.trim()).filter(Boolean);
+    let valid = 0;
+    let duplicates = 0;
+    let invalid = 0;
+    const newWallets: string[] = [];
+    const existing = new Set(selectedWallets.map((w) => w.toLowerCase()));
+
+    for (const line of lines) {
+      if (/^0x[a-fA-F0-9]{40}$/.test(line)) {
+        if (existing.has(line.toLowerCase())) {
+          duplicates++;
+        } else {
+          existing.add(line.toLowerCase());
+          newWallets.push(line);
+          valid++;
+        }
+      } else {
+        invalid++;
+      }
+    }
+
+    if (newWallets.length > 0) {
+      setSelectedWallets((prev) => [...prev, ...newWallets]);
+    }
+    setPasteResult({ valid, duplicates, invalid });
+    setPasteText("");
+  };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -154,14 +189,51 @@ export function AudienceDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Select Wallets</Label>
-            <WalletSelector
-              websiteId={website.id}
-              selectedWallets={selectedWallets}
-              onSelectionChange={setSelectedWallets}
-              onWalletClick={onWalletClick}
-              initialFilters={initialFilters}
-            />
+            <Label>Select Wallets ({selectedWallets.length} selected)</Label>
+            <Tabs defaultValue="visitors">
+              <TabsList>
+                <TabsTrigger value="visitors">From Visitors</TabsTrigger>
+                <TabsTrigger value="paste">Paste Wallets</TabsTrigger>
+              </TabsList>
+              <TabsContent value="visitors">
+                <WalletSelector
+                  websiteId={website.id}
+                  selectedWallets={selectedWallets}
+                  onSelectionChange={setSelectedWallets}
+                  onWalletClick={onWalletClick}
+                  initialFilters={initialFilters}
+                />
+              </TabsContent>
+              <TabsContent value="paste">
+                <div className="space-y-3">
+                  <Textarea
+                    placeholder={"Paste wallet addresses, one per line:\n0x4fbB65ffF71703191A19089942cda010bbfc7De7\n0x1984829BB3439D04bD74F3c37cD35ff10a8625D7\n0x76e65da09d5466ec2C31ABFd258D149F282DBf14"}
+                    value={pasteText}
+                    onChange={(e) => { setPasteText(e.target.value); setPasteResult(null); }}
+                    rows={8}
+                    className="font-mono text-xs"
+                  />
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleAddPastedWallets}
+                      disabled={!pasteText.trim()}
+                    >
+                      <ClipboardPaste className="mr-2 h-4 w-4" />
+                      Add Wallets
+                    </Button>
+                    {pasteResult && (
+                      <p className="text-sm text-muted-foreground">
+                        {pasteResult.valid > 0 && <span className="text-primary">{pasteResult.valid} added</span>}
+                        {pasteResult.duplicates > 0 && <span className="ml-2 text-accent-foreground">{pasteResult.duplicates} skipped</span>}
+                        {pasteResult.invalid > 0 && <span className="ml-2 text-destructive">{pasteResult.invalid} invalid</span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
 
