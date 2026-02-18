@@ -100,6 +100,19 @@ export function AudienceDialog({
     setPasteText("");
   };
 
+  const parsePastedWallets = () => {
+    const lines = pasteText.split("\n").map((l) => l.trim()).filter(Boolean);
+    const existing = new Set(selectedWallets.map((w) => w.toLowerCase()));
+    const newWallets: string[] = [];
+    for (const line of lines) {
+      if (/^0x[a-fA-F0-9]{40}$/.test(line) && !existing.has(line.toLowerCase())) {
+        existing.add(line.toLowerCase());
+        newWallets.push(line);
+      }
+    }
+    return newWallets;
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       toast({
@@ -110,7 +123,15 @@ export function AudienceDialog({
       return;
     }
 
-    if (selectedWallets.length === 0) {
+    // Auto-process any remaining pasted wallets before submitting
+    const extraWallets = pasteText.trim() ? parsePastedWallets() : [];
+    const allWallets = [...selectedWallets, ...extraWallets];
+    if (extraWallets.length > 0) {
+      setSelectedWallets(allWallets);
+      setPasteText("");
+    }
+
+    if (allWallets.length === 0) {
       toast({
         title: "No wallets selected",
         description: "Please select at least one wallet for your audience.",
@@ -124,7 +145,7 @@ export function AudienceDialog({
       if (isEditing && audience) {
         await updateAudience(audience.id, {
           name: name.trim(),
-          wallets: selectedWallets,
+          wallets: allWallets,
         });
         toast({
           title: "Audience updated",
@@ -134,11 +155,11 @@ export function AudienceDialog({
         await createAudience({
           name: name.trim(),
           website_id: website.id,
-          wallets: selectedWallets,
+          wallets: allWallets,
         });
         toast({
           title: "Audience created",
-          description: `"${name}" has been created with ${selectedWallets.length} wallets.`,
+          description: `"${name}" has been created with ${allWallets.length} wallets.`,
         });
       }
       onSuccess();
