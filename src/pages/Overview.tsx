@@ -586,6 +586,7 @@ const Overview = () => {
                       walletDistributionRows: walletDistributionData?.rows ?? [],
                       clicksRows: clicksData?.rows ?? [],
                       holderData,
+                      activeFilters,
                       compScorecard: comparisonData?.scorecard?.data?.data ?? null,
                       compDailyRows: comparisonData?.table_date_day?.data?.rows,
                       compDimensionRows: comparisonData?.table_referrer_domain?.data?.rows,

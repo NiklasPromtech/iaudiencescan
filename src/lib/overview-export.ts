@@ -25,6 +25,7 @@ interface OverviewExportData {
   walletDistributionRows: WalletDistributionRow[];
   clicksRows: ClicksTableRow[];
   holderData: HolderDataPoint[];
+  activeFilters?: Record<string, string | string[]>;
   // Comparison data (optional)
   compScorecard?: ScorecardResponse["data"] | null;
   compDailyRows?: TableRow[];
@@ -64,6 +65,13 @@ function delta(current: number | null | undefined, previous: number | null | und
   return ` (${sign}${change.toFixed(0)}%)`;
 }
 
+function ppDelta(current: number | null, previous: number | null): string {
+  if (current === null || previous === null) return "";
+  const diff = current - previous;
+  const sign = diff >= 0 ? "+" : "";
+  return ` (${sign}${diff.toFixed(1)}pp)`;
+}
+
 function getDateLabel(dr: DateRangeValue): string {
   const today = new Date();
   if (dr.type === "custom" && dr.from && dr.to) {
@@ -84,129 +92,191 @@ function holderTotal(data: HolderDataPoint[]): number | null {
   return data.filter(i => i.date === latestDate).reduce((s, i) => s + i.holder_count, 0);
 }
 
-export function formatOverviewForAI(data: OverviewExportData): string {
+function bounceRate(pv: number, bc: number): number | null {
+  return pv > 0 ? (bc / pv) * 100 : null;
+}
+
+// ── Formatters ──
+
+function formatHeader(data: OverviewExportData): string[] {
   const lines: string[] = [];
-  const s = data.scorecard;
-  const cs = data.compScorecard;
-  const hasComp = !!cs;
-
-  // Header
   lines.push(`AudienceScan Overview | ${data.websiteName} | ${getDateLabel(data.dateRange)}`);
-  lines.push("");
-
-  // Scorecard
-  if (s) {
-    lines.push("SCORECARD");
-    const bounceRate = s.pageviews > 0 ? (s.bounce_count / s.pageviews) * 100 : null;
-    const cBounceRate = cs && cs.pageviews > 0 ? (cs.bounce_count / cs.pageviews) * 100 : null;
-
-    lines.push(
-      `Pageviews: ${num(s.pageviews)}${delta(s.pageviews, cs?.pageviews)}  ` +
-      `Visitors: ${num(s.unique_visitors)}${delta(s.unique_visitors, cs?.unique_visitors)}  ` +
-      `Bounce: ${bounceRate !== null ? pct(bounceRate) : "–"}${bounceRate !== null && cBounceRate !== null ? ` (${(bounceRate - cBounceRate) >= 0 ? "+" : ""}${(bounceRate - cBounceRate).toFixed(1)}pp)` : ""}`
+  if (data.activeFilters && Object.keys(data.activeFilters).length > 0) {
+    const parts = Object.entries(data.activeFilters).map(([k, v]) =>
+      `${k}=${Array.isArray(v) ? v.join(",") : v}`
     );
+    lines.push(`Filters: ${parts.join(", ")}`);
+  }
+  lines.push("");
+  return lines;
+}
 
-    if (s.wallet_users !== null || s.converted_users !== null) {
-      let line2 = "";
-      if (s.wallet_users !== null) line2 += `Wallets: ${num(s.wallet_users)}${delta(s.wallet_users, cs?.wallet_users)}  `;
-      if (s.converted_users !== null) line2 += `Conversions: ${num(s.converted_users)}${delta(s.converted_users, cs?.converted_users)}  `;
-      const ht = holderTotal(data.holderData);
-      const cht = data.compHolderData ? holderTotal(data.compHolderData) : null;
-      if (ht !== null) line2 += `Holders: ${num(ht)}${delta(ht, cht)}`;
-      if (line2.trim()) lines.push(line2.trim());
-    }
+function formatScorecard(data: OverviewExportData): string[] {
+  const s = data.scorecard;
+  if (!s) return [];
+  const cs = data.compScorecard;
+  const lines: string[] = ["SCORECARD"];
 
-    if (s.wallets_enriched !== null) {
-      let line3 = `Enriched: ${num(s.wallets_enriched)}/${num(s.wallet_users)} (${pct(s.percent_enriched)})  `;
-      line3 += `Median Bal: ${usd(s.median_balance_usd)}  Total Bal: ${usd(s.total_balance_usd)}`;
-      lines.push(line3);
-    }
+  const br = bounceRate(s.pageviews, s.bounce_count);
+  const cbr = cs ? bounceRate(cs.pageviews, cs.bounce_count) : null;
 
-    lines.push("");
+  lines.push(
+    `Pageviews: ${num(s.pageviews)}${delta(s.pageviews, cs?.pageviews)}  ` +
+    `Visitors: ${num(s.unique_visitors)}${delta(s.unique_visitors, cs?.unique_visitors)}  ` +
+    `Bounce: ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`
+  );
+
+  // Engagement
+  lines.push(
+    `Stayed 10s: ${num(s.stayed_10s)}${delta(s.stayed_10s, cs?.stayed_10s)}  ` +
+    `30s: ${num(s.stayed_30s)}${delta(s.stayed_30s, cs?.stayed_30s)}  ` +
+    `60s: ${num(s.stayed_60s)}${delta(s.stayed_60s, cs?.stayed_60s)}  ` +
+    `5m: ${num(s.stayed_5m)}${delta(s.stayed_5m, cs?.stayed_5m)}`
+  );
+
+  // Bots
+  if (s.bot_visitors !== null) {
+    lines.push(`Bots: ${num(s.bot_visitors)}${delta(s.bot_visitors, cs?.bot_visitors)} / ${num(s.bot_checked)} checked`);
   }
 
-  // Daily trend (compact – skip if no rows)
-  if (data.dailyRows.length > 0) {
-    lines.push("DAILY TREND (date | visitors | wallets | conversions)");
-    const compMap = new Map((data.compDailyRows ?? []).map(r => [r.dim_value, r]));
-    for (const r of data.dailyRows) {
-      const d = r.dim_value; // date string
-      let line = `${d}: ${r.unique_visitors}`;
-      if (r.wallet_users !== null) line += ` | ${r.wallet_users}`;
-      if (r.converted_users !== null) line += ` | ${r.converted_users}`;
-      lines.push(line);
-    }
-    lines.push("");
+  // Wallets, extensions, conversions, holders
+  const parts: string[] = [];
+  if (s.wallet_users !== null) parts.push(`Wallets: ${num(s.wallet_users)}${delta(s.wallet_users, cs?.wallet_users)}`);
+  if (s.visitors_with_wallet_extension !== null) parts.push(`Wallet Ext: ${num(s.visitors_with_wallet_extension)}${delta(s.visitors_with_wallet_extension, cs?.visitors_with_wallet_extension)}`);
+  if (s.converted_users !== null) parts.push(`Conversions: ${num(s.converted_users)}${delta(s.converted_users, cs?.converted_users)}`);
+  if (s.conversions_total !== null) parts.push(`Conv Total: ${num(s.conversions_total)}${delta(s.conversions_total, cs?.conversions_total)}`);
+  const ht = holderTotal(data.holderData);
+  const cht = data.compHolderData ? holderTotal(data.compHolderData) : null;
+  if (ht !== null) parts.push(`Holders: ${num(ht)}${delta(ht, cht)}`);
+  if (parts.length) lines.push(parts.join("  "));
+
+  // Enrichment
+  if (s.wallets_enriched !== null) {
+    lines.push(
+      `Enriched: ${num(s.wallets_enriched)}${delta(s.wallets_enriched, cs?.wallets_enriched)}/${num(s.wallet_users)} (${pct(s.percent_enriched)})  ` +
+      `Median Bal: ${usd(s.median_balance_usd)}${delta(s.median_balance_usd, cs?.median_balance_usd)}  ` +
+      `Total Bal: ${usd(s.total_balance_usd)}${delta(s.total_balance_usd, cs?.total_balance_usd)}`
+    );
   }
 
-  // Dimension table
-  if (data.dimensionRows.length > 0) {
-    const dimLabel = data.dimensionName.replace(/_/g, " ").toUpperCase();
-    lines.push(`TOP ${dimLabel} (source | visitors | wallets | bounce%)`);
-    const compMap = new Map((data.compDimensionRows ?? []).map(r => [r.dim_value, r]));
-    for (const r of data.dimensionRows.slice(0, 20)) {
-      const cr = compMap.get(r.dim_value);
-      const br = r.pageviews > 0 ? ((r.bounce_count / r.pageviews) * 100).toFixed(0) + "%" : "–";
-      let line = `${r.dim_value}: ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`;
-      if (r.wallet_users !== null) line += ` | ${r.wallet_users}`;
-      line += ` | ${br}`;
-      lines.push(line);
-    }
-    lines.push("");
+  if (s.cost_total !== null) {
+    lines.push(`Cost Total: ${usd(s.cost_total)}${delta(s.cost_total, cs?.cost_total)}`);
   }
 
-  // Events
-  if (data.eventsRows.length > 0) {
-    lines.push("EVENTS (type | count | delta)");
-    const compMap = new Map((data.compEventsRows ?? []).map(r => [r.event_type, r]));
-    for (const r of data.eventsRows) {
-      const cr = compMap.get(r.event_type);
-      lines.push(`${r.event_type}: ${num(r.event_count)}${delta(r.event_count, cr?.event_count)}`);
-    }
-    lines.push("");
-  }
+  lines.push("");
+  return lines;
+}
 
-  // Wallet actions
-  if (data.walletsRows.length > 0) {
-    lines.push("WALLET ACTIONS (action | count | delta)");
-    const compMap = new Map((data.compWalletsRows ?? []).map(r => [r.action_type, r]));
-    for (const r of data.walletsRows) {
-      const cr = compMap.get(r.action_type);
-      lines.push(`${r.action_type}: ${num(r.action_count)}${delta(r.action_count, cr?.action_count)}`);
-    }
-    lines.push("");
-  }
+function formatDailyTrend(data: OverviewExportData): string[] {
+  if (data.dailyRows.length === 0) return [];
+  const lines: string[] = ["DAILY TREND (date | visitors | wallets | conversions)"];
+  const compMap = new Map((data.compDailyRows ?? []).map(r => [r.dim_value, r]));
 
-  // Wallet extensions
-  if (data.walletExtensionsRows.length > 0) {
-    lines.push("WALLET EXTENSIONS (type | count)");
-    for (const r of data.walletExtensionsRows) {
-      lines.push(`${r.wallet_type}: ${num(r.count)}`);
-    }
-    lines.push("");
+  for (const r of data.dailyRows) {
+    const cr = compMap.get(r.dim_value);
+    let line = `${r.dim_value}: ${r.unique_visitors}${delta(r.unique_visitors, cr?.unique_visitors)}`;
+    if (r.wallet_users !== null) line += ` | ${r.wallet_users}${delta(r.wallet_users, cr?.wallet_users)}`;
+    if (r.converted_users !== null) line += ` | ${r.converted_users}${delta(r.converted_users, cr?.converted_users)}`;
+    lines.push(line);
   }
+  lines.push("");
+  return lines;
+}
 
-  // Wallet distribution
-  if (data.walletDistributionRows.length > 0) {
-    lines.push("WALLET DISTRIBUTION (tier | wallets | total_usd)");
-    const compMap = new Map((data.compWalletDistributionRows ?? []).map(r => [r.tier, r]));
-    for (const r of data.walletDistributionRows) {
-      const cr = compMap.get(r.tier);
-      lines.push(`${r.tier}: ${r.wallet_count}${delta(r.wallet_count, cr?.wallet_count)} | ${usd(r.total_usd)}`);
-    }
-    lines.push("");
+function formatDimensionTable(data: OverviewExportData): string[] {
+  if (data.dimensionRows.length === 0) return [];
+  const dimLabel = data.dimensionName.replace(/_/g, " ").toUpperCase();
+  const lines: string[] = [`TOP ${dimLabel} (source | pv | visitors | bounce% | wallets | conversions)`];
+  const compMap = new Map((data.compDimensionRows ?? []).map(r => [r.dim_value, r]));
+
+  for (const r of data.dimensionRows) {
+    const cr = compMap.get(r.dim_value);
+    const br = bounceRate(r.pageviews, r.bounce_count);
+    const cbr = cr ? bounceRate(cr.pageviews, cr.bounce_count) : null;
+
+    let line = `${r.dim_value}: pv ${num(r.pageviews)}${delta(r.pageviews, cr?.pageviews)}`;
+    line += ` | ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`;
+    line += ` | bounce ${br !== null ? pct(br) : "–"}${ppDelta(br, cbr)}`;
+    if (r.wallet_users !== null) line += ` | wallets ${r.wallet_users}${delta(r.wallet_users, cr?.wallet_users)}`;
+    if (r.converted_users !== null) line += ` | conv ${r.converted_users}${delta(r.converted_users, cr?.converted_users)}`;
+    if (r.wallets_enriched !== null) line += ` | enriched ${r.wallets_enriched}${delta(r.wallets_enriched, cr?.wallets_enriched)}`;
+    if (r.median_balance_usd !== null) line += ` | med_bal ${usd(r.median_balance_usd)}${delta(r.median_balance_usd, cr?.median_balance_usd)}`;
+    lines.push(line);
   }
+  lines.push("");
+  return lines;
+}
 
-  // Clicks
-  if (data.clicksRows.length > 0) {
-    lines.push("CLICKS (text | url | count | delta)");
-    const compMap = new Map((data.compClicksRows ?? []).map(r => [`${r.click_text}|${r.href}`, r]));
-    for (const r of data.clicksRows.slice(0, 20)) {
-      const cr = compMap.get(`${r.click_text}|${r.href}`);
-      lines.push(`${r.click_text}: ${r.href} | ${num(r.click_count)}${delta(r.click_count, cr?.click_count)}`);
-    }
-    lines.push("");
+function formatEvents(data: OverviewExportData): string[] {
+  if (data.eventsRows.length === 0) return [];
+  const lines: string[] = ["EVENTS (type | count | delta)"];
+  const compMap = new Map((data.compEventsRows ?? []).map(r => [r.event_type, r]));
+  for (const r of data.eventsRows) {
+    const cr = compMap.get(r.event_type);
+    lines.push(`${r.event_type}: ${num(r.event_count)}${delta(r.event_count, cr?.event_count)}`);
   }
+  lines.push("");
+  return lines;
+}
 
-  return lines.join("\n").trim();
+function formatWalletActions(data: OverviewExportData): string[] {
+  if (data.walletsRows.length === 0) return [];
+  const lines: string[] = ["WALLET ACTIONS (action | count | delta)"];
+  const compMap = new Map((data.compWalletsRows ?? []).map(r => [r.action_type, r]));
+  for (const r of data.walletsRows) {
+    const cr = compMap.get(r.action_type);
+    lines.push(`${r.action_type}: ${num(r.action_count)}${delta(r.action_count, cr?.action_count)}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+function formatWalletExtensions(data: OverviewExportData): string[] {
+  if (data.walletExtensionsRows.length === 0) return [];
+  const lines: string[] = ["WALLET EXTENSIONS (type | count | delta)"];
+  const compMap = new Map((data.compWalletExtensionsRows ?? []).map(r => [r.wallet_type, r]));
+  for (const r of data.walletExtensionsRows) {
+    const cr = compMap.get(r.wallet_type);
+    lines.push(`${r.wallet_type}: ${num(r.count)}${delta(r.count, cr?.count)}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+function formatWalletDistribution(data: OverviewExportData): string[] {
+  if (data.walletDistributionRows.length === 0) return [];
+  const lines: string[] = ["WALLET DISTRIBUTION (tier | wallets | total_usd)"];
+  const compMap = new Map((data.compWalletDistributionRows ?? []).map(r => [r.tier, r]));
+  for (const r of data.walletDistributionRows) {
+    const cr = compMap.get(r.tier);
+    lines.push(`${r.tier}: ${r.wallet_count}${delta(r.wallet_count, cr?.wallet_count)} | ${usd(r.total_usd)}${delta(r.total_usd, cr?.total_usd)}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+function formatClicks(data: OverviewExportData): string[] {
+  if (data.clicksRows.length === 0) return [];
+  const lines: string[] = ["CLICKS (text | url | clicks | visitors)"];
+  const compMap = new Map((data.compClicksRows ?? []).map(r => [`${r.click_text}|${r.href}`, r]));
+  for (const r of data.clicksRows) {
+    const cr = compMap.get(`${r.click_text}|${r.href}`);
+    lines.push(`${r.click_text}: ${r.href} | ${num(r.click_count)}${delta(r.click_count, cr?.click_count)} | visitors ${num(r.unique_visitors)}${delta(r.unique_visitors, cr?.unique_visitors)}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+export function formatOverviewForAI(data: OverviewExportData): string {
+  return [
+    ...formatHeader(data),
+    ...formatScorecard(data),
+    ...formatDailyTrend(data),
+    ...formatDimensionTable(data),
+    ...formatEvents(data),
+    ...formatWalletActions(data),
+    ...formatWalletExtensions(data),
+    ...formatWalletDistribution(data),
+    ...formatClicks(data),
+  ].join("\n").trim();
 }
