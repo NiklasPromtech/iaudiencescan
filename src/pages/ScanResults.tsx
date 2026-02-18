@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, ArrowLeft, Network, Users, Newspaper, Globe, Download } from "lucide-react";
+import { AlertCircle, ArrowLeft, Network, Users, Newspaper, Globe, Download, FileText } from "lucide-react";
+import { openReport } from "@/lib/report-export";
 import {
   getScan,
   getScanResults,
@@ -63,7 +64,7 @@ const ScanResults = () => {
 
   return (
     <DashboardLayout>
-      <div className="container max-w-6xl py-8 px-4">
+      <div className="container max-w-[1600px] py-8 px-4">
         {/* Loading State */}
         {loading && (
           <div className="space-y-6">
@@ -112,13 +113,22 @@ const ScanResults = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Scan Details
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/network/${scanId}`)}
-              >
-                <Network className="h-4 w-4 mr-2" />
-                View Full Network
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => openReport(scan, results)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Download Report
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/network/${scanId}`)}
+                >
+                  <Network className="h-4 w-4 mr-2" />
+                  View Full Network
+                </Button>
+              </div>
             </div>
 
             {/* Title Section */}
@@ -175,7 +185,7 @@ const ScanResults = () => {
                 </TabsContent>
 
                 <TabsContent value="export" className="mt-0 p-4">
-                  <ExportCenterTab tokens={tokens} scanName={scan.name || undefined} />
+                  <ExportCenterTab tokens={tokens} scanName={scan.name || undefined} scan={scan} results={results} />
                 </TabsContent>
               </div>
             </Tabs>
