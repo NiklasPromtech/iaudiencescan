@@ -125,7 +125,13 @@ export function AudienceDialog({
 
     // Auto-process any remaining pasted wallets before submitting
     const extraWallets = pasteText.trim() ? parsePastedWallets() : [];
-    const allWallets = [...selectedWallets, ...extraWallets];
+    const seen = new Set<string>();
+    const allWallets = [...selectedWallets, ...extraWallets].filter((w) => {
+      const key = w.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     if (extraWallets.length > 0) {
       setSelectedWallets(allWallets);
       setPasteText("");
