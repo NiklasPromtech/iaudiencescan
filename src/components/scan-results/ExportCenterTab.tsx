@@ -11,8 +11,9 @@ import {
   Copy,
   Check,
   Megaphone,
+  FileText,
 } from "lucide-react";
-import { ScanResultsTopToken } from "@/lib/api";
+import { Scan, ScanResultsResponse, ScanResultsTopToken } from "@/lib/api";
 import { ExportCard } from "./ExportCard";
 import {
   formatPlatformHandles,
@@ -26,13 +27,16 @@ import {
   copyToClipboard,
   getPlatformCounts,
 } from "@/lib/export-utils";
+import { openReport } from "@/lib/report-export";
 
 interface ExportCenterTabProps {
   tokens: ScanResultsTopToken[];
   scanName?: string;
+  scan?: Scan;
+  results?: ScanResultsResponse;
 }
 
-export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
+export const ExportCenterTab = ({ tokens, scanName, scan, results }: ExportCenterTabProps) => {
   const [copiedJSON, setCopiedJSON] = useState(false);
 
   const counts = useMemo(() => getPlatformCounts(tokens), [tokens]);
@@ -58,6 +62,27 @@ export const ExportCenterTab = ({ tokens, scanName }: ExportCenterTabProps) => {
 
   return (
     <div className="space-y-8">
+      {/* Branded Report */}
+      {scan && results && (
+        <div className="border border-primary/30 bg-primary/5 p-6">
+          <div className="flex items-start gap-4">
+            <div className="text-primary shrink-0">
+              <FileText className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium mb-1">Download Branded Report</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Generate a professional, print-ready AudienceScan report with all communities, news, and websites — perfect for sharing with your team or clients.
+              </p>
+              <Button onClick={() => openReport(scan, results)} className="gap-2">
+                <Download className="h-4 w-4" />
+                Generate Report
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h2 className="font-mono text-xs uppercase tracking-widest">Export Center</h2>
