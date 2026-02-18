@@ -178,7 +178,7 @@ export const PlatformTargetingCard = ({ platform, tokens }: PlatformTargetingCar
     <div className="border border-border overflow-hidden h-full flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div className={config.color}>{config.icon}</div>
             <div className="min-w-0">
