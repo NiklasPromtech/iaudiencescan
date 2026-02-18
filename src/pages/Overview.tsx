@@ -4,7 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftRight, X, Loader2 } from "lucide-react";
+import { ArrowLeftRight, X, Loader2, ClipboardCopy } from "lucide-react";
+import { formatOverviewForAI } from "@/lib/overview-export";
+import { copyToClipboard } from "@/lib/export-utils";
 import { 
   fetchOverview,
   fetchTableData,
@@ -567,6 +569,40 @@ const Overview = () => {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-mono border-dashed border-primary/40 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    const text = formatOverviewForAI({
+                      websiteName: selectedWebsite?.name || "Unknown",
+                      dateRange,
+                      scorecard: data ?? null,
+                      dailyRows: dailyData?.rows ?? [],
+                      dimensionRows: tableData?.rows ?? [],
+                      dimensionName: tableDimension,
+                      eventsRows: eventsData?.rows ?? [],
+                      walletsRows: walletsData?.rows ?? [],
+                      walletExtensionsRows: walletExtensionsData?.rows ?? [],
+                      walletDistributionRows: walletDistributionData?.rows ?? [],
+                      clicksRows: clicksData?.rows ?? [],
+                      holderData,
+                      compScorecard: comparisonData?.scorecard?.data?.data ?? null,
+                      compDailyRows: comparisonData?.table_date_day?.data?.rows,
+                      compDimensionRows: comparisonData?.table_referrer_domain?.data?.rows,
+                      compEventsRows: comparisonData?.events?.data?.rows,
+                      compWalletsRows: comparisonData?.wallets?.data?.rows,
+                      compWalletExtensionsRows: comparisonData?.wallet_extensions?.data?.rows,
+                      compWalletDistributionRows: comparisonData?.wallet_distribution?.data?.rows,
+                      compClicksRows: comparisonData?.clicks?.data?.rows,
+                      compHolderData: comparisonData?.holders?.data?.data,
+                    });
+                    copyToClipboard(text, "Copied overview data for AI");
+                  }}
+                >
+                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" />
+                  Copy to AI
+                </Button>
               </div>
             </div>
           </div>
