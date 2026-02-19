@@ -7,6 +7,7 @@ import {
   DollarSign,
   Search,
   Megaphone,
+  Wrench,
   Settings,
   ChevronDown,
   FileCode2,
@@ -85,6 +86,11 @@ const strategyItems = [
     title: "Scans",
     url: "/scans",
     icon: Search,
+  },
+  {
+    title: "Tools",
+    url: "/tools",
+    icon: Wrench,
   },
 ];
 
