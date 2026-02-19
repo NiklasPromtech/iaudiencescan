@@ -87,8 +87,11 @@ const strategyItems = [
     url: "/scans",
     icon: Search,
   },
+];
+
+const toolsItems = [
   {
-    title: "Tools",
+    title: "UTM Generator",
     url: "/tools",
     icon: Wrench,
   },
@@ -226,6 +229,7 @@ export const DashboardSidebar = () => {
         <NavGroup label="Insights" items={insightsItems} collapsed={collapsed} />
         <NavGroup label="Enrichment" items={enrichmentItems} collapsed={collapsed} />
         <NavGroup label="Strategy" items={strategyItems} collapsed={collapsed} />
+        <NavGroup label="Tools" items={toolsItems} collapsed={collapsed} />
       </SidebarContent>
 
       <SidebarFooter className={cn("px-2 pb-4", collapsed && "px-1")}>
