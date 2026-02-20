@@ -181,8 +181,11 @@ export default function QueryEditor() {
   // Query load state
   const [queryLoading, setQueryLoading] = useState(!isNew);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  // Track if this is the first load (don't auto-save on initial populate)
-  const isFirstLoad = useRef(true);
+  // skipNextSave: set to true before any injection so the next auto-save cycle is skipped.
+  // sqlRef / titleRef: always hold the latest values so the debounced save avoids stale closures.
+  const skipNextSave = useRef(true);
+  const sqlRef = useRef(sql);
+  const titleRef = useRef(title);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Schema state
@@ -209,6 +212,10 @@ export default function QueryEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNew]);
 
+  // Keep refs in sync with state so debounced callbacks never read stale closures
+  useEffect(() => { sqlRef.current = sql; }, [sql]);
+  useEffect(() => { titleRef.current = title; }, [title]);
+
   // Load existing query from Supabase
   useEffect(() => {
     if (isNew || !id) return;
@@ -223,9 +230,9 @@ export default function QueryEditor() {
         .eq("id", id)
         .maybeSingle();
       if (!error && data) {
-        isFirstLoad.current = true;
+        // Block the auto-save that will fire when we call setTitle/setSql
+        skipNextSave.current = true;
         setTitle(data.name ?? "New query");
-        // Pre-populate with a sample query if the query has no SQL yet
         if (data.sql) {
           setSql(data.sql);
         } else {
@@ -250,7 +257,8 @@ export default function QueryEditor() {
     if (sql.trim()) return; // already has content
     if (!selectedWebsite?.tag_id) return;
     sampleInjected.current = true;
-    isFirstLoad.current = true; // prevent auto-save of the injected sample
+    // Block the auto-save that fires when setSql triggers a re-render
+    skipNextSave.current = true;
     setSql(
       `-- Replace '${selectedWebsite.tag_id}' with your tag ID if querying a different property\nSELECT\n  date_trunc('day', visited_at) AS day,\n  COUNT(DISTINCT wallet_address)  AS unique_wallets,\n  COUNT(*)                        AS total_visits\nFROM audiencescan.visits\nWHERE tag_id = '${selectedWebsite.tag_id}'\n  AND visited_at >= NOW() - INTERVAL '30' DAY\nGROUP BY 1\nORDER BY 1 DESC`
     );
@@ -259,16 +267,17 @@ export default function QueryEditor() {
 
   useEffect(() => {
     if (isNew || !id || queryLoading) return;
-    if (isFirstLoad.current) {
-      // Skip the save triggered by the initial population
-      isFirstLoad.current = false;
+    if (skipNextSave.current) {
+      // This save was triggered by an injection or initial load — skip it
+      skipNextSave.current = false;
       return;
     }
     setSaveStatus("saving");
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
       try {
-        await updateQuery(id, { name: title, sql });
+        // Read from refs to avoid stale closure capturing the old sql/title values
+        await updateQuery(id, { name: titleRef.current, sql: sqlRef.current });
         setSaveStatus("saved");
         setTimeout(() => setSaveStatus("idle"), 2000);
       } catch {
