@@ -117,6 +117,11 @@ const SQL_KEYWORDS = new Set([
   "CURRENT_DATE","CURRENT_TIMESTAMP","TRUE","FALSE","LIKE","ILIKE",
 ]);
 
+const normalizeSqlQuotes = (s: string) =>
+  s
+    .replace(/[\u2018\u2019\u02BC\u0060\u00B4]/g, "'") // curly/smart single quotes → '
+    .replace(/[\u201C\u201D]/g, '"');                   // curly double quotes → "
+
 function tokenizeSql(sql: string): SqlToken[] {
   const tokens: SqlToken[] = [];
   let remaining = sql;
@@ -339,11 +344,6 @@ const SqlEditor = ({
     }
     onKeyDownExtra?.(e);
   };
-
-  const normalizeSqlQuotes = (s: string) =>
-    s
-      .replace(/[\u2018\u2019\u02BC\u0060\u00B4]/g, "'") // curly/smart single quotes → '
-      .replace(/[\u201C\u201D]/g, '"');                   // curly double quotes → "
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(normalizeSqlQuotes(e.target.value));
@@ -649,7 +649,7 @@ export default function QueryEditor() {
         skipNextSave.current = true;
         setTitle(data.name ?? "New query");
         if (data.sql) {
-          setSql(data.sql);
+          setSql(normalizeSqlQuotes(data.sql));
         } else {
           // Will be filled in once selectedWebsite is available — see effect below
           setSql("");
@@ -818,7 +818,7 @@ export default function QueryEditor() {
     setHasRun(true);
 
     try {
-      const data = await executeQuery(selectedWebsite.id, sql);
+      const data = await executeQuery(selectedWebsite.id, normalizeSqlQuotes(sql));
       setResults(data);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : "Query failed");
