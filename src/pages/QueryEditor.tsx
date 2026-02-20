@@ -978,29 +978,12 @@ export default function QueryEditor() {
                 </button>
               </div>
 
-                  <div className="flex flex-wrap gap-2 justify-center max-w-lg">
-                    {PROMPT_CHIPS.map((chip) => (
-                      <button
-                        key={chip}
-                        onClick={() => setPrompt(chip)}
-                        className="border border-border px-3 py-1.5 font-mono text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors text-left"
-                      >
-                        {chip}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : isRunning ? (
-                /* ── Running state ── */
-                <div className="px-4 py-6 flex items-center gap-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  <p className="font-mono text-xs text-muted-foreground">
-                    Executing query...
-                  </p>
-                </div>
+              {/* SQL editor */}
+              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
+            </div>
 
-              {/* Results area */}
-              <div className="flex-1 overflow-y-auto">
+            {/* Results area */}
+            <div className="flex-1 overflow-y-auto">
                 {!hasRun ? (
                   /* ── Empty state ── */
                   <div className="flex flex-col items-center justify-center h-full gap-3 py-12 text-center px-4">
