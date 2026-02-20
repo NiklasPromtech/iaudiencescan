@@ -872,6 +872,30 @@ export default function QueryEditor() {
                   ))}
                 </div>
               )}
+              {/* Inline prompt bar — Dune-style */}
+              <div className="shrink-0 flex items-center border border-border bg-muted/20 hover:bg-muted/30 transition-colors group">
+                <Sparkles className="h-3.5 w-3.5 text-muted-foreground/60 ml-3 shrink-0 group-focus-within:text-primary transition-colors" />
+                <input
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleGenerate();
+                    if (e.key === "Escape") setPrompt("");
+                  }}
+                  placeholder="Edit SQL with prompt…"
+                  className="flex-1 bg-transparent px-2.5 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                />
+                {prompt.trim() && (
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    className="shrink-0 flex items-center gap-1 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-primary hover:text-primary/80 transition-colors border-l border-border disabled:opacity-50"
+                  >
+                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                    {isGenerating ? "Generating…" : "Generate"}
+                  </button>
+                )}
+              </div>
               <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
             </div>
 
