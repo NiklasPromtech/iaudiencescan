@@ -225,13 +225,42 @@ export default function QueryEditor() {
       if (!error && data) {
         isFirstLoad.current = true;
         setTitle(data.name ?? "New query");
-        setSql(data.sql ?? "");
+        // Pre-populate with a sample query if the query has no SQL yet
+        if (data.sql) {
+          setSql(data.sql);
+        } else {
+          // Will be filled in once selectedWebsite is available — see effect below
+          setSql("");
+        }
       }
       setQueryLoading(false);
     })();
   }, [id, isNew]);
 
-  // Debounced auto-save whenever title or sql changes
+  // Once the query loads with no SQL and we know the tag_id, inject a sample query
+  const sampleInjected = useRef(false);
+  useEffect(() => {
+    if (sampleInjected.current) return;
+    if (queryLoading) return;
+    if (sql.trim()) return; // already has content
+    if (!selectedWebsite?.tag_id) return;
+    sampleInjected.current = true;
+    isFirstLoad.current = true; // prevent auto-save of the injected sample
+    setSql(
+      `-- Replace '${selectedWebsite.tag_id}' with your tag ID if querying a different property
+SELECT
+  date_trunc('day', visited_at) AS day,
+  COUNT(DISTINCT wallet_address)  AS unique_wallets,
+  COUNT(*)                        AS total_visits
+FROM audiencescan.visits
+WHERE tag_id = '${selectedWebsite.tag_id}'
+  AND visited_at >= NOW() - INTERVAL '30' DAY
+GROUP BY 1
+ORDER BY 1 DESC`
+    );
+  }, [queryLoading, sql, selectedWebsite?.tag_id]);
+
+
   useEffect(() => {
     if (isNew || !id || queryLoading) return;
     if (isFirstLoad.current) {
@@ -384,9 +413,26 @@ export default function QueryEditor() {
             </button>
           )}
 
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            @audiencescan
-          </span>
+          {selectedWebsite?.tag_id && (
+            <button
+              title="This is your website tag ID — include it in queries to filter data for this property"
+              onClick={() => {
+                navigator.clipboard.writeText(selectedWebsite.tag_id);
+                toast({ description: `Copied tag ID: ${selectedWebsite.tag_id}` });
+              }}
+              className="flex items-center gap-1.5 border border-border bg-muted/40 px-2 py-0.5 hover:bg-muted transition-colors group"
+            >
+              <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                tag_id
+              </span>
+              <span className="font-mono text-[10px] text-foreground font-semibold">
+                {selectedWebsite.tag_id}
+              </span>
+              <span className="font-mono text-[9px] text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
+                copy
+              </span>
+            </button>
+          )}
 
           {/* Save status */}
           {saveStatus === "saving" && (
