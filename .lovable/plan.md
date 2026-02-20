@@ -1,97 +1,96 @@
 
-# Add "Queries" to Insights Section
+# Wire Up Real Query Execution + Schema-Driven Data Explorer
 
-## Overview
+## What we're connecting
 
-Inspired by Dune Analytics, we're adding a **Queries** feature under the **Insights** section of the sidebar. This gives users a SQL-like query workspace to explore their AudienceScan data, styled to match the flat Dune-inspired aesthetic already in place.
+You have two live endpoints on the same base API:
 
-This is a **frontend-only, UI scaffold** — no live SQL execution backend yet, but everything is wired up visually and structurally so it's ready to connect to a real query engine later.
+- `POST /query` — executes SQL, returns columns + rows + row_count
+- `GET /query/schema` — returns real table names, column names, types, and descriptions
+
+We'll use these to:
+1. Replace the hardcoded Data Explorer tree with **real tables from `/query/schema`**
+2. Make the **Run button actually execute** via `POST /query` using the selected website's `website_id`
+3. Render a **proper results table** (columns as headers, rows as data) instead of the placeholder "0 rows" message
+4. Show a **loading state** while the query runs and a clear **error state** if it fails
 
 ---
 
-## What We're Building
+## Changes
 
-### 1. Sidebar — add "Queries" to Insights
-
-Add a `Terminal` icon item to `insightsItems` in `DashboardSidebar.tsx`:
+### 1. `src/lib/api.ts` — add two new functions
 
 ```typescript
-{ title: "Queries", url: "/queries", icon: Terminal }
+// Types
+export interface QuerySchemaColumn {
+  name: string;
+  type: string;
+  description: string;
+}
+export interface QuerySchemaTable {
+  name: string;
+  description: string;
+  columns: QuerySchemaColumn[];
+}
+export interface QuerySchemaResponse {
+  tables: QuerySchemaTable[];
+}
+export interface QueryExecuteResponse {
+  columns: string[];
+  rows: (string | number | null)[][];
+  row_count: number;
+}
+
+// Functions
+export async function fetchQuerySchema(): Promise<QuerySchemaResponse>
+export async function executeQuery(websiteId: string, sql: string): Promise<QueryExecuteResponse>
 ```
 
-This places it alongside Overview, Change, and Wallet Data under the Insights group.
+Both use the existing `apiRequest` helper (`API_BASE_URL`) with Bearer auth — same pattern as every other call.
 
 ---
 
-### 2. Queries List Page — `src/pages/Queries.tsx`
+### 2. `src/pages/QueryEditor.tsx` — full wiring
 
-A Dune-style queries index page:
+**Data Explorer — schema-driven**
+- On mount, call `fetchQuerySchema()` and store the result in state
+- Replace the hardcoded `explorerSections` array with the real table list from the API response
+- Each table becomes a collapsible section showing its `description` as a sub-label and its columns as clickable rows (clicking a column name inserts `table.column` into the editor at cursor)
+- While loading: show a subtle skeleton / "Loading schema..." text
+- On error: show "Could not load schema" with a retry button
 
-- **Header**: "Queries" title
-- **Toolbar row**:
-  - Search input ("Search queries...")
-  - `Sort by: Updated date` dropdown
-  - `Sort by: Descending` dropdown
-  - `New query` button (navigates to `/queries/new`)
-- **Query list**: flat rows (no cards, no shadows — border-bottom separated), each row showing:
-  - Terminal/code icon on the left
-  - Query name (bold) + `@audiencescan • modified X ago` in muted mono text
-  - Star icon on the right (toggle favourite)
-- Mock data for 3–4 starter queries (e.g. "People that deposited into CEX", "All Known EVM CEX Addresses")
+**Run button — live execution**
+- Read `selectedWebsite` from `useSelectedWebsite()` to get the `website_id`
+- On click: set `isRunning = true`, call `executeQuery(websiteId, sql)`
+- Success: store `{ columns, rows, rowCount }` in state, set `hasRun = true`
+- Error: store the error message, surface it in the results area with the exact error text from the API
+- The Run button shows a `Loader2` spinner (animated) while running and is disabled during execution
 
----
+**Results table**
+- When results arrive, render a proper table:
+  - Header row: one `<th>` per column name
+  - Body rows: one `<td>` per cell value, `null` rendered as `—`
+  - Row count shown in the results bar: `Results — 47 rows`
+  - If `row_count === 0`: show "Query executed successfully. No rows returned."
+- The table is scrollable horizontally if there are many columns
 
-### 3. Query Editor Page — `src/pages/QueryEditor.tsx`
-
-A split-pane layout:
-
-**Left panel — Data Explorer (fixed ~280px width)**
-- "Data Explorer" header
-- Search input ("Search by dataset name, contract address...")
-- Collapsible sections using the existing Collapsible component:
-  - **AudienceScan data** (label): Prices & metadata, DEX trading, Transfers & balances, Labels & identity, Gas & fees, More curated data
-  - **My data**: Uploads, Materialized views
-  - **Blockchain data**: Decoded projects, Raw blockchain data
-
-**Right panel — Query editor area**
-- Query title (editable inline, e.g. "New query")
-- `@audiencescan` avatar + username label
-- **Query editor** box: monospaced textarea with line numbers (simple implementation — a `<textarea>` styled with `font-mono`, with a line-number gutter column alongside it)
-- **Run** button (top-right of the editor pane, orange primary colour)
-- **Results area** below: initially shows a "Get started" panel with:
-  - "Generate with a prompt" text input
-  - 3 example prompt chips (e.g. "Find all wallets that interacted with Uniswap in the last 7 days")
-
----
-
-### 4. Routing — `src/App.tsx`
-
-Add two protected routes:
-```typescript
-<Route path="/queries" element={<RequireAuth><Queries /></RequireAuth>} />
-<Route path="/queries/:id" element={<RequireAuth><QueryEditor /></RequireAuth>} />
+**Error state** — shown in the results area instead of the table:
+```
+Query error
+ERROR: column "wallet_address" does not exist
 ```
 
-`/queries/new` will also resolve to QueryEditor via the `:id` param being "new".
+---
+
+### 3. No changes needed to `Queries.tsx`, `DashboardSidebar.tsx`, or routing
+
+The existing structure is already correct. This is purely a data-wiring change to `QueryEditor.tsx` and adding the two API functions.
 
 ---
 
-## Style Notes (matching existing platform aesthetic)
+## Technical notes
 
-- `rounded-none` throughout — no rounded corners on cards, buttons, inputs
-- `font-mono text-[10px] uppercase tracking-widest` for section labels
-- Border-separated rows instead of cards with shadows
-- Orange (`text-orange-500` / `bg-orange-500`) for the Run button and active states
-- Teal for any "Unknown" states if needed
-- The Data Explorer left panel uses the same collapsible pattern already in the sidebar
-
----
-
-## Files to Create/Modify
-
-| File | Action |
-|---|---|
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `Terminal` icon + Queries to `insightsItems` |
-| `src/pages/Queries.tsx` | Create — queries list page |
-| `src/pages/QueryEditor.tsx` | Create — split-pane editor page |
-| `src/App.tsx` | Register two new routes |
+- The `API_BASE_URL` in `api.ts` is already `https://api-wldojy4riq-uc.a.run.app` — both `/query` and `/query/schema` will be called on that same base
+- `website_id` comes from `useSelectedWebsite()` which is already available app-wide
+- Schema is fetched once on mount (not on every run) — a "Refresh schema" button can be added later
+- No new dependencies needed — standard fetch + existing UI components (Table from `ui/table.tsx`, Loader2 from lucide-react)
