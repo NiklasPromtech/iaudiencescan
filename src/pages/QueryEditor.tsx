@@ -150,6 +150,26 @@ const SqlEditor = ({
   );
 };
 
+// ── Sample queries ────────────────────────────────────────────────────────────
+
+const SAMPLE_QUERIES: { label: string; getSql: (tagId: string) => string }[] = [
+  {
+    label: "Visitors today",
+    getSql: (tagId) =>
+      `SELECT COUNT(DISTINCT wallet_address) AS unique_wallets, COUNT(*) AS total_visits\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND visited_at >= CURRENT_DATE`,
+  },
+  {
+    label: "Visitors that connected a wallet today",
+    getSql: (tagId) =>
+      `SELECT COUNT(DISTINCT wallet_address) AS wallets_connected\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND wallet_address IS NOT NULL\n  AND visited_at >= CURRENT_DATE`,
+  },
+  {
+    label: "Daily visitors this week",
+    getSql: (tagId) =>
+      `SELECT date_trunc('day', visited_at) AS day, COUNT(DISTINCT wallet_address) AS unique_wallets\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND visited_at >= NOW() - INTERVAL '7' DAY\nGROUP BY 1\nORDER BY 1 DESC`,
+  },
+];
+
 // ── Prompt chips ──────────────────────────────────────────────────────────────
 
 const PROMPT_CHIPS = [
@@ -250,19 +270,6 @@ export default function QueryEditor() {
   useEffect(() => {
     sampleInjected.current = false;
   }, [id]);
-  useEffect(() => {
-    if (sampleInjected.current) return;
-    if (queryLoading) return;
-    if (isNew) return; // wait for redirect to real ID
-    if (sql.trim()) return; // already has content
-    if (!selectedWebsite?.tag_id) return;
-    sampleInjected.current = true;
-    // Block the auto-save that fires when setSql triggers a re-render
-    skipNextSave.current = true;
-    setSql(
-      `-- Replace '${selectedWebsite.tag_id}' with your tag ID if querying a different property\nSELECT\n  date_trunc('day', visited_at) AS day,\n  COUNT(DISTINCT wallet_address)  AS unique_wallets,\n  COUNT(*)                        AS total_visits\nFROM audiencescan.visits\nWHERE tag_id = '${selectedWebsite.tag_id}'\n  AND visited_at >= NOW() - INTERVAL '30' DAY\nGROUP BY 1\nORDER BY 1 DESC`
-    );
-  }, [id, isNew, queryLoading, sql, selectedWebsite?.tag_id]);
 
 
   useEffect(() => {
@@ -548,9 +555,30 @@ export default function QueryEditor() {
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* SQL Editor */}
             <div
-              className="flex flex-col p-4 border-b border-border"
+              className="flex flex-col p-4 border-b border-border gap-2"
               style={{ height: "55%" }}
             >
+              {/* Sample query chips */}
+              {selectedWebsite?.tag_id && (
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 shrink-0">
+                    Samples:
+                  </span>
+                  {SAMPLE_QUERIES.map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={() => {
+                        skipNextSave.current = true;
+                        setSql(s.getSql(selectedWebsite.tag_id));
+                        setHasRun(false);
+                      }}
+                      className="border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} />
             </div>
 
