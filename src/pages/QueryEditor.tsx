@@ -640,8 +640,8 @@ export default function QueryEditor() {
     setIsGenerating(true);
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      const { data, error } = await supabase.functions.invoke("sql-generate", {
-        body: { prompt, schema },
+      const { data, error } = await supabase.functions.invoke("audiencescan-signal", {
+        body: { action: "sql-generate", prompt, schema },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
