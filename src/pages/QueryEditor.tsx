@@ -16,7 +16,9 @@ import {
   Pencil,
   Copy,
   Download,
+  Wand2,
 } from "lucide-react";
+import { format as formatSql } from "sql-formatter";
 import { downloadCSV } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -807,6 +809,22 @@ export default function QueryEditor() {
     }
   };
 
+  // Format SQL
+  const handleFormat = () => {
+    if (!sql.trim()) return;
+    try {
+      const formatted = formatSql(normalizeSqlQuotes(sql), {
+        language: "bigquery",
+        tabWidth: 2,
+        keywordCase: "upper",
+        linesBetweenQueries: 2,
+      });
+      setSql(formatted);
+    } catch {
+      // If formatter fails, leave SQL unchanged
+    }
+  };
+
   // Execute the query
   const handleRun = async () => {
     if (!sql.trim() || isRunning) return;
@@ -945,6 +963,16 @@ export default function QueryEditor() {
                 </button>
               )
             )}
+
+            <button
+              onClick={handleFormat}
+              disabled={!sql.trim() || queryLoading}
+              title="Format SQL"
+              className="h-8 px-3 flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border rounded-none hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Wand2 className="h-3 w-3" />
+              Pretty
+            </button>
 
             <Button
               onClick={handleRun}
