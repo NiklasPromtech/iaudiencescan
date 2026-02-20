@@ -205,7 +205,7 @@ export default function Queries() {
                     {query.name}
                   </p>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
-                    @audiencescan &bull; modified{" "}
+                    Modified{" "}
                     {formatDistanceToNow(new Date(query.updated_at), {
                       addSuffix: true,
                     })}
