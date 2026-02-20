@@ -643,7 +643,20 @@ export default function QueryEditor() {
       const { data, error } = await supabase.functions.invoke("audiencescan-signal", {
         body: { action: "sql-generate", prompt, schema },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to extract a more specific message from the function response body
+        let detail = "Please try again.";
+        try {
+          // FunctionsHttpError has a .context.responseBody or similar
+          const ctx = (error as { context?: { responseBody?: string } }).context;
+          if (ctx?.responseBody) {
+            const parsed = JSON.parse(ctx.responseBody);
+            detail = parsed.error ?? detail;
+          }
+        } catch (_e) { /* ignore parse errors */ }
+        console.error("sql-generate error:", error, detail);
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
       setSql(data.sql ?? "");
       setPrompt("");
