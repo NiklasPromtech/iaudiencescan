@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -7,48 +7,43 @@ import {
   Play,
   Sparkles,
   ArrowLeft,
-  Database,
-  Table2,
+  Loader2,
+  RefreshCw,
+  AlertCircle,
+  Columns,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import {
+  fetchQuerySchema,
+  executeQuery,
+  QuerySchemaTable,
+  QuerySchemaColumn,
+  QueryExecuteResponse,
+} from "@/lib/api";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-// ── Data Explorer tree ────────────────────────────────────────────────────────
+// ── Schema-driven Data Explorer ───────────────────────────────────────────────
 
-const explorerSections = [
-  {
-    label: "AudienceScan data",
-    icon: Database,
-    items: [
-      "Prices & metadata",
-      "DEX trading",
-      "Transfers & balances",
-      "Labels & identity",
-      "Gas & fees",
-      "More curated data",
-    ],
-  },
-  {
-    label: "My data",
-    icon: Table2,
-    items: ["Uploads", "Materialized views"],
-  },
-  {
-    label: "Blockchain data",
-    icon: Database,
-    items: ["Decoded projects", "Raw blockchain data"],
-  },
-];
-
-const ExplorerSection = ({
-  label,
-  icon: Icon,
-  items,
-}: (typeof explorerSections)[0]) => {
-  const [open, setOpen] = useState(true);
+const SchemaTableSection = ({
+  table,
+  onColumnClick,
+}: {
+  table: QuerySchemaTable;
+  onColumnClick: (table: string, column: QuerySchemaColumn) => void;
+}) => {
+  const [open, setOpen] = useState(false);
   return (
     <div className="border-b border-border">
       <button
@@ -60,19 +55,31 @@ const ExplorerSection = ({
         ) : (
           <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
         )}
-        <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <span className="font-mono text-[10px] uppercase tracking-widest text-foreground font-semibold">
-          {label}
+        <Columns className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        <span className="font-mono text-[10px] font-semibold text-foreground truncate">
+          {table.name}
         </span>
       </button>
       {open && (
         <div className="pb-1">
-          {items.map((item) => (
+          {table.description && (
+            <p className="px-8 pb-1.5 font-mono text-[9px] text-muted-foreground/70 leading-tight">
+              {table.description}
+            </p>
+          )}
+          {table.columns.map((col) => (
             <button
-              key={item}
-              className="w-full text-left px-8 py-1.5 font-mono text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+              key={col.name}
+              onClick={() => onColumnClick(table.name, col)}
+              className="w-full text-left px-8 py-1 flex items-start gap-2 hover:bg-muted/30 group transition-colors"
+              title={col.description}
             >
-              {item}
+              <span className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+                {col.name}
+              </span>
+              <span className="font-mono text-[9px] text-muted-foreground/50 mt-px shrink-0">
+                {col.type}
+              </span>
             </button>
           ))}
         </div>
@@ -96,17 +103,18 @@ LIMIT 100`;
 const SqlEditor = ({
   value,
   onChange,
+  editorRef,
 }: {
   value: string;
   onChange: (v: string) => void;
+  editorRef: React.RefObject<HTMLTextAreaElement>;
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
-  const lineCount = value.split("\n").length;
+  const lineCount = value.split("\n").length || 1;
 
   const syncScroll = () => {
-    if (textareaRef.current && gutterRef.current) {
-      gutterRef.current.scrollTop = textareaRef.current.scrollTop;
+    if (editorRef.current && gutterRef.current) {
+      gutterRef.current.scrollTop = editorRef.current.scrollTop;
     }
   };
 
@@ -115,7 +123,7 @@ const SqlEditor = ({
       {/* Gutter */}
       <div
         ref={gutterRef}
-        className="bg-muted/50 border-r border-border text-muted-foreground select-none overflow-hidden shrink-0 w-10 pt-3 pb-3"
+        className="bg-muted/50 border-r border-border text-muted-foreground select-none shrink-0 w-10 pt-3 pb-3"
         style={{ overflowY: "hidden" }}
       >
         {Array.from({ length: lineCount }, (_, i) => (
@@ -126,7 +134,7 @@ const SqlEditor = ({
       </div>
       {/* Textarea */}
       <textarea
-        ref={textareaRef}
+        ref={editorRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onScroll={syncScroll}
@@ -152,18 +160,99 @@ export default function QueryEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === "new";
+  const { selectedWebsite } = useSelectedWebsite();
 
-  const [title, setTitle] = useState(isNew ? "New query" : "People that deposited into CEX");
+  const [title, setTitle] = useState(
+    isNew ? "New query" : "People that deposited into CEX"
+  );
   const [editingTitle, setEditingTitle] = useState(false);
   const [sql, setSql] = useState(isNew ? "" : PLACEHOLDER_SQL);
   const [prompt, setPrompt] = useState("");
-  const [hasRun, setHasRun] = useState(false);
+
+  // Schema state
+  const [schema, setSchema] = useState<QuerySchemaTable[]>([]);
+  const [schemaLoading, setSchemaLoading] = useState(true);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
   const [explorerSearch, setExplorerSearch] = useState("");
 
-  const handleRun = () => {
-    if (!sql.trim()) return;
+  // Run state
+  const [isRunning, setIsRunning] = useState(false);
+  const [results, setResults] = useState<QueryExecuteResponse | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [hasRun, setHasRun] = useState(false);
+
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load schema on mount
+  const loadSchema = useCallback(async () => {
+    setSchemaLoading(true);
+    setSchemaError(null);
+    try {
+      const data = await fetchQuerySchema();
+      setSchema(data.tables);
+    } catch (err) {
+      setSchemaError(err instanceof Error ? err.message : "Could not load schema");
+    } finally {
+      setSchemaLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSchema();
+  }, [loadSchema]);
+
+  // Insert column reference into editor at cursor
+  const handleColumnClick = useCallback(
+    (tableName: string, col: QuerySchemaColumn) => {
+      const ref = `${tableName}.${col.name}`;
+      const ta = editorRef.current;
+      if (!ta) {
+        setSql((s) => s + ref);
+        return;
+      }
+      const start = ta.selectionStart ?? sql.length;
+      const end = ta.selectionEnd ?? sql.length;
+      const next = sql.slice(0, start) + ref + sql.slice(end);
+      setSql(next);
+      // restore cursor after state update
+      setTimeout(() => {
+        ta.focus();
+        ta.setSelectionRange(start + ref.length, start + ref.length);
+      }, 0);
+    },
+    [sql]
+  );
+
+  // Execute the query
+  const handleRun = async () => {
+    if (!sql.trim() || isRunning) return;
+    if (!selectedWebsite) return;
+
+    setIsRunning(true);
+    setRunError(null);
+    setResults(null);
     setHasRun(true);
+
+    try {
+      const data = await executeQuery(selectedWebsite.id, sql);
+      setResults(data);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : "Query failed");
+    } finally {
+      setIsRunning(false);
+    }
   };
+
+  // Filter schema by search
+  const filteredSchema = explorerSearch
+    ? schema.filter(
+        (t) =>
+          t.name.toLowerCase().includes(explorerSearch.toLowerCase()) ||
+          t.columns.some((c) =>
+            c.name.toLowerCase().includes(explorerSearch.toLowerCase())
+          )
+      )
+    : schema;
 
   return (
     <DashboardLayout>
@@ -199,14 +288,23 @@ export default function QueryEditor() {
             @audiencescan
           </span>
 
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            {!selectedWebsite && (
+              <span className="font-mono text-[10px] text-muted-foreground">
+                No website selected
+              </span>
+            )}
             <Button
               onClick={handleRun}
-              disabled={!sql.trim()}
+              disabled={!sql.trim() || isRunning || !selectedWebsite}
               className="rounded-none h-8 px-4 text-xs font-mono uppercase tracking-widest gap-1.5"
             >
-              <Play className="h-3 w-3 fill-current" />
-              Run
+              {isRunning ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Play className="h-3 w-3 fill-current" />
+              )}
+              {isRunning ? "Running..." : "Run"}
             </Button>
           </div>
         </div>
@@ -215,10 +313,19 @@ export default function QueryEditor() {
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Left — Data Explorer */}
           <div className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden">
-            <div className="px-3 py-2 border-b border-border shrink-0">
+            <div className="px-3 py-2 border-b border-border shrink-0 flex items-center justify-between">
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
                 Data Explorer
               </p>
+              {!schemaLoading && (
+                <button
+                  onClick={loadSchema}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="Refresh schema"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </button>
+              )}
             </div>
             <div className="px-2 py-2 border-b border-border shrink-0">
               <div className="relative">
@@ -226,42 +333,67 @@ export default function QueryEditor() {
                 <Input
                   value={explorerSearch}
                   onChange={(e) => setExplorerSearch(e.target.value)}
-                  placeholder="Search datasets..."
+                  placeholder="Search tables & columns..."
                   className="pl-7 h-7 rounded-none text-[10px] font-mono"
                 />
               </div>
             </div>
+
             <div className="flex-1 overflow-y-auto">
-              {explorerSections.map((section) => (
-                <ExplorerSection key={section.label} {...section} />
-              ))}
+              {schemaLoading ? (
+                <div className="px-3 py-4 flex flex-col gap-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-5 w-full" />
+                  ))}
+                </div>
+              ) : schemaError ? (
+                <div className="px-3 py-4 flex flex-col items-start gap-2">
+                  <p className="font-mono text-[10px] text-destructive leading-tight">
+                    Could not load schema
+                  </p>
+                  <p className="font-mono text-[9px] text-muted-foreground leading-tight">
+                    {schemaError}
+                  </p>
+                  <button
+                    onClick={loadSchema}
+                    className="font-mono text-[10px] text-primary hover:underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : filteredSchema.length === 0 ? (
+                <div className="px-3 py-4">
+                  <p className="font-mono text-[10px] text-muted-foreground">
+                    {explorerSearch ? "No matches" : "No tables available"}
+                  </p>
+                </div>
+              ) : (
+                filteredSchema.map((table) => (
+                  <SchemaTableSection
+                    key={table.name}
+                    table={table}
+                    onColumnClick={handleColumnClick}
+                  />
+                ))
+              )}
             </div>
           </div>
 
           {/* Right — Editor + Results */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* SQL Editor */}
-            <div className="flex flex-col p-4 border-b border-border" style={{ height: "55%" }}>
-              <SqlEditor value={sql} onChange={setSql} />
+            <div
+              className="flex flex-col p-4 border-b border-border"
+              style={{ height: "55%" }}
+            >
+              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} />
             </div>
 
             {/* Results / Get started */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {hasRun ? (
-                <div className="border border-border">
-                  <div className="px-4 py-2 border-b border-border bg-muted/30">
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Results — 0 rows
-                    </p>
-                  </div>
-                  <div className="px-6 py-10 text-center">
-                    <p className="font-mono text-xs text-muted-foreground">
-                      Query executed. No results returned.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-6 py-8">
+            <div className="flex-1 overflow-y-auto">
+              {!hasRun ? (
+                /* ── Prompt area ── */
+                <div className="flex flex-col items-center gap-6 py-8 px-4">
                   <div className="flex flex-col items-center gap-2">
                     <Sparkles className="h-8 w-8 text-primary/40" />
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -296,7 +428,92 @@ export default function QueryEditor() {
                     ))}
                   </div>
                 </div>
-              )}
+              ) : isRunning ? (
+                /* ── Running state ── */
+                <div className="px-4 py-6 flex items-center gap-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Executing query...
+                  </p>
+                </div>
+              ) : runError ? (
+                /* ── Error state ── */
+                <div className="p-4">
+                  <div className="border border-destructive/40 bg-destructive/5">
+                    <div className="px-4 py-2 border-b border-destructive/30 flex items-center gap-2">
+                      <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-destructive">
+                        Query error
+                      </p>
+                    </div>
+                    <div className="px-4 py-3">
+                      <p className="font-mono text-xs text-destructive/80 whitespace-pre-wrap break-all">
+                        {runError}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : results ? (
+                /* ── Results table ── */
+                <div className="p-4">
+                  <div className="border border-border">
+                    <div className="px-4 py-2 border-b border-border bg-muted/30 flex items-center justify-between">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                        Results —{" "}
+                        <span className="text-foreground">
+                          {results.row_count} row
+                          {results.row_count !== 1 ? "s" : ""}
+                        </span>
+                      </p>
+                    </div>
+
+                    {results.row_count === 0 ? (
+                      <div className="px-6 py-10 text-center">
+                        <p className="font-mono text-xs text-muted-foreground">
+                          Query executed successfully. No rows returned.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              {results.columns.map((col) => (
+                                <TableHead
+                                  key={col}
+                                  className="font-mono text-[10px] uppercase tracking-widest h-9 px-4 whitespace-nowrap"
+                                >
+                                  {col}
+                                </TableHead>
+                              ))}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {results.rows.map((row, ri) => (
+                              <TableRow key={ri}>
+                                {row.map((cell, ci) => (
+                                  <TableCell
+                                    key={ci}
+                                    className="font-mono text-xs px-4 py-2 whitespace-nowrap"
+                                  >
+                                    {cell === null ? (
+                                      <span className="text-muted-foreground">
+                                        —
+                                      </span>
+                                    ) : (
+                                      String(cell)
+                                    )}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
