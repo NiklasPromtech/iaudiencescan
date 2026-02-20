@@ -68,6 +68,8 @@ import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
 import Change from "./pages/Change";
 import Tools from "./pages/Tools";
+import Queries from "./pages/Queries";
+import QueryEditor from "./pages/QueryEditor";
 import LandingPageV3 from "./pages/LandingPageV3";
 import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
@@ -154,6 +156,8 @@ const App = () => (
           <Route path="/touchpoints" element={<RequireAuth><Touchpoints /></RequireAuth>} />
           <Route path="/contracts" element={<RequireAuth><Contracts /></RequireAuth>} />
           <Route path="/tools" element={<RequireAuth><Tools /></RequireAuth>} />
+          <Route path="/queries" element={<RequireAuth><Queries /></RequireAuth>} />
+          <Route path="/queries/:id" element={<RequireAuth><QueryEditor /></RequireAuth>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
