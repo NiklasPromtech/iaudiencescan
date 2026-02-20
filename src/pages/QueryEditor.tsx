@@ -468,11 +468,14 @@ WHERE DATE(p.created_at) = CURRENT_DATE()
   {
     label: "Clicks by UTM source today",
     sql: `SELECT
-  utm_source,
+  p.utm_source,
   COUNT(*) AS clicks
-FROM clicks
-WHERE DATE(created_at) = CURRENT_DATE()
-  AND utm_source IS NOT NULL
+FROM events e
+INNER JOIN pageviews p
+  ON p.session_id = e.session_id
+WHERE DATE(e.created_at) = CURRENT_DATE()
+  AND e.event_type = 'click'
+  AND p.utm_source IS NOT NULL
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 50`,
@@ -480,12 +483,15 @@ LIMIT 50`,
   {
     label: "Clicks from utm_source=\"sample\" today",
     sql: `SELECT
-  href,
-  click_text,
-  COUNT(*) AS clicks
-FROM clicks
-WHERE DATE(created_at) = CURRENT_DATE()
-  AND utm_source = 'sample'
+  JSON_EXTRACT_SCALAR(e.event_data, '$.href')       AS href,
+  JSON_EXTRACT_SCALAR(e.event_data, '$.click_text') AS click_text,
+  COUNT(*)                                           AS clicks
+FROM events e
+INNER JOIN pageviews p
+  ON p.session_id = e.session_id
+WHERE DATE(e.created_at) = CURRENT_DATE()
+  AND e.event_type = 'click'
+  AND p.utm_source = 'sample'
 GROUP BY 1, 2
 ORDER BY 3 DESC
 LIMIT 50`,
@@ -493,12 +499,13 @@ LIMIT 50`,
   {
     label: "Top converting wallets this week",
     sql: `SELECT
-  w.wallet_address,
-  COUNT(DISTINCT e.id) AS conversion_events
+  w.wallet_id                   AS wallet_address,
+  COUNT(DISTINCT e.session_id)  AS conversion_events
 FROM wallets w
 INNER JOIN events e ON e.visitor_hash = w.visitor_hash
 WHERE DATE(e.created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
-  AND e.event_type = 'conversion'
+  AND e.event_type != 'click'
+  AND e.is_auto_tracked = false
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 50`,
