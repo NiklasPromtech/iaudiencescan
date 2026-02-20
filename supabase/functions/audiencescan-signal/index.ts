@@ -68,7 +68,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, messages, scanContext, prompt, schema } = body;
+    const { action, messages, scanContext, prompt, schema } = body ?? {};
+    const safeMessages = Array.isArray(messages) ? messages : [];
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -164,13 +165,13 @@ ${schemaContext}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemMessage },
-          ...(messages ?? []),
-        ],
-        stream: true,
-      }),
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemMessage },
+            ...safeMessages,
+          ],
+          stream: true,
+        }),
     });
 
     if (!response.ok) {
