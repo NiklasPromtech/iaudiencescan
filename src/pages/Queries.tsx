@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, Star, Search, ChevronDown, Plus, Database } from "lucide-react";
+import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import { useQueries } from "@/hooks/use-queries";
 import { formatDistanceToNow } from "date-fns";
+import { Toaster } from "@/components/ui/toaster";
 
 type SortField = "Updated date" | "Name";
 type SortDir = "Descending" | "Ascending";
@@ -21,6 +23,7 @@ type SortDir = "Descending" | "Ascending";
 export default function Queries() {
   const navigate = useNavigate();
   const { queries, loading, error, createQuery, updateQuery } = useQueries();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("Updated date");
   const [sortDir, setSortDir] = useState<SortDir>("Descending");
@@ -31,8 +34,13 @@ export default function Queries() {
     try {
       const q = await createQuery("New query", "");
       navigate(`/queries/${q.id}`);
-    } catch {
+    } catch (err) {
       setCreating(false);
+      toast({
+        title: "Couldn't create query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -163,12 +171,13 @@ export default function Queries() {
               ))}
             </div>
           ) : error ? (
-            <div className="px-6 py-12 text-center">
-              <p className="font-mono text-xs text-destructive uppercase tracking-widest">
-                Failed to load queries
+            <div className="px-6 py-16 flex flex-col items-center gap-3">
+              <AlertCircle className="h-8 w-8 text-muted-foreground/30" />
+              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                Queries unavailable
               </p>
-              <p className="font-mono text-[10px] text-muted-foreground mt-1">
-                {error}
+              <p className="font-mono text-[10px] text-muted-foreground/60 max-w-xs text-center">
+                The query storage isn&apos;t set up yet. Run the SQL migration in Supabase to get started.
               </p>
             </div>
           ) : filtered.length === 0 ? (
@@ -218,6 +227,7 @@ export default function Queries() {
           )}
         </div>
       </div>
+      <Toaster />
     </DashboardLayout>
   );
 }
