@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, Star, Search, ChevronDown, Plus } from "lucide-react";
+import { Terminal, Star, Search, ChevronDown, Plus, Database } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,59 +12,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-
-const mockQueries = [
-  {
-    id: "1",
-    name: "People that deposited into CEX",
-    author: "audiencescan",
-    updatedAt: "2 hours ago",
-    starred: false,
-  },
-  {
-    id: "2",
-    name: "All Known EVM CEX Addresses",
-    author: "audiencescan",
-    updatedAt: "1 day ago",
-    starred: true,
-  },
-  {
-    id: "3",
-    name: "Wallets holding > 1 ETH with DeFi activity",
-    author: "audiencescan",
-    updatedAt: "3 days ago",
-    starred: false,
-  },
-  {
-    id: "4",
-    name: "Token holders that bridge from Ethereum to L2",
-    author: "audiencescan",
-    updatedAt: "1 week ago",
-    starred: false,
-  },
-];
+import { useQueries } from "@/hooks/use-queries";
+import { formatDistanceToNow } from "date-fns";
 
 type SortField = "Updated date" | "Name";
 type SortDir = "Descending" | "Ascending";
 
 export default function Queries() {
   const navigate = useNavigate();
+  const { queries, loading, error, createQuery, updateQuery } = useQueries();
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("Updated date");
   const [sortDir, setSortDir] = useState<SortDir>("Descending");
-  const [starred, setStarred] = useState<Record<string, boolean>>(
-    Object.fromEntries(mockQueries.map((q) => [q.id, q.starred]))
-  );
+  const [creating, setCreating] = useState(false);
 
-  const filtered = mockQueries
+  const handleNewQuery = async () => {
+    setCreating(true);
+    try {
+      const q = await createQuery("New query", "");
+      navigate(`/queries/${q.id}`);
+    } catch {
+      setCreating(false);
+    }
+  };
+
+  const handleToggleStar = async (e: React.MouseEvent, id: string, current: boolean) => {
+    e.stopPropagation();
+    await updateQuery(id, { starred: !current });
+  };
+
+  const filtered = queries
     .filter((q) => q.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sortField === "Name") {
-        return sortDir === "Ascending"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+        const cmp = a.name.localeCompare(b.name);
+        return sortDir === "Ascending" ? cmp : -cmp;
       }
-      return 0; // keep mock order for Updated date
+      // "Updated date" — DB already returns DESC; for ascending flip
+      if (sortDir === "Ascending") {
+        return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+      }
+      return 0; // DB order is already descending
     });
 
   return (
@@ -75,11 +64,12 @@ export default function Queries() {
             Queries
           </h1>
           <Button
-            onClick={() => navigate("/queries/new")}
+            onClick={handleNewQuery}
+            disabled={creating}
             className="rounded-none h-8 px-3 text-xs font-mono uppercase tracking-widest gap-1.5"
           >
             <Plus className="h-3 w-3" />
-            New query
+            {creating ? "Creating..." : "New query"}
           </Button>
         </div>
 
@@ -155,11 +145,43 @@ export default function Queries() {
 
         {/* Query rows */}
         <div className="flex-1 overflow-auto">
-          {filtered.length === 0 ? (
+          {loading ? (
+            /* Loading skeletons */
+            <div className="flex flex-col">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 px-6 py-4 border-b border-border"
+                >
+                  <Skeleton className="h-4 w-4 shrink-0" />
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Skeleton className="h-3.5 w-56" />
+                    <Skeleton className="h-2.5 w-32" />
+                  </div>
+                  <Skeleton className="h-4 w-4 shrink-0" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
             <div className="px-6 py-12 text-center">
-              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                No queries found
+              <p className="font-mono text-xs text-destructive uppercase tracking-widest">
+                Failed to load queries
               </p>
+              <p className="font-mono text-[10px] text-muted-foreground mt-1">
+                {error}
+              </p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="px-6 py-16 flex flex-col items-center gap-3">
+              <Database className="h-8 w-8 text-muted-foreground/30" />
+              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                {search ? "No queries match your search" : "No queries yet"}
+              </p>
+              {!search && (
+                <p className="font-mono text-[10px] text-muted-foreground/60">
+                  Click &quot;New query&quot; to get started
+                </p>
+              )}
             </div>
           ) : (
             filtered.map((query) => (
@@ -174,20 +196,20 @@ export default function Queries() {
                     {query.name}
                   </p>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
-                    @{query.author} &bull; modified {query.updatedAt}
+                    @audiencescan &bull; modified{" "}
+                    {formatDistanceToNow(new Date(query.updated_at), {
+                      addSuffix: true,
+                    })}
                   </p>
                 </div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setStarred((prev) => ({ ...prev, [query.id]: !prev[query.id] }));
-                  }}
+                  onClick={(e) => handleToggleStar(e, query.id, query.starred)}
                   className="p-1 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Star
                     className={cn(
                       "h-4 w-4",
-                      starred[query.id] && "fill-primary text-primary"
+                      query.starred && "fill-primary text-primary"
                     )}
                   />
                 </button>
