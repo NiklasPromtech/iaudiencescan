@@ -340,8 +340,13 @@ const SqlEditor = ({
     onKeyDownExtra?.(e);
   };
 
+  const normalizeSqlQuotes = (s: string) =>
+    s
+      .replace(/[\u2018\u2019\u02BC\u0060\u00B4]/g, "'") // curly/smart single quotes → '
+      .replace(/[\u201C\u201D]/g, '"');                   // curly double quotes → "
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onChange(normalizeSqlQuotes(e.target.value));
     // Schedule autocomplete update after state settles
     setTimeout(() => {
       if (editorRef.current) updateAutocomplete(editorRef.current);
