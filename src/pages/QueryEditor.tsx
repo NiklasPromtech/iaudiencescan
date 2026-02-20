@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -94,36 +94,257 @@ const SchemaTableSection = ({
 
 // ── SQL Editor with line numbers ──────────────────────────────────────────────
 
-const PLACEHOLDER_SQL = `SELECT
-  wallet_address,
-  COUNT(*) AS tx_count,
-  SUM(amount_usd) AS total_volume_usd
-FROM audiencescan.transfers
-WHERE block_date >= NOW() - INTERVAL '30' DAY
-GROUP BY 1
-ORDER BY 3 DESC
-LIMIT 100`;
+// ── Tokenizer ─────────────────────────────────────────────────────────────────
+
+type SqlToken = {
+  type: "keyword" | "string" | "number" | "comment" | "other";
+  text: string;
+};
+
+const SQL_KEYWORDS = new Set([
+  "SELECT","FROM","WHERE","JOIN","LEFT","RIGHT","INNER","OUTER","FULL","CROSS",
+  "ON","AS","AND","OR","NOT","IN","IS","NULL","BETWEEN","LIKE","EXISTS",
+  "GROUP","BY","ORDER","HAVING","LIMIT","OFFSET","DISTINCT","UNION","ALL",
+  "INSERT","INTO","VALUES","UPDATE","SET","DELETE","CREATE","TABLE","DROP",
+  "ALTER","ADD","COLUMN","INDEX","WITH","CASE","WHEN","THEN","ELSE","END",
+  "COUNT","SUM","AVG","MIN","MAX","COALESCE","DATE","TIMESTAMP","INTERVAL",
+  "CAST","IF","IFNULL","NULLIF","ROW","OVER","PARTITION","ASC","DESC",
+  "CURRENT_DATE","CURRENT_TIMESTAMP","TRUE","FALSE","LIKE","ILIKE",
+]);
+
+function tokenizeSql(sql: string): SqlToken[] {
+  const tokens: SqlToken[] = [];
+  let remaining = sql;
+
+  const patterns: [SqlToken["type"], RegExp][] = [
+    ["comment", /^--[^\n]*/],
+    ["string",  /^'[^']*'|^"[^"]*"/],
+    ["number",  /^\b\d+(\.\d+)?(e\d+)?\b/i],
+    ["keyword", new RegExp(`^\\b(${[...SQL_KEYWORDS].join("|")})\\b`, "i")],
+    ["other",   /^[\s\S]/],
+  ];
+
+  while (remaining.length > 0) {
+    let matched = false;
+    for (const [type, re] of patterns) {
+      const m = remaining.match(re);
+      if (m) {
+        const text = m[0];
+        // Merge consecutive "other" tokens
+        if (type === "other" && tokens.length > 0 && tokens[tokens.length - 1].type === "other") {
+          tokens[tokens.length - 1].text += text;
+        } else {
+          tokens.push({ type, text });
+        }
+        remaining = remaining.slice(text.length);
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) break; // safety
+  }
+  return tokens;
+}
+
+function renderTokens(tokens: SqlToken[]): React.ReactNode[] {
+  return tokens.map((tok, i) => {
+    if (tok.type === "keyword") {
+      return (
+        <span key={i} style={{ color: "#a78bfa" }}>
+          {tok.text}
+        </span>
+      );
+    }
+    if (tok.type === "string" || tok.type === "number") {
+      return (
+        <span key={i} style={{ color: "#fb923c" }}>
+          {tok.text}
+        </span>
+      );
+    }
+    if (tok.type === "comment") {
+      return (
+        <span key={i} style={{ color: "#6b7280", fontStyle: "italic" }}>
+          {tok.text}
+        </span>
+      );
+    }
+    return <span key={i}>{tok.text}</span>;
+  });
+}
+
+// ── Autocomplete helpers ───────────────────────────────────────────────────────
+
+function getPartialWord(text: string, cursorPos: number): string {
+  const before = text.slice(0, cursorPos);
+  const match = before.match(/[\w.]+$/);
+  return match ? match[0] : "";
+}
+
+function replacePartialWord(text: string, cursorPos: number, completion: string): [string, number] {
+  const before = text.slice(0, cursorPos);
+  const after = text.slice(cursorPos);
+  const match = before.match(/[\w.]+$/);
+  const partialLen = match ? match[0].length : 0;
+  const newText = before.slice(0, before.length - partialLen) + completion + after;
+  const newCursor = cursorPos - partialLen + completion.length;
+  return [newText, newCursor];
+}
+
+// ── SqlEditor component ────────────────────────────────────────────────────────
+
+interface AutocompleteState {
+  show: boolean;
+  matches: string[];
+  selected: number;
+  top: number;
+  left: number;
+}
+
+const LINE_HEIGHT = 20; // px — matches leading-5 (1.25rem = 20px)
+const CHAR_WIDTH = 7.2; // approx px for Space Mono 12px
+const EDITOR_PADDING = 12; // p-3 = 12px
 
 const SqlEditor = ({
   value,
   onChange,
+  onKeyDownExtra,
   editorRef,
+  schema,
 }: {
   value: string;
   onChange: (v: string) => void;
+  onKeyDownExtra?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   editorRef: React.RefObject<HTMLTextAreaElement>;
+  schema: QuerySchemaTable[];
 }) => {
   const gutterRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   const lineCount = value.split("\n").length || 1;
 
+  // All autocomplete candidates from schema
+  const candidates = useMemo(() => {
+    const set = new Set<string>();
+    for (const table of schema) {
+      set.add(table.name);
+      for (const col of table.columns) {
+        set.add(col.name);
+      }
+    }
+    return [...set].sort();
+  }, [schema]);
+
+  const [ac, setAc] = useState<AutocompleteState>({
+    show: false, matches: [], selected: 0, top: 0, left: 0,
+  });
+
   const syncScroll = () => {
-    if (editorRef.current && gutterRef.current) {
-      gutterRef.current.scrollTop = editorRef.current.scrollTop;
+    const ta = editorRef.current;
+    if (!ta) return;
+    if (gutterRef.current) gutterRef.current.scrollTop = ta.scrollTop;
+    if (preRef.current) {
+      preRef.current.scrollTop = ta.scrollTop;
+      preRef.current.scrollLeft = ta.scrollLeft;
     }
   };
 
+  // Recompute autocomplete position & matches whenever value/cursor changes
+  const updateAutocomplete = useCallback((ta: HTMLTextAreaElement) => {
+    const cursor = ta.selectionStart;
+    const partial = getPartialWord(value, cursor);
+    if (partial.length < 2) {
+      setAc((prev) => ({ ...prev, show: false }));
+      return;
+    }
+    const lower = partial.toLowerCase();
+    const matches = candidates.filter((c) => c.toLowerCase().startsWith(lower) && c !== partial);
+    if (matches.length === 0) {
+      setAc((prev) => ({ ...prev, show: false }));
+      return;
+    }
+
+    // Calculate pixel position
+    const textBefore = value.slice(0, cursor);
+    const lines = textBefore.split("\n");
+    const lineIndex = lines.length - 1;
+    const colIndex = lines[lineIndex].length;
+    const scrollTop = ta.scrollTop;
+
+    const top = EDITOR_PADDING + (lineIndex + 1) * LINE_HEIGHT - scrollTop;
+    const left = EDITOR_PADDING + colIndex * CHAR_WIDTH;
+
+    setAc({ show: true, matches: matches.slice(0, 6), selected: 0, top, left });
+  }, [value, candidates]);
+
+  const acceptCompletion = useCallback((completionOverride?: string) => {
+    const ta = editorRef.current;
+    if (!ta) return;
+    const completion = completionOverride ?? ac.matches[ac.selected];
+    if (!completion) return;
+    const [newSql, newCursor] = replacePartialWord(value, ta.selectionStart, completion);
+    onChange(newSql);
+    setAc((prev) => ({ ...prev, show: false }));
+    setTimeout(() => {
+      ta.focus();
+      ta.setSelectionRange(newCursor, newCursor);
+    }, 0);
+  }, [ac, value, onChange, editorRef]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (ac.show) {
+      if (e.key === "Tab" || e.key === "Enter") {
+        e.preventDefault();
+        acceptCompletion();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setAc((prev) => ({ ...prev, selected: Math.min(prev.selected + 1, prev.matches.length - 1) }));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setAc((prev) => ({ ...prev, selected: Math.max(prev.selected - 1, 0) }));
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setAc((prev) => ({ ...prev, show: false }));
+        return;
+      }
+    } else if (e.key === "Tab") {
+      // Insert 2 spaces for indentation when no autocomplete
+      e.preventDefault();
+      const ta = e.currentTarget;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const next = value.slice(0, start) + "  " + value.slice(end);
+      onChange(next);
+      setTimeout(() => {
+        ta.setSelectionRange(start + 2, start + 2);
+      }, 0);
+      return;
+    }
+    onKeyDownExtra?.(e);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e.target.value);
+    // Schedule autocomplete update after state settles
+    setTimeout(() => {
+      if (editorRef.current) updateAutocomplete(editorRef.current);
+    }, 0);
+  };
+
+  const handleClick = () => {
+    if (editorRef.current) updateAutocomplete(editorRef.current);
+  };
+
+  const tokens = useMemo(() => tokenizeSql(value), [value]);
+
   return (
-    <div className="flex border border-border overflow-hidden font-mono text-xs leading-5 flex-1 min-h-0">
+    <div ref={editorContainerRef} className="flex border border-border overflow-hidden font-mono text-xs leading-5 flex-1 min-h-0 relative">
       {/* Gutter */}
       <div
         ref={gutterRef}
@@ -136,16 +357,64 @@ const SqlEditor = ({
           </div>
         ))}
       </div>
-      {/* Textarea */}
-      <textarea
-        ref={editorRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onScroll={syncScroll}
-        spellCheck={false}
-        className="flex-1 resize-none bg-background text-foreground p-3 focus:outline-none leading-5 font-mono text-xs"
-        placeholder="-- Write your SQL query here..."
-      />
+
+      {/* Editor area: pre + textarea stacked */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Highlighted pre layer */}
+        <pre
+          ref={preRef}
+          aria-hidden="true"
+          className="absolute inset-0 p-3 font-mono text-xs leading-5 whitespace-pre overflow-hidden pointer-events-none m-0"
+          style={{ tabSize: 2 }}
+        >
+          {renderTokens(tokens)}
+          {/* trailing newline so height matches textarea */}
+          {"\n"}
+        </pre>
+
+        {/* Transparent textarea on top */}
+        <textarea
+          ref={editorRef}
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onClick={handleClick}
+          onScroll={syncScroll}
+          spellCheck={false}
+          className="absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs"
+          style={{ color: "transparent", caretColor: "hsl(var(--foreground))" }}
+          placeholder="-- Write your SQL query here..."
+        />
+
+        {/* Autocomplete dropdown */}
+        {ac.show && (
+          <div
+            className="absolute z-50 border border-border bg-popover text-popover-foreground shadow-md py-0.5 min-w-[160px]"
+            style={{ top: ac.top, left: ac.left }}
+            onMouseDown={(e) => e.preventDefault()} // keep textarea focused
+          >
+            {ac.matches.map((m, i) => (
+              <div
+                key={m}
+                onMouseDown={() => acceptCompletion(m)}
+                className={cn(
+                  "px-3 py-1 font-mono text-xs cursor-pointer transition-colors",
+                  i === ac.selected
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-muted/60"
+                )}
+              >
+                {m}
+              </div>
+            ))}
+            <div className="border-t border-border mt-0.5 px-3 py-0.5">
+              <span className="font-mono text-[9px] text-muted-foreground/60 uppercase tracking-widest">
+                Tab to complete · Esc to dismiss
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -603,7 +872,7 @@ export default function QueryEditor() {
                   ))}
                 </div>
               )}
-              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} />
+              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
             </div>
 
             {/* Results / Get started */}
