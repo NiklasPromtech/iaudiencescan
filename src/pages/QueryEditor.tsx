@@ -153,9 +153,11 @@ const SqlEditor = ({
 // ── Prompt chips ──────────────────────────────────────────────────────────────
 
 const PROMPT_CHIPS = [
-  "Find all wallets that interacted with Uniswap in the last 7 days",
-  "Show top 100 wallets by ETH balance",
-  "List wallets that deposited into a CEX this month",
+  "Top 50 token holders by balance in the last 30 days",
+  "Wallets that clicked an ad and then made an on-chain transfer",
+  "Daily new wallet visits to my site this month",
+  "Which wallets hold my token and also visited a competitor's site?",
+  "Show wallet journeys from first ad click to first transaction",
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
