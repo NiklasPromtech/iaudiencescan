@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Copy, Megaphone } from "lucide-react";
 import { mockPlatformTokens } from "./mock-data";
+import { toast } from "@/hooks/use-toast";
 
 const TokenAvatar = ({ symbol, logo }: { symbol: string; logo?: string }) => {
   const [imgError, setImgError] = React.useState(false);
@@ -25,6 +26,13 @@ export const MockPlatformCards = ({ limit, platforms }: MockPlatformCardsProps) 
   const entries = platforms
     ? platforms.filter((k) => k in mockPlatformTokens).map((k) => mockPlatformTokens[k as keyof typeof mockPlatformTokens])
     : Object.values(mockPlatformTokens);
+
+  const handleSignupPrompt = () => {
+    toast({
+      title: "Sign up to export your targeting list",
+      description: "Create a free account to copy all handles and create campaigns.",
+    });
+  };
 
   return (
     <div className={`grid ${entries.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-5 text-left`}>
@@ -54,10 +62,10 @@ export const MockPlatformCards = ({ limit, platforms }: MockPlatformCardsProps) 
               ))}
             </div>
             <div className="flex gap-2 px-5 py-3 border-t border-border bg-muted/30">
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleSignupPrompt}>
                 <Copy className="w-3 h-3" /> Copy All
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleSignupPrompt}>
                 <Megaphone className="w-3 h-3" /> Create Campaign
               </Button>
             </div>
