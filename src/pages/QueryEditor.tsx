@@ -14,6 +14,7 @@ import {
   Check,
   Trash2,
   Pencil,
+  Copy,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -494,6 +495,7 @@ export default function QueryEditor() {
   const [sql, setSql] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [schemaCopied, setSchemaCopied] = useState(false);
 
   // Query load state
   const [queryLoading, setQueryLoading] = useState(!isNew);
@@ -633,6 +635,28 @@ export default function QueryEditor() {
     },
     [sql]
   );
+
+  // Copy schema to clipboard for use with external AI
+  const handleCopySchema = useCallback(() => {
+    if (!schema.length) return;
+    const text = [
+      "You are a SQL assistant for the AudienceScan analytics platform.",
+      "Generate BigQuery-compatible SQL using only the tables and columns listed below.",
+      "Return ONLY the SQL — no explanation, no markdown fences.",
+      "",
+      "## Schema",
+      ...schema.map((t) => {
+        const cols = t.columns
+          .map((c) => `  - ${c.name} (${c.type})${c.description ? `: ${c.description}` : ""}`)
+          .join("\n");
+        return `### ${t.name}${t.description ? `\n${t.description}` : ""}\n${cols}`;
+      }),
+    ].join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setSchemaCopied(true);
+      setTimeout(() => setSchemaCopied(false), 2000);
+    });
+  }, [schema]);
 
   // Generate SQL from a natural language prompt
   const handleGenerate = async () => {
@@ -939,66 +963,20 @@ export default function QueryEditor() {
                   ))}
                 </div>
               )}
-              {/* Inline prompt bar — Dune-style */}
-              <div className="shrink-0 flex items-center border border-border bg-muted/20 hover:bg-muted/30 transition-colors group">
-                <Sparkles className="h-3.5 w-3.5 text-muted-foreground/60 ml-3 shrink-0 group-focus-within:text-primary transition-colors" />
-                <input
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleGenerate();
-                    if (e.key === "Escape") setPrompt("");
-                  }}
-                  placeholder="Edit SQL with prompt…"
-                  className="flex-1 bg-transparent px-2.5 py-1.5 font-mono text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
-                />
-                {prompt.trim() && (
-                  <button
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="shrink-0 flex items-center gap-1 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-primary hover:text-primary/80 transition-colors border-l border-border disabled:opacity-50"
-                  >
-                    {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                    {isGenerating ? "Generating…" : "Generate"}
-                  </button>
-                )}
+              {/* Copy schema bar */}
+              <div className="shrink-0 flex items-center gap-2 border border-border bg-muted/20 px-3 py-2">
+                <Copy className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                <span className="flex-1 font-mono text-xs text-muted-foreground/70">
+                  Use your preferred AI to write SQL — paste the schema as context
+                </span>
+                <button
+                  onClick={handleCopySchema}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary hover:text-primary/80 border border-primary/30 hover:border-primary/60 transition-colors"
+                >
+                  {schemaCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  {schemaCopied ? "Copied!" : "Copy Schema"}
+                </button>
               </div>
-              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
-            </div>
-
-            {/* Results / Get started */}
-            <div className="flex-1 overflow-y-auto">
-              {!hasRun ? (
-                /* ── Prompt area ── */
-                <div className="flex flex-col items-center gap-6 py-8 px-4">
-                  <div className="flex flex-col items-center gap-2">
-                    <Sparkles className="h-8 w-8 text-primary/40" />
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Generate with a prompt
-                    </p>
-                  </div>
-
-                  <div className="w-full max-w-lg flex gap-2">
-                    <Input
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                      placeholder="Describe what you want to query..."
-                      className="rounded-none font-mono text-xs"
-                    />
-                    <Button
-                      onClick={handleGenerate}
-                      className="rounded-none shrink-0 font-mono text-xs uppercase tracking-widest gap-1.5"
-                      disabled={!prompt.trim() || isGenerating}
-                    >
-                      {isGenerating ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-3 w-3" />
-                      )}
-                      {isGenerating ? "Generating..." : "Generate"}
-                    </Button>
-                  </div>
 
                   <div className="flex flex-wrap gap-2 justify-center max-w-lg">
                     {PROMPT_CHIPS.map((chip) => (
@@ -1020,7 +998,18 @@ export default function QueryEditor() {
                     Executing query...
                   </p>
                 </div>
-              ) : runError ? (
+
+              {/* Results area */}
+              <div className="flex-1 overflow-y-auto">
+                {!hasRun ? (
+                  /* ── Empty state ── */
+                  <div className="flex flex-col items-center justify-center h-full gap-3 py-12 text-center px-4">
+                    <Play className="h-6 w-6 text-muted-foreground/30" />
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Run your query to see results
+                    </p>
+                  </div>
+                ) : runError ? (
                 /* ── Error state ── */
                 <div className="p-4">
                   <div className="border border-destructive/40 bg-destructive/5">
