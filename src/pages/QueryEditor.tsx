@@ -129,9 +129,14 @@ function tokenizeSql(sql: string): SqlToken[] {
     ["other",   /^[\s\S]/],
   ];
 
+  let prevChar = "";
+  const isWordChar = (c: string) => /\w/.test(c);
+
   while (remaining.length > 0) {
     let matched = false;
     for (const [type, re] of patterns) {
+      // Skip keyword matching if the previous character was a word char (we're mid-identifier)
+      if (type === "keyword" && prevChar !== "" && isWordChar(prevChar)) continue;
       const m = remaining.match(re);
       if (m) {
         const text = m[0];
@@ -141,6 +146,7 @@ function tokenizeSql(sql: string): SqlToken[] {
         } else {
           tokens.push({ type, text });
         }
+        prevChar = text[text.length - 1];
         remaining = remaining.slice(text.length);
         matched = true;
         break;
