@@ -67,13 +67,91 @@ serve(async (req) => {
       });
     }
 
-    const { messages, scanContext } = await req.json();
+    const body = await req.json();
+    const { action, messages, scanContext, prompt, schema } = body;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // ── SQL generation action ────────────────────────────────────────────────
+    if (action === "sql-generate") {
+      if (!prompt?.trim()) {
+        return new Response(JSON.stringify({ error: "Prompt is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const schemaContext = Array.isArray(schema) && schema.length > 0
+        ? schema
+            .map((table: { name: string; description?: string; columns: { name: string; type: string; description?: string }[] }) => {
+              const cols = table.columns
+                .map((c) => `  ${c.name} ${c.type}${c.description ? ` -- ${c.description}` : ""}`)
+                .join("\n");
+              return `TABLE ${table.name}${table.description ? ` -- ${table.description}` : ""}:\n${cols}`;
+            })
+            .join("\n\n")
+        : "No schema available — generate a reasonable query based on the prompt.";
+
+      const sqlSystemPrompt = `You are a SQL query generator for the AudienceScan analytics platform.
+You receive a natural language request and a database schema, and you return ONLY valid SQL — no explanation, no markdown fences, no preamble, no backticks.
+The SQL must be compatible with BigQuery syntax.
+Only reference tables and columns that exist in the provided schema.
+If the request cannot be answered from the schema, return a SQL comment explaining why (e.g. -- The requested data is not available in the current schema).
+
+Database schema:
+${schemaContext}`;
+
+      const sqlResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-flash-1.5",
+          messages: [
+            { role: "system", content: sqlSystemPrompt },
+            { role: "user", content: prompt },
+          ],
+          stream: false,
+        }),
+      });
+
+      if (!sqlResponse.ok) {
+        if (sqlResponse.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit reached — please wait a moment and try again." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (sqlResponse.status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted — please add credits to your workspace." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const errText = await sqlResponse.text();
+        console.error("AI gateway error:", sqlResponse.status, errText);
+        throw new Error(`AI gateway error (${sqlResponse.status}): ${errText}`);
+      }
+
+      const aiData = await sqlResponse.json();
+      const rawSql = aiData.choices?.[0]?.message?.content?.trim() ?? "";
+      const cleanedSql = rawSql
+        .replace(/^```(?:sql)?\n?/i, "")
+        .replace(/\n?```$/, "")
+        .trim();
+
+      return new Response(JSON.stringify({ sql: cleanedSql }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Chat / signal action (default) ───────────────────────────────────────
     // Build the system message with scan context
     const systemMessage = scanContext 
       ? `${SYSTEM_PROMPT}\n\nCurrent ScanContext:\n${JSON.stringify(scanContext, null, 2)}`
@@ -89,7 +167,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemMessage },
-          ...messages,
+          ...(messages ?? []),
         ],
         stream: true,
       }),
