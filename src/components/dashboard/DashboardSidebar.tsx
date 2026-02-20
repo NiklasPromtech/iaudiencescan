@@ -13,6 +13,7 @@ import {
   FileCode2,
   TrendingUp,
   LogOut,
+  Terminal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -55,6 +56,11 @@ const insightsItems = [
     title: "Wallet Data",
     url: "/wallets",
     icon: Wallet,
+  },
+  {
+    title: "Queries",
+    url: "/queries",
+    icon: Terminal,
   },
 ];
 
