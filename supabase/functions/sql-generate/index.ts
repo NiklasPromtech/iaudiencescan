@@ -1,8 +1,7 @@
-// sql-generate v3 — AI-powered SQL generation via Lovable AI Gateway
-// deploy-trigger: 2026-02-20T-v3
+// sql-generate v4 — AI-powered SQL generation via Lovable AI Gateway
+// deploy-trigger: 2026-02-20T-v4-model-fix
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +11,7 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
@@ -34,8 +33,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -83,7 +84,7 @@ ${schemaContext}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-flash-1.5",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
@@ -107,7 +108,7 @@ ${schemaContext}`;
       }
       const errText = await response.text();
       console.error("AI gateway error:", response.status, errText);
-      throw new Error(`AI gateway error (${response.status})`);
+      throw new Error(`AI gateway error (${response.status}): ${errText}`);
     }
 
     const aiData = await response.json();
