@@ -11,6 +11,7 @@ import {
   RefreshCw,
   AlertCircle,
   Columns,
+  Check,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import {
   QueryExecuteResponse,
 } from "@/lib/api";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { useQueries } from "@/hooks/use-queries";
 import {
   Table,
   TableBody,
@@ -156,18 +158,26 @@ const PROMPT_CHIPS = [
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
+type SaveStatus = "idle" | "saving" | "saved";
+
 export default function QueryEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === "new";
   const { selectedWebsite } = useSelectedWebsite();
+  const { createQuery, updateQuery } = useQueries();
 
-  const [title, setTitle] = useState(
-    isNew ? "New query" : "People that deposited into CEX"
-  );
+  const [title, setTitle] = useState("New query");
   const [editingTitle, setEditingTitle] = useState(false);
-  const [sql, setSql] = useState(isNew ? "" : PLACEHOLDER_SQL);
+  const [sql, setSql] = useState("");
   const [prompt, setPrompt] = useState("");
+
+  // Query load state
+  const [queryLoading, setQueryLoading] = useState(!isNew);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  // Track if this is the first load (don't auto-save on initial populate)
+  const isFirstLoad = useRef(true);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Schema state
   const [schema, setSchema] = useState<QuerySchemaTable[]>([]);
@@ -182,6 +192,63 @@ export default function QueryEditor() {
   const [hasRun, setHasRun] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // If navigated to /queries/new, create a DB row and redirect
+  useEffect(() => {
+    if (isNew) {
+      createQuery("New query", "").then((q) => {
+        navigate(`/queries/${q.id}`, { replace: true });
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNew]);
+
+  // Load existing query from Supabase
+  useEffect(() => {
+    if (isNew || !id) return;
+    setQueryLoading(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .from("queries")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (!error && data) {
+        isFirstLoad.current = true;
+        setTitle(data.name ?? "New query");
+        setSql(data.sql ?? "");
+      }
+      setQueryLoading(false);
+    })();
+  }, [id, isNew]);
+
+  // Debounced auto-save whenever title or sql changes
+  useEffect(() => {
+    if (isNew || !id || queryLoading) return;
+    if (isFirstLoad.current) {
+      // Skip the save triggered by the initial population
+      isFirstLoad.current = false;
+      return;
+    }
+    setSaveStatus("saving");
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await updateQuery(id, { name: title, sql });
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2000);
+      } catch {
+        setSaveStatus("idle");
+      }
+    }, 1500);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, sql]);
 
   // Load schema on mount
   const loadSchema = useCallback(async () => {
@@ -266,7 +333,9 @@ export default function QueryEditor() {
             <ArrowLeft className="h-4 w-4" />
           </button>
 
-          {editingTitle ? (
+          {queryLoading ? (
+            <Skeleton className="h-4 w-48" />
+          ) : editingTitle ? (
             <input
               autoFocus
               value={title}
@@ -288,6 +357,20 @@ export default function QueryEditor() {
             @audiencescan
           </span>
 
+          {/* Save status */}
+          {saveStatus === "saving" && (
+            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1">
+              <Loader2 className="h-2.5 w-2.5 animate-spin" />
+              Saving...
+            </span>
+          )}
+          {saveStatus === "saved" && (
+            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1">
+              <Check className="h-2.5 w-2.5" />
+              Saved
+            </span>
+          )}
+
           <div className="ml-auto flex items-center gap-2">
             {!selectedWebsite && (
               <span className="font-mono text-[10px] text-muted-foreground">
@@ -296,7 +379,7 @@ export default function QueryEditor() {
             )}
             <Button
               onClick={handleRun}
-              disabled={!sql.trim() || isRunning || !selectedWebsite}
+              disabled={!sql.trim() || isRunning || !selectedWebsite || queryLoading}
               className="rounded-none h-8 px-4 text-xs font-mono uppercase tracking-widest gap-1.5"
             >
               {isRunning ? (
