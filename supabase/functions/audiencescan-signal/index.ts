@@ -77,6 +77,7 @@ serve(async (req) => {
 
     // ── SQL generation action ────────────────────────────────────────────────
     if (action === "sql-generate") {
+      console.log("[sql-generate] prompt:", prompt?.slice(0, 80));
       if (!prompt?.trim()) {
         return new Response(JSON.stringify({ error: "Prompt is required" }), {
           status: 400,
@@ -88,12 +89,14 @@ serve(async (req) => {
         ? schema
             .map((table: { name: string; description?: string; columns: { name: string; type: string; description?: string }[] }) => {
               const cols = table.columns
-                .map((c) => `  ${c.name} ${c.type}${c.description ? ` -- ${c.description}` : ""}`)
+                .map((c: { name: string; type: string; description?: string }) => `  ${c.name} ${c.type}${c.description ? ` -- ${c.description}` : ""}`)
                 .join("\n");
               return `TABLE ${table.name}${table.description ? ` -- ${table.description}` : ""}:\n${cols}`;
             })
             .join("\n\n")
         : "No schema available — generate a reasonable query based on the prompt.";
+
+      console.log("[sql-generate] schema tables:", Array.isArray(schema) ? schema.length : "none");
 
       const sqlSystemPrompt = `You are a SQL query generator for the AudienceScan analytics platform.
 You receive a natural language request and a database schema, and you return ONLY valid SQL — no explanation, no markdown fences, no preamble, no backticks.
@@ -104,23 +107,37 @@ If the request cannot be answered from the schema, return a SQL comment explaini
 Database schema:
 ${schemaContext}`;
 
-      const sqlResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: sqlSystemPrompt },
-            { role: "user", content: prompt },
-          ],
-          stream: false,
-        }),
-      });
+      console.log("[sql-generate] calling AI gateway...");
+      let sqlResponse: Response;
+      try {
+        sqlResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: sqlSystemPrompt },
+              { role: "user", content: prompt },
+            ],
+            stream: false,
+          }),
+        });
+      } catch (fetchErr) {
+        console.error("[sql-generate] fetch failed:", fetchErr);
+        return new Response(JSON.stringify({ error: `Network error calling AI gateway: ${fetchErr}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log("[sql-generate] AI gateway status:", sqlResponse.status);
 
       if (!sqlResponse.ok) {
+        const errText = await sqlResponse.text();
+        console.error("[sql-generate] AI gateway error:", sqlResponse.status, errText);
         if (sqlResponse.status === 429) {
           return new Response(JSON.stringify({ error: "Rate limit reached — please wait a moment and try again." }), {
             status: 429,
@@ -133,18 +150,21 @@ ${schemaContext}`;
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        const errText = await sqlResponse.text();
-        console.error("AI gateway error:", sqlResponse.status, errText);
-        throw new Error(`AI gateway error (${sqlResponse.status}): ${errText}`);
+        return new Response(JSON.stringify({ error: `AI gateway error (${sqlResponse.status}): ${errText}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const aiData = await sqlResponse.json();
+      console.log("[sql-generate] AI response keys:", Object.keys(aiData));
       const rawSql = aiData.choices?.[0]?.message?.content?.trim() ?? "";
       const cleanedSql = rawSql
         .replace(/^```(?:sql)?\n?/i, "")
         .replace(/\n?```$/, "")
         .trim();
 
+      console.log("[sql-generate] returning SQL length:", cleanedSql.length);
       return new Response(JSON.stringify({ sql: cleanedSql }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
