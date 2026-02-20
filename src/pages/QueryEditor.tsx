@@ -237,28 +237,24 @@ export default function QueryEditor() {
     })();
   }, [id, isNew]);
 
-  // Once the query loads with no SQL and we know the tag_id, inject a sample query
+  // Once the query loads with no SQL and we know the tag_id, inject a sample query.
+  // Reset when the query ID changes (e.g. redirect from /queries/new → /queries/UUID).
   const sampleInjected = useRef(false);
+  useEffect(() => {
+    sampleInjected.current = false;
+  }, [id]);
   useEffect(() => {
     if (sampleInjected.current) return;
     if (queryLoading) return;
+    if (isNew) return; // wait for redirect to real ID
     if (sql.trim()) return; // already has content
     if (!selectedWebsite?.tag_id) return;
     sampleInjected.current = true;
     isFirstLoad.current = true; // prevent auto-save of the injected sample
     setSql(
-      `-- Replace '${selectedWebsite.tag_id}' with your tag ID if querying a different property
-SELECT
-  date_trunc('day', visited_at) AS day,
-  COUNT(DISTINCT wallet_address)  AS unique_wallets,
-  COUNT(*)                        AS total_visits
-FROM audiencescan.visits
-WHERE tag_id = '${selectedWebsite.tag_id}'
-  AND visited_at >= NOW() - INTERVAL '30' DAY
-GROUP BY 1
-ORDER BY 1 DESC`
+      `-- Replace '${selectedWebsite.tag_id}' with your tag ID if querying a different property\nSELECT\n  date_trunc('day', visited_at) AS day,\n  COUNT(DISTINCT wallet_address)  AS unique_wallets,\n  COUNT(*)                        AS total_visits\nFROM audiencescan.visits\nWHERE tag_id = '${selectedWebsite.tag_id}'\n  AND visited_at >= NOW() - INTERVAL '30' DAY\nGROUP BY 1\nORDER BY 1 DESC`
     );
-  }, [queryLoading, sql, selectedWebsite?.tag_id]);
+  }, [id, isNew, queryLoading, sql, selectedWebsite?.tag_id]);
 
 
   useEffect(() => {
