@@ -1,33 +1,97 @@
 
-# Add UTM Generator Tool
+# Add "Queries" to Insights Section
 
 ## Overview
-Add a new "Tools" section in the sidebar under Strategy, with a UTM Generator as the first tool. The generator lets users paste a base URL, fill in UTM parameters, and copy the final tagged URL. Simple and clean for now, designed to grow over time.
 
-## Changes
+Inspired by Dune Analytics, we're adding a **Queries** feature under the **Insights** section of the sidebar. This gives users a SQL-like query workspace to explore their AudienceScan data, styled to match the flat Dune-inspired aesthetic already in place.
 
-### 1. New page: `src/pages/Tools.tsx`
-- Dashboard layout with a "UTM Generator" card
-- Input fields:
-  - **Website URL** (required) -- the base link
-  - **utm_source** (e.g. twitter, telegram)
-  - **utm_medium** (e.g. cpc, social, email)
-  - **utm_campaign** (e.g. retargeting-q1)
-  - **utm_content** (e.g. blue-ad-v2)
-  - **utm_term** (optional)
-- Live preview of the generated URL below the inputs
-- "Copy URL" button that copies to clipboard with a toast confirmation
-- "Reset" button to clear all fields
-- Validation: disable copy if no base URL is entered
+This is a **frontend-only, UI scaffold** — no live SQL execution backend yet, but everything is wired up visually and structurally so it's ready to connect to a real query engine later.
 
-### 2. Sidebar update: `src/components/dashboard/DashboardSidebar.tsx`
-- Add a `Wrench` icon import from lucide-react
-- Add `{ title: "Tools", url: "/tools", icon: Wrench }` to the `strategyItems` array alongside Scans
+---
 
-### 3. Route + auth: `src/App.tsx`
-- Import `Tools` page
-- Add `<Route path="/tools" element={<RequireAuth><Tools /></RequireAuth>} />`
+## What We're Building
 
-## Future extensibility (not built now, just noting)
-- UTM naming/aliasing (e.g. `utm_content = 614243622634` labeled "Blue Twitter ad") could live under Enrichment as a "UTM Labels" feature, where saved labels appear in Overview tables alongside raw UTM values
-- The Tools page can grow to include link shorteners, QR generators, etc.
+### 1. Sidebar — add "Queries" to Insights
+
+Add a `Terminal` icon item to `insightsItems` in `DashboardSidebar.tsx`:
+
+```typescript
+{ title: "Queries", url: "/queries", icon: Terminal }
+```
+
+This places it alongside Overview, Change, and Wallet Data under the Insights group.
+
+---
+
+### 2. Queries List Page — `src/pages/Queries.tsx`
+
+A Dune-style queries index page:
+
+- **Header**: "Queries" title
+- **Toolbar row**:
+  - Search input ("Search queries...")
+  - `Sort by: Updated date` dropdown
+  - `Sort by: Descending` dropdown
+  - `New query` button (navigates to `/queries/new`)
+- **Query list**: flat rows (no cards, no shadows — border-bottom separated), each row showing:
+  - Terminal/code icon on the left
+  - Query name (bold) + `@audiencescan • modified X ago` in muted mono text
+  - Star icon on the right (toggle favourite)
+- Mock data for 3–4 starter queries (e.g. "People that deposited into CEX", "All Known EVM CEX Addresses")
+
+---
+
+### 3. Query Editor Page — `src/pages/QueryEditor.tsx`
+
+A split-pane layout:
+
+**Left panel — Data Explorer (fixed ~280px width)**
+- "Data Explorer" header
+- Search input ("Search by dataset name, contract address...")
+- Collapsible sections using the existing Collapsible component:
+  - **AudienceScan data** (label): Prices & metadata, DEX trading, Transfers & balances, Labels & identity, Gas & fees, More curated data
+  - **My data**: Uploads, Materialized views
+  - **Blockchain data**: Decoded projects, Raw blockchain data
+
+**Right panel — Query editor area**
+- Query title (editable inline, e.g. "New query")
+- `@audiencescan` avatar + username label
+- **Query editor** box: monospaced textarea with line numbers (simple implementation — a `<textarea>` styled with `font-mono`, with a line-number gutter column alongside it)
+- **Run** button (top-right of the editor pane, orange primary colour)
+- **Results area** below: initially shows a "Get started" panel with:
+  - "Generate with a prompt" text input
+  - 3 example prompt chips (e.g. "Find all wallets that interacted with Uniswap in the last 7 days")
+
+---
+
+### 4. Routing — `src/App.tsx`
+
+Add two protected routes:
+```typescript
+<Route path="/queries" element={<RequireAuth><Queries /></RequireAuth>} />
+<Route path="/queries/:id" element={<RequireAuth><QueryEditor /></RequireAuth>} />
+```
+
+`/queries/new` will also resolve to QueryEditor via the `:id` param being "new".
+
+---
+
+## Style Notes (matching existing platform aesthetic)
+
+- `rounded-none` throughout — no rounded corners on cards, buttons, inputs
+- `font-mono text-[10px] uppercase tracking-widest` for section labels
+- Border-separated rows instead of cards with shadows
+- Orange (`text-orange-500` / `bg-orange-500`) for the Run button and active states
+- Teal for any "Unknown" states if needed
+- The Data Explorer left panel uses the same collapsible pattern already in the sidebar
+
+---
+
+## Files to Create/Modify
+
+| File | Action |
+|---|---|
+| `src/components/dashboard/DashboardSidebar.tsx` | Add `Terminal` icon + Queries to `insightsItems` |
+| `src/pages/Queries.tsx` | Create — queries list page |
+| `src/pages/QueryEditor.tsx` | Create — split-pane editor page |
+| `src/App.tsx` | Register two new routes |
