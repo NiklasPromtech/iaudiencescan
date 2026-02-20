@@ -13,6 +13,8 @@ import {
   Columns,
   Check,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,11 +168,13 @@ export default function QueryEditor() {
   const isNew = id === "new";
   const { selectedWebsite } = useSelectedWebsite();
   const { createQuery, updateQuery } = useQueries();
+  const { toast } = useToast();
 
   const [title, setTitle] = useState("New query");
   const [editingTitle, setEditingTitle] = useState(false);
   const [sql, setSql] = useState("");
   const [prompt, setPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Query load state
   const [queryLoading, setQueryLoading] = useState(!isNew);
@@ -289,6 +293,31 @@ export default function QueryEditor() {
     },
     [sql]
   );
+
+  // Generate SQL from a natural language prompt
+  const handleGenerate = async () => {
+    if (!prompt.trim() || isGenerating) return;
+    setIsGenerating(true);
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data, error } = await supabase.functions.invoke("sql-generate", {
+        body: { prompt, schema },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSql(data.sql ?? "");
+      setPrompt("");
+      setHasRun(false);
+    } catch (err) {
+      toast({
+        title: "Couldn't generate query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Execute the query
   const handleRun = async () => {
@@ -488,14 +517,21 @@ export default function QueryEditor() {
                     <Input
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                       placeholder="Describe what you want to query..."
                       className="rounded-none font-mono text-xs"
                     />
                     <Button
-                      className="rounded-none shrink-0 font-mono text-xs uppercase tracking-widest"
-                      disabled={!prompt.trim()}
+                      onClick={handleGenerate}
+                      className="rounded-none shrink-0 font-mono text-xs uppercase tracking-widest gap-1.5"
+                      disabled={!prompt.trim() || isGenerating}
                     >
-                      Generate
+                      {isGenerating ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3" />
+                      )}
+                      {isGenerating ? "Generating..." : "Generate"}
                     </Button>
                   </div>
 
@@ -601,6 +637,7 @@ export default function QueryEditor() {
           </div>
         </div>
       </div>
+      <Toaster />
     </DashboardLayout>
   );
 }
