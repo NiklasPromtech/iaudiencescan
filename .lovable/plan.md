@@ -1,102 +1,93 @@
 
-# Save Queries to Supabase
+# Wire the AI "Generate" Button to Produce Real SQL
 
-## Overview
+## What's currently there
 
-Right now queries are hardcoded mock data. We'll create a real `queries` table in Supabase so each user's saved queries persist, and wire `Queries.tsx` and `QueryEditor.tsx` to read/write from it. The UI reference image confirms the existing layout is correct — we're just swapping mock data for real data.
+The QueryEditor already has a polished prompt UI — a text input, three example chips ("Find all wallets that interacted with Uniswap…", etc.), and a "Generate" button. But the button is entirely disconnected. No edge function exists for SQL generation. Clicking it does nothing.
+
+## What we're building
+
+A new Supabase edge function (`sql-generate`) that takes a natural language prompt + the current schema, calls the Lovable AI gateway, and returns a ready-to-paste SQL query. The QueryEditor "Generate" button will call it, stream or await the response, and drop the result directly into the SQL editor.
 
 ---
 
-## 1. Database — `queries` table (migration)
+## 1. New edge function — `supabase/functions/sql-generate/index.ts`
 
-```sql
-CREATE TABLE public.queries (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name        text NOT NULL DEFAULT 'New query',
-  sql         text NOT NULL DEFAULT '',
-  starred     boolean NOT NULL DEFAULT false,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
-);
+This follows the exact same pattern as the existing `audiencescan-signal` function (already in the project):
 
--- Auto-update updated_at on every save
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$;
+- Validates the JWT from the `Authorization` header
+- Reads `{ prompt, schema }` from the request body
+- Sends a system prompt + user message to `https://ai.gateway.lovable.dev/v1/chat/completions`
+- Model: `google/gemini-3-flash-preview`
+- Returns the SQL string in a simple JSON response `{ sql: "SELECT ..." }`
+- Handles 429 and 402 errors with friendly messages
 
-CREATE TRIGGER queries_updated_at
-  BEFORE UPDATE ON public.queries
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-
--- RLS
-ALTER TABLE public.queries ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage their own queries"
-  ON public.queries FOR ALL
-  TO authenticated
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
+**System prompt** (kept server-side, never exposed to client):
+```
+You are a SQL query generator for the AudienceScan analytics platform.
+You receive a natural language request and a database schema, and you return 
+ONLY valid SQL — no explanation, no markdown fences, no preamble.
+The SQL must be compatible with BigQuery syntax.
+Only reference tables and columns that exist in the provided schema.
+If the request cannot be answered from the schema, return a SQL comment explaining why.
 ```
 
-This is user-scoped: each user only ever sees and modifies their own queries. No shared/public queries for now.
+The schema from the frontend (already fetched and stored in state) is passed in the request body so the AI knows exactly which tables and columns exist.
 
 ---
 
-## 2. `src/hooks/use-queries.ts` — new hook
+## 2. `supabase/config.toml` — register the new function
 
-A small Supabase-backed hook that encapsulates all query CRUD:
+Add an entry for `sql-generate` with `verify_jwt = true` (only authenticated users can generate queries).
 
+---
+
+## 3. `src/pages/QueryEditor.tsx` — wire the Generate button
+
+**State additions:**
+- `isGenerating: boolean` — shows a spinner on the button while waiting
+
+**`handleGenerate` function:**
 ```typescript
-// fetch all queries for the current user (ordered by updated_at desc)
-useQueries() → { queries, loading, error, refetch }
-
-// mutations
-createQuery(name, sql) → Promise<query>
-updateQuery(id, patch) → Promise<void>   // patch = { name?, sql?, starred? }
-deleteQuery(id) → Promise<void>
+const handleGenerate = async () => {
+  if (!prompt.trim() || isGenerating) return;
+  setIsGenerating(true);
+  try {
+    const { data, error } = await supabase.functions.invoke("sql-generate", {
+      body: { prompt, schema }  // schema is already in state from fetchQuerySchema()
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    setSql(data.sql);           // drops the generated SQL into the editor
+    setHasRun(false);           // resets results area so user sees the editor
+  } catch (err) {
+    toast({ title: "Couldn't generate query", description: err.message, variant: "destructive" });
+  } finally {
+    setIsGenerating(false);
+  }
+};
 ```
 
-Uses `supabase.from("queries")` directly — same pattern as the rest of the app (no new dependencies).
+**Button update:**
+```tsx
+<Button
+  onClick={handleGenerate}
+  disabled={!prompt.trim() || isGenerating}
+>
+  {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+  {isGenerating ? "Generating..." : "Generate"}
+</Button>
+```
+
+**After generation:** The prompt input is cleared, the generated SQL appears in the editor, and the user can immediately click Run or tweak the query. The auto-save debounce will persist the new SQL automatically.
+
+**Chip behaviour:** Clicking a chip fills the prompt input (already works) — then the user clicks Generate (or hits Enter in the prompt field).
 
 ---
 
-## 3. `src/pages/Queries.tsx` — replace mock data
+## 4. Add Toaster to QueryEditor
 
-- Remove `mockQueries` constant
-- Import and call `useQueries()`
-- Show a loading skeleton (3 rows) while fetching
-- Show "No queries yet — click New Query to get started" empty state
-- Starring now calls `updateQuery(id, { starred: !current })` — persisted to DB
-- Clicking a row still navigates to `/queries/:id` (the real UUID now)
-- Sort by "Updated date" works correctly because the DB returns rows ordered by `updated_at DESC`; sort by "Name" is done client-side (same as before)
-- "New Query" button: calls `createQuery("New query", "")` first, then navigates to the returned UUID — so the row is created in DB immediately
-
----
-
-## 4. `src/pages/QueryEditor.tsx` — load & auto-save
-
-**On mount (existing query):**
-- If `id !== "new"`, fetch the single query row from Supabase (`supabase.from("queries").select().eq("id", id).single()`)
-- Populate `title` and `sql` from the DB row
-
-**Auto-save (debounced):**
-- Whenever `title` or `sql` changes (and the query already exists in DB), debounce 1.5s then call `updateQuery(id, { name: title, sql })`
-- A small "Saved" / "Saving..." indicator appears near the title so users know their work is persisted
-
-**If `id === "new"`:**
-- `QueryEditor` is no longer reachable at `/queries/new` directly for creating — "New Query" in the list page creates the DB row first and redirects to `/queries/<uuid>`. This keeps the editor always working against a real ID.
-- If someone navigates to `/queries/new` directly, we create the query on the fly and redirect.
-
----
-
-## 5. `src/integrations/supabase/types.ts`
-
-Will be updated automatically once the migration runs (Lovable regenerates types). No manual changes needed.
+The QueryEditor doesn't currently have a `<Toaster />` or `useToast()` — we'll add both so the error toast from failed generation is visible.
 
 ---
 
@@ -104,13 +95,15 @@ Will be updated automatically once the migration runs (Lovable regenerates types
 
 | File | Action |
 |---|---|
-| `supabase/migrations/<timestamp>_create_queries_table.sql` | Create — schema + RLS |
-| `src/hooks/use-queries.ts` | Create — Supabase CRUD hook |
-| `src/pages/Queries.tsx` | Modify — replace mock data with real hook |
-| `src/pages/QueryEditor.tsx` | Modify — load query by ID + auto-save on edit |
+| `supabase/functions/sql-generate/index.ts` | Create — new AI edge function |
+| `supabase/config.toml` | Modify — register the new function |
+| `src/pages/QueryEditor.tsx` | Modify — wire Generate button + add toast |
 
 ---
 
-## Visual result
+## Technical notes
 
-The list page will look identical to the reference image — same flat row layout, star toggle, search/sort toolbar — but everything is now real and persisted per user. The editor gains a subtle "Saving..." badge near the title confirming edits are stored automatically.
+- Uses `supabase.functions.invoke` (non-streaming) since we want the full SQL before inserting it into the editor — partial SQL mid-stream would be unusable
+- The schema passed to the AI is already available in `schema` state (fetched from `/query/schema` on mount) — no extra API call needed
+- The `LOVABLE_API_KEY` secret is auto-provisioned in the Supabase environment — no user action required
+- 429 / 402 errors from the AI gateway are surfaced as descriptive toasts, consistent with the `audiencescan-signal` function pattern
