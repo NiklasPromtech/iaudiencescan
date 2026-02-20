@@ -15,7 +15,9 @@ import {
   Trash2,
   Pencil,
   Copy,
+  Download,
 } from "lucide-react";
+import { downloadCSV } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -463,6 +465,44 @@ INNER JOIN wallets w ON w.visitor_hash = p.visitor_hash
 WHERE DATE(p.created_at) = CURRENT_DATE()
   AND p.is_bot = false`,
   },
+  {
+    label: "Clicks by UTM source today",
+    sql: `SELECT
+  utm_source,
+  COUNT(*) AS clicks
+FROM clicks
+WHERE DATE(created_at) = CURRENT_DATE()
+  AND utm_source IS NOT NULL
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 50`,
+  },
+  {
+    label: "Clicks from utm_source=\"sample\" today",
+    sql: `SELECT
+  href,
+  click_text,
+  COUNT(*) AS clicks
+FROM clicks
+WHERE DATE(created_at) = CURRENT_DATE()
+  AND utm_source = 'sample'
+GROUP BY 1, 2
+ORDER BY 3 DESC
+LIMIT 50`,
+  },
+  {
+    label: "Top converting wallets this week",
+    sql: `SELECT
+  w.wallet_address,
+  COUNT(DISTINCT e.id) AS conversion_events
+FROM wallets w
+INNER JOIN events e ON e.visitor_hash = w.visitor_hash
+WHERE DATE(e.created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+  AND e.event_type = 'conversion'
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 50`,
+  },
 ];
 
 // ── Prompt chips ──────────────────────────────────────────────────────────────
@@ -520,6 +560,44 @@ export default function QueryEditor() {
   const [hasRun, setHasRun] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // Resizable editor/results split
+  const [editorHeightPx, setEditorHeightPx] = useState(300);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const newHeight = ev.clientY - rect.top;
+      const clamped = Math.max(120, Math.min(newHeight, rect.height - 120));
+      setEditorHeightPx(clamped);
+    };
+
+    const onMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, []);
+
+  // CSV export for results
+  const handleDownloadCSV = useCallback(() => {
+    if (!results) return;
+    const data = [results.columns, ...results.rows.map((row) => row.map((cell) => String(cell ?? "")))];
+    downloadCSV(data, `query-results-${Date.now()}`);
+  }, [results]);
 
   // If navigated to /queries/new, create a DB row and redirect
   useEffect(() => {
@@ -936,11 +1014,11 @@ export default function QueryEditor() {
           </div>
 
           {/* Right — Editor + Results */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* SQL Editor */}
+          <div ref={containerRef} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* SQL Editor — resizable height */}
             <div
-              className="flex flex-col p-4 border-b border-border gap-2"
-              style={{ height: "55%" }}
+              className="flex flex-col p-4 gap-2 overflow-hidden shrink-0"
+              style={{ height: editorHeightPx }}
             >
               {/* Sample query chips */}
               {selectedWebsite && (
@@ -982,17 +1060,37 @@ export default function QueryEditor() {
               <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
             </div>
 
+            {/* Drag handle divider */}
+            <div
+              onMouseDown={handleDividerMouseDown}
+              className="shrink-0 h-1.5 bg-border hover:bg-primary/30 cursor-row-resize transition-colors select-none flex items-center justify-center group"
+              title="Drag to resize"
+            >
+              <div className="flex flex-col gap-0.5 opacity-40 group-hover:opacity-70 transition-opacity">
+                <div className="w-8 h-px bg-foreground rounded-full" />
+                <div className="w-8 h-px bg-foreground rounded-full" />
+              </div>
+            </div>
+
             {/* Results area */}
             <div className="flex-1 overflow-y-auto">
-                {!hasRun ? (
-                  /* ── Empty state ── */
-                  <div className="flex flex-col items-center justify-center h-full gap-3 py-12 text-center px-4">
-                    <Play className="h-6 w-6 text-muted-foreground/30" />
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Run your query to see results
-                    </p>
-                  </div>
-                ) : runError ? (
+              {!hasRun ? (
+                /* ── Empty state ── */
+                <div className="flex flex-col items-center justify-center h-full gap-3 py-12 text-center px-4">
+                  <Play className="h-6 w-6 text-muted-foreground/30" />
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Run your query to see results
+                  </p>
+                </div>
+              ) : isRunning ? (
+                /* ── Running state ── */
+                <div className="flex flex-col items-center justify-center h-full gap-3 py-12">
+                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Running…
+                  </p>
+                </div>
+              ) : runError ? (
                 /* ── Error state ── */
                 <div className="p-4">
                   <div className="border border-destructive/40 bg-destructive/5">
@@ -1021,6 +1119,14 @@ export default function QueryEditor() {
                           {results.row_count !== 1 ? "s" : ""}
                         </span>
                       </p>
+                      <button
+                        onClick={handleDownloadCSV}
+                        className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border hover:border-foreground/30 transition-colors"
+                        title="Download as CSV"
+                      >
+                        <Download className="h-3 w-3" />
+                        CSV
+                      </button>
                     </div>
 
                     {results.row_count === 0 ? (
