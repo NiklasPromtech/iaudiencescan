@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Columns,
   Check,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -482,8 +484,10 @@ export default function QueryEditor() {
   const navigate = useNavigate();
   const isNew = id === "new";
   const { selectedWebsite } = useSelectedWebsite();
-  const { createQuery, updateQuery } = useQueries();
+  const { createQuery, updateQuery, deleteQuery } = useQueries();
   const { toast } = useToast();
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const [title, setTitle] = useState("New query");
   const [editingTitle, setEditingTitle] = useState(false);
@@ -655,6 +659,21 @@ export default function QueryEditor() {
     }
   };
 
+  // Delete the query
+  const handleDelete = async () => {
+    if (!id || isNew) return;
+    try {
+      await deleteQuery(id);
+      navigate("/queries");
+    } catch (err) {
+      toast({
+        title: "Couldn't delete query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Execute the query
   const handleRun = async () => {
     if (!sql.trim() || isRunning) return;
@@ -706,15 +725,19 @@ export default function QueryEditor() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={() => setEditingTitle(false)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
-              className="font-mono text-sm font-semibold bg-transparent border-b border-primary focus:outline-none text-foreground"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") setEditingTitle(false);
+              }}
+              className="font-mono text-sm font-semibold bg-transparent border-b border-primary focus:outline-none text-foreground min-w-0 max-w-xs"
             />
           ) : (
             <button
               onClick={() => setEditingTitle(true)}
-              className="font-mono text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              title="Click to rename"
+              className="group flex items-center gap-1.5 font-mono text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               {title}
+              <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
             </button>
           )}
 
@@ -759,6 +782,37 @@ export default function QueryEditor() {
                 No website selected
               </span>
             )}
+
+            {/* Delete button — with inline confirmation */}
+            {!isNew && (
+              confirmDelete ? (
+                <div className="flex items-center gap-1.5 border border-destructive/50 bg-destructive/5 px-2 py-1">
+                  <span className="font-mono text-[10px] text-destructive">Delete?</span>
+                  <button
+                    onClick={handleDelete}
+                    className="font-mono text-[10px] text-destructive hover:text-destructive/80 font-semibold transition-colors"
+                  >
+                    Yes
+                  </button>
+                  <span className="text-muted-foreground/40 font-mono text-[10px]">/</span>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  title="Delete query"
+                  className="text-muted-foreground/50 hover:text-destructive transition-colors p-1"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )
+            )}
+
             <Button
               onClick={handleRun}
               disabled={!sql.trim() || isRunning || !selectedWebsite || queryLoading}
