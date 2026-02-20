@@ -152,21 +152,44 @@ const SqlEditor = ({
 
 // ── Sample queries ────────────────────────────────────────────────────────────
 
-const SAMPLE_QUERIES: { label: string; getSql: (tagId: string) => string }[] = [
+const SAMPLE_QUERIES: { label: string; sql: string }[] = [
   {
     label: "Visitors today",
-    getSql: (tagId) =>
-      `SELECT COUNT(DISTINCT wallet_address) AS unique_wallets, COUNT(*) AS total_visits\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND visited_at >= CURRENT_DATE`,
+    sql: `SELECT
+  COUNT(DISTINCT visitor_hash) AS unique_visitors,
+  COUNT(*)                     AS total_pageviews
+FROM pageviews
+WHERE created_at >= CURRENT_DATE
+  AND is_bot = false`,
   },
   {
-    label: "Visitors that connected a wallet today",
-    getSql: (tagId) =>
-      `SELECT COUNT(DISTINCT wallet_address) AS wallets_connected\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND wallet_address IS NOT NULL\n  AND visited_at >= CURRENT_DATE`,
+    label: "Wallet connections today",
+    sql: `SELECT
+  COUNT(DISTINCT wallet_id) AS wallets_connected
+FROM wallets
+WHERE created_at >= CURRENT_DATE`,
   },
   {
-    label: "Daily visitors this week",
-    getSql: (tagId) =>
-      `SELECT date_trunc('day', visited_at) AS day, COUNT(DISTINCT wallet_address) AS unique_wallets\nFROM audiencescan.visits\nWHERE tag_id = '${tagId}'\n  AND visited_at >= NOW() - INTERVAL '7' DAY\nGROUP BY 1\nORDER BY 1 DESC`,
+    label: "Top pages today",
+    sql: `SELECT
+  page_path,
+  COUNT(DISTINCT visitor_hash) AS unique_visitors,
+  COUNT(*)                     AS pageviews
+FROM pageviews
+WHERE created_at >= CURRENT_DATE
+  AND is_bot = false
+GROUP BY 1
+ORDER BY 3 DESC
+LIMIT 20`,
+  },
+  {
+    label: "Visitors that connected a wallet",
+    sql: `SELECT
+  COUNT(DISTINCT p.visitor_hash) AS visitors_with_wallet
+FROM pageviews p
+INNER JOIN wallets w ON w.visitor_hash = p.visitor_hash
+WHERE p.created_at >= CURRENT_DATE
+  AND p.is_bot = false`,
   },
 ];
 
@@ -179,6 +202,7 @@ const PROMPT_CHIPS = [
   "Which wallets hold my token and also visited a competitor's site?",
   "Show wallet journeys from first ad click to first transaction",
 ];
+
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
@@ -559,7 +583,7 @@ export default function QueryEditor() {
               style={{ height: "55%" }}
             >
               {/* Sample query chips */}
-              {selectedWebsite?.tag_id && (
+              {selectedWebsite && (
                 <div className="flex items-center gap-2 flex-wrap shrink-0">
                   <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 shrink-0">
                     Samples:
@@ -569,7 +593,7 @@ export default function QueryEditor() {
                       key={s.label}
                       onClick={() => {
                         skipNextSave.current = true;
-                        setSql(s.getSql(selectedWebsite.tag_id));
+                        setSql(s.sql);
                         setHasRun(false);
                       }}
                       className="border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
