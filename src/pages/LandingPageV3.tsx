@@ -91,7 +91,7 @@ const LandingPageV3 = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
+          <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
             Stop paying for bot traffic.<br />
             <span className="text-primary">Start reaching real buyers.</span>
           </h1>
@@ -118,7 +118,7 @@ const LandingPageV3 = () => {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-widest text-destructive mb-3">The problem</p>
-              <h2 className="font-serif text-2xl md:text-3xl text-foreground mb-4 leading-snug">
+              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
                 If 20–40% of your traffic is bots, you're overpaying by thousands every month.
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
@@ -169,7 +169,7 @@ const LandingPageV3 = () => {
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-5xl">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground text-center mb-3">What you get for free</p>
-          <h2 className="font-serif text-3xl md:text-4xl text-center mb-3 text-foreground">
+          <h2 className="font-bold text-3xl md:text-4xl text-center mb-3 text-foreground">
             Three problems. One install. Free.
           </h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
@@ -269,7 +269,7 @@ const LandingPageV3 = () => {
       {/* ── WALLET VALUE ── */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="font-serif text-3xl md:text-4xl text-center mb-4 text-foreground">
+          <h2 className="font-bold text-3xl md:text-4xl text-center mb-4 text-foreground">
             See Wallet Value — Not Just Wallet Count
           </h2>
           <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
@@ -305,7 +305,7 @@ const LandingPageV3 = () => {
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-5xl text-center">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Audience scanning</p>
-          <h2 className="font-serif text-3xl md:text-4xl mb-4 text-foreground">
+          <h2 className="font-bold text-3xl md:text-4xl mb-4 text-foreground">
             Then find more of your best users
           </h2>
           <p className="text-muted-foreground mb-3 max-w-2xl mx-auto">
@@ -329,7 +329,7 @@ const LandingPageV3 = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Query workspace</p>
-              <h2 className="font-serif text-2xl md:text-3xl text-foreground mb-4 leading-snug">
+              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
                 Query your data like a data analyst — not a marketer
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
@@ -397,7 +397,7 @@ const LandingPageV3 = () => {
       {/* ── FINAL CTA ── */}
       <section id="how-it-works" className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="font-serif text-3xl md:text-4xl mb-4 text-foreground">
+          <h2 className="font-bold text-3xl md:text-4xl mb-4 text-foreground">
             Free to start.{" "}
             <span className="text-primary">No credit card. Takes 5 minutes.</span>
           </h2>
