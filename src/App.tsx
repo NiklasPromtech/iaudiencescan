@@ -71,6 +71,7 @@ import Tools from "./pages/Tools";
 import Queries from "./pages/Queries";
 import QueryEditor from "./pages/QueryEditor";
 import LandingPageV3 from "./pages/LandingPageV3";
+import LinkedInAds from "./pages/LinkedInAds";
 import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
 const queryClient = new QueryClient({
@@ -125,6 +126,7 @@ const App = () => (
           <Route path="/merge/:studyId" element={<Merge />} />
           <Route path="/x-data/:studyId" element={<XData />} />
           <Route path="/xads/agency" element={<XAdsAgency />} />
+          <Route path="/ads" element={<LinkedInAds />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/wizard/mobile" element={<WizardMobile />} />
           <Route path="/wizard/v2" element={<WizardV2 />} />
