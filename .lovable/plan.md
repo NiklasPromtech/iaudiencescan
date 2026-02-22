@@ -1,27 +1,51 @@
 
 
-## Fix: Replace DM Serif Display with Bai Jamjuree on the Landing Page
+## LinkedIn Test Ads Page at `/ads`
 
-### The Issue
+Create a new page at `/ads` that displays 10 LinkedIn ad mockups — each styled as a realistic LinkedIn sponsored post card. This is an internal creative reference page (like `/sales-pitch` or `/sample1`).
 
-The hero and section headings on `LandingPageV3.tsx` use `font-serif` (DM Serif Display) — a decorative serif typeface that clashes with the flat, Dune-inspired aesthetic. The rest of the platform uses **Bai Jamjuree** (clean geometric sans-serif) for all text and **Space Mono** for data/labels. The serif font makes the landing page feel like a different product.
+### The 10 Ads
 
-### The Fix
+Each ad targets a different pain point / hook based on the repositioned product messaging:
 
-Replace every `font-serif` class in `src/pages/LandingPageV3.tsx` with the default `font-bai` (or simply remove it, since `font-bai` is already the body default). Headings should use `font-bold` or `font-semibold` at their current sizes — the weight and size do the heavy lifting, not a different typeface.
+1. **"23% of your Web3 traffic is bots"** — Lead with the stat. Visual: the MockBotSummary donut chart showing human vs bot split. CTA: "Find out your bot rate — free"
 
-### File: `src/pages/LandingPageV3.tsx`
+2. **"We helped a client claim $25,000 back from a publisher"** — Social proof / legal angle. Visual: quote card with the testimonial. CTA: "See how bot detection works"
 
-Find and replace all instances of `font-serif` with `font-bold` (or remove if `font-bold` is already present). Affected lines:
+3. **"What if your CPA was based on real wallets — not bot clicks?"** — Attribution angle. Visual: side-by-side showing inflated CPA vs real CPA. CTA: "Get your real CPA"
 
-- **Line 94** (hero h1): `font-serif text-5xl` → `font-bold text-5xl`
-- **Line 121** (bot section h2): `font-serif text-2xl` → `font-bold text-2xl`
-- **Line 172** (outcome grid h2): `font-serif text-3xl` → `font-bold text-3xl`
-- **Line 237** (audience section h2): `font-serif text-3xl` → `font-bold text-3xl`
-- **Line 254** (SQL section h2): `font-serif text-2xl` → `font-bold text-2xl`
-- **Line 277** (testimonial h2): `font-serif text-3xl` → `font-bold text-3xl`
-- **Line 298** (without/with h2): `font-serif text-3xl` → `font-bold text-3xl`
-- **Line 333** (final CTA h2): `font-serif text-3xl` → `font-bold text-3xl`
+4. **"Your token holders also follow these 18 X accounts"** — Scan result hook. Visual: mock list of X handles with follower counts. CTA: "Run your first scan free"
 
-This is a simple find-and-replace across one file. No component or layout changes needed.
+5. **"It's like Google Analytics — but it actually works for Web3"** — GA replacement. Visual: feature comparison (3 bullet points, not a table). CTA: "Free to start. No credit card."
+
+6. **"Stop optimizing for clicks. Start optimizing for wallets."** — Philosophy ad. Visual: simple text-on-brand-gradient. CTA: "See wallet-level analytics"
+
+7. **"We found 6 Telegram groups where your next buyers already hang out"** — Telegram targeting. Visual: mock Telegram group cards with member counts. CTA: "Find your communities"
+
+8. **"Free Web3 analytics with bot detection. No, really."** — Free angle. Visual: pricing-style card showing $0 with feature list. CTA: "Start free today"
+
+9. **"Your $2,000/mo ad budget? $460 of it goes to bots."** — Dollar waste. Visual: stacked bar showing wasted vs effective spend. CTA: "Find out how much you're wasting"
+
+10. **"Query your own data. Export to CSV. No SQL experience needed."** — Power user / data analyst angle. Visual: styled SQL code snippet. CTA: "Try the query workspace"
+
+### Page Design
+
+- Dark background (matching the product's Dune aesthetic)
+- 2-column grid of ad cards on desktop, single column on mobile
+- Each card is styled as a LinkedIn sponsored post: company logo + name at top, body copy, visual/image area, CTA button at bottom
+- Each card has a small label: "Ad 1/10", "Ad 2/10" etc.
+- Header at top: "LinkedIn Ad Test Concepts" with a back button
+- No Header/Footer components (it's an internal tool page)
+
+### Technical Details
+
+**New file: `src/pages/LinkedInAds.tsx`**
+- Single self-contained page component
+- Each ad is a card with: headline, body text (2-3 sentences max — LinkedIn character limits), a visual area (either a simple styled div with stats/text or reusing existing mock components where appropriate), and a CTA button
+- Uses existing Tailwind classes and the project's color system (primary orange, muted backgrounds)
+- No new dependencies needed
+
+**Modified file: `src/App.tsx`**
+- Add route: `<Route path="/ads" element={<LinkedInAds />} />`
+- Add lazy import for the new page
 
