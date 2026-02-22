@@ -1,7 +1,7 @@
 import { ArrowLeft, Bot, User, HelpCircle, Check, X, MessageSquare, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import logoWhite from "@/assets/audiencescan-logo-white.png";
+import logoIcon from "@/assets/audiencescan-icon.png";
 
 const ads = [
   {
@@ -271,7 +271,7 @@ const LinkedInAds = () => {
             <div key={ad.num} className="border border-border bg-card flex flex-col">
               {/* LinkedIn post header */}
               <div className="flex items-center gap-3 p-4 pb-2">
-                <img src={logoWhite} alt="AudienceScan" className="h-10 w-10 rounded-full bg-muted object-contain p-1" />
+                <img src={logoIcon} alt="AudienceScan" className="h-10 w-10 rounded-full object-contain" />
                 <div className="flex-1">
                   <p className="text-sm font-bold text-foreground">AudienceScan</p>
                   <p className="text-[10px] text-muted-foreground font-mono">Promoted · Ad {ad.num}/10</p>
