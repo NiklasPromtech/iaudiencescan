@@ -616,6 +616,7 @@ export interface WalletExtensionsRequest {
 export interface WalletExtensionsRow {
   wallet_type: string;
   count: number;
+  unique_visitors?: number;
 }
 
 export interface WalletExtensionsResponse {
