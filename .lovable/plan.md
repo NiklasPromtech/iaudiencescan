@@ -1,51 +1,44 @@
 
 
-## LinkedIn Test Ads Page at `/ads`
+## Fix: Ensure All Filter Dropdowns Show Counts
 
-Create a new page at `/ads` that displays 10 LinkedIn ad mockups — each styled as a realistic LinkedIn sponsored post card. This is an internal creative reference page (like `/sales-pitch` or `/sample1`).
+### Problem
 
-### The 10 Ads
+The filter bar on the Overview page has 10 filter buttons (Source, UTM Source, Medium, Campaign, Content, Term, Country, Conversion, Wallet Action, Wallet Tier). Currently only some of them (like UTM Source and Medium) display counts next to each option. The others either show no count or may not handle the data format correctly.
 
-Each ad targets a different pain point / hook based on the repositioned product messaging:
+### Root Cause
 
-1. **"23% of your Web3 traffic is bots"** — Lead with the stat. Visual: the MockBotSummary donut chart showing human vs bot split. CTA: "Find out your bot rate — free"
+The `FilterOptionsResponse` type expects every filter key to return `FilterOptionItem[]` (objects with `value` and `count`). However, the API may return some filter keys as plain `string[]` (without counts). The current code doesn't handle this mismatch — it just passes the raw data through, so plain strings fail to render counts.
 
-2. **"We helped a client claim $25,000 back from a publisher"** — Social proof / legal angle. Visual: quote card with the testimonial. CTA: "See how bot detection works"
+### Solution
 
-3. **"What if your CPA was based on real wallets — not bot clicks?"** — Attribution angle. Visual: side-by-side showing inflated CPA vs real CPA. CTA: "Get your real CPA"
-
-4. **"Your token holders also follow these 18 X accounts"** — Scan result hook. Visual: mock list of X handles with follower counts. CTA: "Run your first scan free"
-
-5. **"It's like Google Analytics — but it actually works for Web3"** — GA replacement. Visual: feature comparison (3 bullet points, not a table). CTA: "Free to start. No credit card."
-
-6. **"Stop optimizing for clicks. Start optimizing for wallets."** — Philosophy ad. Visual: simple text-on-brand-gradient. CTA: "See wallet-level analytics"
-
-7. **"We found 6 Telegram groups where your next buyers already hang out"** — Telegram targeting. Visual: mock Telegram group cards with member counts. CTA: "Find your communities"
-
-8. **"Free Web3 analytics with bot detection. No, really."** — Free angle. Visual: pricing-style card showing $0 with feature list. CTA: "Start free today"
-
-9. **"Your $2,000/mo ad budget? $460 of it goes to bots."** — Dollar waste. Visual: stacked bar showing wasted vs effective spend. CTA: "Find out how much you're wasting"
-
-10. **"Query your own data. Export to CSV. No SQL experience needed."** — Power user / data analyst angle. Visual: styled SQL code snippet. CTA: "Try the query workspace"
-
-### Page Design
-
-- Dark background (matching the product's Dune aesthetic)
-- 2-column grid of ad cards on desktop, single column on mobile
-- Each card is styled as a LinkedIn sponsored post: company logo + name at top, body copy, visual/image area, CTA button at bottom
-- Each card has a small label: "Ad 1/10", "Ad 2/10" etc.
-- Header at top: "LinkedIn Ad Test Concepts" with a back button
-- No Header/Footer components (it's an internal tool page)
+Add a normalizer in `FilterDialog.tsx` that converts any filter option data into the expected `FilterOptionItem[]` format. If the API returns plain strings (e.g., `["google", "twitter"]`), wrap them as `[{value: "google", count: 0}, {value: "twitter", count: 0}]`. If it already returns objects with `value` and `count`, use them as-is.
 
 ### Technical Details
 
-**New file: `src/pages/LinkedInAds.tsx`**
-- Single self-contained page component
-- Each ad is a card with: headline, body text (2-3 sentences max — LinkedIn character limits), a visual area (either a simple styled div with stats/text or reusing existing mock components where appropriate), and a CTA button
-- Uses existing Tailwind classes and the project's color system (primary orange, muted backgrounds)
-- No new dependencies needed
+**File: `src/components/overview/FilterDialog.tsx`**
 
-**Modified file: `src/App.tsx`**
-- Add route: `<Route path="/ads" element={<LinkedInAds />} />`
-- Add lazy import for the new page
+In the `sectionOptions` memo (around line 370), add a normalization step:
 
+```text
+For each section key, read filterOptions[key].
+If the value is an array of strings, convert each to { value: string, count: 0 }.
+If the value is an array of objects with value/count, use as-is.
+```
+
+This ensures every filter dropdown renders consistently with counts shown when available, and gracefully shows "0" or omits the count display when the API doesn't provide it.
+
+Optionally, hide the count column entirely if all items in a section have `count: 0` (meaning the API didn't provide counts for that dimension), so it doesn't look broken showing all zeros.
+
+**File: `src/lib/api.ts`**
+
+Update `FilterOptionsResponse` to allow both formats using a union type, so TypeScript doesn't complain:
+
+```typescript
+// Each filter key can be either FilterOptionItem[] or string[]
+sources?: FilterOptionItem[] | string[];
+utm_source?: FilterOptionItem[] | string[];
+// ... etc for all keys
+```
+
+This is a defensive change — the normalizer in FilterDialog handles the conversion regardless.
