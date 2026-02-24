@@ -169,7 +169,7 @@ const FilterButton = ({
         </div>
 
         {/* Options */}
-        <ScrollArea className="max-h-64">
+        <ScrollArea className="h-auto" style={{ maxHeight: '16rem' }}>
           <div className="p-2">
             {filteredOptions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
