@@ -97,6 +97,7 @@ export const WalletExtensionsTable = ({
             <TableRow className="border-border hover:bg-transparent">
               <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Wallet Type</TableHead>
               <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Count</TableHead>
+              <TableHead className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-medium text-right">Unique Users</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,6 +110,12 @@ export const WalletExtensionsTable = ({
                   <div className="flex items-baseline justify-end gap-1">
                     {row.count?.toLocaleString() ?? "—"}
                     <DeltaBadge delta={calcDeltaPct(row.count, comparisonMap?.get(row.wallet_type)?.count)} />
+                  </div>
+                </TableCell>
+                <TableCell className="font-mono text-right text-foreground font-medium tabular-nums">
+                  <div className="flex items-baseline justify-end gap-1">
+                    {row.unique_visitors?.toLocaleString() ?? "—"}
+                    <DeltaBadge delta={calcDeltaPct(row.unique_visitors, comparisonMap?.get(row.wallet_type)?.unique_visitors)} />
                   </div>
                 </TableCell>
               </TableRow>
