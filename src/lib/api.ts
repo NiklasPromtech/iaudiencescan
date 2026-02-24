@@ -164,16 +164,16 @@ export interface FilterOptionItem {
 export interface FilterOptionsResponse {
   success: boolean;
   tag_id: string;
-  sources?: FilterOptionItem[];
-  utm_source?: FilterOptionItem[];
-  utm_medium?: FilterOptionItem[];
-  utm_campaign?: FilterOptionItem[];
-  utm_content?: FilterOptionItem[];
-  utm_term?: FilterOptionItem[];
-  countries?: FilterOptionItem[];
-  conversion_events?: FilterOptionItem[];
-  wallet_actions?: FilterOptionItem[];
-  wallet_tiers?: FilterOptionItem[];
+  sources?: FilterOptionItem[] | string[];
+  utm_source?: FilterOptionItem[] | string[];
+  utm_medium?: FilterOptionItem[] | string[];
+  utm_campaign?: FilterOptionItem[] | string[];
+  utm_content?: FilterOptionItem[] | string[];
+  utm_term?: FilterOptionItem[] | string[];
+  countries?: FilterOptionItem[] | string[];
+  conversion_events?: FilterOptionItem[] | string[];
+  wallet_actions?: FilterOptionItem[] | string[];
+  wallet_tiers?: FilterOptionItem[] | string[];
   cost_sources?: Array<{
     id: string;
     name: string;

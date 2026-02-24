@@ -68,6 +68,7 @@ interface FilterButtonProps {
   onSelectAll: (values: string[]) => void;
   onClear: () => void;
   customOrder?: string[];
+  hasCounts?: boolean;
   renderCustomOption?: (option: FilterOptionItem, allOptions: FilterOptionItem[]) => React.ReactNode;
 }
 
@@ -79,6 +80,7 @@ const FilterButton = ({
   onSelectAll,
   onClear,
   customOrder,
+  hasCounts = true,
   renderCustomOption,
 }: FilterButtonProps) => {
   const [open, setOpen] = useState(false);
@@ -207,9 +209,11 @@ const FilterButton = ({
                           <span className="flex-1 text-sm truncate">
                             {option.value}
                           </span>
-                          <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-                            {option.count.toLocaleString()}
-                          </span>
+                          {hasCounts && (
+                            <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                              {option.count.toLocaleString()}
+                            </span>
+                          )}
                         </>
                       )}
                     </label>
@@ -333,10 +337,20 @@ export const FilterDialog = ({
 
   // Get options per section — empty array if no data
   const sectionOptions = useMemo(() => {
-    return FILTER_SECTIONS.map((section) => ({
-      ...section,
-      options: (filterOptions?.[section.key] as FilterOptionItem[] | undefined) || [],
-    }));
+    return FILTER_SECTIONS.map((section) => {
+      const raw = filterOptions?.[section.key];
+      let options: FilterOptionItem[] = [];
+      if (Array.isArray(raw)) {
+        options = raw.map((item) => {
+          if (typeof item === "string") {
+            return { value: item, count: 0 };
+          }
+          return item as FilterOptionItem;
+        });
+      }
+      const hasCounts = options.some((o) => o.count > 0);
+      return { ...section, options, hasCounts };
+    });
   }, [filterOptions]);
 
   const totalPendingFilters = Object.values(pendingFilters).reduce(
@@ -414,6 +428,7 @@ export const FilterDialog = ({
             onSelectAll={(values) => handleSelectAll(section.key, values)}
             onClear={() => handleClear(section.key)}
             customOrder={section.customOrder}
+            hasCounts={section.hasCounts}
             renderCustomOption={walletTierRenderer}
           />
         );
