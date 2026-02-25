@@ -71,6 +71,8 @@ import Tools from "./pages/Tools";
 import Queries from "./pages/Queries";
 import QueryEditor from "./pages/QueryEditor";
 import LandingPageV3 from "./pages/LandingPageV3";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import ResourcesPage from "./pages/ResourcesPage";
 import LinkedInAds from "./pages/LinkedInAds";
 import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
@@ -96,6 +98,8 @@ const App = () => (
           <Route path="/" element={<LandingPageV3 />} />
           <Route path="/old-home" element={<Index />} />
           <Route path="/case-studies" element={<CaseStudies />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/personal-letter" element={<BlogPost />} />

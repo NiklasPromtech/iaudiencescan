@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Zap, BarChart3, Target, BookOpen, ArrowRight, Mail } from "lucide-react";
+import { Zap, BarChart3, Target, BookOpen, Mail } from "lucide-react";
 
 const cards = [
   {
@@ -46,10 +46,9 @@ const Resources = () => {
         {/* 2×2 grid */}
         <div className="grid sm:grid-cols-2 gap-6 mb-12">
           {cards.map((card) => (
-            <Link
+            <div
               key={card.title}
-              to={card.link}
-              className="border border-border bg-card p-6 group hover:border-primary/40 transition-colors flex flex-col"
+              className="border border-border bg-card p-6 flex flex-col"
             >
               <div className="w-10 h-10 border border-primary/30 flex items-center justify-center mb-4">
                 <card.icon className="w-5 h-5 text-primary" />
@@ -60,10 +59,7 @@ const Resources = () => {
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">
                 {card.description}
               </p>
-              <span className="inline-flex items-center gap-1 mt-4 font-mono text-[11px] text-primary group-hover:gap-2 transition-all">
-                Read more <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </Link>
+            </div>
           ))}
         </div>
 
