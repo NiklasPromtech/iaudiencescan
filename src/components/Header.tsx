@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+
 import audienceScanIcon from "@/assets/audiencescan-icon-large.png";
 
 const Header = () => {
@@ -19,14 +19,12 @@ const Header = () => {
 
         {/* Center nav links */}
         <div className="hidden md:flex items-center gap-6">
-          <a href="/#how-it-works" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          <Link to="/how-it-works" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
             How It Works
-            <ChevronDown className="w-3 h-3" />
-          </a>
-          <a href="/#resources" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          </Link>
+          <Link to="/resources" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
             Resources
-            <ChevronDown className="w-3 h-3" />
-          </a>
+          </Link>
           <a
             href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
             target="_blank"
