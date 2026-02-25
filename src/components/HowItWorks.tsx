@@ -15,7 +15,7 @@ const steps = [
     title: "Data starts flowing",
     description:
       "Wallet extensions, geographic distribution, referrer sources, bot signals, and trading behavior — all linked and analyzed automatically.",
-    stat: "First data within 1 hour",
+    stat: "First data within seconds",
   },
   {
     icon: BarChart3,
