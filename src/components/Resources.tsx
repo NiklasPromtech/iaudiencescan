@@ -1,63 +1,98 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { BookOpen, Play, Settings } from "lucide-react";
+import { Zap, BarChart3, Target, BookOpen, ArrowRight, Mail } from "lucide-react";
+
+const cards = [
+  {
+    icon: Zap,
+    title: "Install Guide",
+    description:
+      "Place the tag and see data in under 5 minutes. Step-by-step with video.",
+    link: "/blog/tracking",
+  },
+  {
+    icon: BarChart3,
+    title: "Understanding Your Dashboard",
+    description: "What every metric means and what to do about it.",
+    link: "/blog/what-am-i-looking-at",
+  },
+  {
+    icon: Target,
+    title: "Run Your First Scan",
+    description:
+      "Turn wallet data into X, Telegram, and Reddit targeting lists.",
+    link: "/blog/tutorials",
+  },
+  {
+    icon: BookOpen,
+    title: "Case Studies",
+    description:
+      "Real campaigns: 84% lower CPA on DV360, 66% on Telegram, 3× conversions on X.",
+    link: "/case-studies",
+  },
+];
 
 const Resources = () => {
-  const resources = [
-    {
-      icon: BookOpen,
-      title: "How to Create Your First Scan",
-      description: "Step-by-step guide to get started"
-    },
-    {
-      icon: Play,
-      title: "Step-by-Step X Ads Setup",
-      description: "Complete walkthrough for Twitter advertising"
-    },
-    {
-      icon: Settings,
-      title: "DV360, Reddit, and Telegram Ad Walkthroughs",
-      description: "Platform-specific implementation guides"
-    }
-  ];
-
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-h2 font-bold mb-6">
-            Resources & Tutorials
-          </h2>
+    <section className="py-24 bg-muted/20">
+      <div className="container mx-auto px-4 max-w-5xl">
+        {/* Label + heading */}
+        <p className="font-mono text-[10px] uppercase tracking-widest text-primary mb-4">
+          Resources
+        </p>
+        <h2 className="font-bold text-3xl md:text-4xl text-foreground mb-12">
+          Everything you need to get started.
+        </h2>
+
+        {/* 2×2 grid */}
+        <div className="grid sm:grid-cols-2 gap-6 mb-12">
+          {cards.map((card) => (
+            <Link
+              key={card.title}
+              to={card.link}
+              className="border border-border bg-card p-6 group hover:border-primary/40 transition-colors flex flex-col"
+            >
+              <div className="w-10 h-10 border border-primary/30 flex items-center justify-center mb-4">
+                <card.icon className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">
+                {card.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                {card.description}
+              </p>
+              <span className="inline-flex items-center gap-1 mt-4 font-mono text-[11px] text-primary group-hover:gap-2 transition-all">
+                Read more <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+          ))}
         </div>
-        
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {resources.map((resource, index) => (
-              <Card key={index} className="border-2 border-primary/10 hover:border-primary/30 transition-smooth hover:shadow-elegant group">
-                <CardContent className="p-8 text-center">
-                  <div className="mb-6 flex justify-center">
-                    <div className="w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center group-hover:animate-float">
-                      <resource.icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                  </div>
-                  <h3 className="text-h3 font-semibold mb-4 text-foreground">
-                    {resource.title}
-                  </h3>
-                  <p className="text-p2 text-muted-foreground leading-relaxed">
-                    {resource.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4">
-              <Link to="/blog/tutorials">View Tutorials</Link>
-            </Button>
-          </div>
+
+        {/* FAQ callout */}
+        <div className="border border-border bg-card p-6 mb-6">
+          <p className="text-sm text-muted-foreground">
+            Have questions about data security, privacy compliance, or whether
+            the tool works without paid ads?{" "}
+            <Link
+              to="/pricing"
+              className="text-primary hover:underline font-medium"
+            >
+              Check our FAQ
+            </Link>
+            .
+          </p>
         </div>
+
+        {/* Support */}
+        <p className="text-sm text-muted-foreground flex items-center gap-2">
+          <Mail className="w-4 h-4" />
+          Need help? Reach us at{" "}
+          <a
+            href="mailto:support@audiencescan.io"
+            className="text-primary hover:underline"
+          >
+            support@audiencescan.io
+          </a>
+        </p>
       </div>
     </section>
   );
