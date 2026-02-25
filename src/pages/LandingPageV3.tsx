@@ -400,7 +400,7 @@ const LandingPageV3 = () => {
       <Resources />
 
       {/* ── FINAL CTA ── */}
-      <section id="how-it-works" className="py-24 bg-muted/30">
+      <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <h2 className="font-bold text-3xl md:text-4xl mb-4 text-foreground">
             Free to start.{" "}

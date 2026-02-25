@@ -23,7 +23,7 @@ const Header = () => {
             How It Works
             <ChevronDown className="w-3 h-3" />
           </a>
-          <a href="/blog" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          <a href="/#resources" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             Resources
             <ChevronDown className="w-3 h-3" />
           </a>
