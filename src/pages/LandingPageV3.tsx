@@ -16,6 +16,8 @@ import { MockBotSummary } from "@/components/landing/MockBotSummary";
 import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
 
 import { DashboardFrame } from "@/components/landing/DashboardFrame";
+import HowItWorks from "@/components/HowItWorks";
+import Resources from "@/components/Resources";
 import {
   mockScorecard, mockDimensionRows, mockCostRows,
 } from "@/components/landing/mock-data";
@@ -393,6 +395,9 @@ const LandingPageV3 = () => {
           </div>
         </div>
       </section>
+
+      <HowItWorks />
+      <Resources />
 
       {/* ── FINAL CTA ── */}
       <section id="how-it-works" className="py-24 bg-muted/30">
