@@ -1,44 +1,83 @@
 
 
-## Fix: Ensure All Filter Dropdowns Show Counts
+## Rewrite HowItWorks and Resources for LandingPageV3
 
-### Problem
+Both components are outdated and not currently used on V3. They'll be fully rewritten to match the V3 visual style (font-mono labels, border cards, dark aesthetic) and inserted into LandingPageV3 between the Ned testimonial and the Final CTA.
 
-The filter bar on the Overview page has 10 filter buttons (Source, UTM Source, Medium, Campaign, Content, Term, Country, Conversion, Wallet Action, Wallet Tier). Currently only some of them (like UTM Source and Medium) display counts next to each option. The others either show no count or may not handle the data format correctly.
+---
 
-### Root Cause
+### New HowItWorks -- "How It Works"
 
-The `FilterOptionsResponse` type expects every filter key to return `FilterOptionItem[]` (objects with `value` and `count`). However, the API may return some filter keys as plain `string[]` (without counts). The current code doesn't handle this mismatch — it just passes the raw data through, so plain strings fail to render counts.
+Framed around the meeting notes structure: Problem, Solution, Steps, What You Get, Benefits.
 
-### Solution
+**Opening context line** (replaces old generic heading):
+"AudienceScan is like Google Analytics for crypto. Place a tag, enrich with wallet data, get actionable insights."
 
-Add a normalizer in `FilterDialog.tsx` that converts any filter option data into the expected `FilterOptionItem[]` format. If the API returns plain strings (e.g., `["google", "twitter"]`), wrap them as `[{value: "google", count: 0}, {value: "twitter", count: 0}]`. If it already returns objects with `value` and `count`, use them as-is.
+**3 steps, each with icon, title, description, and a concrete proof stat:**
 
-### Technical Details
+| Step | Title | Description | Stat |
+|------|-------|-------------|------|
+| 1 -- Code2 icon | Place the tag | Drop a lightweight script tag on your site or app. Works with any CMS or custom build. Takes under 5 minutes. | Avg install time: 2 min |
+| 2 -- Eye icon | Data starts flowing | Wallet extensions, geographic distribution, referrer sources, bot signals, and trading behavior -- all linked and analyzed automatically. | First data within 1 hour |
+| 3 -- BarChart3 icon | Insights + recommendations | Your dashboard surfaces actionable audience segments, change detection (shifts in holders, new wallet patterns, geographic hot spots), and ready-to-use targeting lists. | Avg 12 communities per scan |
 
-**File: `src/components/overview/FilterDialog.tsx`**
+**"What You Get" sub-section** below the 3 steps -- a compact 2-column list:
+- Actionable audience segments (frequent traders, top regions)
+- Bot detection across 12+ signals
+- Real CPA per wallet connected
+- Community overlap (X, Telegram, Reddit, Discord)
+- Change detection (trading behaviors, holder shifts)
+- Geographic hot spots and wallet tier breakdowns
 
-In the `sectionOptions` memo (around line 370), add a normalization step:
+**Benefits footer** -- 3 inline stats:
+- "Improved ROI by cutting bot spend"
+- "Data-first strategy investors trust"
+- "Insights visible within hours, not weeks"
 
-```text
-For each section key, read filterOptions[key].
-If the value is an array of strings, convert each to { value: string, count: 0 }.
-If the value is an array of objects with value/count, use as-is.
+Visual style: matches V3 -- `font-mono text-[10px] uppercase tracking-widest` labels, `border border-border bg-card` cards, no rounded corners (matches existing `rounded-none` on Cards but the landing page uses `rounded-lg` so we'll match that).
+
+---
+
+### New Resources -- "Get Started"
+
+Rewritten to match the meeting notes structure: Onboarding, Dashboards, Case Studies, FAQ, Support.
+
+**4 cards in a 2x2 grid:**
+
+| Card | Icon | Title | Description | Link |
+|------|------|-------|-------------|------|
+| 1 | Zap | Install Guide | Place the tag and see data in under 5 minutes. Step-by-step with video. | /blog/tracking |
+| 2 | BarChart3 | Understanding Your Dashboard | What every metric means and what to do about it. | /blog/what-am-i-looking-at |
+| 3 | Target | Run Your First Scan | Turn wallet data into X, Telegram, and Reddit targeting lists. | /blog/tutorials |
+| 4 | BookOpen | Case Studies | Real campaigns: 84% lower CPA on DV360, 66% on Telegram, 3x conversions on X. | /case-studies |
+
+**FAQ callout** below the grid:
+"Have questions about data security, privacy compliance, or whether the tool works without paid ads? Check our FAQ." -- links to the FAQ section on the landing page (anchor or /pricing which has FAQ).
+
+**Support line**: "Need help? Reach us at support@audiencescan.io or book a call."
+
+---
+
+### LandingPageV3 Integration
+
+Insert both components after the Ned testimonial (line 395) and before the Final CTA (line 397):
+
+```
+... Ned testimonial ...
+<HowItWorks />
+<Resources />
+... Final CTA ...
 ```
 
-This ensures every filter dropdown renders consistently with counts shown when available, and gracefully shows "0" or omits the count display when the API doesn't provide it.
+Import both at the top of LandingPageV3.tsx.
 
-Optionally, hide the count column entirely if all items in a section have `count: 0` (meaning the API didn't provide counts for that dimension), so it doesn't look broken showing all zeros.
+---
 
-**File: `src/lib/api.ts`**
+### Files Modified
 
-Update `FilterOptionsResponse` to allow both formats using a union type, so TypeScript doesn't complain:
+1. **`src/components/HowItWorks.tsx`** -- Full rewrite with the 3-step flow, "What You Get" list, and benefits footer. Uses lucide-react icons (Code2, Eye, BarChart3). Styled to match V3 aesthetic.
 
-```typescript
-// Each filter key can be either FilterOptionItem[] or string[]
-sources?: FilterOptionItem[] | string[];
-utm_source?: FilterOptionItem[] | string[];
-// ... etc for all keys
-```
+2. **`src/components/Resources.tsx`** -- Full rewrite with 4-card grid, FAQ callout, and support line. Uses lucide-react icons (Zap, BarChart3, Target, BookOpen) and react-router-dom Links.
 
-This is a defensive change — the normalizer in FilterDialog handles the conversion regardless.
+3. **`src/pages/LandingPageV3.tsx`** -- Import and insert both components between Ned testimonial and Final CTA sections.
+
