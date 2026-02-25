@@ -44,7 +44,7 @@ const benefits = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-24 bg-background">
+    <section id="how-it-works" className="py-24 bg-background">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Label + heading */}
         <p className="font-mono text-[10px] uppercase tracking-widest text-primary mb-4">

@@ -33,7 +33,7 @@ const cards = [
 
 const Resources = () => {
   return (
-    <section className="py-24 bg-muted/20">
+    <section id="resources" className="py-24 bg-muted/20">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Label + heading */}
         <p className="font-mono text-[10px] uppercase tracking-widest text-primary mb-4">
