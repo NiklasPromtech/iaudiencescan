@@ -260,7 +260,11 @@ export function DailyChart({ data, loading, holderData = [], comparisonData }: D
 
   return (
     <>
-      <div className="py-4 border-t border-border">
+      <div className="py-4 border-t border-border relative">
+        {/* Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/10 text-lg font-bold select-none">AudienceScan</span>
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
             <h3 className="text-h3 text-foreground">Daily Metrics</h3>
