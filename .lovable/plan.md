@@ -1,38 +1,47 @@
 
 
-# Animated Hero Text Swap on LandingPageV3
+# Rotating Hero Text Carousel on LandingPageV3
 
 ## What changes
 
-The hero heading currently shows both lines statically:
-```
-Stop paying for bot traffic.
-Start reaching real buyers.
-```
+The hero heading currently swaps once (from "Stop paying for bot traffic." to "Start reaching real buyers."). We will turn it into a looping carousel that cycles through five messages, each sliding out to the right while the next slides in from the left.
 
-We will animate this so:
-1. On load, "Stop paying for bot traffic." is visible
-2. After ~2.5 seconds, it slides out to the right while "Start reaching real buyers." slides in from the left
-3. The second line stays permanently after the animation completes
+## Messages in order
 
-## Visual effect
-- "Stop paying for bot traffic." exits by accelerating to the right (slide-out-right)
-- "Start reaching real buyers." enters from the left (slide-in-left), appearing as the first line disappears
-- Both animations happen simultaneously for a smooth swap feel
+1. "Stop paying for bot traffic."
+2. "Start reaching real buyers."
+3. "Optimise to the wallets with the highest balance."
+4. "Partner with the tokens your connected wallets hold."
+5. "Optimise to the action that generated the most holders."
+
+After the last message, it loops back to the first.
+
+## Animation behavior
+
+- Each message displays for ~3 seconds before transitioning
+- The outgoing text slides out to the right (existing `hero-slide-out-right` animation)
+- The incoming text slides in from the left (existing `hero-slide-in-left` animation)
+- Continuous loop forever
 
 ## Technical details
 
-### 1. Add keyframes to `tailwind.config.ts`
-- Add `slide-out-right` keyframe (translateX(0) -> translateX(120%)) with slight ease-in
-- Add `slide-in-left` keyframe (translateX(-120%) -> translateX(0)) with ease-out
+### Update `src/pages/LandingPageV3.tsx`
 
-### 2. Update `src/pages/LandingPageV3.tsx`
-- Add `useState` and `useEffect` to manage animation state (`idle` -> `swapping` -> `done`)
-- After ~2.5s delay, trigger the swap
-- Render both lines in a container with `overflow-hidden` and `relative` positioning
-- Line 1 ("Stop paying..."): starts visible, gets `animate-slide-out-right` class on swap, then hidden
-- Line 2 ("Start reaching..."): starts off-screen left, gets `animate-slide-in-left` class on swap, then stays visible
-- The `<br/>` between lines is removed; instead both lines occupy the same space using absolute/relative positioning during the transition
+1. Define a `heroMessages` array with the five phrases (each with optional color styling -- first line white/foreground, rest get accent colors like primary, emerald, amber, cyan).
 
-The animation runs once on page load and settles on the final "Start reaching real buyers." message.
+2. Replace the current `heroPhase` state with:
+   - `currentIndex` (number) -- which message is showing
+   - `animating` (boolean) -- whether a swap is in progress
+
+3. Use `useEffect` with `setInterval` (~3.5s) to trigger `animating = true`. On animation end, increment index (mod array length) and set `animating = false`.
+
+4. Render logic:
+   - Current message visible; when `animating`, apply `animate-hero-slide-out-right`
+   - Next message (absolute positioned) enters with `animate-hero-slide-in-left` when `animating`
+   - On animation end, update `currentIndex` to the next index
+
+5. Increase `minHeight` to ~2.4em to accommodate the longer lines that may wrap on smaller screens.
+
+### No changes to `tailwind.config.ts`
+The existing `hero-slide-out-right` and `hero-slide-in-left` keyframes and animations are reused as-is.
 
