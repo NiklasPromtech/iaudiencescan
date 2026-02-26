@@ -74,6 +74,7 @@ import LandingPageV3 from "./pages/LandingPageV3";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import LinkedInAds from "./pages/LinkedInAds";
+import FAQPage from "./pages/FAQPage";
 import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
 const queryClient = new QueryClient({
@@ -100,6 +101,7 @@ const App = () => (
           <Route path="/case-studies" element={<CaseStudies />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/faq" element={<FAQPage />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/personal-letter" element={<BlogPost />} />
