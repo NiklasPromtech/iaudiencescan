@@ -1,33 +1,27 @@
 
 
-## Update the Footer
+## Wallet Holdings: Chain Sub-tabs and $50 Filter
 
-The footer has several dead links from the purge (DM Assistant, Strategy Playbook) and placeholder `#` links. Here's the updated content:
+### What changes
 
-### Updated Sections
+1. **Filter out small holdings** -- Only show tokens where `total_quote_usd > 50`. Add a small info badge above the table: "Showing tokens with holdings over $50 USD".
 
-**Product**
-- Get Started → `/auth`
-- Blog → `/blog`
-- Book a Demo → `https://calendly.com/niklas-audiencescan/audiencescan-demo` (matches header's demo link)
+2. **Add chain sub-tabs** -- Inside the Wallet Holdings tab, add a secondary row of tabs:
+   - **"All Chains"** tab (default) showing everything
+   - One tab per unique chain found in the data (e.g. "Ethereum Mainnet", "BNB Smart Chain")
+   - Each tab shows a count of tokens in that chain
 
-**Resources**
-- How It Works → `/how-it-works`
-- FAQ → `/faq`
-- Case Studies → `/case-studies`
+3. **Remove the Chain column when filtered** -- When a specific chain tab is selected, hide the Chain column since it's redundant.
 
-**Company**
-- Privacy → `#` (kept as placeholder for now)
-- Terms → `#` (kept as placeholder for now)
-- Support → `mailto:hello@audiencescan.io`
+### Technical details
 
-Also update the tagline to reflect the analytics-first positioning:
-> "Web3 analytics that connects website visitors to wallet intelligence. Built by marketers who've scaled crypto projects."
+All changes are in `src/components/overview/WalletHoldingsTable.tsx`:
 
-### Technical Details
-
-**Modified: `src/components/Footer.tsx`**
-- Update the `sections` array (lines 5-29) with the new links above
-- Update the brand description (lines 47-50) to the new tagline
-- Update copyright year to 2025-2026 or just 2026
+- Filter incoming `data` to items with `total_quote_usd > 50` before rendering
+- Extract unique `chain_display_name` values from filtered data
+- Add local state for `selectedChain` (default: `"all"`)
+- Render a secondary `Tabs` component with pill-style triggers for "All" + each chain
+- When a specific chain is selected, further filter the data and hide the Chain column
+- Display a muted info line: "Filtered to tokens with holdings over $50 USD"
+- Sort results by `total_quote_usd` descending for better readability
 
