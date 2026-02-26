@@ -13,7 +13,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
         <main className="flex-1 flex flex-col">
-          <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+          <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
             <SidebarTrigger className="mr-4" />
             <WebsiteSelector />
           </header>
