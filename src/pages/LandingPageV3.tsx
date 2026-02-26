@@ -84,11 +84,11 @@ const outcomeCards = [
 ];
 
 const heroMessages = [
-  { text: "Stop paying for bot traffic.", className: "text-foreground" },
+  { text: "Stop paying for bot traffic.", className: "text-destructive" },
   { text: "Start reaching real buyers.", className: "text-primary" },
-  { text: "Optimise to the wallets with the highest balance.", className: "text-emerald-500" },
-  { text: "Partner with the tokens your connected wallets hold.", className: "text-amber-500" },
-  { text: "Optimise to the action that generated the most holders.", className: "text-cyan-400" },
+  { text: "Optimise to the wallets with the highest balance.", className: "text-[#2db19b]" },
+  { text: "Partner with the tokens your connected wallets hold.", className: "text-primary" },
+  { text: "Optimise to the action that generated the most holders.", className: "text-[#2db19b]" },
 ];
 
 const LandingPageV3 = () => {
@@ -119,7 +119,7 @@ const LandingPageV3 = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
-          <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
+          <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
             <span className="block relative" style={{ minHeight: "2.4em" }}>
               {/* Current message */}
               <span
