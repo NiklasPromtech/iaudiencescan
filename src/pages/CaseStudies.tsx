@@ -2,15 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import dv360Logo from "@/assets/dv360-logo.png";
-import telegramLogo from "@/assets/telegram-logo.png";
-import xLogo from "@/assets/x-logo.png";
 
 const CaseStudies = () => {
   const caseStudies = [
     {
       title: "DV360 Campaign – Smart Contract Targeting",
-      summary: "We scanned a bridge contract on Ethereum used to convert stablecoins into a native token. The campaign ran on DV360.",
+      summary: "We scanned users using their bridging contract on Ethereum used to convert stablecoins into a native token. The campaign ran on DV360.",
       clientType: "Layer 1 protocol aiming to let devs build apps on Bitcoin.",
       results: {
         audienceScan: "$6.09",
@@ -19,12 +16,11 @@ const CaseStudies = () => {
       },
       improvement: "84% lower CPA using AudienceScan",
       screenshot: "/lovable-uploads/f613b86d-553e-46a0-8589-8a06a49093c0.png",
-      logo: dv360Logo,
       platform: "DV360"
     },
     {
       title: "Telegram Campaign – Token-Based Channel Targeting", 
-      summary: "We scanned the client's official token on the Base chain, and used that to drive targeting on Telegram.",
+      summary: "We scanned wallet holders from the US that held their token on the Base chain, and used that to drive targeting on Telegram.",
       clientType: "NFT project linked to real-world assets.",
       results: {
         audienceScan: "€0.21",
@@ -33,12 +29,11 @@ const CaseStudies = () => {
       },
       improvement: "66% more cost-efficient using AudienceScan",
       screenshot: "/lovable-uploads/ada45400-38d0-4a2f-866f-2f252b37200b.png",
-      logo: telegramLogo,
       platform: "Telegram"
     },
     {
-      title: "X Campaign – BSC Token Targeting for Lead Gen",
-      summary: "We scanned the client's official token on BSC, using it to drive influencer signups.",
+      title: "X Campaign – Visitor Retargeting for Lead Gen",
+      summary: "We scanned visitors that had visited the page in the last week with more than $1,000 in their wallet from UK, USA and Canada, using it to drive influencer signups.",
       clientType: "Web3 platform helping micro-influencers earn revenue.",
       results: {
         audienceScan: "€13.11",
@@ -47,7 +42,6 @@ const CaseStudies = () => {
       },
       improvement: "3× more conversions at 60% lower cost",
       screenshot: "/lovable-uploads/42492af3-11d2-4f8a-9447-3cd163ffa1c2.png",
-      logo: xLogo,
       platform: "X (Twitter)"
     }
   ];
@@ -74,12 +68,7 @@ const CaseStudies = () => {
                   <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left Section - Content */}
                     <div className="lg:col-span-2 space-y-6">
-                      <div className="flex items-center gap-4 mb-6">
-                        <img 
-                          src={study.logo} 
-                          alt={`${study.platform} logo`}
-                          className="w-12 h-12 object-contain"
-                        />
+                      <div className="mb-6">
                         <h2 className="text-h3 font-bold text-foreground">
                           {study.title}
                         </h2>
