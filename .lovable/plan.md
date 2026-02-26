@@ -1,27 +1,21 @@
 
 
-## Wallet Holdings: Chain Sub-tabs and $50 Filter
+## Wallet Holdings: Icon-based Filter
 
 ### What changes
 
-1. **Filter out small holdings** -- Only show tokens where `total_quote_usd > 50`. Add a small info badge above the table: "Showing tokens with holdings over $50 USD".
+Add a simple toggle filter above the chain sub-tabs that lets users switch between:
+- **"Verified tokens"** (default) -- only shows tokens that have a valid `logo_url`
+- **"All tokens"** -- shows everything including tokens without icons
 
-2. **Add chain sub-tabs** -- Inside the Wallet Holdings tab, add a secondary row of tabs:
-   - **"All Chains"** tab (default) showing everything
-   - One tab per unique chain found in the data (e.g. "Ethereum Mainnet", "BNB Smart Chain")
-   - Each tab shows a count of tokens in that chain
-
-3. **Remove the Chain column when filtered** -- When a specific chain tab is selected, hide the Chain column since it's redundant.
+This defaults to showing only tokens with icons, since those tend to be more established/legitimate projects.
 
 ### Technical details
 
-All changes are in `src/components/overview/WalletHoldingsTable.tsx`:
+All changes in `src/components/overview/WalletHoldingsTable.tsx`:
 
-- Filter incoming `data` to items with `total_quote_usd > 50` before rendering
-- Extract unique `chain_display_name` values from filtered data
-- Add local state for `selectedChain` (default: `"all"`)
-- Render a secondary `Tabs` component with pill-style triggers for "All" + each chain
-- When a specific chain is selected, further filter the data and hide the Chain column
-- Display a muted info line: "Filtered to tokens with holdings over $50 USD"
-- Sort results by `total_quote_usd` descending for better readability
+- Add a `showAll` boolean state (default: `false`)
+- Before the chain filtering step, filter items to only those where `logo_url` is a non-empty string (when `showAll` is false)
+- Render a small toggle or segmented button group (using the existing `Tabs` pattern) with "Verified" and "All" options, placed inline next to the $50 filter info line
+- Update counts on chain sub-tabs to reflect the current icon filter
 
