@@ -104,7 +104,7 @@ const LandingPageV3 = () => {
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
-            <span className="block relative overflow-hidden" style={{ minHeight: "1.2em" }}>
+            <span className="block relative" style={{ minHeight: "1.2em" }}>
               {/* Line 1 — slides out right */}
               {heroPhase !== "done" && (
                 <span
