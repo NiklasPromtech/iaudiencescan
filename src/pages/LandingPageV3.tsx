@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,17 @@ const outcomeCards = [
 ];
 
 const LandingPageV3 = () => {
+  const [heroPhase, setHeroPhase] = useState<"idle" | "swapping" | "done">("idle");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setHeroPhase("swapping"), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleSwapEnd = () => {
+    if (heroPhase === "swapping") setHeroPhase("done");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -92,8 +104,26 @@ const LandingPageV3 = () => {
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
-            Stop paying for bot traffic.<br />
-            <span className="text-primary">Start reaching real buyers.</span>
+            <span className="block relative overflow-hidden" style={{ minHeight: "1.2em" }}>
+              {/* Line 1 — slides out right */}
+              {heroPhase !== "done" && (
+                <span
+                  className={`inline-block ${heroPhase === "swapping" ? "animate-hero-slide-out-right" : ""}`}
+                  onAnimationEnd={handleSwapEnd}
+                >
+                  Stop paying for bot traffic.
+                </span>
+              )}
+              {/* Line 2 — slides in from left */}
+              {heroPhase === "swapping" && (
+                <span className="absolute inset-0 inline-flex items-center justify-center text-primary animate-hero-slide-in-left">
+                  Start reaching real buyers.
+                </span>
+              )}
+              {heroPhase === "done" && (
+                <span className="text-primary">Start reaching real buyers.</span>
+              )}
+            </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
             The only analytics tool built for Web3 teams — free to start, with bot detection, wallet attribution, and ready-to-use audience targeting lists.
