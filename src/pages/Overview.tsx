@@ -748,7 +748,7 @@ const Overview = () => {
           {/* Events, Wallets & Extensions Tables */}
           <div className="border border-border mb-6">
             <Tabs defaultValue="events">
-              <TabsList className="w-full justify-start border-b border-border bg-transparent p-0">
+              <TabsList className="w-full grid grid-cols-6 border-b border-border bg-transparent p-0">
                 <TabsTrigger value="events" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
                   Conversion Events
                   <span className="ml-2 font-mono tabular-nums text-muted-foreground">({eventsData?.pagination?.total_rows ?? 0})</span>
