@@ -109,6 +109,7 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
             {showChainColumn && (
               <TableHead className="font-mono text-xs uppercase tracking-widest">Chain</TableHead>
             )}
+            <TableHead className="font-mono text-xs uppercase tracking-widest text-right">Holders</TableHead>
             <TableHead className="font-mono text-xs uppercase tracking-widest text-right">Total Value (USD)</TableHead>
           </TableRow>
         </TableHeader>
@@ -133,6 +134,9 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
                   {item.chain_display_name}
                 </TableCell>
               )}
+              <TableCell className="font-mono text-xs tabular-nums text-right text-muted-foreground">
+                {item.unique_wallets != null ? item.unique_wallets.toLocaleString() : "—"}
+              </TableCell>
               <TableCell className="font-mono text-xs tabular-nums text-right">
                 {formatUsd(item.total_quote_usd)}
               </TableCell>
