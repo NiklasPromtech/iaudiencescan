@@ -8,15 +8,15 @@ const sections = [
     links: [
       { label: "Get Started", href: "/auth" },
       { label: "Blog", href: "/blog" },
-      { label: "Book a Demo", href: "mailto:hello@audiencescan.io" },
+      { label: "Book a Demo", href: "https://calendly.com/niklas-audiencescan/audiencescan-demo" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "How It Works", href: "/#how-it-works" },
-      { label: "DM Assistant", href: "/dm-assistant" },
-      { label: "Strategy Playbook", href: "/strategy-playbook" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Case Studies", href: "/case-studies" },
     ],
   },
   {
@@ -24,7 +24,7 @@ const sections = [
     links: [
       { label: "Privacy", href: "#" },
       { label: "Terms", href: "#" },
-      { label: "Support", href: "#" },
+      { label: "Support", href: "mailto:hello@audiencescan.io" },
     ],
   },
 ];
@@ -45,8 +45,7 @@ const Footer = () => {
               <span className="text-lg font-bold text-foreground">AudienceScan</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Built by marketers & devs who've scaled Web3 projects.
-              Turn wallet data into marketing signal.
+              Web3 analytics that connects website visitors to wallet intelligence. Built by marketers who've scaled crypto projects.
             </p>
             <div className="flex gap-3 mt-5">
               <a
@@ -97,7 +96,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-12 pt-8 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2025 AudienceScan. All rights reserved.
+            © 2026 AudienceScan. All rights reserved.
           </p>
         </div>
       </div>
