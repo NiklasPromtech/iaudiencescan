@@ -1680,6 +1680,7 @@ export interface WalletHoldingItem {
   contract_name: string;
   logo_url: string | null;
   total_quote_usd: number;
+  unique_wallets?: number;
 }
 
 export interface WalletHoldingsResponse {
