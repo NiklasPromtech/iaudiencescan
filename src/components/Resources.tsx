@@ -69,7 +69,7 @@ const Resources = () => {
             Have questions about data security, privacy compliance, or whether
             the tool works without paid ads?{" "}
             <Link
-              to="/pricing"
+              to="/faq"
               className="text-primary hover:underline font-medium"
             >
               Check our FAQ
