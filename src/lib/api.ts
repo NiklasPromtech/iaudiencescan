@@ -1671,6 +1671,19 @@ export interface OverviewResponse {
   wallet_distribution: SubResult<WalletDistributionResponse>;
   clicks: SubResult<ClicksTableResponse>;
   holders: SubResult<HoldersResponse>;
+  wallet_holdings: SubResult<WalletHoldingsResponse>;
+}
+
+// ============= WALLET HOLDINGS =============
+export interface WalletHoldingItem {
+  chain_display_name: string;
+  contract_name: string;
+  logo_url: string | null;
+  total_quote_usd: number;
+}
+
+export interface WalletHoldingsResponse {
+  items: WalletHoldingItem[];
 }
 
 export async function fetchOverview(request: OverviewRequest): Promise<OverviewResponse> {
