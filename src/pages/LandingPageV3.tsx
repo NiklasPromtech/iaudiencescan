@@ -84,11 +84,11 @@ const outcomeCards = [
 ];
 
 const heroMessages = [
-  { text: "Stop paying for bot traffic.", className: "text-destructive" },
+  { text: "Stop paying for bot traffic.", className: "text-foreground" },
   { text: "Start reaching real buyers.", className: "text-primary" },
-  { text: "Optimise to wallet balance.", className: "text-[#2db19b]" },
+  { text: "Optimise to wallet balance.", className: "text-foreground" },
   { text: "Partner with the right tokens.", className: "text-primary" },
-  { text: "Optimise to token holders.", className: "text-[#2db19b]" },
+  { text: "Optimise to token holders.", className: "text-foreground" },
 ];
 
 const LandingPageV3 = () => {
@@ -120,17 +120,17 @@ const LandingPageV3 = () => {
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
-            <span className="block relative" style={{ minHeight: "2.4em" }}>
-              {/* Current message */}
+            <span className="block relative overflow-hidden" style={{ height: "2.4em" }}>
+              {/* Current message – always absolutely centered */}
               <span
-                className={`inline-block ${heroMessages[currentIndex].className} ${animating ? "animate-hero-slide-out-right" : ""}`}
+                className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center ${heroMessages[currentIndex].className} ${animating ? "animate-hero-slide-out-right" : ""}`}
                 onAnimationEnd={handleSlideOutEnd}
               >
                 {heroMessages[currentIndex].text}
               </span>
-              {/* Next message sliding in */}
+              {/* Next message sliding in – same absolute center */}
               {animating && (
-                <span className={`absolute inset-0 inline-flex items-center justify-center ${heroMessages[nextIndex].className} animate-hero-slide-in-left`}>
+                <span className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center ${heroMessages[nextIndex].className} animate-hero-slide-in-left`}>
                   {heroMessages[nextIndex].text}
                 </span>
               )}
