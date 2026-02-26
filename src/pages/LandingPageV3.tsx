@@ -83,16 +83,32 @@ const outcomeCards = [
   },
 ];
 
+const heroMessages = [
+  { text: "Stop paying for bot traffic.", className: "text-foreground" },
+  { text: "Start reaching real buyers.", className: "text-primary" },
+  { text: "Optimise to the wallets with the highest balance.", className: "text-emerald-500" },
+  { text: "Partner with the tokens your connected wallets hold.", className: "text-amber-500" },
+  { text: "Optimise to the action that generated the most holders.", className: "text-cyan-400" },
+];
+
 const LandingPageV3 = () => {
-  const [heroPhase, setHeroPhase] = useState<"idle" | "swapping" | "done">("idle");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  const nextIndex = (currentIndex + 1) % heroMessages.length;
 
   useEffect(() => {
-    const timer = setTimeout(() => setHeroPhase("swapping"), 2500);
-    return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      setAnimating(true);
+    }, 3500);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleSwapEnd = () => {
-    if (heroPhase === "swapping") setHeroPhase("done");
+  const handleSlideOutEnd = () => {
+    if (animating) {
+      setCurrentIndex(nextIndex);
+      setAnimating(false);
+    }
   };
 
   return (
@@ -104,24 +120,19 @@ const LandingPageV3 = () => {
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl tracking-tight mb-5 text-foreground leading-[1.1]">
-            <span className="block relative" style={{ minHeight: "1.2em" }}>
-              {/* Line 1 — slides out right */}
-              {heroPhase !== "done" && (
-                <span
-                  className={`inline-block ${heroPhase === "swapping" ? "animate-hero-slide-out-right" : ""}`}
-                  onAnimationEnd={handleSwapEnd}
-                >
-                  Stop paying for bot traffic.
+            <span className="block relative" style={{ minHeight: "2.4em" }}>
+              {/* Current message */}
+              <span
+                className={`inline-block ${heroMessages[currentIndex].className} ${animating ? "animate-hero-slide-out-right" : ""}`}
+                onAnimationEnd={handleSlideOutEnd}
+              >
+                {heroMessages[currentIndex].text}
+              </span>
+              {/* Next message sliding in */}
+              {animating && (
+                <span className={`absolute inset-0 inline-flex items-center justify-center ${heroMessages[nextIndex].className} animate-hero-slide-in-left`}>
+                  {heroMessages[nextIndex].text}
                 </span>
-              )}
-              {/* Line 2 — slides in from left */}
-              {heroPhase === "swapping" && (
-                <span className="absolute inset-0 inline-flex items-center justify-center text-primary animate-hero-slide-in-left">
-                  Start reaching real buyers.
-                </span>
-              )}
-              {heroPhase === "done" && (
-                <span className="text-primary">Start reaching real buyers.</span>
               )}
             </span>
           </h1>
