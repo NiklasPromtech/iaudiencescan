@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, ShieldCheck, List } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -30,23 +30,29 @@ interface WalletHoldingsTableProps {
 
 export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHoldingsTableProps) => {
   const [selectedChain, setSelectedChain] = useState("all");
+  const [showAll, setShowAll] = useState(false);
 
   const filteredByValue = useMemo(
     () => data.filter((item) => item.total_quote_usd > 50).sort((a, b) => b.total_quote_usd - a.total_quote_usd),
     [data]
   );
 
+  const filteredByIcon = useMemo(
+    () => showAll ? filteredByValue : filteredByValue.filter((item) => !!item.logo_url),
+    [filteredByValue, showAll]
+  );
+
   const chains = useMemo(() => {
     const map = new Map<string, number>();
-    filteredByValue.forEach((item) => {
+    filteredByIcon.forEach((item) => {
       map.set(item.chain_display_name, (map.get(item.chain_display_name) || 0) + 1);
     });
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-  }, [filteredByValue]);
+  }, [filteredByIcon]);
 
   const displayData = useMemo(
-    () => selectedChain === "all" ? filteredByValue : filteredByValue.filter((item) => item.chain_display_name === selectedChain),
-    [filteredByValue, selectedChain]
+    () => selectedChain === "all" ? filteredByIcon : filteredByIcon.filter((item) => item.chain_display_name === selectedChain),
+    [filteredByIcon, selectedChain]
   );
 
   const showChainColumn = selectedChain === "all";
@@ -69,9 +75,27 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Info className="h-3.5 w-3.5" />
-        <span className="font-mono text-[11px]">Filtered to tokens with holdings over $50 USD</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Info className="h-3.5 w-3.5" />
+          <span className="font-mono text-[11px]">Filtered to tokens with holdings over $50 USD</span>
+        </div>
+        <div className="flex items-center gap-1 border border-border rounded-full p-0.5">
+          <button
+            onClick={() => setShowAll(false)}
+            className={`flex items-center gap-1 h-6 px-2.5 rounded-full font-mono text-[11px] transition-colors ${!showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <ShieldCheck className="h-3 w-3" />
+            Verified
+          </button>
+          <button
+            onClick={() => setShowAll(true)}
+            className={`flex items-center gap-1 h-6 px-2.5 rounded-full font-mono text-[11px] transition-colors ${showAll ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <List className="h-3 w-3" />
+            All
+          </button>
+        </div>
       </div>
 
       {chains.length > 1 && (
