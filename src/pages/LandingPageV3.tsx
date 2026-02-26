@@ -86,9 +86,9 @@ const outcomeCards = [
 const heroMessages = [
   { text: "Stop paying for bot traffic.", className: "text-destructive" },
   { text: "Start reaching real buyers.", className: "text-primary" },
-  { text: "Optimise to the wallets with the highest balance.", className: "text-[#2db19b]" },
-  { text: "Partner with the tokens your connected wallets hold.", className: "text-primary" },
-  { text: "Optimise to the action that generated the most holders.", className: "text-[#2db19b]" },
+  { text: "Optimise to wallet balance.", className: "text-[#2db19b]" },
+  { text: "Partner with the right tokens.", className: "text-primary" },
+  { text: "Optimise to token holders.", className: "text-[#2db19b]" },
 ];
 
 const LandingPageV3 = () => {
