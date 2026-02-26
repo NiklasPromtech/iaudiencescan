@@ -266,6 +266,66 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
+      {/* ── PERIOD COMPARISON ── */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-primary mb-3">New</p>
+              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
+                Compare any period.<br />See what actually changed.
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                Toggle "Compare to previous period" and instantly see deltas on every metric — visitors, wallets, bot rate, balance — across every source and every day.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                No spreadsheets. No manual math. Just click and know whether last week was better or worse — and <span className="text-foreground font-medium">exactly why</span>.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-border bg-card overflow-hidden shadow-elegant">
+              <div className="px-5 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Source breakdown — 7d vs prior 7d</span>
+                <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary">Comparing</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Source</th>
+                    <th className="text-right px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Visitors</th>
+                    <th className="text-right px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Wallets</th>
+                    <th className="text-right px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Bot %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { source: "twitter_ads", visitors: "4,210", vDelta: "+18%", vUp: true, wallets: "312", wDelta: "+23%", wUp: true, bot: "8%", bDelta: "-4%", bUp: false },
+                    { source: "telegram_promo", visitors: "3,102", vDelta: "-6%", vUp: false, wallets: "198", wDelta: "+2%", wUp: true, bot: "31%", bDelta: "+12%", bUp: true },
+                    { source: "organic", visitors: "2,890", vDelta: "+9%", vUp: true, wallets: "245", wDelta: "+14%", wUp: true, bot: "3%", bDelta: "0%", bUp: false },
+                  ].map((r) => (
+                    <tr key={r.source} className="border-b border-border last:border-0">
+                      <td className="px-5 py-3 font-medium text-foreground">{r.source}</td>
+                      <td className="text-right px-4 py-3">
+                        <span className="tabular-nums font-mono text-foreground">{r.visitors}</span>
+                        <span className={`ml-2 text-[11px] font-mono font-medium ${r.vUp ? "text-emerald-500" : "text-destructive"}`}>{r.vDelta}</span>
+                      </td>
+                      <td className="text-right px-4 py-3">
+                        <span className="tabular-nums font-mono text-foreground">{r.wallets}</span>
+                        <span className={`ml-2 text-[11px] font-mono font-medium ${r.wUp ? "text-emerald-500" : "text-destructive"}`}>{r.wDelta}</span>
+                      </td>
+                      <td className="text-right px-5 py-3">
+                        <span className={`tabular-nums font-mono font-medium ${parseInt(r.bot) > 20 ? "text-destructive" : "text-emerald-500"}`}>{r.bot}</span>
+                        <span className={`ml-2 text-[11px] font-mono font-medium ${r.bUp ? "text-destructive" : "text-emerald-500"}`}>{r.bDelta}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── WALLET VALUE ── */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 max-w-4xl">
