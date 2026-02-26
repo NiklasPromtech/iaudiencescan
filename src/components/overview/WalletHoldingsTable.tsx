@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Loader2, Info, ShieldCheck, List } from "lucide-react";
 import {
   Table,
@@ -31,15 +31,42 @@ interface WalletHoldingsTableProps {
 export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHoldingsTableProps) => {
   const [selectedChain, setSelectedChain] = useState("all");
   const [showAll, setShowAll] = useState(false);
+  const [validLogos, setValidLogos] = useState<Set<string>>(new Set());
+  const [logosChecked, setLogosChecked] = useState(false);
 
   const filteredByValue = useMemo(
     () => data.filter((item) => item.total_quote_usd > 50).sort((a, b) => b.total_quote_usd - a.total_quote_usd),
     [data]
   );
 
+  // Pre-validate logo URLs by attempting to load each image
+  useEffect(() => {
+    if (!filteredByValue.length) { setLogosChecked(true); return; }
+    const urls = new Set(filteredByValue.map((item) => item.logo_url).filter(Boolean) as string[]);
+    if (!urls.size) { setLogosChecked(true); return; }
+
+    const valid = new Set<string>();
+    let remaining = urls.size;
+
+    const done = () => {
+      remaining--;
+      if (remaining <= 0) {
+        setValidLogos(valid);
+        setLogosChecked(true);
+      }
+    };
+
+    urls.forEach((url) => {
+      const img = new Image();
+      img.onload = () => { valid.add(url); done(); };
+      img.onerror = () => { done(); };
+      img.src = url;
+    });
+  }, [filteredByValue]);
+
   const filteredByIcon = useMemo(
-    () => showAll ? filteredByValue : filteredByValue.filter((item) => !!item.logo_url),
-    [filteredByValue, showAll]
+    () => showAll ? filteredByValue : filteredByValue.filter((item) => item.logo_url && validLogos.has(item.logo_url)),
+    [filteredByValue, showAll, validLogos]
   );
 
   const chains = useMemo(() => {
@@ -107,7 +134,7 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
             >
               All Chains
               <Badge variant="secondary" className="ml-1.5 h-4 px-1.5 text-[10px] rounded-full">
-                {filteredByValue.length}
+                {filteredByIcon.length}
               </Badge>
             </TabsTrigger>
             {chains.map(([chain, count]) => (
