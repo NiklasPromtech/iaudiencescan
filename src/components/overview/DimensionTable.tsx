@@ -288,13 +288,29 @@ export function DimensionTable({
     return enriched.sort((a, b) => (b.pageviews ?? 0) - (a.pageviews ?? 0));
   }, [data, dimension]);
 
-  // Create comparison lookup by dim_value
+  // Create comparison lookup – for date_day use positional (day-index) matching
+  // because date strings differ between current and previous periods.
   const comparisonMap = useMemo(() => {
     if (!comparisonRows?.length) return null;
     const map = new Map<string, ApiTableRow>();
-    comparisonRows.forEach(row => map.set(row.dim_value, row));
+    if (dimension === "date_day") {
+      // Sort comparison rows chronologically, then map by index to enrichedData
+      const sorted = [...comparisonRows].sort((a, b) =>
+        a.dim_value.localeCompare(b.dim_value)
+      );
+      const currentSorted = [...enrichedData].sort((a, b) =>
+        a.dim_value.localeCompare(b.dim_value)
+      );
+      currentSorted.forEach((row, i) => {
+        if (sorted[i]) {
+          map.set(row.dim_value, sorted[i]);
+        }
+      });
+    } else {
+      comparisonRows.forEach(row => map.set(row.dim_value, row));
+    }
     return map;
-  }, [comparisonRows]);
+  }, [comparisonRows, dimension, enrichedData]);
 
   // Slice data based on expansion state
   const visibleData = useMemo(() => {
