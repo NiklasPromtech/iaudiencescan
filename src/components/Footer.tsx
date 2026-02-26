@@ -6,24 +6,23 @@ const sections = [
   {
     title: "Product",
     links: [
-      { label: "Get Started", href: "/auth" },
-      { label: "Blog", href: "/blog" },
-      { label: "Book a Demo", href: "https://calendly.com/niklas-audiencescan/audiencescan-demo" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Resources", href: "/resources" },
+      { label: "Case Studies", href: "/case-studies" },
     ],
   },
   {
-    title: "Resources",
+    title: "Learn",
     links: [
-      { label: "How It Works", href: "/how-it-works" },
+      { label: "Blog", href: "/blog" },
       { label: "FAQ", href: "/faq" },
-      { label: "Case Studies", href: "/case-studies" },
+      { label: "Book a Demo", href: "https://calendly.com/niklas-audiencescan/audiencescan-demo" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "Privacy", href: "#" },
-      { label: "Terms", href: "#" },
+      { label: "Get Started", href: "/auth" },
       { label: "Support", href: "mailto:hello@audiencescan.io" },
     ],
   },
