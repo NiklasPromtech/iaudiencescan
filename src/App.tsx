@@ -4,9 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./components/auth/RequireAuth";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Sample1 from "./pages/Sample1";
 import Sitemap from "./pages/Sitemap";
 import CaseStudies from "./pages/CaseStudies";
 import Blog from "./pages/Blog";
@@ -20,36 +18,6 @@ import BlogPostAddressableAudiences from "./pages/BlogPostAddressableAudiences";
 import BlogPostAgencyDifferentiation from "./pages/BlogPostAgencyDifferentiation";
 import BlogPostFoundersLetter from "./pages/BlogPostFoundersLetter";
 import BlogPostAudienceScanAds from "./pages/BlogPostAudienceScanAds";
-import Video from "./pages/Video";
-import Video1 from "./pages/Video1";
-import VideoWhite from "./pages/VideoWhite";
-import SalesPitch from "./pages/SalesPitch";
-import Pricing from "./pages/Pricing";
-import ManagedService from "./pages/ManagedService";
-import SDTerms from "./pages/SDTerms";
-import StrategyPlaybook from "./pages/StrategyPlaybook";
-import DMAssistant from "./pages/DMAssistant";
-import CreateScan from "./pages/CreateScan";
-import ProposedFeatures from "./pages/ProposedFeatures";
-import Creation from "./pages/Creation";
-import Artifact from "./pages/Artifact";
-import Network from "./pages/Network";
-import NetworkAgency from "./pages/NetworkAgency";
-import Merge from "./pages/Merge";
-import XData from "./pages/XData";
-import XAdsAgency from "./pages/XAdsAgency";
-import Wizard from "./pages/Wizard";
-import WizardMobile from "./pages/WizardMobile";
-import WizardV2 from "./pages/WizardV2";
-import NoNiche from "./pages/NoNiche";
-import NoNicheV2 from "./pages/NoNicheV2";
-import NoNicheV3 from "./pages/NoNicheV3";
-import GADune from "./pages/GADune";
-import GADune2 from "./pages/GADune2";
-import AI from "./pages/AI";
-import Confidence from "./pages/Confidence";
-import PlaceholderConfidence from "./pages/PlaceholderConfidence";
-import PlaceholderAI from "./pages/PlaceholderAI";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import Overview from "./pages/Overview";
@@ -63,7 +31,6 @@ import Scans from "./pages/Scans";
 import ScanDetail from "./pages/ScanDetail";
 import ScanResults from "./pages/ScanResults";
 import Wallets from "./pages/Wallets";
-import LandingPageV2 from "./pages/LandingPageV2";
 import Contracts from "./pages/Contracts";
 import Touchpoints from "./pages/Touchpoints";
 import Change from "./pages/Change";
@@ -73,17 +40,16 @@ import QueryEditor from "./pages/QueryEditor";
 import LandingPageV3 from "./pages/LandingPageV3";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import ResourcesPage from "./pages/ResourcesPage";
-import LinkedInAds from "./pages/LinkedInAds";
 import FAQPage from "./pages/FAQPage";
 import { SelectedWebsiteProvider } from "./hooks/use-selected-website";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0, // Always consider data stale — triggers background refetch on mount
-      gcTime: 10 * 60 * 1000, // 10 minutes - cache kept after unmount
+      staleTime: 0,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
-      refetchOnMount: 'always', // Refetch every time a component mounts
+      refetchOnMount: 'always',
     },
   },
 });
@@ -97,12 +63,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPageV3 />} />
-          <Route path="/old-home" element={<Index />} />
           <Route path="/case-studies" element={<CaseStudies />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/faq" element={<FAQPage />} />
-          <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/personal-letter" element={<BlogPost />} />
           <Route path="/blog/tutorials" element={<BlogPostTutorials />} />
@@ -113,40 +77,7 @@ const App = () => (
           <Route path="/blog/tracking" element={<BlogPostTracking />} />
           <Route path="/blog/agency-differentiation" element={<BlogPostAgencyDifferentiation />} />
           <Route path="/blog/what-am-i-looking-at" element={<BlogPostWhatAmILookingAt />} />
-          <Route path="/proposed-features" element={<ProposedFeatures />} />
           <Route path="/sitemap.xml" element={<Sitemap />} />
-          <Route path="/dm-assistant" element={<DMAssistant />} />
-          <Route path="/managed-service" element={<ManagedService />} />
-          <Route path="/create-scan" element={<CreateScan />} />
-          <Route path="/sales-pitch" element={<SalesPitch />} />
-          <Route path="/sdterms" element={<SDTerms />} />
-          <Route path="/sample1" element={<Sample1 />} />
-          <Route path="/strategy-playbook" element={<StrategyPlaybook />} />
-          <Route path="/video" element={<Video />} />
-          <Route path="/video1" element={<Video1 />} />
-          <Route path="/video/white" element={<VideoWhite />} />
-          <Route path="/creation" element={<Creation />} />
-          <Route path="/artifact/:studyId" element={<Artifact />} />
-          <Route path="/network/:studyId" element={<Network />} />
-          <Route path="/network/agency/:studyId" element={<NetworkAgency />} />
-          <Route path="/merge/:studyId" element={<Merge />} />
-          <Route path="/x-data/:studyId" element={<XData />} />
-          <Route path="/xads/agency" element={<XAdsAgency />} />
-          <Route path="/ads" element={<LinkedInAds />} />
-          <Route path="/wizard" element={<Wizard />} />
-          <Route path="/wizard/mobile" element={<WizardMobile />} />
-          <Route path="/wizard/v2" element={<WizardV2 />} />
-          <Route path="/v2/landingPage" element={<LandingPageV2 />} />
-          <Route path="/v3/landingpage" element={<LandingPageV3 />} />
-          <Route path="/no-niche" element={<NoNiche />} />
-          <Route path="/no-niche/v2" element={<NoNicheV2 />} />
-          <Route path="/no-niche/v3" element={<NoNicheV3 />} />
-          <Route path="/GADune" element={<GADune />} />
-          <Route path="/GADune2" element={<GADune2 />} />
-          <Route path="/ai" element={<AI />} />
-          <Route path="/confidence/:studyId" element={<Confidence />} />
-          <Route path="/placeholder/confidence" element={<PlaceholderConfidence />} />
-          <Route path="/placeholder/ai" element={<PlaceholderAI />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/install" element={<RequireAuth><Install /></RequireAuth>} />
           <Route path="/overview" element={<RequireAuth><Overview /></RequireAuth>} />
