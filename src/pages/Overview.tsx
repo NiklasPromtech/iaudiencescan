@@ -26,6 +26,7 @@ import {
   ActiveFilters,
   DIMENSION_TO_FILTER,
   HolderDataPoint,
+  WalletHoldingItem,
   OverviewResponse,
 } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,7 @@ import { WalletsOverviewTable } from "@/components/overview/WalletsOverviewTable
 import { WalletExtensionsTable } from "@/components/overview/WalletExtensionsTable";
 import { WalletDistributionTable } from "@/components/overview/WalletDistributionTable";
 import { ClicksTable } from "@/components/overview/ClicksTable";
+import { WalletHoldingsTable } from "@/components/overview/WalletHoldingsTable";
 import { TrackingSetupDialog } from "@/components/overview/TrackingSetupDialog";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DateRangePicker, DateRangeValue } from "@/components/overview/DateRangePicker";
@@ -82,6 +84,8 @@ const Overview = () => {
   const [walletDistributionLoading, setWalletDistributionLoading] = useState(true);
   const [clicksData, setClicksData] = useState<ClicksTableResponse | null>(null);
   const [clicksLoading, setClicksLoading] = useState(true);
+  const [walletHoldingsData, setWalletHoldingsData] = useState<WalletHoldingItem[]>([]);
+  const [walletHoldingsLoading, setWalletHoldingsLoading] = useState(true);
   
   // Audience dialog state
   const [audienceDialogOpen, setAudienceDialogOpen] = useState(false);
@@ -265,6 +269,7 @@ const Overview = () => {
     setWalletExtensionsLoading(true);
     setWalletDistributionLoading(true);
     setClicksLoading(true);
+    setWalletHoldingsLoading(true);
     setFilterOptionsLoading(true);
     setError(null);
 
@@ -353,6 +358,13 @@ const Overview = () => {
         setClicksData(response.clicks.data);
       }
 
+      // Wallet holdings
+      if (response.wallet_holdings?.success && response.wallet_holdings?.data) {
+        setWalletHoldingsData(response.wallet_holdings.data.items || []);
+      } else {
+        setWalletHoldingsData([]);
+      }
+
       // Holders
       if (response.holders.success && response.holders.data) {
         setHolderData(response.holders.data.data || []);
@@ -370,6 +382,7 @@ const Overview = () => {
       setWalletExtensionsLoading(false);
       setWalletDistributionLoading(false);
       setClicksLoading(false);
+      setWalletHoldingsLoading(false);
       setFilterOptionsLoading(false);
     }
   }, [selectedWebsite, getFiltersParam]);
@@ -756,6 +769,10 @@ const Overview = () => {
                   Clicks
                   <span className="ml-2 font-mono tabular-nums text-muted-foreground">({clicksData?.pagination?.total_rows ?? 0})</span>
                 </TabsTrigger>
+                <TabsTrigger value="holdings" className="font-mono text-xs uppercase tracking-widest data-[state=active]:bg-muted/50 px-4 py-3">
+                  Wallet Holdings
+                  <span className="ml-2 font-mono tabular-nums text-muted-foreground">({walletHoldingsData.length})</span>
+                </TabsTrigger>
               </TabsList>
               <div className="p-4">
                 <TabsContent value="events" className="mt-0">
@@ -821,6 +838,13 @@ const Overview = () => {
                         ? comparisonData.clicks.data.rows
                         : undefined
                     }
+                  />
+                </TabsContent>
+                <TabsContent value="holdings" className="mt-0">
+                  <WalletHoldingsTable
+                    data={walletHoldingsData}
+                    loading={walletHoldingsLoading}
+                    hideHeader
                   />
                 </TabsContent>
               </div>
