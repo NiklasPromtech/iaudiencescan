@@ -36,7 +36,7 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
   const [logosChecked, setLogosChecked] = useState(false);
 
   const filteredByValue = useMemo(
-    () => data.filter((item) => item.total_quote_usd > 50).sort((a, b) => b.total_quote_usd - a.total_quote_usd),
+    () => data.filter((item) => item.total_quote_usd > 50).sort((a, b) => (b.unique_wallets ?? 0) - (a.unique_wallets ?? 0)),
     [data]
   );
 
