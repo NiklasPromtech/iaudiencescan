@@ -146,12 +146,12 @@ export default {
 				}
 			},
 			'hero-slide-out-right': {
-				'0%': { transform: 'translateX(0)', opacity: '1' },
-				'100%': { transform: 'translateX(120%)', opacity: '0' }
+				'0%': { transform: 'translateX(0) translateY(-50%)', opacity: '1' },
+				'100%': { transform: 'translateX(120%) translateY(-50%)', opacity: '0' }
 			},
 			'hero-slide-in-left': {
-				'0%': { transform: 'translateX(-120%)', opacity: '0' },
-				'100%': { transform: 'translateX(0)', opacity: '1' }
+				'0%': { transform: 'translateX(-120%) translateY(-50%)', opacity: '0' },
+				'100%': { transform: 'translateX(0) translateY(-50%)', opacity: '1' }
 			}
 		},
 		animation: {
