@@ -13,16 +13,16 @@ const FAQ = () => {
 
   const aboutFaqs = [
     {
-      question: "What does the scan include?",
-      answer: "A breakdown of token holders, wallet segments, social media community overlaps, and recommended targeting moves. You'll see which X/Telegram communities your holders are active in, their transaction patterns, and suggested marketing strategies."
-    },
-    {
-      question: "Do I need to connect a wallet?",
-      answer: "No wallet connect needed — just enter your contract address. Our analysis is completely permissionless and doesn't require any personal wallet connection."
+      question: "What is AudienceScan?",
+      answer: "AudienceScan is a Web3 analytics platform. Think of it as Google Analytics built for crypto — it tracks your website visitors, detects wallet extensions, identifies bot traffic, and connects on-chain holder data with real user behavior. It started as a blockchain scanning tool for marketing strategies, but we realized raw wallet data is useless without enrichment. So we merged our analytics engine with our scan tool into one platform."
     },
     {
       question: "How much does it cost?",
-      answer: "Starting from $199 / month for 5 scans, you will be able to get a weekly update of how your community is changing and new opportunities. We offer a customer advisory discount for selected users, so reach out to see if you are a good fit to help us grow AudienceScan."
+      answer: "It's free. We're building up our user base and the platform will remain free until we reach 1,000 users. No credit card required, no trial period, no feature gates."
+    },
+    {
+      question: "Do I need to connect a wallet?",
+      answer: "No. Just add the tracking tag to your site and enter your contract address for scans. Everything is permissionless."
     },
     {
       question: "What chains are supported?",
@@ -49,30 +49,30 @@ const FAQ = () => {
     },
     {
       question: "Can I export the data?",
-      answer: "Yes! Export audience segments in CSV format for use in Google Ads, Drippi.ai, or any other marketing tool. Premium users get additional export formats."
+      answer: "Yes. Export audience segments, wallet lists, and analytics data in CSV format for use in ad platforms or other tools."
     }
   ];
 
   const whyFaqs = [
     {
       question: "Why not just use Google Analytics?",
-      answer: "GA tracks page views and sessions but has zero wallet awareness. It can't tell you which visitors hold your token, which wallet extensions they use, or which on-chain communities they belong to. AudienceScan starts where GA stops — connecting web traffic to wallet behavior and giving you crypto-native audience segments you can actually target."
+      answer: "GA tracks page views and sessions but has zero wallet awareness. It can't tell you which visitors hold your token, which wallet extensions they use, or which on-chain communities they belong to. AudienceScan gives you everything GA does for Web3 sites, plus wallet-level intelligence, bot detection, and audience scans that connect holders to targetable communities."
     },
     {
       question: "Why not just use Dune?",
-      answer: "Dune is great for querying raw blockchain data, but it requires SQL knowledge and doesn't connect on-chain activity to off-chain marketing channels. AudienceScan does that bridge automatically — linking holder wallets to X communities, Telegram groups, and ad platforms so you get actionable targeting, not just dashboards."
-    },
-    {
-      question: "Can I use AudienceScan without running paid ads?",
-      answer: "Absolutely. The tracking tag and audience scans work independently of any ad spend. Many teams use AudienceScan purely for community intelligence — understanding who their holders are, where they came from, and how the audience is shifting over time."
-    },
-    {
-      question: "Is my data private and secure?",
-      answer: "Yes. We never ask users to connect wallets. All analysis is based on publicly available on-chain data and aggregated browser signals. No PII is collected or stored. Your dashboard data is private to your team."
+      answer: "Dune is great for querying raw blockchain data, but it requires SQL knowledge and doesn't connect on-chain activity to your website traffic or marketing channels. AudienceScan is like having Dune for your own data — with a built-in SQL workspace, plus automatic bridging between wallet behavior and real user sessions."
     },
     {
       question: "How is this different from a blockchain explorer?",
-      answer: "Explorers show individual transactions. AudienceScan aggregates thousands of wallets into behavioral segments, detects bots, maps community overlaps, and turns all of that into marketing actions — things no explorer does."
+      answer: "Explorers show individual transactions. AudienceScan aggregates thousands of wallets into behavioral segments, detects bots, maps community overlaps, and turns all of that into marketing actions."
+    },
+    {
+      question: "Can I use it without running paid ads?",
+      answer: "Absolutely. Most teams use AudienceScan purely for analytics and community intelligence — understanding who their holders are, spotting bots, and tracking how their audience evolves over time."
+    },
+    {
+      question: "Is my data private and secure?",
+      answer: "Yes. We never ask users to connect wallets. All analysis uses publicly available on-chain data and aggregated browser signals. No PII is collected. Your dashboard is private to your team."
     }
   ];
 
