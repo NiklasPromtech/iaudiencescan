@@ -31,6 +31,7 @@ interface WalletHoldingsTableProps {
 export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHoldingsTableProps) => {
   const [selectedChain, setSelectedChain] = useState("all");
   const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [validLogos, setValidLogos] = useState<Set<string>>(new Set());
   const [logosChecked, setLogosChecked] = useState(false);
 
@@ -81,6 +82,10 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
     () => selectedChain === "all" ? filteredByIcon : filteredByIcon.filter((item) => item.chain_display_name === selectedChain),
     [filteredByIcon, selectedChain]
   );
+
+  const DEFAULT_ROWS = 10;
+  const visibleData = expanded ? displayData : displayData.slice(0, DEFAULT_ROWS);
+  const hasMore = displayData.length > DEFAULT_ROWS;
 
   const showChainColumn = selectedChain === "all";
 
@@ -165,7 +170,7 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
           </TableRow>
         </TableHeader>
         <TableBody>
-          {displayData.map((item, i) => (
+          {visibleData.map((item, i) => (
             <TableRow key={`${item.contract_name}-${item.chain_display_name}-${i}`}>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -195,6 +200,15 @@ export const WalletHoldingsTable = ({ data, loading, hideHeader }: WalletHolding
           ))}
         </TableBody>
       </Table>
+
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full py-2 text-center font-mono text-[11px] text-muted-foreground hover:text-foreground transition-colors border border-border rounded-md"
+        >
+          {expanded ? "Show less" : `View all ${displayData.length} rows`}
+        </button>
+      )}
     </div>
   );
 };
