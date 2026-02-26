@@ -1,33 +1,46 @@
 
 
-## Move HowItWorks and Resources to Separate Pages
+## Create a Dedicated FAQ Page
 
-Remove both sections from the landing page and give each its own dedicated route. Update the header nav links to point to the new pages instead of anchor scrolls.
+Restyle the existing FAQ component to match the V3 aesthetic, expand the questions to address competitive positioning (vs GA, vs Dune, etc.), create a dedicated page at `/faq`, and update the Resources link.
 
 ---
 
-### Changes
+### New & Updated Questions
 
-**1. New file: `src/pages/HowItWorksPage.tsx`**
-- A standalone page wrapping the existing `<HowItWorks />` component with `<Header />` and `<Footer />`.
-- Route: `/how-it-works`
+The existing 5 questions will be kept (with minor copy tweaks) and grouped alongside new competitive/objection-handling questions. Organized into two groups:
 
-**2. New file: `src/pages/ResourcesPage.tsx`**
-- A standalone page wrapping the existing `<Resources />` component with `<Header />` and `<Footer />`.
-- Since the current Resource card links are outdated, the cards will become informational (no "Read more" links) until you decide what they should link to.
-- Route: `/resources`
+**About AudienceScan**
+1. What does the scan include?
+2. Do I need to connect a wallet?
+3. How much does it cost?
+4. What chains are supported? (with chain icons grid)
+5. Can I export the data?
 
-**3. Modified: `src/pages/LandingPageV3.tsx`**
-- Remove the `<HowItWorks />` and `<Resources />` imports and usage (lines 19-20, 399-400).
+**Why AudienceScan?**
+6. **Why not just use Google Analytics?** -- GA tracks page views and sessions but has zero wallet awareness. It can't tell you which visitors hold your token, which wallet extensions they use, or which on-chain communities they belong to. AudienceScan starts where GA stops -- connecting web traffic to wallet behavior and giving you crypto-native audience segments you can actually target.
+7. **Why not just use Dune?** -- Dune is great for querying raw blockchain data, but it requires SQL knowledge and doesn't connect on-chain activity to off-chain marketing channels. AudienceScan does that bridge automatically -- linking holder wallets to X communities, Telegram groups, and ad platforms so you get actionable targeting, not just dashboards.
+8. **Can I use AudienceScan without running paid ads?** -- Absolutely. The tracking tag and audience scans work independently of any ad spend. Many teams use AudienceScan purely for community intelligence -- understanding who their holders are, where they came from, and how the audience is shifting over time.
+9. **Is my data private and secure?** -- Yes. We never ask users to connect wallets. All analysis is based on publicly available on-chain data and aggregated browser signals. No PII is collected or stored. Your dashboard data is private to your team.
+10. **How is this different from a blockchain explorer?** -- Explorers show individual transactions. AudienceScan aggregates thousands of wallets into behavioral segments, detects bots, maps community overlaps, and turns all of that into marketing actions -- things no explorer does.
 
-**4. Modified: `src/components/Header.tsx`**
-- Change "How It Works" link from `/#how-it-works` to `/how-it-works`.
-- Change "Resources" link from `/#resources` to `/resources`.
-- Remove the `ChevronDown` icons from these links (they're no longer in-page anchors).
+---
 
-**5. Modified: `src/App.tsx`**
-- Add routes for `/how-it-works` and `/resources` pointing to the new page components.
+### Files
 
-**6. Modified: `src/components/Resources.tsx`**
-- Remove the card links and "Read more" arrows since the destinations are outdated. Cards become static informational tiles for now.
+**1. New file: `src/pages/FAQPage.tsx`**
+- Standalone page wrapping `<Header />`, `<FAQ />`, `<Footer />`.
+- Route: `/faq`
+
+**2. Modified: `src/components/FAQ.tsx`**
+- Restyle to V3 aesthetic (font-mono label, border cards, no rounded corners on accordion items).
+- Add the 5 new questions above.
+- Group into two sections with subheadings: "About AudienceScan" and "Why AudienceScan?"
+
+**3. Modified: `src/App.tsx`**
+- Add route: `<Route path="/faq" element={<FAQPage />} />`
+- Import `FAQPage`.
+
+**4. Modified: `src/components/Resources.tsx`**
+- Update the FAQ callout link from `/pricing` to `/faq`.
 
