@@ -14,9 +14,9 @@ import {
   Check,
   Trash2,
   Pencil,
-  Copy,
   Download,
   Wand2,
+  Info,
 } from "lucide-react";
 import { format as formatSql } from "sql-formatter";
 import { downloadCSV } from "@/lib/export-utils";
@@ -437,102 +437,12 @@ const SqlEditor = ({
   );
 };
 
-// ── Sample queries ────────────────────────────────────────────────────────────
+// ── Example prompts for Get Started section ──────────────────────────────────
 
-const SAMPLE_QUERIES: { label: string; sql: string }[] = [
-  {
-    label: "Visitors today",
-    sql: `SELECT
-  COUNT(DISTINCT visitor_hash) AS unique_visitors,
-  COUNT(*)                     AS total_pageviews
-FROM pageviews
-WHERE DATE(created_at) = CURRENT_DATE()
-  AND is_bot = false`,
-  },
-  {
-    label: "Wallet connections today",
-    sql: `SELECT
-  COUNT(DISTINCT wallet_id) AS wallets_connected
-FROM wallets
-WHERE DATE(created_at) = CURRENT_DATE()`,
-  },
-  {
-    label: "Top pages today",
-    sql: `SELECT
-  page_path,
-  COUNT(DISTINCT visitor_hash) AS unique_visitors,
-  COUNT(*)                     AS pageviews
-FROM pageviews
-WHERE DATE(created_at) = CURRENT_DATE()
-  AND is_bot = false
-GROUP BY 1
-ORDER BY 3 DESC
-LIMIT 20`,
-  },
-  {
-    label: "Visitors that connected a wallet",
-    sql: `SELECT
-  COUNT(DISTINCT p.visitor_hash) AS visitors_with_wallet
-FROM pageviews p
-INNER JOIN wallets w ON w.visitor_hash = p.visitor_hash
-WHERE DATE(p.created_at) = CURRENT_DATE()
-  AND p.is_bot = false`,
-  },
-  {
-    label: "Clicks by UTM source today",
-    sql: `SELECT
-  p.utm_source,
-  COUNT(*) AS clicks
-FROM events e
-INNER JOIN pageviews p
-  ON p.session_id = e.session_id
-WHERE DATE(e.created_at) = CURRENT_DATE()
-  AND e.event_type = 'click'
-  AND p.utm_source IS NOT NULL
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 50`,
-  },
-  {
-    label: "Clicks from utm_source=\"sample\" today",
-    sql: `SELECT
-  JSON_EXTRACT_SCALAR(e.event_data, '$.href')       AS href,
-  JSON_EXTRACT_SCALAR(e.event_data, '$.click_text') AS click_text,
-  COUNT(*)                                           AS clicks
-FROM events e
-INNER JOIN pageviews p
-  ON p.session_id = e.session_id
-WHERE DATE(e.created_at) = CURRENT_DATE()
-  AND e.event_type = 'click'
-  AND p.utm_source = 'sample'
-GROUP BY 1, 2
-ORDER BY 3 DESC
-LIMIT 50`,
-  },
-  {
-    label: "Top converting wallets this week",
-    sql: `SELECT
-  w.wallet_id                   AS wallet_address,
-  COUNT(DISTINCT e.session_id)  AS conversion_events
-FROM wallets w
-INNER JOIN events e ON e.visitor_hash = w.visitor_hash
-WHERE DATE(e.created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
-  AND e.event_type != 'click'
-  AND e.is_auto_tracked = false
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 50`,
-  },
-];
-
-// ── Prompt chips ──────────────────────────────────────────────────────────────
-
-const PROMPT_CHIPS = [
-  "Top 50 token holders by balance in the last 30 days",
-  "Wallets that clicked an ad and then made an on-chain transfer",
-  "Daily new wallet visits to my site this month",
-  "Which wallets hold my token and also visited a competitor's site?",
-  "Show wallet journeys from first ad click to first transaction",
+const EXAMPLE_PROMPTS = [
+  "What are users clicking on the home page?",
+  "What is the median wallet balance of users visiting the product page?",
+  "How many users with a wallet extension landed on the token swap page?",
 ];
 
 
@@ -555,7 +465,7 @@ export default function QueryEditor() {
   const [sql, setSql] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [schemaCopied, setSchemaCopied] = useState(false);
+  
 
   // Query load state
   const [queryLoading, setQueryLoading] = useState(!isNew);
@@ -734,27 +644,6 @@ export default function QueryEditor() {
     [sql]
   );
 
-  // Copy schema to clipboard for use with external AI
-  const handleCopySchema = useCallback(() => {
-    if (!schema.length) return;
-    const text = [
-      "You are a SQL assistant for the AudienceScan analytics platform.",
-      "Generate BigQuery-compatible SQL using only the tables and columns listed below.",
-      "Return ONLY the SQL — no explanation, no markdown fences.",
-      "",
-      "## Schema",
-      ...schema.map((t) => {
-        const cols = t.columns
-          .map((c) => `  - ${c.name} (${c.type})${c.description ? `: ${c.description}` : ""}`)
-          .join("\n");
-        return `### ${t.name}${t.description ? `\n${t.description}` : ""}\n${cols}`;
-      }),
-    ].join("\n");
-    navigator.clipboard.writeText(text).then(() => {
-      setSchemaCopied(true);
-      setTimeout(() => setSchemaCopied(false), 2000);
-    });
-  }, [schema]);
 
   // Generate SQL from a natural language prompt
   const handleGenerate = async () => {
@@ -1052,41 +941,8 @@ export default function QueryEditor() {
               className="flex flex-col p-4 gap-2 overflow-hidden shrink-0"
               style={{ height: editorHeightPx }}
             >
-              {/* Sample query chips */}
-              {selectedWebsite && (
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 shrink-0">
-                    Samples:
-                  </span>
-                  {SAMPLE_QUERIES.map((s) => (
-                    <button
-                      key={s.label}
-                      onClick={() => {
-                        skipNextSave.current = true;
-                        setSql(s.sql);
-                        setHasRun(false);
-                      }}
-                      className="border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {/* Copy schema bar */}
-              <div className="shrink-0 flex items-center gap-2 border border-border bg-muted/20 px-3 py-2">
-                <Copy className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                <span className="flex-1 font-mono text-xs text-muted-foreground/70">
-                  Use your preferred AI to write SQL — paste the schema as context
-                </span>
-                <button
-                  onClick={handleCopySchema}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary hover:text-primary/80 border border-primary/30 hover:border-primary/60 transition-colors"
-                >
-                  {schemaCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {schemaCopied ? "Copied!" : "Copy Schema"}
-                </button>
-              </div>
+
+
 
               {/* SQL editor */}
               <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
@@ -1107,12 +963,56 @@ export default function QueryEditor() {
             {/* Results area */}
             <div className="flex-1 overflow-y-auto">
               {!hasRun ? (
-                /* ── Empty state ── */
-                <div className="flex flex-col items-center justify-center h-full gap-3 py-12 text-center px-4">
-                  <Play className="h-6 w-6 text-muted-foreground/30" />
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Run your query to see results
+                /* ── Get started — Dune-style prompt section ── */
+                <div className="flex flex-col gap-6 px-6 py-8 max-w-2xl mx-auto">
+                  <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+                    Get started
                   </p>
+
+                  {/* Generate with a prompt */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span className="font-mono text-xs text-foreground font-semibold">
+                        Generate with a prompt
+                      </span>
+                      <span className="text-muted-foreground/40 shrink-0" title="Describe what you want to query in plain English and AI will generate the SQL for you."><Info className="h-3 w-3" /></span>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleGenerate();
+                          }
+                        }}
+                        placeholder="Enter prompt to generate SQL..."
+                        disabled={isGenerating || !selectedWebsite}
+                        className="pr-10 font-mono text-xs h-10"
+                      />
+                      {isGenerating && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Example prompt cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {EXAMPLE_PROMPTS.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPrompt(p)}
+                        disabled={isGenerating || !selectedWebsite}
+                        className="text-left border border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/30 px-4 py-3 transition-colors disabled:opacity-40 disabled:cursor-not-allowed group"
+                      >
+                        <p className="font-mono text-[11px] text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">
+                          {p}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : isRunning ? (
                 /* ── Running state ── */
