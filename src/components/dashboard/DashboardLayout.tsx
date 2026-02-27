@@ -24,12 +24,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <SidebarProvider open={open} onOpenChange={handleOpenChange}>
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
             <SidebarTrigger className="mr-4" />
             <WebsiteSelector />
           </header>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 overflow-hidden">
             {children}
           </div>
         </main>
