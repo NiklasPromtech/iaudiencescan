@@ -1,15 +1,24 @@
-import { ReactNode } from "react";
+import { ReactNode, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { WebsiteSelector } from "./WebsiteSelector";
+
+const SIDEBAR_KEY = "sidebar-open";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  const stored = localStorage.getItem(SIDEBAR_KEY);
+  const defaultOpen = stored === null ? false : stored === "true";
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    localStorage.setItem(SIDEBAR_KEY, String(open));
+  }, []);
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={defaultOpen} onOpenChange={handleOpenChange}>
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
         <main className="flex-1 flex flex-col">
