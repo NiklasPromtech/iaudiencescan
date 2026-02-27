@@ -93,23 +93,18 @@ const heroMessages = [
 
 const LandingPageV3 = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
-
-  const nextIndex = (currentIndex + 1) % heroMessages.length;
+  const [phase, setPhase] = useState<"in" | "out">("in");
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAnimating(true);
+      setPhase("out");
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % heroMessages.length);
+        setPhase("in");
+      }, 500);
     }, 3500);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSlideOutEnd = () => {
-    if (animating) {
-      setCurrentIndex(nextIndex);
-      setAnimating(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -121,16 +116,10 @@ const LandingPageV3 = () => {
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
             <span className="block relative overflow-hidden" style={{ height: "2.4em" }}>
-              {/* Current message – crossfade */}
               <span
-                className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[currentIndex].className} ${animating ? "opacity-0" : "opacity-100"}`}
-                onTransitionEnd={handleSlideOutEnd}
+                className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[currentIndex].className} ${phase === "in" ? "opacity-100" : "opacity-0"}`}
               >
                 {heroMessages[currentIndex].text}
-              </span>
-              {/* Next message fading in */}
-              <span className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[nextIndex].className} ${animating ? "opacity-100" : "opacity-0"}`}>
-                {heroMessages[nextIndex].text}
               </span>
             </span>
           </h1>
