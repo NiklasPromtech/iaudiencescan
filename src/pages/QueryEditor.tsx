@@ -974,7 +974,7 @@ export default function QueryEditor() {
           </div>
 
           {/* Right — Editor + Results */}
-          <div ref={containerRef} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div ref={containerRef} className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
             {/* SQL Editor — resizable height */}
             <div
               className="flex flex-col p-4 gap-2 overflow-hidden shrink-0"
