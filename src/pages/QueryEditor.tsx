@@ -1024,7 +1024,15 @@ export default function QueryEditor() {
 
             {/* Results area */}
             <div className="flex-1 overflow-y-auto">
-              {!hasRun ? (
+              {isRunning ? (
+                /* ── Running state ── */
+                <div className="flex flex-col items-center justify-center h-full gap-3 py-12">
+                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Running…
+                  </p>
+                </div>
+              ) : !hasRun ? (
                 /* ── Get started — Dune-style prompt section ── */
                 <div className="flex flex-col gap-6 px-6 py-8 max-w-2xl mx-auto">
                   <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground font-semibold">
@@ -1075,14 +1083,6 @@ export default function QueryEditor() {
                       </button>
                     ))}
                   </div>
-                </div>
-              ) : isRunning ? (
-                /* ── Running state ── */
-                <div className="flex flex-col items-center justify-center h-full gap-3 py-12">
-                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Running…
-                  </p>
                 </div>
               ) : runError ? (
                 /* ── Error state ── */
