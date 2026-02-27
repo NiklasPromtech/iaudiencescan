@@ -17,12 +17,17 @@ export type QueryPatch = {
   starred?: boolean;
 };
 
-export function useQueries() {
+export function useQueries(websiteId?: string | null) {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchQueries = useCallback(async () => {
+    if (!websiteId) {
+      setQueries([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -30,6 +35,7 @@ export function useQueries() {
       const { data, error: err } = await (supabase as any)
         .from("queries")
         .select("*")
+        .eq("website_id", websiteId)
         .order("updated_at", { ascending: false });
       if (err) throw err;
       setQueries((data as SavedQuery[]) ?? []);
@@ -38,7 +44,7 @@ export function useQueries() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [websiteId]);
 
   useEffect(() => {
     fetchQueries();
@@ -52,7 +58,7 @@ export function useQueries() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error: err } = await (supabase as any)
         .from("queries")
-        .insert({ name, sql, user_id: user.id })
+        .insert({ name, sql, user_id: user.id, website_id: websiteId ?? null })
         .select()
         .single();
       if (err) throw err;
@@ -60,7 +66,7 @@ export function useQueries() {
       setQueries((prev) => [created, ...prev]);
       return created;
     },
-    []
+    [websiteId]
   );
 
   const updateQuery = useCallback(
