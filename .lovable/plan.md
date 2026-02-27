@@ -1,102 +1,70 @@
 
-I tracked both issues in `src/pages/QueryEditor.tsx` and confirmed they’re related to layout containment rather than query logic.
+## Update Query Name from AI Response + Add Query History Log
 
-## What’s happening now
-
-1. Top action buttons drifting/disappearing when results are very wide
-- The results table is correctly horizontally scrollable, but some parent flex containers are still allowed to grow with wide content.
-- In flex layouts, missing `min-w-0`/overflow constraints can make sibling regions appear pushed or clipped.
-- The top bar currently has one long, single-line row with mixed flexible + fixed elements, which makes it fragile under pressure.
-
-2. No minimize control for Data Explorer
-- Left panel is hardcoded at `w-64` and always open.
-- There is no collapse state and no persisted user preference for this panel.
-
-## Implementation approach
-
-### A) Stabilize header/top actions when results are wide
-
-Files:
-- `src/components/dashboard/DashboardLayout.tsx`
-- `src/pages/QueryEditor.tsx`
-
-Changes:
-1. Add hard width containment on dashboard main content
-- In `DashboardLayout`, ensure the main/content wrappers can shrink:
-  - `main`: add `min-w-0 overflow-hidden`
-  - children wrapper (`<div className="flex-1">`): add `min-w-0 overflow-hidden`
-- This prevents wide page children from stretching the whole layout horizontally.
-
-2. Harden QueryEditor top bar structure
-- Refactor top bar into explicit left and right zones:
-  - Left zone: back button + title + tag_id, with `min-w-0` and truncation where needed.
-  - Right zone: actions (`delete`, `pretty`, `run`) with `shrink-0`.
-- Keep buttons visible by preventing them from shrinking away.
-- Add truncation on long text elements (title/tag) so controls remain accessible.
-
-3. Constrain horizontal overflow to results table only
-- Keep table scrolling local to results pane (`overflow-x-auto`).
-- Ensure parent wrappers remain `overflow-hidden`/`min-w-0` so they do not inherit table width.
-
-Expected result:
-- Even with very wide result sets, top controls stay anchored and visible.
-- Horizontal scrolling happens only inside the table region, not the entire page content lane.
+### Overview
+Two changes: (1) use the `name` field from the AI response to set the query title, and (2) add an in-session "Query Log" so you can jump back to any previous AI-generated iteration without losing work.
 
 ---
 
-### B) Add Data Explorer minimize + remembered preference
+### A) Use AI-returned `name` for query title
 
-File:
-- `src/pages/QueryEditor.tsx`
+The API now returns a `name` field alongside `sql` and `explanation`. We'll update the response type and both handlers to use it.
 
-Changes:
-1. Add collapse state + persistence
-- New state: `isExplorerCollapsed`.
-- Persist in `localStorage` with a dedicated key (e.g. `query-editor-explorer-collapsed`).
-- Initialize from storage on first render and update on toggle.
+**Changes:**
+- **`src/lib/api/queries.ts`** -- Add `name` to `QueryGenerateResponse` interface
+- **`src/pages/QueryEditor.tsx`** -- In `handleGenerate`, set title to `data.name` (falling back to the prompt). In `handleEditGenerate`, also update the title to `data.name` when present.
 
-2. Add explicit collapse/expand control
-- Add a button in the Data Explorer header to collapse/expand.
-- Use clear icon + tooltip/title + `aria-label` for accessibility.
-- When collapsed, render a slim rail (icon-only) that can be expanded with one click.
+---
 
-3. Conditional panel rendering
-- Expanded: current full explorer (`w-64`) with search + tables.
-- Collapsed: narrow strip (`w-10`/`w-12`) with vertical affordance and expand button.
-- Keep right editor/results area as `flex-1 min-w-0` so it automatically gains space.
+### B) Add Query Log panel
 
-4. Optional polish (low-risk)
-- Add subtle divider/visual cue on collapsed rail so state is obvious.
-- Keep schema refresh in expanded mode only (or in tooltip icon for collapsed if desired).
+A lightweight, in-session history of every AI generation step, stored in component state (not persisted to database -- it resets when you leave the page).
 
-Expected result:
-- Users can minimize Data Explorer to focus on SQL/results.
-- Their preference is remembered between visits and reloads.
+**What gets logged (each entry):**
+- The prompt you sent
+- The AI-returned `name`
+- The AI-returned `explanation`
+- The generated SQL
+- Timestamp
 
-## Validation checklist
+**UI placement:**
+- Add a small "History" toggle/tab below the SQL editor (or as a collapsible section above the results area).
+- When expanded, shows a compact reverse-chronological list of log entries.
+- Each entry displays: the prompt (as the primary label), the AI name, and a timestamp.
+- Clicking an entry restores that SQL + title into the editor (with the flash animation).
 
-1. Wide table stress test
-- Run a query returning many columns / long cell values.
-- Confirm top buttons (Pretty/Run/Delete) remain visible.
-- Confirm only results table scrolls horizontally.
+**Implementation in `src/pages/QueryEditor.tsx`:**
+1. New state: `queryLog` array and a `History` icon import.
+2. After each successful generate/edit, push an entry to the log.
+3. Render a collapsible history strip between the editor and results:
+   - Collapsed: just a small "History (N)" button.
+   - Expanded: scrollable list of entries with click-to-restore.
+4. Clicking an entry sets `sql`, `title`, and triggers `flashEditor()`.
 
-2. Top bar resilience
-- Test long query title + visible tag_id + narrow viewport.
-- Confirm text truncates before controls disappear.
+---
 
-3. Explorer collapse behavior
-- Collapse explorer, verify editor/results expand immediately.
-- Refresh page; confirm collapsed/expanded preference persists.
-- Expand again and verify search/schema still works.
+### Technical details
 
-4. Regression checks
-- Sidebar open/close persistence still works.
-- Existing loading indicators and run/generate/edit flows remain unchanged.
+```text
+QueryGenerateResponse {
+  sql: string
+  explanation: string
+  name: string          <-- new field
+}
 
-## Technical notes
+QueryLogEntry {
+  id: string            // crypto.randomUUID()
+  prompt: string        // what the user typed
+  name: string          // AI-returned name
+  explanation: string   // AI-returned explanation
+  sql: string           // generated SQL
+  timestamp: Date
+  type: 'generate' | 'edit'
+}
+```
 
-- This fix is primarily about flexbox constraints:
-  - `min-w-0` on flex children prevents unintended width growth from deep content.
-  - `shrink-0` on critical action clusters preserves button visibility.
-  - Localizing `overflow-x-auto` to the table prevents global horizontal drift.
-- Data Explorer preference persistence follows the same localStorage pattern already used for dashboard sidebar behavior.
+**Files to modify:**
+- `src/lib/api/queries.ts` -- add `name` to response type
+- `src/pages/QueryEditor.tsx` -- update handlers + add query log state + UI
+
+**No new dependencies or database changes required.**
