@@ -402,6 +402,7 @@ const SqlEditor = ({
           onClick={handleClick}
           onScroll={syncScroll}
           spellCheck={false}
+          autoComplete="off"
           className="absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs"
           style={{ color: "transparent", caretColor: "hsl(var(--foreground))" }}
           placeholder="-- Write your SQL query here..."
