@@ -1001,7 +1001,9 @@ export default function QueryEditor() {
                     className="pl-9 pr-10 font-mono text-xs h-8 bg-muted/30 border-border"
                   />
                   {isEditing && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    <span className="absolute right-3 inset-y-0 flex items-center">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    </span>
                   )}
                 </div>
               )}
@@ -1063,7 +1065,9 @@ export default function QueryEditor() {
                         className="pr-10 font-mono text-xs h-10"
                       />
                       {isGenerating && (
-                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                        <span className="absolute right-3 inset-y-0 flex items-center">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                        </span>
                       )}
                     </div>
                   </div>
