@@ -1,32 +1,37 @@
 
+Goal: fix the loading indicator so it clearly spins (not “bouncing”) when a SQL request is in progress.
 
-# Fix: Loading Spinner Not Showing Properly When Running Queries
+What I found:
+- The loading state logic itself is now in the correct order (`isRunning` before `!hasRun`), so the right branch should render.
+- The visual issue is caused by CSS transform conflicts on some loader icons in `QueryEditor`.
+- In `src/pages/QueryEditor.tsx`, the inline loaders for prompt/edit use:
+  - `top-1/2 -translate-y-1/2 ... animate-spin`
+- `-translate-y-1/2` and `animate-spin` both write to `transform`. Because the spin keyframes animate `transform`, the translate gets overridden during animation, which creates the “drops down / jumps up” behavior instead of a stable centered spinner.
 
-## Problem
-The loading spinner ("Running...") doesn't display correctly because the conditional rendering checks `!hasRun` first. When a query hasn't been run yet (or after generating new SQL which resets `hasRun` to false), the "Get started" section shows instead of the running state -- causing a visual jump rather than a smooth spinner.
+Implementation plan:
+1. Update spinner positioning pattern in `QueryEditor` to avoid transform conflicts.
+   - Replace each `Loader2` that combines `-translate-y-1/2` + `animate-spin` with a wrapper that handles vertical centering, and keep spin only on the icon.
+   - Recommended structure:
+     - Wrapper: `absolute right-3 inset-y-0 flex items-center`
+     - Icon: `h-3.5 w-3.5 animate-spin text-muted-foreground`
+2. Apply this to both affected places:
+   - Edit SQL prompt loader (around current line ~1004)
+   - Generate prompt loader (around current line ~1066)
+3. Keep existing loading state copy and behavior (“Running…”, disabled inputs/buttons) unchanged, since the issue is visual animation fidelity, not state transition logic.
 
-## Fix in `src/pages/QueryEditor.tsx`
+Why this approach:
+- It preserves current UX and logic while fixing the root CSS conflict.
+- It follows existing Tailwind patterns and avoids introducing custom CSS or new dependencies.
+- It’s low-risk and localized to two elements.
 
-Reorder the conditional chain in the results area (around line 1026) so `isRunning` is checked **first**, before `!hasRun`:
+Validation checklist (after implementation):
+- Trigger “Generate with a prompt” and confirm the spinner rotates smoothly without vertical jumping.
+- Trigger “Edit SQL with prompt” and confirm same behavior.
+- Trigger “Run” and ensure top run button + results loading state still behave correctly.
+- Verify no layout shift in the input fields while loading.
 
-**Current order:**
-```
-!hasRun -> Get Started
-isRunning -> Running spinner
-runError -> Error
-results -> Table
-```
-
-**Fixed order:**
-```
-isRunning -> Running spinner
-!hasRun -> Get Started
-runError -> Error
-results -> Table
-```
-
-This is a single change to the ternary chain in the results area. The running spinner will always show when a query is executing, regardless of whether it's the first run or not.
-
-## File changed
-- `src/pages/QueryEditor.tsx` -- reorder the conditional branches in the results area
-
+Technical notes:
+- This is a classic Tailwind transform collision:
+  - `-translate-y-1/2` needs `transform`
+  - `animate-spin` keyframes animate `transform`
+- Splitting centering and spinning across wrapper/child avoids competing `transform` declarations.
