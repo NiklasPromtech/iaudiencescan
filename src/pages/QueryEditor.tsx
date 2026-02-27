@@ -953,15 +953,6 @@ export default function QueryEditor() {
                   Data Explorer
                 </p>
                 <div className="flex items-center gap-1">
-                  {!schemaLoading && (
-                    <button
-                      onClick={loadSchema}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      title="Refresh schema"
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                    </button>
-                  )}
                   <button
                     onClick={toggleExplorer}
                     title="Collapse Data Explorer"
