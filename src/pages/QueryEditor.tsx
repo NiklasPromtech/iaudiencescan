@@ -684,6 +684,7 @@ export default function QueryEditor() {
       // Use the prompt itself as the query name
       setTitle(prompt.trim());
       setSql(formatted);
+      flashEditor();
       setPrompt("");
       setHasRun(false);
     } catch (err) {
@@ -700,6 +701,12 @@ export default function QueryEditor() {
   // Edit existing SQL via AI prompt
   const [editPrompt, setEditPrompt] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [sqlFlash, setSqlFlash] = useState(false);
+
+  const flashEditor = useCallback(() => {
+    setSqlFlash(true);
+    setTimeout(() => setSqlFlash(false), 1200);
+  }, []);
 
   const handleEditGenerate = async () => {
     if (!editPrompt.trim() || isEditing || !selectedWebsite || !sql.trim()) return;
@@ -710,6 +717,7 @@ export default function QueryEditor() {
       const data = await generateQuery(selectedWebsite.id, combinedPrompt);
       const formatted = prettifySql(data.sql ?? "");
       setSql(formatted);
+      flashEditor();
       setEditPrompt("");
     } catch (err) {
       toast({
@@ -1053,7 +1061,9 @@ export default function QueryEditor() {
               )}
 
               {/* SQL editor */}
-              <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
+              <div className={cn("flex-1 min-h-0 transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
+                <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
+              </div>
             </div>
 
             {/* Drag handle divider */}
