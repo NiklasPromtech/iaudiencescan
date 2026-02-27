@@ -1077,7 +1077,7 @@ export default function QueryEditor() {
               )}
 
               {/* SQL editor */}
-              <div className={cn("flex-1 min-h-0 transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
+              <div className={cn("flex-1 min-h-0 flex flex-col transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
                 <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
               </div>
             </div>
