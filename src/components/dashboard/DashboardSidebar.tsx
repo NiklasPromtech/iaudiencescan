@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   LayoutDashboard,
   Wallet,
   Users,
@@ -124,20 +129,33 @@ const NavItem = ({ item, collapsed }: NavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === item.url;
 
+  const link = (
+    <Link
+      to={item.url}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50",
+        isActive && "bg-primary/10 text-primary font-medium",
+        collapsed && "justify-center px-0"
+      )}
+    >
+      <item.icon className="h-4 w-4 shrink-0" />
+      {!collapsed && <span className="font-mono text-xs uppercase tracking-wider">{item.title}</span>}
+    </Link>
+  );
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild>
-        <Link
-          to={item.url}
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50",
-            isActive && "bg-primary/10 text-primary font-medium",
-            collapsed && "justify-center px-0"
-          )}
-        >
-          <item.icon className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="font-mono text-xs uppercase tracking-wider">{item.title}</span>}
-        </Link>
+        {collapsed ? (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>{link}</TooltipTrigger>
+            <TooltipContent side="right" className="font-mono text-xs uppercase tracking-wider">
+              {item.title}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          link
+        )}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -159,9 +177,8 @@ const NavGroup = ({ label, items, collapsed, defaultOpen = true }: NavGroupProps
   const hasActiveChild = items.some((item) => location.pathname === item.url);
 
   if (collapsed) {
-    // In collapsed mode, just show icons without group labels
     return (
-      <SidebarGroup className="px-1">
+      <SidebarGroup className="px-1 border-b border-border pb-2 mb-1">
         <SidebarGroupContent>
           <SidebarMenu>
             {items.map((item) => (
