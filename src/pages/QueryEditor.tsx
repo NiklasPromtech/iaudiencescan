@@ -1065,6 +1065,7 @@ export default function QueryEditor() {
                     placeholder="Edit SQL with prompt…"
                     disabled={isEditing || !selectedWebsite}
                     className="pl-9 pr-10 font-mono text-xs h-8 bg-muted/30 border-border"
+                    autoComplete="off"
                   />
                   {isEditing && (
                     <span className="absolute right-3 inset-y-0 flex items-center">
@@ -1186,6 +1187,7 @@ export default function QueryEditor() {
                         placeholder="Enter prompt to generate SQL..."
                         disabled={isGenerating || !selectedWebsite}
                         className="pr-10 font-mono text-xs h-10"
+                        autoComplete="off"
                       />
                       {isGenerating && (
                         <span className="absolute right-3 inset-y-0 flex items-center">
