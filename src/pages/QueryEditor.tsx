@@ -19,6 +19,7 @@ import {
   Info,
   PanelLeftClose,
   PanelLeftOpen,
+  History,
 } from "lucide-react";
 import { format as formatSql } from "sql-formatter";
 import { downloadCSV } from "@/lib/export-utils";
@@ -673,6 +674,26 @@ export default function QueryEditor() {
     }
   };
 
+  // ── Query log (in-session history) ──────────────────────────────────────────
+  interface QueryLogEntry {
+    id: string;
+    prompt: string;
+    name: string;
+    explanation: string;
+    sql: string;
+    timestamp: Date;
+    type: "generate" | "edit";
+  }
+  const [queryLog, setQueryLog] = useState<QueryLogEntry[]>([]);
+  const [showLog, setShowLog] = useState(false);
+
+  const pushLog = useCallback((entry: Omit<QueryLogEntry, "id" | "timestamp">) => {
+    setQueryLog((prev) => [
+      { ...entry, id: crypto.randomUUID(), timestamp: new Date() },
+      ...prev,
+    ]);
+  }, []);
+
   // Generate SQL from a natural language prompt
   const handleGenerate = async () => {
     if (!prompt.trim() || isGenerating || !selectedWebsite) return;
@@ -681,10 +702,10 @@ export default function QueryEditor() {
       const { generateQuery } = await import("@/lib/api/queries");
       const data = await generateQuery(selectedWebsite.id, prompt.trim());
       const formatted = prettifySql(data.sql ?? "");
-      // Use the prompt itself as the query name
-      setTitle(prompt.trim());
+      setTitle(data.name || prompt.trim());
       setSql(formatted);
       flashEditor();
+      pushLog({ prompt: prompt.trim(), name: data.name, explanation: data.explanation, sql: formatted, type: "generate" });
       setPrompt("");
       setHasRun(false);
     } catch (err) {
@@ -716,8 +737,10 @@ export default function QueryEditor() {
       const combinedPrompt = `Given this existing SQL:\n\`\`\`sql\n${sql}\n\`\`\`\n\nApply this edit: ${editPrompt.trim()}`;
       const data = await generateQuery(selectedWebsite.id, combinedPrompt);
       const formatted = prettifySql(data.sql ?? "");
+      if (data.name) setTitle(data.name);
       setSql(formatted);
       flashEditor();
+      pushLog({ prompt: editPrompt.trim(), name: data.name, explanation: data.explanation, sql: formatted, type: "edit" });
       setEditPrompt("");
     } catch (err) {
       toast({
@@ -1056,6 +1079,61 @@ export default function QueryEditor() {
                 <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
               </div>
             </div>
+
+            {/* Query log strip */}
+            {queryLog.length > 0 && (
+              <div className="shrink-0 border-t border-border bg-muted/20">
+                <button
+                  onClick={() => setShowLog((v) => !v)}
+                  className="w-full flex items-center gap-2 px-4 py-1.5 hover:bg-muted/40 transition-colors"
+                >
+                  <History className="h-3 w-3 text-muted-foreground" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    History ({queryLog.length})
+                  </span>
+                  <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform ml-auto", !showLog && "-rotate-90")} />
+                </button>
+                {showLog && (
+                  <div className="max-h-36 overflow-y-auto border-t border-border">
+                    {queryLog.map((entry) => (
+                      <button
+                        key={entry.id}
+                        onClick={() => {
+                          skipNextSave.current = true;
+                          setTitle(entry.name || entry.prompt);
+                          setSql(entry.sql);
+                          flashEditor();
+                          setShowLog(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-muted/40 transition-colors border-b border-border last:border-b-0 group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 shrink-0",
+                            entry.type === "generate"
+                              ? "bg-primary/10 text-primary"
+                              : "bg-accent text-accent-foreground"
+                          )}>
+                            {entry.type === "generate" ? "new" : "edit"}
+                          </span>
+                          <span className="font-mono text-xs text-foreground truncate group-hover:text-primary transition-colors">
+                            {entry.prompt}
+                          </span>
+                          <span className="font-mono text-[9px] text-muted-foreground/50 shrink-0 ml-auto">
+                            {entry.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        {entry.name && (
+                          <p className="font-mono text-[10px] text-muted-foreground mt-0.5 truncate pl-[calc(1.5rem+0.5rem)]">
+                            → {entry.name}
+                          </p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Drag handle divider */}
             <div

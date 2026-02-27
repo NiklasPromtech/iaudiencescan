@@ -36,6 +36,7 @@ export async function executeQuery(websiteId: string, sql: string): Promise<Quer
 export interface QueryGenerateResponse {
   sql: string;
   explanation: string;
+  name: string;
 }
 
 export async function generateQuery(websiteId: string, prompt: string): Promise<QueryGenerateResponse> {
