@@ -121,19 +121,17 @@ const LandingPageV3 = () => {
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
             <span className="block relative overflow-hidden" style={{ height: "2.4em" }}>
-              {/* Current message – always absolutely centered */}
+              {/* Current message – crossfade */}
               <span
-                className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center ${heroMessages[currentIndex].className} ${animating ? "animate-hero-slide-out-right" : ""}`}
-                onAnimationEnd={handleSlideOutEnd}
+                className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[currentIndex].className} ${animating ? "opacity-0" : "opacity-100"}`}
+                onTransitionEnd={handleSlideOutEnd}
               >
                 {heroMessages[currentIndex].text}
               </span>
-              {/* Next message sliding in – same absolute center */}
-              {animating && (
-                <span className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 text-center ${heroMessages[nextIndex].className} animate-hero-slide-in-left`}>
-                  {heroMessages[nextIndex].text}
-                </span>
-              )}
+              {/* Next message fading in */}
+              <span className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[nextIndex].className} ${animating ? "opacity-100" : "opacity-0"}`}>
+                {heroMessages[nextIndex].text}
+              </span>
             </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
