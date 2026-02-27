@@ -1,83 +1,53 @@
 
 
-# Queries: Website Scoping, Backend SQL Generation, and Delete from List
+# Redesign Query Editor: Dune-Style AI Prompt Section
 
-## Overview
-Three changes to the Queries feature:
-1. Scope queries to the selected website so each site has its own query list
-2. Integrate the new backend `POST /query/generate` endpoint (replacing the edge function approach) and auto-name queries from the explanation
-3. Add a delete button on each query row in the Queries list page
+## What Changes
 
----
+Remove the **Sample Queries chips** and **Copy Schema bar** from above the SQL editor. Add a Dune-inspired "Get started" section below the editor (in the results area, when no query has been run yet) with an AI prompt input and example prompt cards.
 
-## 1. Scope Queries to Selected Website
+## Changes to `src/pages/QueryEditor.tsx`
 
-**Database change**: Add a `website_id` column to the `queries` table via migration.
+### Remove (lines 1055-1089)
+- The `SAMPLE_QUERIES` array (lines 442-526) -- delete entirely
+- The `PROMPT_CHIPS` array (lines 530-536) -- delete entirely  
+- The sample query chips row (lines 1056-1075)
+- The "Copy Schema" bar (lines 1076-1089)
+- The `schemaCopied` state and `handleCopySchema` callback (no longer needed)
 
-```sql
-ALTER TABLE queries ADD COLUMN website_id TEXT;
-CREATE INDEX idx_queries_website_id ON queries(website_id);
+### Add: "Get started" section in the empty results area
+Replace the current empty state (lines 1109-1116, the "Run your query to see results" message) with a Dune-style section containing:
+
+1. **Header row**: "Get started" label
+2. **"Generate with a prompt" input**: A text input with sparkles icon, placeholder "Enter prompt to generate SQL", that submits on Enter. Calls the existing `handleGenerate()` function.
+3. **Example prompt cards**: 3 clickable cards with relevant AudienceScan prompts that populate the input when clicked:
+   - "What are users clicking on the home page?"
+   - "What is the median wallet balance of users visiting the product page?"
+   - "How many users with a wallet extension landed on the token swap page?"
+
+The prompt input and generate logic already exist (`prompt`, `setPrompt`, `handleGenerate`, `isGenerating`). We just move the UI from wherever it currently lives into the empty-results area.
+
+### Layout
+When `!hasRun` (no query executed yet), the results area shows:
+```
++------------------------------------------+
+| Get started                              |
+|                                          |
+| (sparkles) Generate with a prompt    (i) |
+| [Enter prompt to generate SQL........]   |
+|                                          |
+| +------------+ +------------+ +--------+ |
+| | What are   | | Median     | | Users  | |
+| | users      | | wallet     | | with   | |
+| | clicking   | | balance of | | wallet | |
+| | on home    | | users on   | | ext on | |
+| | page?      | | product pg | | swap   | |
+| +------------+ +------------+ +--------+ |
++------------------------------------------+
 ```
 
-**Hook changes** (`src/hooks/use-queries.ts`):
-- Accept `websiteId: string | null` parameter (or make the hook consume `useSelectedWebsite` internally)
-- Filter all queries by `.eq("website_id", websiteId)` on fetch
-- Include `website_id` in `createQuery` insert
-- Re-fetch when `websiteId` changes
+Once a query has been run, this section disappears and results/error/loading show as before.
 
-**Page changes**:
-- `Queries.tsx`: Pass `selectedWebsite?.id` to the hook (or let the hook read it). Show empty state if no website selected.
-- `QueryEditor.tsx`: Pass `website_id` when creating new queries. Already has `selectedWebsite` available.
-
----
-
-## 2. Integrate Backend SQL Generator + Auto-Name
-
-**New API function** (`src/lib/api/queries.ts`):
-```typescript
-export interface QueryGenerateResponse {
-  sql: string;
-  explanation: string;
-}
-
-export async function generateQuery(websiteId: string, prompt: string): Promise<QueryGenerateResponse> {
-  return apiRequest<QueryGenerateResponse>("/query/generate", {
-    method: "POST",
-    body: JSON.stringify({ website_id: websiteId, prompt }),
-  });
-}
-```
-
-Re-export from `src/lib/api/index.ts`.
-
-**QueryEditor.tsx changes** (`handleGenerate`, ~line 760):
-- Replace the `supabase.functions.invoke("audiencescan-signal", ...)` call with `generateQuery(selectedWebsite.id, prompt)`
-- After receiving the response, set `setSql(data.sql)` (already done) AND update the title: `setTitle(data.explanation)` — this auto-names the query based on what the AI returns
-- The existing auto-save debounce will persist both the new SQL and the new name automatically
-
----
-
-## 3. Delete Button on Query List
-
-**Queries.tsx changes**:
-- Import `Trash2` icon and `deleteQuery` from the hook (already exposed but not destructured)
-- Add a trash icon button on each query row (next to the star button)
-- On click, call `deleteQuery(query.id)` with a confirmation toast or inline confirm
-- `e.stopPropagation()` to prevent row click navigation
-
----
-
-## Technical Details
-
-### File changes summary:
-- **New migration**: Add `website_id` column to `queries` table
-- **`src/hooks/use-queries.ts`**: Add `websiteId` param, filter fetch/create by it
-- **`src/lib/api/queries.ts`**: Add `generateQuery` function + types
-- **`src/lib/api/index.ts`**: Re-export new function
-- **`src/pages/Queries.tsx`**: Pass website context to hook, add delete button per row
-- **`src/pages/QueryEditor.tsx`**: Switch generate to backend API, auto-set title from explanation, pass `website_id` on create
-
-### Edge cases:
-- Existing queries without `website_id` will not appear when filtered — this is acceptable since it's a new feature and old queries were test data
-- If no website is selected, the queries list shows a "select a website" prompt instead of loading
+## Files Modified
+- `src/pages/QueryEditor.tsx` only
 
