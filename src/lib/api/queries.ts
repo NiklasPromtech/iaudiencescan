@@ -32,3 +32,15 @@ export async function executeQuery(websiteId: string, sql: string): Promise<Quer
     body: JSON.stringify({ website_id: websiteId, sql }),
   });
 }
+
+export interface QueryGenerateResponse {
+  sql: string;
+  explanation: string;
+}
+
+export async function generateQuery(websiteId: string, prompt: string): Promise<QueryGenerateResponse> {
+  return apiRequest<QueryGenerateResponse>("/query/generate", {
+    method: "POST",
+    body: JSON.stringify({ website_id: websiteId, prompt }),
+  });
+}

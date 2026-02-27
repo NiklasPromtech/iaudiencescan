@@ -545,7 +545,7 @@ export default function QueryEditor() {
   const navigate = useNavigate();
   const isNew = id === "new";
   const { selectedWebsite } = useSelectedWebsite();
-  const { createQuery, updateQuery, deleteQuery } = useQueries();
+  const { createQuery, updateQuery, deleteQuery } = useQueries(selectedWebsite?.id);
   const { toast } = useToast();
 
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -758,29 +758,15 @@ export default function QueryEditor() {
 
   // Generate SQL from a natural language prompt
   const handleGenerate = async () => {
-    if (!prompt.trim() || isGenerating) return;
+    if (!prompt.trim() || isGenerating || !selectedWebsite) return;
     setIsGenerating(true);
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { data, error } = await supabase.functions.invoke("audiencescan-signal", {
-        body: { action: "sql-generate", prompt, schema },
-      });
-      if (error) {
-        // Try to extract a more specific message from the function response body
-        let detail = "Please try again.";
-        try {
-          // FunctionsHttpError has a .context.responseBody or similar
-          const ctx = (error as { context?: { responseBody?: string } }).context;
-          if (ctx?.responseBody) {
-            const parsed = JSON.parse(ctx.responseBody);
-            detail = parsed.error ?? detail;
-          }
-        } catch (_e) { /* ignore parse errors */ }
-        console.error("sql-generate error:", error, detail);
-        throw new Error(detail);
-      }
-      if (data?.error) throw new Error(data.error);
+      const { generateQuery } = await import("@/lib/api/queries");
+      const data = await generateQuery(selectedWebsite.id, prompt.trim());
       setSql(data.sql ?? "");
+      if (data.explanation) {
+        setTitle(data.explanation);
+      }
       setPrompt("");
       setHasRun(false);
     } catch (err) {

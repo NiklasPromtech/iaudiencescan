@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle } from "lucide-react";
+import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useQueries } from "@/hooks/use-queries";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { formatDistanceToNow } from "date-fns";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -22,7 +23,8 @@ type SortDir = "Descending" | "Ascending";
 
 export default function Queries() {
   const navigate = useNavigate();
-  const { queries, loading, error, createQuery, updateQuery } = useQueries();
+  const { selectedWebsite } = useSelectedWebsite();
+  const { queries, loading, error, createQuery, updateQuery, deleteQuery } = useQueries(selectedWebsite?.id);
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("Updated date");
@@ -47,6 +49,20 @@ export default function Queries() {
   const handleToggleStar = async (e: React.MouseEvent, id: string, current: boolean) => {
     e.stopPropagation();
     await updateQuery(id, { starred: !current });
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await deleteQuery(id);
+      toast({ title: "Query deleted" });
+    } catch (err) {
+      toast({
+        title: "Couldn't delete query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const filtered = queries
@@ -221,6 +237,12 @@ export default function Queries() {
                       query.starred && "fill-primary text-primary"
                     )}
                   />
+                </button>
+                <button
+                  onClick={(e) => handleDelete(e, query.id)}
+                  className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             ))
