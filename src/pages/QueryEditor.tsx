@@ -17,6 +17,8 @@ import {
   Download,
   Wand2,
   Info,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { format as formatSql } from "sql-formatter";
 import { downloadCSV } from "@/lib/export-utils";
@@ -460,6 +462,18 @@ export default function QueryEditor() {
 
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Data Explorer collapse state with persistence
+  const [isExplorerCollapsed, setIsExplorerCollapsed] = useState(() => {
+    return localStorage.getItem("query-editor-explorer-collapsed") === "true";
+  });
+  const toggleExplorer = useCallback(() => {
+    setIsExplorerCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("query-editor-explorer-collapsed", String(next));
+      return next;
+    });
+  }, []);
+
   const [title, setTitle] = useState("New query");
   const [editingTitle, setEditingTitle] = useState(false);
   const [sql, setSql] = useState("");
@@ -774,74 +788,78 @@ export default function QueryEditor() {
     <DashboardLayout>
       <div className="flex flex-col h-full overflow-hidden">
         {/* Top bar */}
-        <div className="border-b border-border px-4 py-2 flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => navigate("/queries")}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-
-          {queryLoading ? (
-            <Skeleton className="h-4 w-48" />
-          ) : editingTitle ? (
-            <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => setEditingTitle(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === "Escape") setEditingTitle(false);
-              }}
-              className="font-mono text-sm font-semibold bg-transparent border-b border-primary focus:outline-none text-foreground min-w-0 max-w-xs"
-            />
-          ) : (
+        <div className="border-b border-border px-4 py-2 flex items-center gap-3 shrink-0 min-w-0">
+          {/* Left zone — back + title + tag — truncates when narrow */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
-              onClick={() => setEditingTitle(true)}
-              title="Click to rename"
-              className="group flex items-center gap-1.5 font-mono text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              onClick={() => navigate("/queries")}
+              className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
-              {title}
-              <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
+              <ArrowLeft className="h-4 w-4" />
             </button>
-          )}
 
-          {selectedWebsite?.tag_id && (
-            <button
-              title="This is your website tag ID — include it in queries to filter data for this property"
-              onClick={() => {
-                navigator.clipboard.writeText(selectedWebsite.tag_id);
-                toast({ description: `Copied tag ID: ${selectedWebsite.tag_id}` });
-              }}
-              className="flex items-center gap-1.5 border border-border bg-muted/40 px-2 py-0.5 hover:bg-muted transition-colors group"
-            >
-              <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                tag_id
-              </span>
-              <span className="font-mono text-[10px] text-foreground font-semibold">
-                {selectedWebsite.tag_id}
-              </span>
-              <span className="font-mono text-[9px] text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
-                copy
-              </span>
-            </button>
-          )}
+            {queryLoading ? (
+              <Skeleton className="h-4 w-48" />
+            ) : editingTitle ? (
+              <input
+                autoFocus
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => setEditingTitle(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === "Escape") setEditingTitle(false);
+                }}
+                className="font-mono text-sm font-semibold bg-transparent border-b border-primary focus:outline-none text-foreground min-w-0 max-w-xs"
+              />
+            ) : (
+              <button
+                onClick={() => setEditingTitle(true)}
+                title="Click to rename"
+                className="group flex items-center gap-1.5 font-mono text-sm font-semibold text-foreground hover:text-primary transition-colors min-w-0"
+              >
+                <span className="truncate">{title}</span>
+                <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
+              </button>
+            )}
 
-          {/* Save status */}
-          {saveStatus === "saving" && (
-            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1">
-              <Loader2 className="h-2.5 w-2.5 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === "saved" && (
-            <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1">
-              <Check className="h-2.5 w-2.5" />
-              Saved
-            </span>
-          )}
+            {selectedWebsite?.tag_id && (
+              <button
+                title="This is your website tag ID — include it in queries to filter data for this property"
+                onClick={() => {
+                  navigator.clipboard.writeText(selectedWebsite.tag_id);
+                  toast({ description: `Copied tag ID: ${selectedWebsite.tag_id}` });
+                }}
+                className="flex items-center gap-1.5 border border-border bg-muted/40 px-2 py-0.5 hover:bg-muted transition-colors group shrink-0"
+              >
+                <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                  tag_id
+                </span>
+                <span className="font-mono text-[10px] text-foreground font-semibold">
+                  {selectedWebsite.tag_id}
+                </span>
+                <span className="font-mono text-[9px] text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
+                  copy
+                </span>
+              </button>
+            )}
 
-          <div className="ml-auto flex items-center gap-2">
+            {/* Save status */}
+            {saveStatus === "saving" && (
+              <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1 shrink-0">
+                <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                Saving...
+              </span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="font-mono text-[10px] text-muted-foreground flex items-center gap-1 shrink-0">
+                <Check className="h-2.5 w-2.5" />
+                Saved
+              </span>
+            )}
+          </div>
+
+          {/* Right zone — actions — never shrink */}
+          <div className="flex items-center gap-2 shrink-0">
             {!selectedWebsite && (
               <span className="font-mono text-[10px] text-muted-foreground">
                 No website selected
@@ -905,73 +923,99 @@ export default function QueryEditor() {
 
         {/* Body */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* Left — Data Explorer */}
-          <div className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden">
-            <div className="px-3 py-2 border-b border-border shrink-0 flex items-center justify-between">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                Data Explorer
-              </p>
-              {!schemaLoading && (
-                <button
-                  onClick={loadSchema}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  title="Refresh schema"
-                >
-                  <RefreshCw className="h-3 w-3" />
-                </button>
-              )}
+          {/* Left — Data Explorer (collapsible) */}
+          {isExplorerCollapsed ? (
+            <div className="w-10 shrink-0 border-r border-border flex flex-col items-center py-2 gap-2">
+              <button
+                onClick={toggleExplorer}
+                title="Expand Data Explorer"
+                aria-label="Expand Data Explorer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <PanelLeftOpen className="h-4 w-4" />
+              </button>
+              <span className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground/50 [writing-mode:vertical-lr] rotate-180 select-none mt-2">
+                Explorer
+              </span>
             </div>
-            <div className="px-2 py-2 border-b border-border shrink-0">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                <Input
-                  value={explorerSearch}
-                  onChange={(e) => setExplorerSearch(e.target.value)}
-                  placeholder="Search tables & columns..."
-                  className="pl-7 h-7 rounded-none text-[10px] font-mono"
-                />
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {schemaLoading ? (
-                <div className="px-3 py-4 flex flex-col gap-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-5 w-full" />
-                  ))}
-                </div>
-              ) : schemaError ? (
-                <div className="px-3 py-4 flex flex-col items-start gap-2">
-                  <p className="font-mono text-[10px] text-destructive leading-tight">
-                    Could not load schema
-                  </p>
-                  <p className="font-mono text-[9px] text-muted-foreground leading-tight">
-                    {schemaError}
-                  </p>
+          ) : (
+            <div className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden">
+              <div className="px-3 py-2 border-b border-border shrink-0 flex items-center justify-between">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                  Data Explorer
+                </p>
+                <div className="flex items-center gap-1">
+                  {!schemaLoading && (
+                    <button
+                      onClick={loadSchema}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      title="Refresh schema"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                    </button>
+                  )}
                   <button
-                    onClick={loadSchema}
-                    className="font-mono text-[10px] text-primary hover:underline"
+                    onClick={toggleExplorer}
+                    title="Collapse Data Explorer"
+                    aria-label="Collapse Data Explorer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Retry
+                    <PanelLeftClose className="h-3.5 w-3.5" />
                   </button>
                 </div>
-              ) : filteredSchema.length === 0 ? (
-                <div className="px-3 py-4">
-                  <p className="font-mono text-[10px] text-muted-foreground">
-                    {explorerSearch ? "No matches" : "No tables available"}
-                  </p>
-                </div>
-              ) : (
-                filteredSchema.map((table) => (
-                  <SchemaTableSection
-                    key={table.name}
-                    table={table}
-                    onColumnClick={handleColumnClick}
+              </div>
+              <div className="px-2 py-2 border-b border-border shrink-0">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                  <Input
+                    value={explorerSearch}
+                    onChange={(e) => setExplorerSearch(e.target.value)}
+                    placeholder="Search tables & columns..."
+                    className="pl-7 h-7 rounded-none text-[10px] font-mono"
                   />
-                ))
-              )}
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {schemaLoading ? (
+                  <div className="px-3 py-4 flex flex-col gap-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-5 w-full" />
+                    ))}
+                  </div>
+                ) : schemaError ? (
+                  <div className="px-3 py-4 flex flex-col items-start gap-2">
+                    <p className="font-mono text-[10px] text-destructive leading-tight">
+                      Could not load schema
+                    </p>
+                    <p className="font-mono text-[9px] text-muted-foreground leading-tight">
+                      {schemaError}
+                    </p>
+                    <button
+                      onClick={loadSchema}
+                      className="font-mono text-[10px] text-primary hover:underline"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : filteredSchema.length === 0 ? (
+                  <div className="px-3 py-4">
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {explorerSearch ? "No matches" : "No tables available"}
+                    </p>
+                  </div>
+                ) : (
+                  filteredSchema.map((table) => (
+                    <SchemaTableSection
+                      key={table.name}
+                      table={table}
+                      onColumnClick={handleColumnClick}
+                    />
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Right — Editor + Results */}
           <div ref={containerRef} className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
