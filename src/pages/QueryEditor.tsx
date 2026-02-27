@@ -645,6 +645,20 @@ export default function QueryEditor() {
   );
 
 
+  // Pretty-format SQL helper
+  const prettifySql = (raw: string): string => {
+    try {
+      return formatSql(normalizeSqlQuotes(raw), {
+        language: "bigquery",
+        tabWidth: 2,
+        keywordCase: "upper",
+        linesBetweenQueries: 2,
+      });
+    } catch {
+      return raw;
+    }
+  };
+
   // Generate SQL from a natural language prompt
   const handleGenerate = async () => {
     if (!prompt.trim() || isGenerating || !selectedWebsite) return;
@@ -652,10 +666,10 @@ export default function QueryEditor() {
     try {
       const { generateQuery } = await import("@/lib/api/queries");
       const data = await generateQuery(selectedWebsite.id, prompt.trim());
-      setSql(data.sql ?? "");
-      if (data.explanation) {
-        setTitle(data.explanation);
-      }
+      const formatted = prettifySql(data.sql ?? "");
+      // Use the prompt itself as the query name
+      setTitle(prompt.trim());
+      setSql(formatted);
       setPrompt("");
       setHasRun(false);
     } catch (err) {
@@ -666,6 +680,31 @@ export default function QueryEditor() {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Edit existing SQL via AI prompt
+  const [editPrompt, setEditPrompt] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditGenerate = async () => {
+    if (!editPrompt.trim() || isEditing || !selectedWebsite || !sql.trim()) return;
+    setIsEditing(true);
+    try {
+      const { generateQuery } = await import("@/lib/api/queries");
+      const combinedPrompt = `Given this existing SQL:\n\`\`\`sql\n${sql}\n\`\`\`\n\nApply this edit: ${editPrompt.trim()}`;
+      const data = await generateQuery(selectedWebsite.id, combinedPrompt);
+      const formatted = prettifySql(data.sql ?? "");
+      setSql(formatted);
+      setEditPrompt("");
+    } catch (err) {
+      toast({
+        title: "Couldn't edit query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -943,6 +982,29 @@ export default function QueryEditor() {
             >
 
 
+
+              {/* Edit SQL with prompt — shown when SQL exists */}
+              {sql.trim() && (
+                <div className="relative">
+                  <Wand2 className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                  <Input
+                    value={editPrompt}
+                    onChange={(e) => setEditPrompt(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleEditGenerate();
+                      }
+                    }}
+                    placeholder="Edit SQL with prompt…"
+                    disabled={isEditing || !selectedWebsite}
+                    className="pl-9 pr-10 font-mono text-xs h-8 bg-muted/30 border-border"
+                  />
+                  {isEditing && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+              )}
 
               {/* SQL editor */}
               <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
