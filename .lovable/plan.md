@@ -1,50 +1,30 @@
 
 
-## Grid Placement for Query Dashboard Tiles
+## Redesign "Add to Dashboard" Controls
 
-### What changes
+### Problem
+The current inline checkbox + grid picker in the editor header is visually cluttered and ugly. It needs a cleaner approach.
 
-**1. Database: add grid position columns**
+### Solution
 
-Add `dash_col`, `dash_row`, `dash_w`, `dash_h` (all integers) to `queries` table:
-- `dash_col` (1–2) — starting column
-- `dash_row` (1–4) — starting row
-- `dash_w` (1–2) — width in grid cells
-- `dash_h` (1–2) — height in grid cells
-- Pie charts enforce 1×1 max
+**1. Query Editor — Replace checkbox/grid with a single toggle button**
 
-**2. Query Editor: grid placement picker**
+Remove the entire `border border-border px-2 py-1.5` container (lines 916–1015) with the checkbox, dropdown, grid picker, and 2W/2H buttons. Replace with:
 
-When "Add to dash" is checked, show below the display type dropdown:
-- A small interactive 2×4 grid of clickable cells
-- User clicks a cell to set position (col, row)
-- Width/height controls: small +/- or a "span 2 wide" toggle (disabled for pie charts)
-- All persisted immediately via `updateQuery()`
+- A single **"Add to Dashboard"** button (small, outline style) that opens a **popover** when clicked
+- If the query is already on the dashboard, the button shows a filled/active state (e.g. primary variant with a `LayoutGrid` icon) with text like "On Dashboard"
+- The popover contains:
+  - Display type selector (Table / Bar / Line / Pie) — as small radio-style buttons or a clean select
+  - The 2×4 grid picker for placement
+  - The 2W / 2H span toggles (hidden for pie)
+  - A "Remove from dashboard" link/button at the bottom
+- This keeps the header clean — just one button — with settings tucked away in a popover
 
-**3. Fix checkbox top margin**
+**2. Queries list — Show dashboard indicator**
 
-The "Add to dash" checkbox container currently has `py-1` — increase top padding or add `mt-1` so the checkbox isn't pushed up against the border edge.
-
-**4. Dashboard: CSS Grid placement**
-
-Replace the current simple 2-column grid with an explicit `grid-template-columns: repeat(2, 1fr)` and `grid-template-rows: repeat(4, minmax(280px, auto))` layout. Each tile card uses `grid-column` and `grid-row` based on its stored position/span values. Tiles without a position get auto-placed into empty cells.
-
-### Constraints
-- Pie charts: `dash_w` and `dash_h` locked to 1
-- Tables/bar/line charts: can span up to 2 wide × 2 tall
-- Grid is 2 columns × 4 rows = 8 slots max
+In `Queries.tsx`, for each query row, show a small `LayoutGrid` icon (or a badge) next to the name if `query.on_dashboard` is true. This gives visibility at a glance without adding clutter.
 
 ### Files to modify
-- `src/hooks/use-queries.ts` — add `dash_col`, `dash_row`, `dash_w`, `dash_h` to `SavedQuery` and `QueryPatch`
-- `src/pages/QueryEditor.tsx` — add grid placement picker UI below display type; fix checkbox margin
-- `src/pages/QueryDashboard.tsx` — switch to explicit CSS grid placement using tile position data
-
-### Migration SQL (run manually)
-```sql
-ALTER TABLE queries
-  ADD COLUMN IF NOT EXISTS dash_col integer NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS dash_row integer NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS dash_w integer NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS dash_h integer NOT NULL DEFAULT 1;
-```
+- `src/pages/QueryEditor.tsx` — replace dashboard checkbox/grid section with a popover-based button
+- `src/pages/Queries.tsx` — add dashboard indicator icon in query rows
 
