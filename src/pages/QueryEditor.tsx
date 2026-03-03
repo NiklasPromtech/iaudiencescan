@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   History,
   LayoutGrid,
+  Copy,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format as formatSql } from "sql-formatter";
@@ -868,26 +869,6 @@ export default function QueryEditor() {
               </button>
             )}
 
-            {selectedWebsite?.tag_id && (
-              <button
-                title="This is your website tag ID — include it in queries to filter data for this property"
-                onClick={() => {
-                  navigator.clipboard.writeText(selectedWebsite.tag_id);
-                  toast({ description: `Copied tag ID: ${selectedWebsite.tag_id}` });
-                }}
-                className="flex items-center gap-1.5 border border-border bg-muted/40 px-2 py-0.5 hover:bg-muted transition-colors group shrink-0"
-              >
-                <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                  tag_id
-                </span>
-                <span className="font-mono text-[10px] text-foreground font-semibold">
-                  {selectedWebsite.tag_id}
-                </span>
-                <span className="font-mono text-[9px] text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
-                  copy
-                </span>
-              </button>
-            )}
 
             {/* Save status */}
             {saveStatus === "saving" && (
@@ -1058,6 +1039,29 @@ export default function QueryEditor() {
                   )}
                 </PopoverContent>
               </Popover>
+            )}
+
+            {/* Clone button */}
+            {!isNew && (
+              <button
+                onClick={async () => {
+                  try {
+                    const q = await createQuery(title + " (copy)", sql);
+                    navigate(`/queries/${q.id}`);
+                    toast({ description: "Query cloned" });
+                  } catch (err) {
+                    toast({
+                      title: "Couldn't clone query",
+                      description: err instanceof Error ? err.message : "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                title="Clone query"
+                className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </button>
             )}
 
             {/* Delete button — with inline confirmation */}
