@@ -1,70 +1,65 @@
 
-## Update Query Name from AI Response + Add Query History Log
+
+## Query Dashboard Feature
 
 ### Overview
-Two changes: (1) use the `name` field from the AI response to set the query title, and (2) add an in-session "Query Log" so you can jump back to any previous AI-generated iteration without losing work.
+Add a "Query Dashboard" page where users can pin queries and see their results rendered as tables, charts, or pie charts — all auto-executed on page load. This involves three pieces: a new DB column to mark queries as dashboard-ready, a toggle in the Query Editor, a new dashboard page, and a sidebar entry.
 
----
+### A) Database: Add dashboard fields to `queries` table
 
-### A) Use AI-returned `name` for query title
+Add two columns to the `queries` table via Supabase migration:
+- `on_dashboard` (boolean, default false) — whether the query appears on the dashboard
+- `display_type` (text, default 'table') — one of `'table'`, `'bar_chart'`, `'line_chart'`, `'pie_chart'`
 
-The API now returns a `name` field alongside `sql` and `explanation`. We'll update the response type and both handlers to use it.
+### B) Update `use-queries.ts` hook
 
-**Changes:**
-- **`src/lib/api/queries.ts`** -- Add `name` to `QueryGenerateResponse` interface
-- **`src/pages/QueryEditor.tsx`** -- In `handleGenerate`, set title to `data.name` (falling back to the prompt). In `handleEditGenerate`, also update the title to `data.name` when present.
+- Add `on_dashboard` and `display_type` to the `SavedQuery` interface and `QueryPatch` type
+- Add a `fetchDashboardQueries()` method that fetches only queries where `on_dashboard = true`
 
----
+### C) Query Editor — "Add to Dashboard" controls
 
-### B) Add Query Log panel
+In the header area of `QueryEditor.tsx` (near the Pretty/Run/Delete buttons), add:
+- A checkbox/toggle: "Add to dash" — sets `on_dashboard` on the saved query
+- When checked, show a small dropdown to pick display type: Table, Bar Chart, Line Chart, Pie Chart
+- Both persist immediately via `updateQuery()`
 
-A lightweight, in-session history of every AI generation step, stored in component state (not persisted to database -- it resets when you leave the page).
+### D) New page: `QueryDashboard.tsx`
 
-**What gets logged (each entry):**
-- The prompt you sent
-- The AI-returned `name`
-- The AI-returned `explanation`
-- The generated SQL
-- Timestamp
+- Route: `/query-dashboard`
+- Fetches all queries where `on_dashboard = true`
+- On mount, executes each query's SQL against the API in parallel
+- Renders each in a card/tile with the query name as title
+- Display type determines rendering:
+  - **Table** — reuse the existing results table component
+  - **Bar Chart** — Recharts `BarChart` (first column = X axis, remaining = bars)
+  - **Line Chart** — Recharts `LineChart` (same convention)
+  - **Pie Chart** — Recharts `PieChart` (first column = name, second = value)
+- Cards arranged in a responsive grid (2 columns on desktop)
+- Each card has a small link icon to jump to the query editor
 
-**UI placement:**
-- Add a small "History" toggle/tab below the SQL editor (or as a collapsible section above the results area).
-- When expanded, shows a compact reverse-chronological list of log entries.
-- Each entry displays: the prompt (as the primary label), the AI name, and a timestamp.
-- Clicking an entry restores that SQL + title into the editor (with the flash animation).
+### E) Sidebar update
 
-**Implementation in `src/pages/QueryEditor.tsx`:**
-1. New state: `queryLog` array and a `History` icon import.
-2. After each successful generate/edit, push an entry to the log.
-3. Render a collapsible history strip between the editor and results:
-   - Collapsed: just a small "History (N)" button.
-   - Expanded: scrollable list of entries with click-to-restore.
-4. Clicking an entry sets `sql`, `title`, and triggers `flashEditor()`.
-
----
-
-### Technical details
-
+In `DashboardSidebar.tsx`, add "Query Dashboard" above "Queries" in the Insights group:
 ```text
-QueryGenerateResponse {
-  sql: string
-  explanation: string
-  name: string          <-- new field
-}
-
-QueryLogEntry {
-  id: string            // crypto.randomUUID()
-  prompt: string        // what the user typed
-  name: string          // AI-returned name
-  explanation: string   // AI-returned explanation
-  sql: string           // generated SQL
-  timestamp: Date
-  type: 'generate' | 'edit'
-}
+Insights
+  Overview
+  Change
+  Wallet Data
+  Query Dashboard  ← new (LayoutGrid icon)
+  Queries
 ```
 
-**Files to modify:**
-- `src/lib/api/queries.ts` -- add `name` to response type
-- `src/pages/QueryEditor.tsx` -- update handlers + add query log state + UI
+### F) Route
 
-**No new dependencies or database changes required.**
+Add lazy import + route for `/query-dashboard` in `App.tsx`.
+
+### Files to create
+- `src/pages/QueryDashboard.tsx`
+- `supabase/migrations/add_query_dashboard_fields.sql`
+
+### Files to modify
+- `src/hooks/use-queries.ts` — extend types + add dashboard fetch
+- `src/pages/QueryEditor.tsx` — add dashboard toggle + display type picker in header
+- `src/components/dashboard/DashboardSidebar.tsx` — add nav item
+- `src/App.tsx` — add route
+
