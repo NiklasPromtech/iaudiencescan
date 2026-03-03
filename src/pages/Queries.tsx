@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2 } from "lucide-react";
+import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2, LayoutGrid } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,9 +217,14 @@ export default function Queries() {
               >
                 <Terminal className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-sm font-semibold text-foreground truncate">
-                    {query.name}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-mono text-sm font-semibold text-foreground truncate">
+                      {query.name}
+                    </p>
+                    {query.on_dashboard && (
+                      <LayoutGrid className="h-3 w-3 text-primary shrink-0" />
+                    )}
+                  </div>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
                     Modified{" "}
                     {formatDistanceToNow(new Date(query.updated_at), {
