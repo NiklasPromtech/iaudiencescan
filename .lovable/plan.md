@@ -1,30 +1,42 @@
 
 
-## Redesign "Add to Dashboard" Controls
+## Polish Query Dashboard Tiles
 
 ### Problem
-The current inline checkbox + grid picker in the editor header is visually cluttered and ugly. It needs a cleaner approach.
+The dashboard tiles use raw recharts components with basic styling, while the Overview page uses the project's `ChartContainer`/`ChartTooltip`/`ChartTooltipContent` wrappers and polished table styling. The result looks inconsistent and rough.
 
-### Solution
+### Changes
 
-**1. Query Editor — Replace checkbox/grid with a single toggle button**
+**1. Upgrade charts to use `ChartContainer` + `ChartTooltip`**
 
-Remove the entire `border border-border px-2 py-1.5` container (lines 916–1015) with the checkbox, dropdown, grid picker, and 2W/2H buttons. Replace with:
+Replace raw `ResponsiveContainer`, `Tooltip`, and `Legend` in all tile chart components (`TileBarChart`, `TileLineChart`, `TilePieChart`) with the project's `ChartContainer`, `ChartTooltip`, and `ChartTooltipContent` from `@/components/ui/chart`. This gives:
+- Proper themed tooltips (matching Overview style)
+- Consistent axis styling via ChartContainer's built-in CSS
+- Dark mode support via theme-aware color config
 
-- A single **"Add to Dashboard"** button (small, outline style) that opens a **popover** when clicked
-- If the query is already on the dashboard, the button shows a filled/active state (e.g. primary variant with a `LayoutGrid` icon) with text like "On Dashboard"
-- The popover contains:
-  - Display type selector (Table / Bar / Line / Pie) — as small radio-style buttons or a clean select
-  - The 2×4 grid picker for placement
-  - The 2W / 2H span toggles (hidden for pie)
-  - A "Remove from dashboard" link/button at the bottom
-- This keeps the header clean — just one button — with settings tucked away in a popover
+Build a dynamic `ChartConfig` from column names, assigning the platform color palette (Orange primary, Teal secondary, then other chart colors).
 
-**2. Queries list — Show dashboard indicator**
+**2. Polish chart styling to match Overview**
 
-In `Queries.tsx`, for each query row, show a small `LayoutGrid` icon (or a badge) next to the name if `query.on_dashboard` is true. This gives visibility at a glance without adding clutter.
+- Bars: `radius={[3, 3, 0, 0]}`, use `COLOR_LEFT` (orange) and `COLOR_RIGHT` (teal) pattern
+- Lines: `strokeWidth={2}`, `dot={false}`, same color scheme
+- Axes: `tickLine={false}`, `axisLine={false}`, `tickMargin={8}` matching DailyChart
+- CartesianGrid: `vertical={false}`, `strokeDasharray="3 3"`, `className="stroke-border"`
+
+**3. Polish table tiles**
+
+- Wrap table in `border border-border` container (matching DimensionTable)
+- Header row: `bg-muted hover:bg-muted` background
+- Header cells: `font-mono text-[10px] uppercase tracking-widest font-medium`
+- Data cells: `font-mono text-xs tabular-nums` with proper alignment
+- Numbers right-aligned, text left-aligned
+
+**4. Polish tile card styling**
+
+- Remove Card wrapper shadow, use `border border-border` only (flat Dune aesthetic)
+- Increase chart heights to fill the tile better (scale with `dash_h`)
+- Add subtle `AudienceScan` watermark on charts (matching DailyChart)
 
 ### Files to modify
-- `src/pages/QueryEditor.tsx` — replace dashboard checkbox/grid section with a popover-based button
-- `src/pages/Queries.tsx` — add dashboard indicator icon in query rows
+- `src/pages/QueryDashboard.tsx` — all tile rendering components and card wrapper
 
