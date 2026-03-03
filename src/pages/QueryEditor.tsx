@@ -1010,9 +1010,14 @@ export default function QueryEditor() {
                             <div className="flex flex-col gap-1">
                               <button
                                 onClick={() => {
-                                  const newW = dashW === 2 ? 1 : (dashCol <= 1 ? 2 : 1);
-                                  setDashW(newW);
-                                  updateQuery(id, { dash_w: newW });
+                                  if (dashW === 2) {
+                                    setDashW(1);
+                                    updateQuery(id, { dash_w: 1 });
+                                  } else {
+                                    setDashCol(1);
+                                    setDashW(2);
+                                    updateQuery(id, { dash_col: 1, dash_w: 2 });
+                                  }
                                 }}
                                 className={cn(
                                   "font-mono text-[9px] px-1.5 py-0.5 border border-border transition-colors",
