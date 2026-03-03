@@ -484,6 +484,10 @@ export default function QueryEditor() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [onDashboard, setOnDashboard] = useState(false);
   const [displayType, setDisplayType] = useState("table");
+  const [dashCol, setDashCol] = useState(1);
+  const [dashRow, setDashRow] = useState(1);
+  const [dashW, setDashW] = useState(1);
+  const [dashH, setDashH] = useState(1);
 
 
   // Query load state
@@ -581,6 +585,10 @@ export default function QueryEditor() {
         setTitle(data.name ?? "New query");
         setOnDashboard(!!data.on_dashboard);
         setDisplayType(data.display_type ?? "table");
+        setDashCol(data.dash_col ?? 1);
+        setDashRow(data.dash_row ?? 1);
+        setDashW(data.dash_w ?? 1);
+        setDashH(data.dash_h ?? 1);
         if (data.sql) {
           setSql(normalizeSqlQuotes(data.sql));
         } else {
@@ -905,7 +913,7 @@ export default function QueryEditor() {
 
             {/* Dashboard toggle */}
             {!isNew && id && (
-              <div className="flex items-center gap-2 border border-border px-2 py-1">
+              <div className="flex items-center gap-2 border border-border px-2 py-1.5 mt-0.5">
                 <Checkbox
                   id="on-dashboard"
                   checked={onDashboard}
@@ -920,19 +928,89 @@ export default function QueryEditor() {
                   Add to dash
                 </label>
                 {onDashboard && (
-                  <select
-                    value={displayType}
-                    onChange={(e) => {
-                      setDisplayType(e.target.value);
-                      updateQuery(id, { display_type: e.target.value });
-                    }}
-                    className="font-mono text-[10px] bg-muted/40 border border-border px-1.5 py-0.5 text-foreground outline-none"
-                  >
-                    <option value="table">Table</option>
-                    <option value="bar_chart">Bar Chart</option>
-                    <option value="line_chart">Line Chart</option>
-                    <option value="pie_chart">Pie Chart</option>
-                  </select>
+                  <>
+                    <select
+                      value={displayType}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        setDisplayType(newType);
+                        const isPie = newType === "pie_chart";
+                        const newW = isPie ? 1 : dashW;
+                        const newH = isPie ? 1 : dashH;
+                        setDashW(newW);
+                        setDashH(newH);
+                        updateQuery(id, { display_type: newType, dash_w: newW, dash_h: newH });
+                      }}
+                      className="font-mono text-[10px] bg-muted/40 border border-border px-1.5 py-0.5 text-foreground outline-none"
+                    >
+                      <option value="table">Table</option>
+                      <option value="bar_chart">Bar Chart</option>
+                      <option value="line_chart">Line Chart</option>
+                      <option value="pie_chart">Pie Chart</option>
+                    </select>
+                    {/* Grid placement picker */}
+                    <div className="flex items-center gap-1.5 ml-1">
+                      <div className="grid grid-cols-2 gap-px" style={{ width: 40, height: 64 }}>
+                        {Array.from({ length: 8 }, (_, i) => {
+                          const col = (i % 2) + 1;
+                          const row = Math.floor(i / 2) + 1;
+                          const isSelected = col >= dashCol && col < dashCol + dashW && row >= dashRow && row < dashRow + dashH;
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                const isPie = displayType === "pie_chart";
+                                const maxW = isPie ? 1 : Math.min(dashW, 3 - col);
+                                const maxH = isPie ? 1 : Math.min(dashH, 5 - row);
+                                setDashCol(col);
+                                setDashRow(row);
+                                setDashW(maxW);
+                                setDashH(maxH);
+                                updateQuery(id, { dash_col: col, dash_row: row, dash_w: maxW, dash_h: maxH });
+                              }}
+                              className={cn(
+                                "border border-border transition-colors",
+                                isSelected ? "bg-primary" : "bg-muted/30 hover:bg-muted/60"
+                              )}
+                              title={`Col ${col}, Row ${row}`}
+                            />
+                          );
+                        })}
+                      </div>
+                      {displayType !== "pie_chart" && (
+                        <div className="flex flex-col gap-0.5">
+                          <button
+                            onClick={() => {
+                              const newW = dashW === 2 ? 1 : (dashCol <= 1 ? 2 : 1);
+                              setDashW(newW);
+                              updateQuery(id, { dash_w: newW });
+                            }}
+                            className={cn(
+                              "font-mono text-[8px] px-1 py-px border border-border transition-colors",
+                              dashW === 2 ? "bg-primary text-primary-foreground" : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                            )}
+                            title="Span 2 columns wide"
+                          >
+                            2W
+                          </button>
+                          <button
+                            onClick={() => {
+                              const newH = dashH === 2 ? 1 : (dashRow <= 3 ? 2 : 1);
+                              setDashH(newH);
+                              updateQuery(id, { dash_h: newH });
+                            }}
+                            className={cn(
+                              "font-mono text-[8px] px-1 py-px border border-border transition-colors",
+                              dashH === 2 ? "bg-primary text-primary-foreground" : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                            )}
+                            title="Span 2 rows tall"
+                          >
+                            2H
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             )}

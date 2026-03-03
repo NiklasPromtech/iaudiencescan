@@ -9,6 +9,10 @@ export interface SavedQuery {
   starred: boolean;
   on_dashboard: boolean;
   display_type: string;
+  dash_col: number;
+  dash_row: number;
+  dash_w: number;
+  dash_h: number;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +23,10 @@ export type QueryPatch = {
   starred?: boolean;
   on_dashboard?: boolean;
   display_type?: string;
+  dash_col?: number;
+  dash_row?: number;
+  dash_w?: number;
+  dash_h?: number;
 };
 
 export function useQueries(websiteId?: string | null) {
