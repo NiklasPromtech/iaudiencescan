@@ -462,8 +462,26 @@ export default function QueryEditor() {
   const navigate = useNavigate();
   const isNew = id === "new";
   const { selectedWebsite } = useSelectedWebsite();
-  const { createQuery, updateQuery, deleteQuery } = useQueries(selectedWebsite?.id);
+  const { createQuery, updateQuery, deleteQuery, fetchDashboardQueries } = useQueries(selectedWebsite?.id);
   const { toast } = useToast();
+
+  // Track occupied grid cells from other dashboard queries
+  const [occupiedCells, setOccupiedCells] = useState<Set<string>>(new Set());
+  const loadOccupiedCells = useCallback(async () => {
+    try {
+      const dashQueries = await fetchDashboardQueries();
+      const cells = new Set<string>();
+      for (const q of dashQueries) {
+        if (q.id === id) continue; // exclude current query
+        for (let c = q.dash_col; c < q.dash_col + q.dash_w; c++) {
+          for (let r = q.dash_row; r < q.dash_row + q.dash_h; r++) {
+            cells.add(`${c},${r}`);
+          }
+        }
+      }
+      setOccupiedCells(cells);
+    } catch { /* ignore */ }
+  }, [fetchDashboardQueries, id]);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -895,7 +913,7 @@ export default function QueryEditor() {
 
             {/* Dashboard toggle */}
             {!isNew && id && (
-              <Popover>
+              <Popover onOpenChange={(open) => { if (open) loadOccupiedCells(); }}>
                 <PopoverTrigger asChild>
                   <Button
                     variant={onDashboard ? "default" : "outline"}
@@ -965,10 +983,12 @@ export default function QueryEditor() {
                               const col = (i % 2) + 1;
                               const row = Math.floor(i / 2) + 1;
                               const isSelected = col >= dashCol && col < dashCol + dashW && row >= dashRow && row < dashRow + dashH;
-                              return (
-                                <button
-                                  key={i}
-                                  onClick={() => {
+                                  const isOccupied = occupiedCells.has(`${col},${row}`);
+                                  return (
+                                    <button
+                                      key={i}
+                                      disabled={isOccupied}
+                                      onClick={() => {
                                     const isPie = displayType === "pie_chart";
                                     const maxW = isPie ? 1 : Math.min(dashW, 3 - col);
                                     const maxH = isPie ? 1 : Math.min(dashH, 5 - row);
@@ -980,9 +1000,13 @@ export default function QueryEditor() {
                                   }}
                                   className={cn(
                                     "border border-border transition-colors",
-                                    isSelected ? "bg-primary" : "bg-muted/30 hover:bg-muted/60"
+                                    isSelected
+                                      ? "bg-primary"
+                                      : isOccupied
+                                        ? "bg-muted-foreground/20 cursor-not-allowed"
+                                        : "bg-muted/30 hover:bg-muted/60"
                                   )}
-                                  title={`Col ${col}, Row ${row}`}
+                                  title={isOccupied ? `Col ${col}, Row ${row} (occupied)` : `Col ${col}, Row ${row}`}
                                 />
                               );
                             })}
