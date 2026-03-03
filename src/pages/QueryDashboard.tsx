@@ -285,10 +285,27 @@ export default function QueryDashboard() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tiles.map((tile) => (
-                <DashboardTileCard key={tile.query.id} tile={tile} />
-              ))}
+            <div
+              className="grid gap-4"
+              style={{
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gridTemplateRows: "repeat(4, minmax(280px, auto))",
+              }}
+            >
+              {tiles.map((tile) => {
+                const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
+                return (
+                  <div
+                    key={tile.query.id}
+                    style={{
+                      gridColumn: `${dash_col} / span ${dash_w}`,
+                      gridRow: `${dash_row} / span ${dash_h}`,
+                    }}
+                  >
+                    <DashboardTileCard tile={tile} />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
