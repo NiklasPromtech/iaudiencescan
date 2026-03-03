@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import {
   LayoutDashboard,
+  LayoutGrid,
   Wallet,
   Users,
   DollarSign,
@@ -61,6 +62,11 @@ const insightsItems = [
     title: "Wallet Data",
     url: "/wallets",
     icon: Wallet,
+  },
+  {
+    title: "Query Dashboard",
+    url: "/query-dashboard",
+    icon: LayoutGrid,
   },
   {
     title: "Queries",

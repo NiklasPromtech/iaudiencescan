@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ChevronDown,
   ChevronRight,
@@ -481,7 +482,9 @@ export default function QueryEditor() {
   const [sql, setSql] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  
+  const [onDashboard, setOnDashboard] = useState(false);
+  const [displayType, setDisplayType] = useState("table");
+
 
   // Query load state
   const [queryLoading, setQueryLoading] = useState(!isNew);
@@ -576,6 +579,8 @@ export default function QueryEditor() {
         // Block the auto-save that will fire when we call setTitle/setSql
         skipNextSave.current = true;
         setTitle(data.name ?? "New query");
+        setOnDashboard(!!data.on_dashboard);
+        setDisplayType(data.display_type ?? "table");
         if (data.sql) {
           setSql(normalizeSqlQuotes(data.sql));
         } else {
@@ -896,6 +901,40 @@ export default function QueryEditor() {
               <span className="font-mono text-[10px] text-muted-foreground">
                 No website selected
               </span>
+            )}
+
+            {/* Dashboard toggle */}
+            {!isNew && id && (
+              <div className="flex items-center gap-2 border border-border px-2 py-1">
+                <Checkbox
+                  id="on-dashboard"
+                  checked={onDashboard}
+                  onCheckedChange={(checked) => {
+                    const val = !!checked;
+                    setOnDashboard(val);
+                    updateQuery(id, { on_dashboard: val });
+                  }}
+                  className="h-3 w-3"
+                />
+                <label htmlFor="on-dashboard" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground cursor-pointer whitespace-nowrap">
+                  Add to dash
+                </label>
+                {onDashboard && (
+                  <select
+                    value={displayType}
+                    onChange={(e) => {
+                      setDisplayType(e.target.value);
+                      updateQuery(id, { display_type: e.target.value });
+                    }}
+                    className="font-mono text-[10px] bg-muted/40 border border-border px-1.5 py-0.5 text-foreground outline-none"
+                  >
+                    <option value="table">Table</option>
+                    <option value="bar_chart">Bar Chart</option>
+                    <option value="line_chart">Line Chart</option>
+                    <option value="pie_chart">Pie Chart</option>
+                  </select>
+                )}
+              </div>
             )}
 
             {/* Delete button — with inline confirmation */}
