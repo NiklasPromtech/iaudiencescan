@@ -1,65 +1,50 @@
 
 
-## Query Dashboard Feature
+## Grid Placement for Query Dashboard Tiles
 
-### Overview
-Add a "Query Dashboard" page where users can pin queries and see their results rendered as tables, charts, or pie charts — all auto-executed on page load. This involves three pieces: a new DB column to mark queries as dashboard-ready, a toggle in the Query Editor, a new dashboard page, and a sidebar entry.
+### What changes
 
-### A) Database: Add dashboard fields to `queries` table
+**1. Database: add grid position columns**
 
-Add two columns to the `queries` table via Supabase migration:
-- `on_dashboard` (boolean, default false) — whether the query appears on the dashboard
-- `display_type` (text, default 'table') — one of `'table'`, `'bar_chart'`, `'line_chart'`, `'pie_chart'`
+Add `dash_col`, `dash_row`, `dash_w`, `dash_h` (all integers) to `queries` table:
+- `dash_col` (1–2) — starting column
+- `dash_row` (1–4) — starting row
+- `dash_w` (1–2) — width in grid cells
+- `dash_h` (1–2) — height in grid cells
+- Pie charts enforce 1×1 max
 
-### B) Update `use-queries.ts` hook
+**2. Query Editor: grid placement picker**
 
-- Add `on_dashboard` and `display_type` to the `SavedQuery` interface and `QueryPatch` type
-- Add a `fetchDashboardQueries()` method that fetches only queries where `on_dashboard = true`
+When "Add to dash" is checked, show below the display type dropdown:
+- A small interactive 2×4 grid of clickable cells
+- User clicks a cell to set position (col, row)
+- Width/height controls: small +/- or a "span 2 wide" toggle (disabled for pie charts)
+- All persisted immediately via `updateQuery()`
 
-### C) Query Editor — "Add to Dashboard" controls
+**3. Fix checkbox top margin**
 
-In the header area of `QueryEditor.tsx` (near the Pretty/Run/Delete buttons), add:
-- A checkbox/toggle: "Add to dash" — sets `on_dashboard` on the saved query
-- When checked, show a small dropdown to pick display type: Table, Bar Chart, Line Chart, Pie Chart
-- Both persist immediately via `updateQuery()`
+The "Add to dash" checkbox container currently has `py-1` — increase top padding or add `mt-1` so the checkbox isn't pushed up against the border edge.
 
-### D) New page: `QueryDashboard.tsx`
+**4. Dashboard: CSS Grid placement**
 
-- Route: `/query-dashboard`
-- Fetches all queries where `on_dashboard = true`
-- On mount, executes each query's SQL against the API in parallel
-- Renders each in a card/tile with the query name as title
-- Display type determines rendering:
-  - **Table** — reuse the existing results table component
-  - **Bar Chart** — Recharts `BarChart` (first column = X axis, remaining = bars)
-  - **Line Chart** — Recharts `LineChart` (same convention)
-  - **Pie Chart** — Recharts `PieChart` (first column = name, second = value)
-- Cards arranged in a responsive grid (2 columns on desktop)
-- Each card has a small link icon to jump to the query editor
+Replace the current simple 2-column grid with an explicit `grid-template-columns: repeat(2, 1fr)` and `grid-template-rows: repeat(4, minmax(280px, auto))` layout. Each tile card uses `grid-column` and `grid-row` based on its stored position/span values. Tiles without a position get auto-placed into empty cells.
 
-### E) Sidebar update
-
-In `DashboardSidebar.tsx`, add "Query Dashboard" above "Queries" in the Insights group:
-```text
-Insights
-  Overview
-  Change
-  Wallet Data
-  Query Dashboard  ← new (LayoutGrid icon)
-  Queries
-```
-
-### F) Route
-
-Add lazy import + route for `/query-dashboard` in `App.tsx`.
-
-### Files to create
-- `src/pages/QueryDashboard.tsx`
-- `supabase/migrations/add_query_dashboard_fields.sql`
+### Constraints
+- Pie charts: `dash_w` and `dash_h` locked to 1
+- Tables/bar/line charts: can span up to 2 wide × 2 tall
+- Grid is 2 columns × 4 rows = 8 slots max
 
 ### Files to modify
-- `src/hooks/use-queries.ts` — extend types + add dashboard fetch
-- `src/pages/QueryEditor.tsx` — add dashboard toggle + display type picker in header
-- `src/components/dashboard/DashboardSidebar.tsx` — add nav item
-- `src/App.tsx` — add route
+- `src/hooks/use-queries.ts` — add `dash_col`, `dash_row`, `dash_w`, `dash_h` to `SavedQuery` and `QueryPatch`
+- `src/pages/QueryEditor.tsx` — add grid placement picker UI below display type; fix checkbox margin
+- `src/pages/QueryDashboard.tsx` — switch to explicit CSS grid placement using tile position data
+
+### Migration SQL (run manually)
+```sql
+ALTER TABLE queries
+  ADD COLUMN IF NOT EXISTS dash_col integer NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS dash_row integer NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS dash_w integer NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS dash_h integer NOT NULL DEFAULT 1;
+```
 
