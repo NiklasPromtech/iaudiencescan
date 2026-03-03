@@ -16,6 +16,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartConfig,
+} from "@/components/ui/chart";
+import {
   BarChart,
   Bar,
   LineChart,
@@ -26,19 +32,25 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
 
-const CHART_COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--accent-foreground))",
+const COLOR_LEFT = "hsl(24 95% 53%)";   // Orange — primary
+const COLOR_RIGHT = "hsl(168 53% 43%)"; // Teal — secondary
+const EXTRA_COLORS = [
   "hsl(142 71% 45%)",
   "hsl(48 96% 53%)",
   "hsl(280 65% 60%)",
   "hsl(200 70% 55%)",
 ];
+
+function buildChartConfig(keys: string[]): ChartConfig {
+  const palette = [COLOR_LEFT, COLOR_RIGHT, ...EXTRA_COLORS];
+  const config: ChartConfig = {};
+  keys.forEach((key, i) => {
+    config[key] = { label: key, color: palette[i % palette.length] };
+  });
+  return config;
+}
 
 interface DashboardTile {
   query: SavedQuery;
@@ -57,27 +69,60 @@ function formatChartData(results: QueryExecuteResponse) {
   });
 }
 
+function isNumeric(v: string | number | null): boolean {
+  if (v === null) return false;
+  return !isNaN(Number(v));
+}
+
+function ChartWatermark() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+      <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-muted-foreground/10 font-medium">
+        AudienceScan
+      </span>
+    </div>
+  );
+}
+
 function TileTable({ results }: { results: QueryExecuteResponse }) {
   return (
-    <div className="overflow-auto max-h-[300px]">
+    <div className="overflow-auto max-h-[300px] border border-border">
       <Table>
         <TableHeader>
-          <TableRow>
-            {results.columns.map((col) => (
-              <TableHead key={col} className="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap">
-                {col}
-              </TableHead>
-            ))}
+          <TableRow className="bg-muted hover:bg-muted">
+            {results.columns.map((col) => {
+              const rightAlign = results.rows.length > 0 && isNumeric(results.rows[0][results.columns.indexOf(col)]);
+              return (
+                <TableHead
+                  key={col}
+                  className={`font-mono text-[10px] uppercase tracking-widest font-medium whitespace-nowrap ${rightAlign ? "text-right" : ""}`}
+                >
+                  {col}
+                </TableHead>
+              );
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
           {results.rows.slice(0, 100).map((row, ri) => (
             <TableRow key={ri}>
-              {row.map((cell, ci) => (
-                <TableCell key={ci} className="font-mono text-xs whitespace-nowrap">
-                  {cell === null ? <span className="text-muted-foreground/40">null</span> : String(cell)}
-                </TableCell>
-              ))}
+              {row.map((cell, ci) => {
+                const num = isNumeric(cell);
+                return (
+                  <TableCell
+                    key={ci}
+                    className={`font-mono text-xs tabular-nums whitespace-nowrap ${num ? "text-right" : ""}`}
+                  >
+                    {cell === null ? (
+                      <span className="text-muted-foreground/40">null</span>
+                    ) : num ? (
+                      Number(cell).toLocaleString()
+                    ) : (
+                      String(cell)
+                    )}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))}
         </TableBody>
@@ -86,78 +131,131 @@ function TileTable({ results }: { results: QueryExecuteResponse }) {
   );
 }
 
-function TileBarChart({ results }: { results: QueryExecuteResponse }) {
+function TileBarChart({ results, chartHeight }: { results: QueryExecuteResponse; chartHeight: number }) {
   const data = formatChartData(results);
   const xKey = results.columns[0];
   const barKeys = results.columns.slice(1);
+  const config = buildChartConfig(barKeys);
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey={xKey} tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }} />
-        <YAxis tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }} />
-        <Tooltip contentStyle={{ fontFamily: "Space Mono, monospace", fontSize: 11 }} />
-        {barKeys.length > 1 && <Legend />}
-        {barKeys.map((key, i) => (
-          <Bar key={key} dataKey={key} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[3, 3, 0, 0]} />
-        ))}
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="relative">
+      <ChartWatermark />
+      <ChartContainer config={config} className="w-full" style={{ height: chartHeight }}>
+        <BarChart data={data}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
+          <XAxis
+            dataKey={xKey}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          {barKeys.map((key) => (
+            <Bar
+              key={key}
+              dataKey={key}
+              fill={`var(--color-${key})`}
+              radius={[3, 3, 0, 0]}
+            />
+          ))}
+        </BarChart>
+      </ChartContainer>
+    </div>
   );
 }
 
-function TileLineChart({ results }: { results: QueryExecuteResponse }) {
+function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse; chartHeight: number }) {
   const data = formatChartData(results);
   const xKey = results.columns[0];
   const lineKeys = results.columns.slice(1);
+  const config = buildChartConfig(lineKeys);
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey={xKey} tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }} />
-        <YAxis tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }} />
-        <Tooltip contentStyle={{ fontFamily: "Space Mono, monospace", fontSize: 11 }} />
-        {lineKeys.length > 1 && <Legend />}
-        {lineKeys.map((key, i) => (
-          <Line key={key} type="monotone" dataKey={key} stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={false} />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <div className="relative">
+      <ChartWatermark />
+      <ChartContainer config={config} className="w-full" style={{ height: chartHeight }}>
+        <LineChart data={data}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
+          <XAxis
+            dataKey={xKey}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          {lineKeys.map((key) => (
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={key}
+              stroke={`var(--color-${key})`}
+              strokeWidth={2}
+              dot={false}
+            />
+          ))}
+        </LineChart>
+      </ChartContainer>
+    </div>
   );
 }
 
-function TilePieChart({ results }: { results: QueryExecuteResponse }) {
+function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse; chartHeight: number }) {
   const data = results.rows.map((row) => ({
     name: String(row[0] ?? ""),
     value: Number(row[1] ?? 0),
   }));
+  const keys = data.map((d) => d.name);
+  const config = buildChartConfig(keys);
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}>
-          {data.map((_, i) => (
-            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-          ))}
-        </Pie>
-        <Tooltip contentStyle={{ fontFamily: "Space Mono, monospace", fontSize: 11 }} />
-        <Legend wrapperStyle={{ fontFamily: "Space Mono, monospace", fontSize: 10 }} />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="relative">
+      <ChartWatermark />
+      <ChartContainer config={config} className="w-full" style={{ height: chartHeight }}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={Math.min(chartHeight * 0.35, 100)}
+            label={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={`var(--color-${entry.name})`} />
+            ))}
+          </Pie>
+          <ChartTooltip content={<ChartTooltipContent />} />
+        </PieChart>
+      </ChartContainer>
+    </div>
   );
 }
 
 function DashboardTileCard({ tile }: { tile: DashboardTile }) {
   const { query, loading, error, results } = tile;
+  const chartHeight = Math.max(200, (query.dash_h || 1) * 240);
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-        <CardTitle className="font-mono text-xs uppercase tracking-widest truncate">
+    <div className="flex flex-col border border-border bg-card h-full">
+      <div className="px-4 py-3 flex items-center justify-between border-b border-border">
+        <span className="font-mono text-[10px] uppercase tracking-widest font-medium truncate text-foreground">
           {query.name}
-        </CardTitle>
+        </span>
         <Link
           to={`/queries/${query.id}`}
           className="text-muted-foreground hover:text-primary transition-colors shrink-0 ml-2"
@@ -165,8 +263,8 @@ function DashboardTileCard({ tile }: { tile: DashboardTile }) {
         >
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
-      </CardHeader>
-      <CardContent className="flex-1 min-h-0">
+      </div>
+      <div className="flex-1 min-h-0 p-3">
         {loading ? (
           <div className="flex flex-col gap-2 py-8 items-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -179,14 +277,14 @@ function DashboardTileCard({ tile }: { tile: DashboardTile }) {
           </div>
         ) : results ? (
           <>
-            {query.display_type === "bar_chart" && <TileBarChart results={results} />}
-            {query.display_type === "line_chart" && <TileLineChart results={results} />}
-            {query.display_type === "pie_chart" && <TilePieChart results={results} />}
+            {query.display_type === "bar_chart" && <TileBarChart results={results} chartHeight={chartHeight} />}
+            {query.display_type === "line_chart" && <TileLineChart results={results} chartHeight={chartHeight} />}
+            {query.display_type === "pie_chart" && <TilePieChart results={results} chartHeight={chartHeight} />}
             {(!query.display_type || query.display_type === "table") && <TileTable results={results} />}
           </>
         ) : null}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -209,7 +307,6 @@ export default function QueryDashboard() {
         setInitialLoading(false);
         return;
       }
-      // Set tiles with loading state
       const initial: DashboardTile[] = dashQueries.map((q) => ({
         query: q,
         loading: true,
@@ -219,7 +316,6 @@ export default function QueryDashboard() {
       setTiles(initial);
       setInitialLoading(false);
 
-      // Execute all in parallel
       await Promise.allSettled(
         dashQueries.map(async (q, idx) => {
           try {
@@ -262,10 +358,10 @@ export default function QueryDashboard() {
           {initialLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[...Array(4)].map((_, i) => (
-                <Card key={i}>
-                  <CardHeader><Skeleton className="h-4 w-32" /></CardHeader>
-                  <CardContent><Skeleton className="h-[200px] w-full" /></CardContent>
-                </Card>
+                <div key={i} className="border border-border p-4">
+                  <Skeleton className="h-4 w-32 mb-4" />
+                  <Skeleton className="h-[200px] w-full" />
+                </div>
               ))}
             </div>
           ) : tiles.length === 0 ? (
