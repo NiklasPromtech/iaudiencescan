@@ -7,6 +7,8 @@ export interface SavedQuery {
   name: string;
   sql: string;
   starred: boolean;
+  on_dashboard: boolean;
+  display_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -15,6 +17,8 @@ export type QueryPatch = {
   name?: string;
   sql?: string;
   starred?: boolean;
+  on_dashboard?: boolean;
+  display_type?: string;
 };
 
 export function useQueries(websiteId?: string | null) {
@@ -94,6 +98,19 @@ export function useQueries(websiteId?: string | null) {
     setQueries((prev) => prev.filter((q) => q.id !== id));
   }, []);
 
+  const fetchDashboardQueries = useCallback(async (): Promise<SavedQuery[]> => {
+    if (!websiteId) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: err } = await (supabase as any)
+      .from("queries")
+      .select("*")
+      .eq("website_id", websiteId)
+      .eq("on_dashboard", true)
+      .order("updated_at", { ascending: false });
+    if (err) throw err;
+    return (data as SavedQuery[]) ?? [];
+  }, [websiteId]);
+
   return {
     queries,
     loading,
@@ -102,5 +119,6 @@ export function useQueries(websiteId?: string | null) {
     createQuery,
     updateQuery,
     deleteQuery,
+    fetchDashboardQueries,
   };
 }
