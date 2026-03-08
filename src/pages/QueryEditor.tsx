@@ -22,6 +22,7 @@ import {
   History,
   LayoutGrid,
   Copy,
+  Clock,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format as formatSql } from "sql-formatter";
@@ -42,6 +43,7 @@ import {
 } from "@/lib/api";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries } from "@/hooks/use-queries";
+import { ScheduleDialog } from "@/components/schedule/ScheduleDialog";
 import {
   Table,
   TableBody,
@@ -484,6 +486,7 @@ export default function QueryEditor() {
   }, [fetchDashboardQueries, id]);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Data Explorer collapse state with persistence
   const [isExplorerCollapsed, setIsExplorerCollapsed] = useState(() => {
@@ -1065,6 +1068,17 @@ export default function QueryEditor() {
               </Popover>
             )}
 
+            {/* Schedule button */}
+            {!isNew && id && selectedWebsite && (
+              <button
+                onClick={() => setScheduleOpen(true)}
+                title="Schedule report"
+                className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+              >
+                <Clock className="h-3.5 w-3.5" />
+              </button>
+            )}
+
             {/* Clone button */}
             {!isNew && (
               <button
@@ -1495,6 +1509,15 @@ export default function QueryEditor() {
         </div>
       </div>
       <Toaster />
+      {!isNew && id && selectedWebsite && (
+        <ScheduleDialog
+          open={scheduleOpen}
+          onOpenChange={setScheduleOpen}
+          queryId={id}
+          queryName={title}
+          websiteId={selectedWebsite.id}
+        />
+      )}
     </DashboardLayout>
   );
 }

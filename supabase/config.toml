@@ -14,4 +14,7 @@ verify_jwt = false
 
 [functions.sql-generate]
 verify_jwt = false
+
+[functions.send-scheduled-report]
+verify_jwt = false
 # updated: 2026-02-20-v4
