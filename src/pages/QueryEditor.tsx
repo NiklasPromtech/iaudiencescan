@@ -1068,6 +1068,17 @@ export default function QueryEditor() {
               </Popover>
             )}
 
+            {/* Schedule button */}
+            {!isNew && id && selectedWebsite && (
+              <button
+                onClick={() => setScheduleOpen(true)}
+                title="Schedule report"
+                className="text-muted-foreground/50 hover:text-foreground transition-colors p-1"
+              >
+                <Clock className="h-3.5 w-3.5" />
+              </button>
+            )}
+
             {/* Clone button */}
             {!isNew && (
               <button
