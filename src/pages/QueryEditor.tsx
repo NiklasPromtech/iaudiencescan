@@ -486,6 +486,7 @@ export default function QueryEditor() {
   }, [fetchDashboardQueries, id]);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   // Data Explorer collapse state with persistence
   const [isExplorerCollapsed, setIsExplorerCollapsed] = useState(() => {
