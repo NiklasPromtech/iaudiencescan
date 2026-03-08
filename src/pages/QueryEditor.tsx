@@ -1509,6 +1509,15 @@ export default function QueryEditor() {
         </div>
       </div>
       <Toaster />
+      {!isNew && id && selectedWebsite && (
+        <ScheduleDialog
+          open={scheduleOpen}
+          onOpenChange={setScheduleOpen}
+          queryId={id}
+          queryName={title}
+          websiteId={selectedWebsite.id}
+        />
+      )}
     </DashboardLayout>
   );
 }
