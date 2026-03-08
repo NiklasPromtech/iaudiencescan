@@ -1,42 +1,116 @@
 
 
-## Polish Query Dashboard Tiles
+## Scheduled Reports: "Keep Me in the Loop"
 
-### Problem
-The dashboard tiles use raw recharts components with basic styling, while the Overview page uses the project's `ChartContainer`/`ChartTooltip`/`ChartTooltipContent` wrappers and polished table styling. The result looks inconsistent and rough.
+### Overview
 
-### Changes
+Add a scheduling feature to saved queries so users can say "send me this data every Monday at 7am" and receive an email with the query results plus AI-generated insights. Includes a "Test Now" button so users can preview the email before committing.
 
-**1. Upgrade charts to use `ChartContainer` + `ChartTooltip`**
+### Architecture
 
-Replace raw `ResponsiveContainer`, `Tooltip`, and `Legend` in all tile chart components (`TileBarChart`, `TileLineChart`, `TilePieChart`) with the project's `ChartContainer`, `ChartTooltip`, and `ChartTooltipContent` from `@/components/ui/chart`. This gives:
-- Proper themed tooltips (matching Overview style)
-- Consistent axis styling via ChartContainer's built-in CSS
-- Dark mode support via theme-aware color config
+```text
+┌─────────────┐     ┌──────────────────────┐     ┌─────────────────┐
+│  Query Editor│────▶│  scheduled_reports    │     │  pg_cron (1min) │
+│  Schedule UI │     │  table (Supabase)     │◀────│  ───────────────│
+└─────────────┘     └──────────┬───────────┘     │  calls edge fn  │
+                               │                  └─────────────────┘
+                               ▼
+                    ┌──────────────────────┐
+                    │  send-scheduled-     │
+                    │  report edge fn      │
+                    │  ─────────────────── │
+                    │  1. Find due reports │
+                    │  2. Execute query    │
+                    │  3. AI summarize     │
+                    │  4. Send via Resend  │
+                    └──────────────────────┘
+```
 
-Build a dynamic `ChartConfig` from column names, assigning the platform color palette (Orange primary, Teal secondary, then other chart colors).
+### Database: `scheduled_reports` table
 
-**2. Polish chart styling to match Overview**
+Create via migration:
 
-- Bars: `radius={[3, 3, 0, 0]}`, use `COLOR_LEFT` (orange) and `COLOR_RIGHT` (teal) pattern
-- Lines: `strokeWidth={2}`, `dot={false}`, same color scheme
-- Axes: `tickLine={false}`, `axisLine={false}`, `tickMargin={8}` matching DailyChart
-- CartesianGrid: `vertical={false}`, `strokeDasharray="3 3"`, `className="stroke-border"`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| query_id | uuid FK → queries.id | Which saved query to run |
+| user_id | uuid FK → auth.users | Owner |
+| website_id | uuid | For query execution context |
+| recipients | text[] | Email addresses |
+| cron_expression | text | e.g. `0 7 * * 1` (Mon 7am) |
+| timezone | text | e.g. `Europe/London` |
+| enabled | boolean | Pause/resume |
+| ends_at | timestamptz | Optional expiry (e.g. "next 5 days") |
+| last_sent_at | timestamptz | Prevents double-sends |
+| created_at / updated_at | timestamptz | Standard |
 
-**3. Polish table tiles**
+RLS: users can only CRUD their own rows.
 
-- Wrap table in `border border-border` container (matching DimensionTable)
-- Header row: `bg-muted hover:bg-muted` background
-- Header cells: `font-mono text-[10px] uppercase tracking-widest font-medium`
-- Data cells: `font-mono text-xs tabular-nums` with proper alignment
-- Numbers right-aligned, text left-aligned
+### Edge Function: `send-scheduled-report`
 
-**4. Polish tile card styling**
+New function at `supabase/functions/send-scheduled-report/index.ts`:
 
-- Remove Card wrapper shadow, use `border border-border` only (flat Dune aesthetic)
-- Increase chart heights to fill the tile better (scale with `dash_h`)
-- Add subtle `AudienceScan` watermark on charts (matching DailyChart)
+1. **Find due reports** — query `scheduled_reports` where `enabled = true`, `ends_at` is null or in the future, and the cron expression matches the current time (with timezone offset). Compare against `last_sent_at` to avoid duplicates.
+2. **Execute query** — for each due report, call the existing `/query` backend endpoint (same as `executeQuery` in `src/lib/api/queries.ts`) using the service key + user context headers.
+3. **AI insights** — send the query results to Lovable AI Gateway (`google/gemini-3-flash-preview`) with a prompt like: "Summarize this analytics data in 3-4 bullet points. Highlight trends, anomalies, and actionable insights." Non-streaming call.
+4. **Send email** — use Resend (already configured with `RESEND_API_KEY`) to send a branded HTML email containing the AI summary + a styled data table.
+5. **Update** `last_sent_at`.
 
-### Files to modify
-- `src/pages/QueryDashboard.tsx` — all tile rendering components and card wrapper
+Supports a `?test=true&report_id=xxx` query param that skips the cron matching and immediately runs a specific report — this powers the "Test Now" button.
+
+Set `verify_jwt = false` in config.toml (called by pg_cron). For test mode, validate the user's JWT from the Authorization header.
+
+### pg_cron Setup
+
+Run via Supabase SQL Editor (not migration — contains project-specific URL/key):
+
+```sql
+select cron.schedule(
+  'send-scheduled-reports',
+  '* * * * *',
+  $$
+  select net.http_post(
+    url:='https://wksyyydmgpcaxdijalqf.supabase.co/functions/v1/send-scheduled-report',
+    headers:='{"Content-Type":"application/json","Authorization":"Bearer <anon_key>"}'::jsonb,
+    body:='{"source":"cron"}'::jsonb
+  ) as request_id;
+  $$
+);
+```
+
+### UI: Schedule Dialog in Query Editor
+
+Add a **Clock** icon button next to the existing action buttons in `QueryEditor.tsx`. Opens a dialog with:
+
+- **Recipients** — tag-style email input (add multiple)
+- **Frequency** — radio group: Daily / Weekly / Custom
+  - Daily: time picker
+  - Weekly: day-of-week selector + time picker
+  - Custom: cron expression input (advanced)
+- **Timezone** — select from common timezones (default to browser tz)
+- **Expires** — optional date picker ("run until")
+- **Test Now** button — calls the edge function with `?test=true&report_id=xxx`, shows a toast "Test email sent to [recipients]"
+- **Save Schedule** button — upserts to `scheduled_reports` table
+
+If a schedule already exists for this query, the dialog loads it for editing with a **Pause** toggle and **Delete** option.
+
+### Files to create/modify
+
+| File | Action |
+|------|--------|
+| `supabase/migrations/xxx_create_scheduled_reports.sql` | Create table + RLS |
+| `supabase/functions/send-scheduled-report/index.ts` | New edge function |
+| `supabase/config.toml` | Add function entry |
+| `src/pages/QueryEditor.tsx` | Add schedule button + dialog |
+| `src/hooks/use-scheduled-reports.ts` | CRUD hook for scheduled_reports |
+| `src/integrations/supabase/types.ts` | Will need regeneration after migration |
+
+### Email Template
+
+Branded HTML email with:
+- AudienceScan header with logo
+- AI-generated insight summary (3-4 bullets)
+- Data table with the query results (max 50 rows, with a note if truncated)
+- Footer: "This report was scheduled by [user]. Manage your schedules in AudienceScan."
+- White background per email standards
 
