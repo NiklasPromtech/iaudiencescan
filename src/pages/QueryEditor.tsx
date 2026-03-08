@@ -43,6 +43,7 @@ import {
 } from "@/lib/api";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries } from "@/hooks/use-queries";
+import { ScheduleDialog } from "@/components/schedule/ScheduleDialog";
 import {
   Table,
   TableBody,
