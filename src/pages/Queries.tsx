@@ -31,6 +31,29 @@ export default function Queries() {
   const [sortField, setSortField] = useState<SortField>("Updated date");
   const [sortDir, setSortDir] = useState<SortDir>("Descending");
   const [creating, setCreating] = useState(false);
+  const [scheduledQueryIds, setScheduledQueryIds] = useState<Set<string>>(new Set());
+
+  // Fetch which queries have active schedules
+  useEffect(() => {
+    if (!queries.length) return;
+    const fetchSchedules = async () => {
+      try {
+        const queryIds = queries.map((q) => q.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error: err } = await (supabase as any)
+          .from("scheduled_reports")
+          .select("query_id")
+          .in("query_id", queryIds)
+          .eq("enabled", true);
+        if (!err && data) {
+          setScheduledQueryIds(new Set(data.map((r: { query_id: string }) => r.query_id)));
+        }
+      } catch (_e) {
+        // scheduled_reports table may not exist yet — ignore
+      }
+    };
+    fetchSchedules();
+  }, [queries]);
 
   const handleNewQuery = async () => {
     setCreating(true);
