@@ -193,6 +193,26 @@ export default function Queries() {
 
         {/* Query rows */}
         <div className="flex-1 overflow-auto">
+          {/* Column headers */}
+          {!loading && !error && filtered.length > 0 && (
+            <div className="flex items-center gap-4 px-6 py-2 border-b border-border bg-muted/20">
+              <div className="w-4 shrink-0" /> {/* icon spacer */}
+              <div className="flex-1 min-w-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Name</span>
+              </div>
+              <div className="w-16 text-center shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Dashboard</span>
+              </div>
+              <div className="w-16 text-center shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Schedule</span>
+              </div>
+              <div className="w-16 text-center shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Starred</span>
+              </div>
+              <div className="w-8 shrink-0" /> {/* delete spacer */}
+            </div>
+          )}
+
           {loading ? (
             /* Loading skeletons */
             <div className="flex flex-col">
@@ -241,14 +261,9 @@ export default function Queries() {
               >
                 <Terminal className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="font-mono text-sm font-semibold text-foreground truncate">
-                      {query.name}
-                    </p>
-                    {query.on_dashboard && (
-                      <LayoutGrid className="h-3 w-3 text-primary shrink-0" />
-                    )}
-                  </div>
+                  <p className="font-mono text-sm font-semibold text-foreground truncate">
+                    {query.name}
+                  </p>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
                     Modified{" "}
                     {formatDistanceToNow(new Date(query.updated_at), {
@@ -256,20 +271,39 @@ export default function Queries() {
                     })}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => handleToggleStar(e, query.id, query.starred)}
-                  className="p-1 text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Star
-                    className={cn(
-                      "h-4 w-4",
-                      query.starred && "fill-primary text-primary"
-                    )}
-                  />
-                </button>
+                {/* Dashboard status */}
+                <div className="w-16 flex justify-center shrink-0">
+                  {query.on_dashboard ? (
+                    <LayoutGrid className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Minus className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  )}
+                </div>
+                {/* Schedule status */}
+                <div className="w-16 flex justify-center shrink-0">
+                  {scheduledQueryIds.has(query.id) ? (
+                    <Clock className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Minus className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  )}
+                </div>
+                {/* Starred */}
+                <div className="w-16 flex justify-center shrink-0">
+                  <button
+                    onClick={(e) => handleToggleStar(e, query.id, query.starred)}
+                    className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Star
+                      className={cn(
+                        "h-4 w-4",
+                        query.starred && "fill-primary text-primary"
+                      )}
+                    />
+                  </button>
+                </div>
                 <button
                   onClick={(e) => handleDelete(e, query.id)}
-                  className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 w-8 shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
