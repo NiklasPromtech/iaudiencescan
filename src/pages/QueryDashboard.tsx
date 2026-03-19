@@ -329,9 +329,28 @@ function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (
 
 export default function QueryDashboard() {
   const { selectedWebsite } = useSelectedWebsite();
-  const { fetchDashboardQueries } = useQueries(selectedWebsite?.id);
+  const { fetchDashboardQueries, seedDefaultQueries } = useQueries(selectedWebsite?.id);
   const [tiles, setTiles] = useState<DashboardTile[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const runTile = useCallback(async (q: SavedQuery, idx: number, varValues?: Record<string, string>) => {
+    const vars = parseVariables(q.sql);
+    const values = varValues ?? buildDefaults(vars);
+    const resolvedSql = substituteVariables(q.sql, values);
+
+    try {
+      const res = await executeQuery(selectedWebsite!.id, resolvedSql);
+      setTiles((prev) =>
+        prev.map((t, i) => (i === idx ? { ...t, loading: false, results: res, error: null } : t))
+      );
+    } catch (err) {
+      setTiles((prev) =>
+        prev.map((t, i) =>
+          i === idx ? { ...t, loading: false, error: err instanceof Error ? err.message : "Query failed" } : t
+        )
+      );
+    }
+  }, [selectedWebsite]);
 
   const loadAndRun = useCallback(async () => {
     if (!selectedWebsite) {
@@ -340,41 +359,46 @@ export default function QueryDashboard() {
     }
     setInitialLoading(true);
     try {
-      const dashQueries = await fetchDashboardQueries();
+      let dashQueries = await fetchDashboardQueries();
+      if (dashQueries.length === 0) {
+        // Try seeding default queries
+        try {
+          dashQueries = await seedDefaultQueries();
+        } catch { /* ignore seed errors */ }
+      }
       if (dashQueries.length === 0) {
         setTiles([]);
         setInitialLoading(false);
         return;
       }
-      const initial: DashboardTile[] = dashQueries.map((q) => ({
-        query: q,
-        loading: true,
-        error: null,
-        results: null,
-      }));
+
+      const initial: DashboardTile[] = dashQueries.map((q) => {
+        const vars = parseVariables(q.sql);
+        const defaults = buildDefaults(vars);
+        const hasRequired = !allVariablesSatisfied(vars, defaults);
+        return {
+          query: q,
+          loading: !hasRequired, // Don't auto-run tiles with required vars
+          error: null,
+          results: null,
+        };
+      });
       setTiles(initial);
       setInitialLoading(false);
 
+      // Run tiles that can auto-resolve
       await Promise.allSettled(
         dashQueries.map(async (q, idx) => {
-          try {
-            const res = await executeQuery(selectedWebsite.id, q.sql);
-            setTiles((prev) =>
-              prev.map((t, i) => (i === idx ? { ...t, loading: false, results: res } : t))
-            );
-          } catch (err) {
-            setTiles((prev) =>
-              prev.map((t, i) =>
-                i === idx ? { ...t, loading: false, error: err instanceof Error ? err.message : "Query failed" } : t
-              )
-            );
-          }
+          const vars = parseVariables(q.sql);
+          const defaults = buildDefaults(vars);
+          if (!allVariablesSatisfied(vars, defaults)) return;
+          await runTile(q, idx);
         })
       );
     } catch {
       setInitialLoading(false);
     }
-  }, [selectedWebsite, fetchDashboardQueries]);
+  }, [selectedWebsite, fetchDashboardQueries, seedDefaultQueries, runTile]);
 
   useEffect(() => {
     loadAndRun();
@@ -386,7 +410,7 @@ export default function QueryDashboard() {
         <div className="border-b border-border px-4 py-3 flex items-center gap-3 shrink-0">
           <LayoutGrid className="h-4 w-4 text-muted-foreground" />
           <h1 className="font-mono text-sm font-semibold uppercase tracking-widest text-foreground">
-            Query Dashboard
+            Dashboard
           </h1>
           <span className="font-mono text-[10px] text-muted-foreground">
             {tiles.length} {tiles.length === 1 ? "tile" : "tiles"}
@@ -427,7 +451,7 @@ export default function QueryDashboard() {
                 gridTemplateRows: "repeat(4, minmax(280px, auto))",
               }}
             >
-              {tiles.map((tile) => {
+              {tiles.map((tile, idx) => {
                 const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
                 return (
                   <div
@@ -437,7 +461,15 @@ export default function QueryDashboard() {
                       gridRow: `${dash_row} / span ${dash_h}`,
                     }}
                   >
-                    <DashboardTileCard tile={tile} />
+                    <DashboardTileCard
+                      tile={tile}
+                      onRerun={(values) => {
+                        setTiles((prev) =>
+                          prev.map((t, i) => (i === idx ? { ...t, loading: true, error: null, results: null } : t))
+                        );
+                        runTile(tile.query, idx, values);
+                      }}
+                    />
                   </div>
                 );
               })}
