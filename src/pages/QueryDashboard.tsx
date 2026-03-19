@@ -4,10 +4,11 @@ import { ExternalLink, Loader2, AlertCircle, LayoutGrid } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries, SavedQuery } from "@/hooks/use-queries";
 import { executeQuery, QueryExecuteResponse } from "@/lib/api";
-import {
+import { parseVariables, buildDefaults, substituteVariables, allVariablesSatisfied } from "@/lib/query-variables";
   Table,
   TableBody,
   TableCell,
