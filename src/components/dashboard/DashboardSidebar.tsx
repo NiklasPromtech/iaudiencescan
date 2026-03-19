@@ -236,7 +236,7 @@ export const DashboardSidebar = () => {
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
       <SidebarHeader className={cn("p-4", collapsed && "p-2 flex items-center justify-center")}>
-        <Link to="/overview" className="flex items-center gap-2">
+        <Link to="/query-dashboard" className="flex items-center gap-2">
           <img
             src={audiencescanIcon}
             alt="AudienceScan"
