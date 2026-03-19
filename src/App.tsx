@@ -114,6 +114,7 @@ const App = () => (
             <Route path="/queries" element={<RequireAuth><Queries /></RequireAuth>} />
             <Route path="/queries/:id" element={<RequireAuth><QueryEditor /></RequireAuth>} />
             <Route path="/query-dashboard" element={<RequireAuth><QueryDashboard /></RequireAuth>} />
+            <Route path="/data-explorer" element={<RequireAuth><DataExplorer /></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
