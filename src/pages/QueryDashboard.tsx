@@ -4,9 +4,11 @@ import { ExternalLink, Loader2, AlertCircle, LayoutGrid } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries, SavedQuery } from "@/hooks/use-queries";
 import { executeQuery, QueryExecuteResponse } from "@/lib/api";
+import { parseVariables, buildDefaults, substituteVariables, allVariablesSatisfied } from "@/lib/query-variables";
 import {
   Table,
   TableBody,
@@ -246,9 +248,13 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
   );
 }
 
-function DashboardTileCard({ tile }: { tile: DashboardTile }) {
+function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
   const { query, loading, error, results } = tile;
   const chartHeight = Math.max(200, (query.dash_h || 1) * 240);
+  const vars = parseVariables(query.sql);
+  const defaults = buildDefaults(vars);
+  const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
+  const hasRequiredVars = vars.length > 0 && !allVariablesSatisfied(vars, defaults);
 
   return (
     <div className="flex flex-col border border-border bg-card h-full">
@@ -264,6 +270,40 @@ function DashboardTileCard({ tile }: { tile: DashboardTile }) {
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
+
+      {/* Variable inputs for tiles with required (no-default) vars */}
+      {hasRequiredVars && !loading && !results && (
+        <div className="px-4 py-2 border-b border-border bg-muted/20 flex flex-wrap items-end gap-2">
+          {vars.map((v) => (
+            <div key={v.name} className="flex flex-col gap-0.5">
+              <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{v.name}</span>
+              <Input
+                value={varValues[v.name] ?? v.defaultValue ?? ""}
+                onChange={(e) => setVarValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                className="h-6 w-24 rounded-none text-xs font-mono px-2"
+              />
+            </div>
+          ))}
+          <button
+            onClick={() => onRerun?.(varValues)}
+            className="font-mono text-[10px] uppercase tracking-widest text-primary hover:underline pb-0.5"
+          >
+            Run
+          </button>
+        </div>
+      )}
+
+      {/* Variable bar for tiles that auto-resolved */}
+      {vars.length > 0 && !hasRequiredVars && (
+        <div className="px-4 py-1.5 border-b border-border bg-muted/10 flex flex-wrap gap-3">
+          {vars.map((v) => (
+            <span key={v.name} className="font-mono text-[9px] text-muted-foreground">
+              {v.name}: <span className="text-foreground">{defaults[v.name]}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="flex-1 min-h-0 p-3">
         {loading ? (
           <div className="flex flex-col gap-2 py-8 items-center">
@@ -290,9 +330,28 @@ function DashboardTileCard({ tile }: { tile: DashboardTile }) {
 
 export default function QueryDashboard() {
   const { selectedWebsite } = useSelectedWebsite();
-  const { fetchDashboardQueries } = useQueries(selectedWebsite?.id);
+  const { fetchDashboardQueries, seedDefaultQueries } = useQueries(selectedWebsite?.id);
   const [tiles, setTiles] = useState<DashboardTile[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const runTile = useCallback(async (q: SavedQuery, idx: number, varValues?: Record<string, string>) => {
+    const vars = parseVariables(q.sql);
+    const values = varValues ?? buildDefaults(vars);
+    const resolvedSql = substituteVariables(q.sql, values);
+
+    try {
+      const res = await executeQuery(selectedWebsite!.id, resolvedSql);
+      setTiles((prev) =>
+        prev.map((t, i) => (i === idx ? { ...t, loading: false, results: res, error: null } : t))
+      );
+    } catch (err) {
+      setTiles((prev) =>
+        prev.map((t, i) =>
+          i === idx ? { ...t, loading: false, error: err instanceof Error ? err.message : "Query failed" } : t
+        )
+      );
+    }
+  }, [selectedWebsite]);
 
   const loadAndRun = useCallback(async () => {
     if (!selectedWebsite) {
@@ -301,41 +360,46 @@ export default function QueryDashboard() {
     }
     setInitialLoading(true);
     try {
-      const dashQueries = await fetchDashboardQueries();
+      let dashQueries = await fetchDashboardQueries();
+      if (dashQueries.length === 0) {
+        // Try seeding default queries
+        try {
+          dashQueries = await seedDefaultQueries();
+        } catch { /* ignore seed errors */ }
+      }
       if (dashQueries.length === 0) {
         setTiles([]);
         setInitialLoading(false);
         return;
       }
-      const initial: DashboardTile[] = dashQueries.map((q) => ({
-        query: q,
-        loading: true,
-        error: null,
-        results: null,
-      }));
+
+      const initial: DashboardTile[] = dashQueries.map((q) => {
+        const vars = parseVariables(q.sql);
+        const defaults = buildDefaults(vars);
+        const hasRequired = !allVariablesSatisfied(vars, defaults);
+        return {
+          query: q,
+          loading: !hasRequired, // Don't auto-run tiles with required vars
+          error: null,
+          results: null,
+        };
+      });
       setTiles(initial);
       setInitialLoading(false);
 
+      // Run tiles that can auto-resolve
       await Promise.allSettled(
         dashQueries.map(async (q, idx) => {
-          try {
-            const res = await executeQuery(selectedWebsite.id, q.sql);
-            setTiles((prev) =>
-              prev.map((t, i) => (i === idx ? { ...t, loading: false, results: res } : t))
-            );
-          } catch (err) {
-            setTiles((prev) =>
-              prev.map((t, i) =>
-                i === idx ? { ...t, loading: false, error: err instanceof Error ? err.message : "Query failed" } : t
-              )
-            );
-          }
+          const vars = parseVariables(q.sql);
+          const defaults = buildDefaults(vars);
+          if (!allVariablesSatisfied(vars, defaults)) return;
+          await runTile(q, idx);
         })
       );
     } catch {
       setInitialLoading(false);
     }
-  }, [selectedWebsite, fetchDashboardQueries]);
+  }, [selectedWebsite, fetchDashboardQueries, seedDefaultQueries, runTile]);
 
   useEffect(() => {
     loadAndRun();
@@ -347,7 +411,7 @@ export default function QueryDashboard() {
         <div className="border-b border-border px-4 py-3 flex items-center gap-3 shrink-0">
           <LayoutGrid className="h-4 w-4 text-muted-foreground" />
           <h1 className="font-mono text-sm font-semibold uppercase tracking-widest text-foreground">
-            Query Dashboard
+            Dashboard
           </h1>
           <span className="font-mono text-[10px] text-muted-foreground">
             {tiles.length} {tiles.length === 1 ? "tile" : "tiles"}
@@ -388,7 +452,7 @@ export default function QueryDashboard() {
                 gridTemplateRows: "repeat(4, minmax(280px, auto))",
               }}
             >
-              {tiles.map((tile) => {
+              {tiles.map((tile, idx) => {
                 const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
                 return (
                   <div
@@ -398,7 +462,15 @@ export default function QueryDashboard() {
                       gridRow: `${dash_row} / span ${dash_h}`,
                     }}
                   >
-                    <DashboardTileCard tile={tile} />
+                    <DashboardTileCard
+                      tile={tile}
+                      onRerun={(values) => {
+                        setTiles((prev) =>
+                          prev.map((t, i) => (i === idx ? { ...t, loading: true, error: null, results: null } : t))
+                        );
+                        runTile(tile.query, idx, values);
+                      }}
+                    />
                   </div>
                 );
               })}

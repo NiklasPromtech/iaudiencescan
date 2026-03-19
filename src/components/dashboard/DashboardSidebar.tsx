@@ -49,22 +49,7 @@ import audiencescanLogo from "@/assets/audiencescan-logo-wide.png";
 
 const insightsItems = [
   {
-    title: "Overview",
-    url: "/overview",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Change",
-    url: "/change",
-    icon: TrendingUp,
-  },
-  {
-    title: "Wallet Data",
-    url: "/wallets",
-    icon: Wallet,
-  },
-  {
-    title: "Query Dashboard",
+    title: "Dashboard",
     url: "/query-dashboard",
     icon: LayoutGrid,
   },
@@ -72,6 +57,16 @@ const insightsItems = [
     title: "Queries",
     url: "/queries",
     icon: Terminal,
+  },
+  {
+    title: "Data Explorer",
+    url: "/data-explorer",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Wallet Data",
+    url: "/wallets",
+    icon: Wallet,
   },
 ];
 
@@ -241,7 +236,7 @@ export const DashboardSidebar = () => {
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
       <SidebarHeader className={cn("p-4", collapsed && "p-2 flex items-center justify-center")}>
-        <Link to="/overview" className="flex items-center gap-2">
+        <Link to="/query-dashboard" className="flex items-center gap-2">
           <img
             src={audiencescanIcon}
             alt="AudienceScan"

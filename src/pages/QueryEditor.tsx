@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { parseVariables, buildDefaults, substituteVariables } from "@/lib/query-variables";
 import {
   ChevronDown,
   ChevronRight,
@@ -821,6 +822,25 @@ export default function QueryEditor() {
     }
   };
 
+  // Template variables
+  const sqlVars = useMemo(() => parseVariables(sql), [sql]);
+  const [varValues, setVarValues] = useState<Record<string, string>>({});
+
+  // Sync defaults when vars change
+  useEffect(() => {
+    const defaults = buildDefaults(sqlVars);
+    setVarValues((prev) => {
+      const next = { ...defaults };
+      // Preserve user-overridden values
+      for (const key of Object.keys(prev)) {
+        if (key in next || sqlVars.some((v) => v.name === key)) {
+          next[key] = prev[key];
+        }
+      }
+      return next;
+    });
+  }, [sqlVars]);
+
   // Execute the query
   const handleRun = async () => {
     if (!sql.trim() || isRunning) return;
@@ -832,7 +852,8 @@ export default function QueryEditor() {
     setHasRun(true);
 
     try {
-      const data = await executeQuery(selectedWebsite.id, normalizeSqlQuotes(sql));
+      const resolvedSql = substituteVariables(normalizeSqlQuotes(sql), varValues);
+      const data = await executeQuery(selectedWebsite.id, resolvedSql);
       setResults(data);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : "Query failed");
@@ -1284,6 +1305,26 @@ export default function QueryEditor() {
               <div className={cn("flex-1 min-h-0 flex flex-col transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
                 <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
               </div>
+
+              {/* Variable parameter bar */}
+              {sqlVars.length > 0 && (
+                <div className="shrink-0 border-t border-border bg-muted/10 px-4 py-2 flex flex-wrap items-end gap-3">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-semibold self-center">
+                    Variables
+                  </span>
+                  {sqlVars.map((v) => (
+                    <div key={v.name} className="flex flex-col gap-0.5">
+                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{v.name}</span>
+                      <Input
+                        value={varValues[v.name] ?? ""}
+                        onChange={(e) => setVarValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                        className="h-6 w-28 rounded-none text-xs font-mono px-2"
+                        placeholder={v.defaultValue ?? "required"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Query log strip */}

@@ -45,6 +45,7 @@ const Tools = lazy(() => import("./pages/Tools"));
 const Queries = lazy(() => import("./pages/Queries"));
 const QueryEditor = lazy(() => import("./pages/QueryEditor"));
 const QueryDashboard = lazy(() => import("./pages/QueryDashboard"));
+const DataExplorer = lazy(() => import("./pages/DataExplorer"));
 const SDTerms = lazy(() => import("./pages/SDTerms"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -113,6 +114,7 @@ const App = () => (
             <Route path="/queries" element={<RequireAuth><Queries /></RequireAuth>} />
             <Route path="/queries/:id" element={<RequireAuth><QueryEditor /></RequireAuth>} />
             <Route path="/query-dashboard" element={<RequireAuth><QueryDashboard /></RequireAuth>} />
+            <Route path="/data-explorer" element={<RequireAuth><DataExplorer /></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
