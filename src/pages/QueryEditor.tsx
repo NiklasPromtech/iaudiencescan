@@ -1305,6 +1305,26 @@ export default function QueryEditor() {
               <div className={cn("flex-1 min-h-0 flex flex-col transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
                 <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
               </div>
+
+              {/* Variable parameter bar */}
+              {sqlVars.length > 0 && (
+                <div className="shrink-0 border-t border-border bg-muted/10 px-4 py-2 flex flex-wrap items-end gap-3">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-semibold self-center">
+                    Variables
+                  </span>
+                  {sqlVars.map((v) => (
+                    <div key={v.name} className="flex flex-col gap-0.5">
+                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{v.name}</span>
+                      <Input
+                        value={varValues[v.name] ?? ""}
+                        onChange={(e) => setVarValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                        className="h-6 w-28 rounded-none text-xs font-mono px-2"
+                        placeholder={v.defaultValue ?? "required"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Query log strip */}
