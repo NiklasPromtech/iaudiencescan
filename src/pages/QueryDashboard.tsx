@@ -247,9 +247,13 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
   );
 }
 
-function DashboardTileCard({ tile }: { tile: DashboardTile }) {
+function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
   const { query, loading, error, results } = tile;
   const chartHeight = Math.max(200, (query.dash_h || 1) * 240);
+  const vars = parseVariables(query.sql);
+  const defaults = buildDefaults(vars);
+  const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
+  const hasRequiredVars = vars.length > 0 && !allVariablesSatisfied(vars, defaults);
 
   return (
     <div className="flex flex-col border border-border bg-card h-full">
@@ -265,6 +269,40 @@ function DashboardTileCard({ tile }: { tile: DashboardTile }) {
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
+
+      {/* Variable inputs for tiles with required (no-default) vars */}
+      {hasRequiredVars && !loading && !results && (
+        <div className="px-4 py-2 border-b border-border bg-muted/20 flex flex-wrap items-end gap-2">
+          {vars.map((v) => (
+            <div key={v.name} className="flex flex-col gap-0.5">
+              <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{v.name}</span>
+              <Input
+                value={varValues[v.name] ?? v.defaultValue ?? ""}
+                onChange={(e) => setVarValues((prev) => ({ ...prev, [v.name]: e.target.value }))}
+                className="h-6 w-24 rounded-none text-xs font-mono px-2"
+              />
+            </div>
+          ))}
+          <button
+            onClick={() => onRerun?.(varValues)}
+            className="font-mono text-[10px] uppercase tracking-widest text-primary hover:underline pb-0.5"
+          >
+            Run
+          </button>
+        </div>
+      )}
+
+      {/* Variable bar for tiles that auto-resolved */}
+      {vars.length > 0 && !hasRequiredVars && (
+        <div className="px-4 py-1.5 border-b border-border bg-muted/10 flex flex-wrap gap-3">
+          {vars.map((v) => (
+            <span key={v.name} className="font-mono text-[9px] text-muted-foreground">
+              {v.name}: <span className="text-foreground">{defaults[v.name]}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="flex-1 min-h-0 p-3">
         {loading ? (
           <div className="flex flex-col gap-2 py-8 items-center">
