@@ -822,6 +822,25 @@ export default function QueryEditor() {
     }
   };
 
+  // Template variables
+  const sqlVars = useMemo(() => parseVariables(sql), [sql]);
+  const [varValues, setVarValues] = useState<Record<string, string>>({});
+
+  // Sync defaults when vars change
+  useEffect(() => {
+    const defaults = buildDefaults(sqlVars);
+    setVarValues((prev) => {
+      const next = { ...defaults };
+      // Preserve user-overridden values
+      for (const key of Object.keys(prev)) {
+        if (key in next || sqlVars.some((v) => v.name === key)) {
+          next[key] = prev[key];
+        }
+      }
+      return next;
+    });
+  }, [sqlVars]);
+
   // Execute the query
   const handleRun = async () => {
     if (!sql.trim() || isRunning) return;
@@ -833,7 +852,8 @@ export default function QueryEditor() {
     setHasRun(true);
 
     try {
-      const data = await executeQuery(selectedWebsite.id, normalizeSqlQuotes(sql));
+      const resolvedSql = substituteVariables(normalizeSqlQuotes(sql), varValues);
+      const data = await executeQuery(selectedWebsite.id, resolvedSql);
       setResults(data);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : "Query failed");
