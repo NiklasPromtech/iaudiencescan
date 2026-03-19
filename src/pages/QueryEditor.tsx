@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { parseVariables, buildDefaults, substituteVariables } from "@/lib/query-variables";
 import {
   ChevronDown,
   ChevronRight,
