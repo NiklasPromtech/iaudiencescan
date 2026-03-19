@@ -29,6 +29,45 @@ export type QueryPatch = {
   dash_h?: number;
 };
 
+const SEED_QUERIES = [
+  {
+    name: "Pageviews (last 14 days)",
+    sql: `SELECT DATE(created_at) AS day, COUNT(*) AS views\nFROM pageviews\nWHERE DATE(created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL {{days_back, "14"}} DAY)\nGROUP BY day\nORDER BY day`,
+    display_type: "bar_chart",
+    dash_col: 1,
+    dash_row: 1,
+    dash_w: 1,
+    dash_h: 1,
+  },
+  {
+    name: "Top Referrers",
+    sql: `SELECT referrer, COUNT(*) AS visits\nFROM pageviews\nWHERE referrer IS NOT NULL AND referrer != ''\nGROUP BY referrer\nORDER BY visits DESC\nLIMIT {{limit, "20"}}`,
+    display_type: "table",
+    dash_col: 2,
+    dash_row: 1,
+    dash_w: 1,
+    dash_h: 1,
+  },
+  {
+    name: "Wallet Connections by Day",
+    sql: `SELECT DATE(created_at) AS day, COUNT(*) AS connections\nFROM wallet_connections\nWHERE DATE(created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL {{days_back, "14"}} DAY)\nGROUP BY day\nORDER BY day`,
+    display_type: "line_chart",
+    dash_col: 1,
+    dash_row: 2,
+    dash_w: 1,
+    dash_h: 1,
+  },
+  {
+    name: "Top Events",
+    sql: `SELECT event_name, COUNT(*) AS occurrences\nFROM events\nGROUP BY event_name\nORDER BY occurrences DESC\nLIMIT {{limit, "20"}}`,
+    display_type: "table",
+    dash_col: 2,
+    dash_row: 2,
+    dash_w: 1,
+    dash_h: 1,
+  },
+];
+
 export function useQueries(websiteId?: string | null) {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +158,39 @@ export function useQueries(websiteId?: string | null) {
     return (data as SavedQuery[]) ?? [];
   }, [websiteId]);
 
+  /** Seed default dashboard queries if the user has none for this website. */
+  const seedDefaultQueries = useCallback(async (): Promise<SavedQuery[]> => {
+    if (!websiteId) return [];
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    // Check if any queries exist at all
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (supabase as any)
+      .from("queries")
+      .select("id", { count: "exact", head: true })
+      .eq("website_id", websiteId);
+
+    if (count && count > 0) return [];
+
+    const inserts = SEED_QUERIES.map((sq) => ({
+      ...sq,
+      user_id: user.id,
+      website_id: websiteId,
+      on_dashboard: true,
+    }));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: err } = await (supabase as any)
+      .from("queries")
+      .insert(inserts)
+      .select();
+    if (err) throw err;
+    const seeded = (data as SavedQuery[]) ?? [];
+    setQueries(seeded);
+    return seeded;
+  }, [websiteId]);
+
   return {
     queries,
     loading,
@@ -128,5 +200,6 @@ export function useQueries(websiteId?: string | null) {
     updateQuery,
     deleteQuery,
     fetchDashboardQueries,
+    seedDefaultQueries,
   };
 }
