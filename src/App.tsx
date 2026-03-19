@@ -45,6 +45,7 @@ const Tools = lazy(() => import("./pages/Tools"));
 const Queries = lazy(() => import("./pages/Queries"));
 const QueryEditor = lazy(() => import("./pages/QueryEditor"));
 const QueryDashboard = lazy(() => import("./pages/QueryDashboard"));
+const DataExplorer = lazy(() => import("./pages/DataExplorer"));
 const SDTerms = lazy(() => import("./pages/SDTerms"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
 const NotFound = lazy(() => import("./pages/NotFound"));
