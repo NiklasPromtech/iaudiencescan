@@ -280,9 +280,17 @@ export default function Queries() {
               >
                 <Terminal className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-sm font-semibold text-foreground truncate">
-                    {query.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-sm font-semibold text-foreground truncate">
+                      {query.name}
+                    </p>
+                    {query.is_system && (
+                      <Badge variant="secondary" className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0 h-4 shrink-0">
+                        <Lock className="h-2.5 w-2.5 mr-1" />
+                        Default
+                      </Badge>
+                    )}
+                  </div>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
                     Modified{" "}
                     {formatDistanceToNow(new Date(query.updated_at), {
@@ -306,6 +314,14 @@ export default function Queries() {
                     <Minus className="h-3.5 w-3.5 text-muted-foreground/30" />
                   )}
                 </div>
+                {/* Type */}
+                <div className="w-16 flex justify-center shrink-0">
+                  {query.is_system ? (
+                    <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
+                  ) : (
+                    <Minus className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  )}
+                </div>
                 {/* Starred */}
                 <div className="w-16 flex justify-center shrink-0">
                   <button
@@ -320,12 +336,24 @@ export default function Queries() {
                     />
                   </button>
                 </div>
-                <button
-                  onClick={(e) => handleDelete(e, query.id)}
-                  className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 w-8 shrink-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                {/* Actions: clone + delete */}
+                <div className="w-16 flex items-center justify-center gap-1 shrink-0">
+                  <button
+                    onClick={(e) => handleClone(e, query)}
+                    title="Clone query"
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                  {!query.is_system && (
+                    <button
+                      onClick={(e) => handleDelete(e, query.id)}
+                      className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))
           )}

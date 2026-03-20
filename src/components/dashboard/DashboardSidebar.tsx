@@ -63,11 +63,6 @@ const insightsItems = [
     url: "/data-explorer",
     icon: LayoutDashboard,
   },
-  {
-    title: "Wallet Data",
-    url: "/wallets",
-    icon: Wallet,
-  },
 ];
 
 const enrichmentItems = [
