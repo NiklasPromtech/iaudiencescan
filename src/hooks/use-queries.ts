@@ -39,6 +39,7 @@ const SEED_QUERIES = [
     dash_row: 1,
     dash_w: 1,
     dash_h: 1,
+    is_system: true,
   },
   {
     name: "Top Referrers",
@@ -48,6 +49,7 @@ const SEED_QUERIES = [
     dash_row: 1,
     dash_w: 1,
     dash_h: 1,
+    is_system: true,
   },
   {
     name: "Wallet Connections by Day",
@@ -57,6 +59,7 @@ const SEED_QUERIES = [
     dash_row: 2,
     dash_w: 1,
     dash_h: 1,
+    is_system: true,
   },
   {
     name: "Top Events",
@@ -66,6 +69,37 @@ const SEED_QUERIES = [
     dash_row: 2,
     dash_w: 1,
     dash_h: 1,
+    is_system: true,
+  },
+  {
+    name: "Wallet List",
+    sql: `SELECT wallet_id, type, first_seen, last_seen, visit_count\nFROM wallets\nORDER BY last_seen DESC\nLIMIT {{limit, "50"}}`,
+    display_type: "table",
+    dash_col: 1,
+    dash_row: 3,
+    dash_w: 2,
+    dash_h: 1,
+    is_system: true,
+  },
+  {
+    name: "Top Wallet Balances",
+    sql: `SELECT wallet_id, total_balance_usd, chains\nFROM wallet_balances\nWHERE total_balance_usd > 0\nORDER BY total_balance_usd DESC\nLIMIT {{limit, "20"}}`,
+    display_type: "table",
+    dash_col: 1,
+    dash_row: 4,
+    dash_w: 1,
+    dash_h: 1,
+    is_system: true,
+  },
+  {
+    name: "Wallets by Chain",
+    sql: `SELECT chain, COUNT(*) AS wallets\nFROM wallet_balances\nGROUP BY chain\nORDER BY wallets DESC`,
+    display_type: "pie_chart",
+    dash_col: 2,
+    dash_row: 4,
+    dash_w: 1,
+    dash_h: 1,
+    is_system: true,
   },
 ];
 
