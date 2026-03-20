@@ -1,5 +1,3 @@
-
-
 ## Query-First Dashboard: Architecture Plan
 
 ### Summary
@@ -58,6 +56,24 @@ The dashboard tile auto-runs with `days_back = 14`. In the editor, the user sees
 
 ---
 
+## System Queries (latest)
+
+### Concept
+
+Replace the dedicated Wallet Data page with query-based equivalents. **System queries** are pre-built, non-deletable queries marked `is_system: true` that ship with every website. Users can duplicate them but not delete or edit the originals.
+
+### Changes implemented
+
+1. **Expanded seed queries** — added Wallet List, Top Wallet Balances, Wallets by Chain to `SEED_QUERIES` with `is_system: true`
+2. **`is_system` flag** — requires `ALTER TABLE queries ADD COLUMN is_system boolean DEFAULT false;` migration (manual)
+3. **Removed Wallet Data from sidebar** — kept page file intact, just hidden from nav
+4. **UI indicators**:
+   - Queries list: "Default" badge with lock icon, clone button always visible, delete hidden for system queries
+   - Query editor: lock icon + "Default" label in title, system banner below top bar, delete hidden, auto-save disabled
+   - Dashboard tiles: no visual difference
+
+---
+
 ### Technical details
 
 **Files to create:**
@@ -73,4 +89,3 @@ The dashboard tile auto-runs with `days_back = 14`. In the editor, the user sees
 - `src/hooks/use-queries.ts` — add `seedDefaultQueries()` helper
 
 **No schema changes needed** — variables are purely a client-side SQL preprocessing feature.
-
