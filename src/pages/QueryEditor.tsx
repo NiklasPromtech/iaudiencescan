@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   Copy,
   Clock,
+  Lock,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format as formatSql } from "sql-formatter";
@@ -512,6 +513,7 @@ export default function QueryEditor() {
   const [dashRow, setDashRow] = useState(1);
   const [dashW, setDashW] = useState(1);
   const [dashH, setDashH] = useState(1);
+  const [isSystem, setIsSystem] = useState(false);
 
 
   // Query load state
@@ -613,6 +615,7 @@ export default function QueryEditor() {
         setDashRow(data.dash_row ?? 1);
         setDashW(data.dash_w ?? 1);
         setDashH(data.dash_h ?? 1);
+        setIsSystem(!!data.is_system);
         if (data.sql) {
           setSql(normalizeSqlQuotes(data.sql));
         } else {
@@ -633,7 +636,7 @@ export default function QueryEditor() {
 
 
   useEffect(() => {
-    if (isNew || !id || queryLoading) return;
+    if (isNew || !id || queryLoading || isSystem) return;
     if (skipNextSave.current) {
       // This save was triggered by an injection or initial load — skip it
       skipNextSave.current = false;
@@ -889,6 +892,12 @@ export default function QueryEditor() {
 
             {queryLoading ? (
               <Skeleton className="h-4 w-48" />
+            ) : isSystem ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="font-mono text-sm font-semibold text-foreground truncate">{title}</span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 shrink-0">Default</span>
+              </div>
             ) : editingTitle ? (
               <input
                 autoFocus
@@ -1123,8 +1132,8 @@ export default function QueryEditor() {
               </button>
             )}
 
-            {/* Delete button — with inline confirmation */}
-            {!isNew && (
+            {/* Delete button — with inline confirmation (hidden for system queries) */}
+            {!isNew && !isSystem && (
               confirmDelete ? (
                 <div className="flex items-center gap-1.5 border border-destructive/50 bg-destructive/5 px-2 py-1">
                   <span className="font-mono text-[10px] text-destructive">Delete?</span>
@@ -1177,6 +1186,16 @@ export default function QueryEditor() {
             </Button>
           </div>
         </div>
+
+        {/* System query banner */}
+        {isSystem && (
+          <div className="border-b border-border bg-muted/30 px-4 py-2 flex items-center gap-2 shrink-0">
+            <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              This is a default system query — duplicate it to make changes.
+            </span>
+          </div>
+        )}
 
         {/* Body */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
