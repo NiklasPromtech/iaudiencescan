@@ -76,6 +76,21 @@ export default function Queries() {
     await updateQuery(id, { starred: !current });
   };
 
+  const handleClone = async (e: React.MouseEvent, query: typeof queries[0]) => {
+    e.stopPropagation();
+    try {
+      const q = await createQuery(query.name + " (copy)", query.sql);
+      navigate(`/queries/${q.id}`);
+      toast({ description: "Query cloned" });
+    } catch (err) {
+      toast({
+        title: "Couldn't clone query",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     try {
