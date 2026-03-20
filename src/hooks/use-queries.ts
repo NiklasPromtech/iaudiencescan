@@ -171,6 +171,9 @@ export function useQueries(websiteId?: string | null) {
   );
 
   const deleteQuery = useCallback(async (id: string): Promise<void> => {
+    // Prevent deletion of system queries
+    const target = queries.find((q) => q.id === id);
+    if (target?.is_system) throw new Error("System queries cannot be deleted");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: err } = await (supabase as any)
       .from("queries")
@@ -178,7 +181,7 @@ export function useQueries(websiteId?: string | null) {
       .eq("id", id);
     if (err) throw err;
     setQueries((prev) => prev.filter((q) => q.id !== id));
-  }, []);
+  }, [queries]);
 
   const fetchDashboardQueries = useCallback(async (): Promise<SavedQuery[]> => {
     if (!websiteId) return [];
