@@ -615,6 +615,7 @@ export default function QueryEditor() {
         setDashRow(data.dash_row ?? 1);
         setDashW(data.dash_w ?? 1);
         setDashH(data.dash_h ?? 1);
+        setIsSystem(!!data.is_system);
         if (data.sql) {
           setSql(normalizeSqlQuotes(data.sql));
         } else {
