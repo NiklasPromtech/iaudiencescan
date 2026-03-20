@@ -513,6 +513,7 @@ export default function QueryEditor() {
   const [dashRow, setDashRow] = useState(1);
   const [dashW, setDashW] = useState(1);
   const [dashH, setDashH] = useState(1);
+  const [isSystem, setIsSystem] = useState(false);
 
 
   // Query load state
