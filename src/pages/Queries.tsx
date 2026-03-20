@@ -223,9 +223,12 @@ export default function Queries() {
                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Schedule</span>
               </div>
               <div className="w-16 text-center shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Type</span>
+              </div>
+              <div className="w-16 text-center shrink-0">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Starred</span>
               </div>
-              <div className="w-8 shrink-0" /> {/* delete spacer */}
+              <div className="w-16 shrink-0" /> {/* actions spacer */}
             </div>
           )}
 
