@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2, LayoutGrid, Clock, Check, Minus } from "lucide-react";
+import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2, LayoutGrid, Clock, Check, Minus, Lock, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
