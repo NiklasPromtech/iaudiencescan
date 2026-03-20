@@ -636,7 +636,7 @@ export default function QueryEditor() {
 
 
   useEffect(() => {
-    if (isNew || !id || queryLoading) return;
+    if (isNew || !id || queryLoading || isSystem) return;
     if (skipNextSave.current) {
       // This save was triggered by an injection or initial load — skip it
       skipNextSave.current = false;
