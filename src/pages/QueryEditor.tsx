@@ -1187,6 +1187,16 @@ export default function QueryEditor() {
           </div>
         </div>
 
+        {/* System query banner */}
+        {isSystem && (
+          <div className="border-b border-border bg-muted/30 px-4 py-2 flex items-center gap-2 shrink-0">
+            <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              This is a default system query — duplicate it to make changes.
+            </span>
+          </div>
+        )}
+
         {/* Body */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Left — Data Explorer (collapsible) */}
