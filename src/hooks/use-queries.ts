@@ -13,6 +13,7 @@ export interface SavedQuery {
   dash_row: number;
   dash_w: number;
   dash_h: number;
+  is_system: boolean;
   created_at: string;
   updated_at: string;
 }
