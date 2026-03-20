@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   Copy,
   Clock,
+  Lock,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format as formatSql } from "sql-formatter";
