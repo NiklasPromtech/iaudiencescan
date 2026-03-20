@@ -18,6 +18,7 @@ import { useQueries } from "@/hooks/use-queries";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { formatDistanceToNow } from "date-fns";
 import { Toaster } from "@/components/ui/toaster";
+import { Badge } from "@/components/ui/badge";
 
 type SortField = "Updated date" | "Name";
 type SortDir = "Descending" | "Ascending";
