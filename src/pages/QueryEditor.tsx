@@ -1132,8 +1132,8 @@ export default function QueryEditor() {
               </button>
             )}
 
-            {/* Delete button — with inline confirmation */}
-            {!isNew && (
+            {/* Delete button — with inline confirmation (hidden for system queries) */}
+            {!isNew && !isSystem && (
               confirmDelete ? (
                 <div className="flex items-center gap-1.5 border border-destructive/50 bg-destructive/5 px-2 py-1">
                   <span className="font-mono text-[10px] text-destructive">Delete?</span>
