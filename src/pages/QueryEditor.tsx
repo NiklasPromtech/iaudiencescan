@@ -892,6 +892,12 @@ export default function QueryEditor() {
 
             {queryLoading ? (
               <Skeleton className="h-4 w-48" />
+            ) : isSystem ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <Lock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="font-mono text-sm font-semibold text-foreground truncate">{title}</span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 shrink-0">Default</span>
+              </div>
             ) : editingTitle ? (
               <input
                 autoFocus
