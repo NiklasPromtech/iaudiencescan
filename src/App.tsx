@@ -32,7 +32,7 @@ const Events = lazy(() => import("./pages/Events"));
 const Audiences = lazy(() => import("./pages/Audiences"));
 const Costs = lazy(() => import("./pages/Costs"));
 const Settings = lazy(() => import("./pages/Settings"));
-const ApiKeys = lazy(() => import("./pages/ApiKeys"));
+const Integrations = lazy(() => import("./pages/Integrations"));
 const Bots = lazy(() => import("./pages/Bots"));
 const Scans = lazy(() => import("./pages/Scans"));
 const ScanDetail = lazy(() => import("./pages/ScanDetail"));
@@ -106,7 +106,7 @@ const App = () => (
             <Route path="/scans/:scanId/results" element={<RequireAuth><ScanResults /></RequireAuth>} />
             <Route path="/costs" element={<RequireAuth><Costs /></RequireAuth>} />
             <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
-            <Route path="/settings/api-keys" element={<RequireAuth><ApiKeys /></RequireAuth>} />
+            <Route path="/settings/integrations" element={<RequireAuth><Integrations /></RequireAuth>} />
             <Route path="/bots" element={<RequireAuth><Bots /></RequireAuth>} />
             <Route path="/touchpoints" element={<RequireAuth><Touchpoints /></RequireAuth>} />
             <Route path="/contracts" element={<RequireAuth><Contracts /></RequireAuth>} />

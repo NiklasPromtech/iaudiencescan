@@ -41,10 +41,10 @@ const Settings = () => {
       badge: null,
     },
     {
-      title: "AI Assistant Access",
-      description: "Generate API keys for external AI tools",
+      title: "Integrations",
+      description: "Connect AI assistants, Telegram bot, and browser extension",
       icon: Key,
-      action: () => navigate("/settings/api-keys"),
+      action: () => navigate("/settings/integrations"),
       badge: null,
     },
     {
