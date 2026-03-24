@@ -32,7 +32,7 @@ const Events = lazy(() => import("./pages/Events"));
 const Audiences = lazy(() => import("./pages/Audiences"));
 const Costs = lazy(() => import("./pages/Costs"));
 const Settings = lazy(() => import("./pages/Settings"));
-const ApiKeys = lazy(() => import("./pages/ApiKeys"));
+const Integrations = lazy(() => import("./pages/Integrations"));
 const Bots = lazy(() => import("./pages/Bots"));
 const Scans = lazy(() => import("./pages/Scans"));
 const ScanDetail = lazy(() => import("./pages/ScanDetail"));
