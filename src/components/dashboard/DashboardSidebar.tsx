@@ -246,8 +246,6 @@ export const DashboardSidebar = () => {
       <SidebarContent className={cn("px-2", collapsed && "px-1")}>
         
         <NavGroup label="Insights" items={insightsItems} collapsed={collapsed} />
-        <NavGroup label="Enrichment" items={enrichmentItems} collapsed={collapsed} />
-        <NavGroup label="Strategy" items={strategyItems} collapsed={collapsed} />
         <NavGroup label="Tools" items={toolsItems} collapsed={collapsed} />
       </SidebarContent>
 
