@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { CreateApiKeyDialog } from "@/components/settings/CreateApiKeyDialog";
 import { ApiKeyList } from "@/components/settings/ApiKeyList";
+import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { toast } from "sonner";
 
 const INFO_ENDPOINT = "https://cdn.audiencescan.io/auth/info";
@@ -23,6 +24,7 @@ type Section = "ai" | "telegram" | "extension" | null;
 
 const Integrations = () => {
   const navigate = useNavigate();
+  const { selectedWebsite } = useSelectedWebsite();
   const [createOpen, setCreateOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [expanded, setExpanded] = useState<Section>(null);
@@ -30,6 +32,13 @@ const Integrations = () => {
   const copyPrompt = () => {
     navigator.clipboard.writeText(buildPrompt());
     toast.success("Copied to clipboard — paste it into your AI assistant");
+  };
+
+  const copyTagId = () => {
+    if (selectedWebsite?.tag_id) {
+      navigator.clipboard.writeText(selectedWebsite.tag_id);
+      toast.success("Tag ID copied to clipboard");
+    }
   };
 
   const toggle = (s: Section) => setExpanded((prev) => (prev === s ? null : s));
@@ -53,6 +62,40 @@ const Integrations = () => {
           </p>
         </div>
 
+        {/* Website Tag ID */}
+        {selectedWebsite?.tag_id && (
+          <Card className="mb-6 p-4 border border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-p3 text-muted-foreground mb-0.5">Website Tag ID</p>
+                <p className="font-mono text-sm text-foreground">{selectedWebsite.tag_id}</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={copyTagId}>
+                <Copy className="h-3.5 w-3.5 mr-2" />
+                Copy
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* API Keys — free-standing */}
+        <Card className="mb-6 border border-border p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Key className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-p1 font-medium text-foreground">API Keys</h3>
+            </div>
+            <Button onClick={() => setCreateOpen(true)} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Create API Key
+            </Button>
+          </div>
+          <p className="text-p3 text-muted-foreground mb-4">
+            API keys are used by all integrations below — AI assistants, Telegram bot, and the browser extension.
+          </p>
+          <ApiKeyList refreshKey={refreshKey} />
+        </Card>
+
         <div className="space-y-3">
           {/* ── AI Assistant Card ── */}
           <Card
@@ -61,12 +104,12 @@ const Integrations = () => {
           >
             <div className="p-4 flex items-center gap-4">
               <div className="p-2 rounded-lg bg-muted">
-                <Key className="h-5 w-5 text-muted-foreground" />
+                <Terminal className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
                 <h3 className="text-p1 font-medium text-foreground">AI Assistant</h3>
                 <p className="text-p3 text-muted-foreground">
-                  Generate API keys so AI tools like ChatGPT or Claude can read your analytics.
+                  Use an API key with ChatGPT, Claude, or any AI tool to query your analytics.
                 </p>
               </div>
               <ChevronRight
@@ -75,36 +118,20 @@ const Integrations = () => {
             </div>
 
             {expanded === "ai" && (
-              <div className="border-t border-border px-4 py-5 space-y-5" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between">
-                  <p className="text-p2 text-muted-foreground">Your API keys</p>
-                  <Button onClick={() => setCreateOpen(true)} size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create API Key
-                  </Button>
+              <div className="border-t border-border px-4 py-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <p className="text-p3 text-muted-foreground">
+                  Give your AI assistant an API key and this instruction:
+                </p>
+                <div className="bg-muted p-3 font-mono text-xs text-foreground">
+                  <pre className="whitespace-pre-wrap">{`curl -H "Authorization: Bearer YOUR_API_KEY" ${INFO_ENDPOINT}`}</pre>
                 </div>
-                <ApiKeyList refreshKey={refreshKey} />
-
-                {/* How it works */}
-                <div className="border border-border p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Terminal className="h-4 w-4 text-muted-foreground" />
-                    <h4 className="text-p2 font-medium text-foreground">How it works</h4>
-                  </div>
-                  <p className="text-p3 text-muted-foreground mb-3">
-                    Give your AI assistant the API key and this instruction:
-                  </p>
-                  <div className="bg-muted p-3 font-mono text-xs text-foreground mb-3">
-                    <pre className="whitespace-pre-wrap">{`curl -H "Authorization: Bearer YOUR_API_KEY" ${INFO_ENDPOINT}`}</pre>
-                  </div>
-                  <p className="text-p3 text-muted-foreground mb-3">
-                    That single request returns everything it needs — every endpoint, filter, dimension, and workflow.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={copyPrompt}>
-                    <Copy className="h-3.5 w-3.5 mr-2" />
-                    Copy prompt for AI
-                  </Button>
-                </div>
+                <p className="text-p3 text-muted-foreground">
+                  That single request returns everything it needs — every endpoint, filter, dimension, and workflow.
+                </p>
+                <Button variant="outline" size="sm" onClick={copyPrompt}>
+                  <Copy className="h-3.5 w-3.5 mr-2" />
+                  Copy prompt for AI
+                </Button>
               </div>
             )}
           </Card>
@@ -141,7 +168,7 @@ const Integrations = () => {
                   <div className="flex items-start gap-3">
                     <span className="text-p1 font-mono text-primary font-bold mt-0.5">2</span>
                     <p className="text-p2 text-foreground">
-                      Send an API key (create one in the AI Assistant section above) to link your account.
+                      Send an API key to link your account.
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
@@ -185,6 +212,9 @@ const Integrations = () => {
               <div className="border-t border-border px-4 py-5 space-y-3" onClick={(e) => e.stopPropagation()}>
                 <p className="text-p2 text-muted-foreground">
                   Download and install the AudienceScan browser extension for Chrome, Brave, Arc, or any Chromium browser.
+                </p>
+                <p className="text-p3 text-muted-foreground">
+                  You'll need your <strong>API key</strong> and <strong>Tag ID</strong> (shown above) to connect the extension.
                 </p>
                 <p className="text-p3 text-muted-foreground italic">
                   Download link coming soon.
