@@ -23,6 +23,7 @@ const sections = [
     title: "Company",
     links: [
       { label: "Get Started", href: "/auth" },
+      { label: "Privacy Policy", href: "/privacy" },
       { label: "Support", href: "mailto:support@audiencescan.io" },
     ],
   },
