@@ -47,6 +47,7 @@ const QueryEditor = lazy(() => import("./pages/QueryEditor"));
 const QueryDashboard = lazy(() => import("./pages/QueryDashboard"));
 const DataExplorer = lazy(() => import("./pages/DataExplorer"));
 const SDTerms = lazy(() => import("./pages/SDTerms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/blog/what-am-i-looking-at" element={<BlogPostWhatAmILookingAt />} />
             <Route path="/blog/founders-letter" element={<BlogPostFoundersLetter />} />
             <Route path="/sd-terms" element={<SDTerms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/sitemap.xml" element={<Sitemap />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/install" element={<RequireAuth><Install /></RequireAuth>} />
