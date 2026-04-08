@@ -25,6 +25,7 @@ import {
   Copy,
   Clock,
   Lock,
+  Save,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format as formatSql } from "sql-formatter";
@@ -945,6 +946,33 @@ export default function QueryEditor() {
               <span className="font-mono text-[10px] text-muted-foreground">
                 No website selected
               </span>
+            )}
+
+            {/* Manual save */}
+            {!isNew && id && !isSystem && (
+              <Button
+                variant="outline"
+                className="h-7 px-2.5 text-[10px] font-mono uppercase tracking-widest gap-1.5"
+                disabled={saveStatus === "saving"}
+                onClick={async () => {
+                  setSaveStatus("saving");
+                  try {
+                    await updateQuery(id, { name: titleRef.current, sql: sqlRef.current });
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  } catch {
+                    setSaveStatus("idle");
+                  }
+                }}
+              >
+                {saveStatus === "saving" ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : saveStatus === "saved" ? (
+                  <Check className="h-3 w-3" />
+                ) : (
+                  <Save className="h-3 w-3" />
+                )}
+              </Button>
             )}
 
             {/* Dashboard toggle */}
