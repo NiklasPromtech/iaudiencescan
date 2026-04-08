@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Terminal, Star, Search, ChevronDown, Plus, Database, AlertCircle, Trash2, LayoutGrid, Clock, Check, Minus, Lock, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -25,9 +25,42 @@ type SortDir = "Descending" | "Ascending";
 
 export default function Queries() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { selectedWebsite } = useSelectedWebsite();
   const { queries, loading, error, createQuery, updateQuery, deleteQuery } = useQueries(selectedWebsite?.id);
   const { toast } = useToast();
+  const autoCreated = useRef(false);
+
+  // Auto-create query from dashboard placement link
+  useEffect(() => {
+    if (autoCreated.current || !selectedWebsite || loading) return;
+    const isNew = searchParams.get("new");
+    if (!isNew) return;
+    autoCreated.current = true;
+    const col = Number(searchParams.get("col") || 1);
+    const row = Number(searchParams.get("row") || 1);
+    const w = Number(searchParams.get("w") || 1);
+    const h = Number(searchParams.get("h") || 1);
+    (async () => {
+      try {
+        const q = await createQuery("New query", "");
+        await updateQuery(q.id, {
+          on_dashboard: true,
+          dash_col: col,
+          dash_row: row,
+          dash_w: w,
+          dash_h: h,
+        });
+        navigate(`/queries/${q.id}`, { replace: true });
+      } catch (err) {
+        toast({
+          title: "Couldn't create query",
+          description: err instanceof Error ? err.message : "Please try again.",
+          variant: "destructive",
+        });
+      }
+    })();
+  }, [searchParams, selectedWebsite, loading, createQuery, updateQuery, navigate, toast]);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("Updated date");
   const [sortDir, setSortDir] = useState<SortDir>("Descending");
