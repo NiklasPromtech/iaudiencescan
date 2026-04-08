@@ -281,7 +281,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
 
 function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
   const { query, loading, error, results } = tile;
-  const chartHeight = Math.max(200, (query.dash_h || 1) * 240);
+  const chartHeight = Math.max(180, (query.dash_h || 1) * 200);
   const vars = parseVariables(query.sql);
   const defaults = buildDefaults(vars);
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
