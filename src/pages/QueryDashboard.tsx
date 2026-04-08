@@ -486,12 +486,15 @@ export default function QueryDashboard() {
             >
               {tiles.map((tile, idx) => {
                 const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
+                const tileHeight = (dash_h || 1) * 160 + 70;
                 return (
                   <div
                     key={tile.query.id}
+                    className="overflow-hidden"
                     style={{
                       gridColumn: `${dash_col} / span ${dash_w}`,
                       gridRow: `${dash_row} / span ${dash_h}`,
+                      maxHeight: tileHeight,
                     }}
                   >
                     <DashboardTileCard
