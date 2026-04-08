@@ -96,7 +96,7 @@ function TileTable({ results, chartHeight }: { results: QueryExecuteResponse; ch
   return (
     <div className="overflow-auto border border-border" style={{ height: chartHeight }}>
 
-      <Table>
+      <Table className="text-[10px]">
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
             {results.columns.map((col) => {
@@ -104,7 +104,7 @@ function TileTable({ results, chartHeight }: { results: QueryExecuteResponse; ch
               return (
                 <TableHead
                   key={col}
-                  className={`font-mono text-[10px] uppercase tracking-widest font-medium whitespace-nowrap ${rightAlign ? "text-right" : ""}`}
+                  className={`font-mono text-[10px] uppercase tracking-widest font-medium whitespace-nowrap py-1.5 px-2 h-auto ${rightAlign ? "text-right" : ""}`}
                 >
                   {col}
                 </TableHead>
@@ -120,7 +120,7 @@ function TileTable({ results, chartHeight }: { results: QueryExecuteResponse; ch
                 return (
                   <TableCell
                     key={ci}
-                    className={`font-mono text-xs tabular-nums whitespace-nowrap ${num ? "text-right" : ""}`}
+                    className={`font-mono text-[10px] tabular-nums whitespace-nowrap py-1 px-2 ${num ? "text-right" : ""}`}
                   >
                     {cell === null ? (
                       <span className="text-muted-foreground/40">null</span>
