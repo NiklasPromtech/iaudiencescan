@@ -26,8 +26,8 @@ import {
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   PieChart,
   Pie,
   Cell,
@@ -184,12 +184,21 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
   const xKey = results.columns[0];
   const lineKeys = results.columns.slice(1);
   const config = buildChartConfig(lineKeys);
+  const palette = [COLOR_LEFT, COLOR_RIGHT, ...EXTRA_COLORS];
 
   return (
     <div className="relative">
       <ChartWatermark />
       <ChartContainer config={config} className="w-full" style={{ height: chartHeight }}>
-        <LineChart data={data}>
+        <AreaChart data={data}>
+          <defs>
+            {lineKeys.map((key, i) => (
+              <linearGradient key={key} id={`fill-${key}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={palette[i % palette.length]} stopOpacity={0.2} />
+                <stop offset="100%" stopColor={palette[i % palette.length]} stopOpacity={0} />
+              </linearGradient>
+            ))}
+          </defs>
           <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
           <XAxis
             dataKey={xKey}
@@ -205,17 +214,19 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
             tick={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
-          {lineKeys.map((key) => (
-            <Line
+          {lineKeys.map((key, i) => (
+            <Area
               key={key}
               type="monotone"
               dataKey={key}
-              stroke={`var(--color-${key})`}
-              strokeWidth={2}
-              dot={false}
+              stroke={palette[i % palette.length]}
+              strokeWidth={2.5}
+              fill={`url(#fill-${key})`}
+              dot={{ r: 2, fill: palette[i % palette.length], strokeWidth: 0 }}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: "hsl(var(--background))" }}
             />
           ))}
-        </LineChart>
+        </AreaChart>
       </ChartContainer>
     </div>
   );
