@@ -531,7 +531,7 @@ export default function QueryDashboard() {
                     </div>
                   );
                 })}
-                {/* Fill empty grid cells with placeholders */}
+                {/* Fill empty grid cells with placeholders + merge zones */}
                 {(() => {
                   const occupied = new Set<string>();
                   tiles.forEach((t) => {
@@ -543,29 +543,61 @@ export default function QueryDashboard() {
                     }
                   });
                   const maxRow = Math.max(...tiles.map((t) => (t.query.dash_row || 1) + (t.query.dash_h || 1) - 1));
-                  const empties: { col: number; row: number }[] = [];
+                  const empty = (c: number, r: number) => !occupied.has(`${c},${r}`) && r >= 1 && r <= maxRow;
+                  const elements: React.ReactNode[] = [];
+
                   for (let r = 1; r <= maxRow; r++) {
                     for (let c = 1; c <= 2; c++) {
-                      if (!occupied.has(`${c},${r}`)) empties.push({ col: c, row: r });
+                      if (!empty(c, r)) continue;
+                      const canMergeRight = c === 1 && empty(2, r);
+                      const canMergeDown = empty(c, r + 1);
+
+                      elements.push(
+                        <div
+                          key={`empty-${c}-${r}`}
+                          className="relative border border-dashed border-border/50 flex items-center justify-center"
+                          style={{
+                            gridColumn: `${c} / span 1`,
+                            gridRow: `${r} / span 1`,
+                            height: 160 + 70,
+                          }}
+                        >
+                          <Link
+                            to={`/queries?new=1&col=${c}&row=${r}&w=1&h=1`}
+                            className="flex flex-col items-center justify-center gap-1.5 w-full h-full hover:bg-muted/30 transition-colors group"
+                          >
+                            <LayoutGrid className="h-4 w-4 text-muted-foreground/20 group-hover:text-primary/40 transition-colors" />
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 group-hover:text-primary/50 transition-colors">
+                              1 × 1
+                            </span>
+                          </Link>
+
+                          {/* Horizontal merge zone — right edge */}
+                          {canMergeRight && (
+                            <Link
+                              to={`/queries?new=1&col=1&row=${r}&w=2&h=1`}
+                              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-6 h-10 flex items-center justify-center bg-background border border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-colors group/merge"
+                              title="Full-width tile"
+                            >
+                              <span className="font-mono text-[8px] text-primary/40 group-hover/merge:text-primary transition-colors">2W</span>
+                            </Link>
+                          )}
+
+                          {/* Vertical merge zone — bottom edge */}
+                          {canMergeDown && (
+                            <Link
+                              to={`/queries?new=1&col=${c}&row=${r}&w=1&h=2`}
+                              className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10 w-10 h-6 flex items-center justify-center bg-background border border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-colors group/merge"
+                              title="Tall tile"
+                            >
+                              <span className="font-mono text-[8px] text-primary/40 group-hover/merge:text-primary transition-colors">2H</span>
+                            </Link>
+                          )}
+                        </div>
+                      );
                     }
                   }
-                  return empties.map(({ col, row }) => (
-                    <Link
-                      key={`empty-${col}-${row}`}
-                      to="/queries"
-                      className="border border-dashed border-border/60 hover:border-primary/30 flex flex-col items-center justify-center gap-2 transition-colors group"
-                      style={{
-                        gridColumn: `${col} / span 1`,
-                        gridRow: `${row} / span 1`,
-                        maxHeight: 230,
-                      }}
-                    >
-                      <LayoutGrid className="h-5 w-5 text-muted-foreground/20 group-hover:text-primary/30 transition-colors" />
-                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/50 transition-colors">
-                        Add a query tile
-                      </span>
-                    </Link>
-                  ));
+                  return elements;
                 })()}
               </div>
             </>
