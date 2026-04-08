@@ -279,7 +279,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             strokeWidth={2}
             stroke="hsl(var(--background))"
             label={renderLabel}
-            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))" }}
+            labelLine={false}
             isAnimationActive={false}
             style={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
           >
