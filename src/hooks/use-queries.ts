@@ -121,7 +121,7 @@ export function useQueries(websiteId?: string | null) {
       const { data, error: err } = await (supabase as any)
         .from("queries")
         .select("*")
-        .eq("website_id", websiteId)
+        .or(`website_id.eq.${websiteId},is_system.eq.true`)
         .order("updated_at", { ascending: false });
       if (err) throw err;
       setQueries((data as SavedQuery[]) ?? []);
@@ -189,7 +189,7 @@ export function useQueries(websiteId?: string | null) {
     const { data, error: err } = await (supabase as any)
       .from("queries")
       .select("*")
-      .eq("website_id", websiteId)
+      .or(`website_id.eq.${websiteId},is_system.eq.true`)
       .eq("on_dashboard", true)
       .order("updated_at", { ascending: false });
     if (err) throw err;

@@ -239,12 +239,14 @@ const SqlEditor = ({
   onKeyDownExtra,
   editorRef,
   schema,
+  readOnly = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   onKeyDownExtra?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   editorRef: React.RefObject<HTMLTextAreaElement>;
   schema: QuerySchemaTable[];
+  readOnly?: boolean;
 }) => {
   const gutterRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -404,14 +406,15 @@ const SqlEditor = ({
         <textarea
           ref={editorRef}
           value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          onClick={handleClick}
+          onChange={readOnly ? undefined : handleChange}
+          onKeyDown={readOnly ? undefined : handleKeyDown}
+          onClick={readOnly ? undefined : handleClick}
           onScroll={syncScroll}
           spellCheck={false}
           autoComplete="off"
-          className="absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs"
-          style={{ color: "transparent", caretColor: "hsl(var(--foreground))" }}
+          readOnly={readOnly}
+          className={cn("absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs", readOnly && "cursor-default")}
+          style={{ color: "transparent", caretColor: readOnly ? "transparent" : "hsl(var(--foreground))" }}
           placeholder="-- Write your SQL query here..."
         />
 
@@ -1099,7 +1102,7 @@ export default function QueryEditor() {
             )}
 
             {/* Schedule button */}
-            {!isNew && id && selectedWebsite && (
+            {!isNew && id && selectedWebsite && !isSystem && (
               <button
                 onClick={() => setScheduleOpen(true)}
                 title="Schedule report"
@@ -1162,15 +1165,17 @@ export default function QueryEditor() {
               )
             )}
 
-            <button
-              onClick={handleFormat}
-              disabled={!sql.trim() || queryLoading}
-              title="Format SQL"
-              className="h-8 px-3 flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border rounded-none hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Wand2 className="h-3 w-3" />
-              Pretty
-            </button>
+            {!isSystem && (
+              <button
+                onClick={handleFormat}
+                disabled={!sql.trim() || queryLoading}
+                title="Format SQL"
+                className="h-8 px-3 flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground border border-border rounded-none hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Wand2 className="h-3 w-3" />
+                Pretty
+              </button>
+            )}
 
             <Button
               onClick={handleRun}
@@ -1294,8 +1299,8 @@ export default function QueryEditor() {
 
 
 
-              {/* Edit SQL with prompt — shown when SQL exists */}
-              {sql.trim() && (
+              {/* Edit SQL with prompt — shown when SQL exists (hidden for system queries) */}
+              {sql.trim() && !isSystem && (
                 <div className="relative">
                   <Wand2 className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                   <Input
@@ -1322,7 +1327,7 @@ export default function QueryEditor() {
 
               {/* SQL editor */}
               <div className={cn("flex-1 min-h-0 flex flex-col transition-shadow duration-700 rounded-sm", sqlFlash && "ring-2 ring-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.15)]")}>
-                <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} />
+                <SqlEditor value={sql} onChange={setSql} editorRef={editorRef} schema={schema} readOnly={isSystem} />
               </div>
 
               {/* Variable parameter bar */}
