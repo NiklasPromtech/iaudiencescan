@@ -39,10 +39,16 @@ import {
 const COLOR_LEFT = "hsl(24 95% 53%)";   // Orange — primary
 const COLOR_RIGHT = "hsl(168 53% 43%)"; // Teal — secondary
 const EXTRA_COLORS = [
-  "hsl(142 71% 45%)",
-  "hsl(48 96% 53%)",
-  "hsl(280 65% 60%)",
-  "hsl(200 70% 55%)",
+  "hsl(24 95% 70%)",    // Light orange
+  "hsl(168 53% 60%)",   // Light teal
+  "hsl(24 60% 40%)",    // Burnt orange
+  "hsl(168 40% 30%)",   // Deep teal
+  "hsl(30 90% 62%)",    // Amber
+  "hsl(180 45% 50%)",   // Cyan-teal
+  "hsl(15 80% 55%)",    // Coral
+  "hsl(160 50% 45%)",   // Sea green
+  "hsl(35 95% 50%)",    // Gold
+  "hsl(190 55% 40%)",   // Steel teal
 ];
 
 function buildChartConfig(keys: string[]): ChartConfig {
@@ -242,6 +248,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             outerRadius={radius}
             innerRadius={radius * 0.45}
             paddingAngle={3}
+            cornerRadius={3}
             strokeWidth={2}
             stroke="hsl(var(--background))"
             label={({ name, value }) => `${name}: ${value.toLocaleString()}`}
