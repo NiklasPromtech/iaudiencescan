@@ -461,55 +461,114 @@ export default function QueryDashboard() {
               ))}
             </div>
           ) : tiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-              <LayoutGrid className="h-10 w-10 text-muted-foreground/30" />
+            <div className="flex flex-col items-center justify-center py-16 gap-6 text-center max-w-lg mx-auto">
+              <LayoutGrid className="h-10 w-10 text-muted-foreground/20" />
               <div>
-                <p className="font-mono text-sm text-foreground font-semibold">No dashboard tiles yet</p>
-                <p className="font-mono text-xs text-muted-foreground mt-1 max-w-md">
-                  Open a query in the editor and check "Add to dash" to pin it here. Choose how to display it — as a table, bar chart, line chart, or pie chart.
+                <p className="font-mono text-sm text-foreground font-semibold uppercase tracking-widest">
+                  Your dashboard is empty
                 </p>
+                <p className="font-mono text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                  Pin queries to your dashboard to track what matters. Start with one of the default queries below, or create your own from scratch.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 w-full">
+                {[
+                  { label: "Daily Pageviews", desc: "Traffic trends over the last 14 days" },
+                  { label: "Visitor Wallet Breakdown", desc: "Total vs detected vs connected" },
+                  { label: "Human vs Bot Traffic", desc: "See how much traffic is real" },
+                  { label: "Top Referrers", desc: "Where your visitors come from" },
+                ].map((card) => (
+                  <Link
+                    key={card.label}
+                    to="/queries"
+                    className="border border-border hover:border-primary/40 p-3 text-left transition-colors group"
+                  >
+                    <p className="font-mono text-[10px] uppercase tracking-widest font-medium text-foreground group-hover:text-primary transition-colors">
+                      {card.label}
+                    </p>
+                    <p className="font-mono text-[9px] text-muted-foreground mt-1">{card.desc}</p>
+                  </Link>
+                ))}
               </div>
               <Link
                 to="/queries"
-                className="font-mono text-xs text-primary hover:underline uppercase tracking-widest"
+                className="font-mono text-[10px] text-primary hover:underline uppercase tracking-widest"
               >
-                Go to Queries →
+                Browse all queries →
               </Link>
             </div>
           ) : (
-            <div
-              className="grid gap-3"
-              style={{
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gridTemplateRows: "repeat(4, minmax(0, auto))",
-              }}
-            >
-              {tiles.map((tile, idx) => {
-                const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
-                const tileHeight = (dash_h || 1) * 160 + 70;
-                return (
-                  <div
-                    key={tile.query.id}
-                    className="overflow-hidden"
-                    style={{
-                      gridColumn: `${dash_col} / span ${dash_w}`,
-                      gridRow: `${dash_row} / span ${dash_h}`,
-                      maxHeight: tileHeight,
-                    }}
-                  >
-                    <DashboardTileCard
-                      tile={tile}
-                      onRerun={(values) => {
-                        setTiles((prev) =>
-                          prev.map((t, i) => (i === idx ? { ...t, loading: true, error: null, results: null } : t))
-                        );
-                        runTile(tile.query, idx, values);
+            <>
+              <div
+                className="grid gap-3"
+                style={{
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gridTemplateRows: "repeat(4, minmax(0, auto))",
+                }}
+              >
+                {tiles.map((tile, idx) => {
+                  const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = tile.query;
+                  const tileHeight = (dash_h || 1) * 160 + 70;
+                  return (
+                    <div
+                      key={tile.query.id}
+                      className="overflow-hidden"
+                      style={{
+                        gridColumn: `${dash_col} / span ${dash_w}`,
+                        gridRow: `${dash_row} / span ${dash_h}`,
+                        maxHeight: tileHeight,
                       }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+                    >
+                      <DashboardTileCard
+                        tile={tile}
+                        onRerun={(values) => {
+                          setTiles((prev) =>
+                            prev.map((t, i) => (i === idx ? { ...t, loading: true, error: null, results: null } : t))
+                          );
+                          runTile(tile.query, idx, values);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+                {/* Fill empty grid cells with placeholders */}
+                {(() => {
+                  const occupied = new Set<string>();
+                  tiles.forEach((t) => {
+                    const { dash_col = 1, dash_row = 1, dash_w = 1, dash_h = 1 } = t.query;
+                    for (let c = dash_col; c < dash_col + dash_w; c++) {
+                      for (let r = dash_row; r < dash_row + dash_h; r++) {
+                        occupied.add(`${c},${r}`);
+                      }
+                    }
+                  });
+                  const maxRow = Math.max(...tiles.map((t) => (t.query.dash_row || 1) + (t.query.dash_h || 1) - 1));
+                  const empties: { col: number; row: number }[] = [];
+                  for (let r = 1; r <= maxRow; r++) {
+                    for (let c = 1; c <= 2; c++) {
+                      if (!occupied.has(`${c},${r}`)) empties.push({ col: c, row: r });
+                    }
+                  }
+                  return empties.map(({ col, row }) => (
+                    <Link
+                      key={`empty-${col}-${row}`}
+                      to="/queries"
+                      className="border border-dashed border-border/60 hover:border-primary/30 flex flex-col items-center justify-center gap-2 transition-colors group"
+                      style={{
+                        gridColumn: `${col} / span 1`,
+                        gridRow: `${row} / span 1`,
+                        maxHeight: 230,
+                      }}
+                    >
+                      <LayoutGrid className="h-5 w-5 text-muted-foreground/20 group-hover:text-primary/30 transition-colors" />
+                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/50 transition-colors">
+                        Add a query tile
+                      </span>
+                    </Link>
+                  ));
+                })()}
+              </div>
+            </>
           )}
         </div>
       </div>
