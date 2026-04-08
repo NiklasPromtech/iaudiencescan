@@ -220,10 +220,12 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
               type="monotone"
               dataKey={key}
               stroke={palette[i % palette.length]}
-              strokeWidth={2.5}
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
               fill={`url(#fill-${key})`}
-              dot={{ r: 2, fill: palette[i % palette.length], strokeWidth: 0 }}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+              dot={{ r: 2.5, fill: palette[i % palette.length], strokeWidth: 0 }}
+              activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
             />
           ))}
         </AreaChart>
@@ -279,7 +281,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
 
 function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
   const { query, loading, error, results } = tile;
-  const chartHeight = Math.max(200, (query.dash_h || 1) * 240);
+  const chartHeight = Math.max(180, (query.dash_h || 1) * 200);
   const vars = parseVariables(query.sql);
   const defaults = buildDefaults(vars);
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
@@ -475,10 +477,10 @@ export default function QueryDashboard() {
             </div>
           ) : (
             <div
-              className="grid gap-4"
+              className="grid gap-3"
               style={{
                 gridTemplateColumns: "repeat(2, 1fr)",
-                gridTemplateRows: "repeat(4, minmax(280px, auto))",
+                gridTemplateRows: "repeat(4, minmax(0, auto))",
               }}
             >
               {tiles.map((tile, idx) => {
