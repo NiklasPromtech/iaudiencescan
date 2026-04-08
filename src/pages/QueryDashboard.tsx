@@ -266,7 +266,8 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             strokeWidth={2}
             stroke="hsl(var(--background))"
             label={({ name, value }) => `${name}: ${value.toLocaleString()}`}
-            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))" }}
+            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))", type: "linear" }}
+            isAnimationActive={false}
             style={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
           >
             {data.map((entry, i) => (
