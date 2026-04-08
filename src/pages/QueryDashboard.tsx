@@ -248,6 +248,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             outerRadius={radius}
             innerRadius={radius * 0.45}
             paddingAngle={3}
+            cornerRadius={3}
             strokeWidth={2}
             stroke="hsl(var(--background))"
             label={({ name, value }) => `${name}: ${value.toLocaleString()}`}
