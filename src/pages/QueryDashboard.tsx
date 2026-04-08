@@ -220,7 +220,7 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
               type="monotone"
               dataKey={key}
               stroke={palette[i % palette.length]}
-              strokeWidth={3}
+              strokeWidth={6}
               strokeLinecap="round"
               strokeLinejoin="round"
               fill={`url(#fill-${key})`}
@@ -281,7 +281,7 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
 
 function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
   const { query, loading, error, results } = tile;
-  const chartHeight = Math.max(180, (query.dash_h || 1) * 200);
+  const chartHeight = (query.dash_h || 1) * 160;
   const vars = parseVariables(query.sql);
   const defaults = buildDefaults(vars);
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
