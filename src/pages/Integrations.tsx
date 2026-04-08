@@ -158,6 +158,7 @@ const Integrations = () => {
 
             {expanded === "telegram" && (
               <div className="border-t border-border px-4 py-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <p className="text-p2 font-medium text-foreground">Direct messages</p>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <span className="text-p1 font-mono text-primary font-bold mt-0.5">1</span>
@@ -178,6 +179,20 @@ const Integrations = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="border-t border-border pt-4">
+                  <p className="text-p2 font-medium text-foreground mb-3">Private groups</p>
+                  <p className="text-p2 text-foreground mb-2">
+                    The bot can also be invited to closed private groups. To activate it, type:
+                  </p>
+                  <div className="bg-muted p-3 font-mono text-xs text-foreground mb-2">
+                    /setkey [your API key]
+                  </div>
+                  <p className="text-p2 text-foreground">
+                    Then for any question about your analytics, mention <strong>{TELEGRAM_BOT}</strong> followed by your question.
+                  </p>
+                </div>
+
                 <Button variant="outline" size="sm" asChild>
                   <a href={TELEGRAM_BOT_URL} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-3.5 w-3.5 mr-2" />
