@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Loader2, AlertCircle, LayoutGrid } from "lucide-react";
+import { ExternalLink, Loader2, AlertCircle, LayoutGrid, ChevronsRight, ChevronsDown } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -555,7 +555,7 @@ export default function QueryDashboard() {
                       elements.push(
                         <div
                           key={`empty-${c}-${r}`}
-                          className="relative border border-dashed border-border/50 flex items-center justify-center"
+                          className="relative border border-dashed border-border/50 flex items-center justify-center group/cell"
                           style={{
                             gridColumn: `${c} / span 1`,
                             gridRow: `${r} / span 1`,
@@ -572,25 +572,25 @@ export default function QueryDashboard() {
                             </span>
                           </Link>
 
-                          {/* Horizontal merge zone — right edge */}
+                          {/* Expand-right button — subtle arrow, visible on cell hover */}
                           {canMergeRight && (
                             <Link
                               to={`/queries?new=1&col=1&row=${r}&w=2&h=1`}
-                              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-6 h-10 flex items-center justify-center bg-background border border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-colors group/merge"
-                              title="Full-width tile"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/cell:opacity-100 p-1.5 hover:bg-primary/10 transition-all"
+                              title="Create full-width tile"
                             >
-                              <span className="font-mono text-[8px] text-primary/40 group-hover/merge:text-primary transition-colors">2W</span>
+                              <ChevronsRight className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
                             </Link>
                           )}
 
-                          {/* Vertical merge zone — bottom edge */}
+                          {/* Expand-down button — subtle arrow, visible on cell hover */}
                           {canMergeDown && (
                             <Link
                               to={`/queries?new=1&col=${c}&row=${r}&w=1&h=2`}
-                              className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10 w-10 h-6 flex items-center justify-center bg-background border border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-colors group/merge"
-                              title="Tall tile"
+                              className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover/cell:opacity-100 p-1.5 hover:bg-primary/10 transition-all"
+                              title="Create tall tile"
                             >
-                              <span className="font-mono text-[8px] text-primary/40 group-hover/merge:text-primary transition-colors">2H</span>
+                              <ChevronsDown className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
                             </Link>
                           )}
                         </div>
