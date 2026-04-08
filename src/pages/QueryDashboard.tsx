@@ -220,12 +220,12 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
               type="monotone"
               dataKey={key}
               stroke={palette[i % palette.length]}
-              strokeWidth={6}
+              strokeWidth={4}
               strokeLinecap="round"
               strokeLinejoin="round"
               fill={`url(#fill-${key})`}
-              dot={{ r: 2.5, fill: palette[i % palette.length], strokeWidth: 0 }}
-              activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+              dot={{ r: 3, fill: palette[i % palette.length], strokeWidth: 0 }}
+              activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
             />
           ))}
         </AreaChart>
@@ -335,9 +335,9 @@ function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (
         </div>
       )}
 
-      <div className="flex-1 min-h-0 p-3">
+      <div className="flex-1 min-h-0 p-3" style={{ height: chartHeight + 24 }}>
         {loading ? (
-          <div className="flex flex-col gap-2 py-8 items-center">
+          <div className="flex flex-col gap-2 h-full items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             <span className="font-mono text-[10px] text-muted-foreground">Running query…</span>
           </div>
