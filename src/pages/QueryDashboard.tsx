@@ -92,9 +92,10 @@ function ChartWatermark() {
   );
 }
 
-function TileTable({ results }: { results: QueryExecuteResponse }) {
+function TileTable({ results, chartHeight }: { results: QueryExecuteResponse; chartHeight: number }) {
   return (
-    <div className="overflow-auto max-h-[300px] border border-border">
+    <div className="overflow-auto border border-border" style={{ height: chartHeight }}>
+
       <Table>
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
@@ -335,7 +336,7 @@ function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (
         </div>
       )}
 
-      <div className="flex-1 min-h-0 p-3" style={{ height: chartHeight + 24 }}>
+      <div className="flex-1 min-h-0 p-3 overflow-hidden" style={{ height: chartHeight + 24 }}>
         {loading ? (
           <div className="flex flex-col gap-2 h-full items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -351,7 +352,7 @@ function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (
             {query.display_type === "bar_chart" && <TileBarChart results={results} chartHeight={chartHeight} />}
             {query.display_type === "line_chart" && <TileLineChart results={results} chartHeight={chartHeight} />}
             {query.display_type === "pie_chart" && <TilePieChart results={results} chartHeight={chartHeight} />}
-            {(!query.display_type || query.display_type === "table") && <TileTable results={results} />}
+            {(!query.display_type || query.display_type === "table") && <TileTable results={results} chartHeight={chartHeight} />}
           </>
         ) : null}
       </div>
