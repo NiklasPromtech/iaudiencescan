@@ -247,9 +247,22 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
   data.forEach((d) => { config[d.name] = { label: d.name, color: d.fill }; });
 
   const radius = Math.min(chartHeight * 0.35, 100);
+  const labelOffset = 8;
+
+  const renderLabel = ({ name, value, cx: cxPx, cy: cyPx, midAngle, outerRadius: oR }: any) => {
+    const RADIAN = Math.PI / 180;
+    const x = cxPx + (oR + labelOffset) * Math.cos(-midAngle * RADIAN);
+    const y = cyPx + (oR + labelOffset) * Math.sin(-midAngle * RADIAN);
+    const anchor = x > cxPx ? "start" : "end";
+    return (
+      <text x={x} y={y} textAnchor={anchor} dominantBaseline="central" style={{ fontSize: 10, fontFamily: "Space Mono, monospace", fill: "hsl(var(--foreground))" }}>
+        {`${name}: ${value.toLocaleString()}`}
+      </text>
+    );
+  };
 
   return (
-    <div className="relative">
+    <div className="relative w-full" style={{ height: chartHeight }}>
       <ChartWatermark />
       <ChartContainer config={config} className="w-full" style={{ height: chartHeight }}>
         <PieChart>
@@ -265,8 +278,8 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             cornerRadius={3}
             strokeWidth={2}
             stroke="hsl(var(--background))"
-            label={({ name, value }) => `${name}: ${value.toLocaleString()}`}
-            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))", type: "linear" }}
+            label={renderLabel}
+            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))" }}
             isAnimationActive={false}
             style={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
           >
