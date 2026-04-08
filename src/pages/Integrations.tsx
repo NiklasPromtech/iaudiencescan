@@ -179,6 +179,12 @@ const Integrations = () => {
                     </p>
                   </div>
                 </div>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={TELEGRAM_BOT_URL} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                    Open {TELEGRAM_BOT}
+                  </a>
+                </Button>
 
                 <div className="border-t border-border pt-4">
                   <p className="text-p2 font-medium text-foreground mb-3">Private groups</p>
@@ -188,17 +194,26 @@ const Integrations = () => {
                   <div className="bg-muted p-3 font-mono text-xs text-foreground mb-2">
                     /setkey [your API key]
                   </div>
-                  <p className="text-p2 text-foreground">
+                  <p className="text-p2 text-foreground mb-3">
                     Then for any question about your analytics, mention <strong>{TELEGRAM_BOT}</strong> followed by your question.
                   </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(TELEGRAM_BOT);
+                      toast.success("Handle copied to clipboard");
+                    }}
+                  >
+                    <Copy className="h-3.5 w-3.5 mr-2" />
+                    Copy handle {TELEGRAM_BOT}
+                  </Button>
+                  <div className="mt-4 p-3 border border-destructive/30 bg-destructive/5 rounded-md">
+                    <p className="text-p3 text-destructive">
+                      <strong>Security note:</strong> Only use <code>/setkey</code> in groups you trust. The API key is visible in chat and can be copied by any group member. After the bot confirms the connection, delete the message containing your key.
+                    </p>
+                  </div>
                 </div>
-
-                <Button variant="outline" size="sm" asChild>
-                  <a href={TELEGRAM_BOT_URL} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                    Open {TELEGRAM_BOT}
-                  </a>
-                </Button>
               </div>
             )}
           </Card>
