@@ -215,13 +215,18 @@ function TileLineChart({ results, chartHeight }: { results: QueryExecuteResponse
   );
 }
 
+const PIE_COLORS = [COLOR_LEFT, COLOR_RIGHT, ...EXTRA_COLORS];
+
 function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse; chartHeight: number }) {
-  const data = results.rows.map((row) => ({
+  const data = results.rows.map((row, i) => ({
     name: String(row[0] ?? ""),
     value: Number(row[1] ?? 0),
+    fill: PIE_COLORS[i % PIE_COLORS.length],
   }));
-  const keys = data.map((d) => d.name);
-  const config = buildChartConfig(keys);
+  const config: ChartConfig = {};
+  data.forEach((d) => { config[d.name] = { label: d.name, color: d.fill }; });
+
+  const radius = Math.min(chartHeight * 0.35, 100);
 
   return (
     <div className="relative">
@@ -234,11 +239,17 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={Math.min(chartHeight * 0.35, 100)}
-            label={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
+            outerRadius={radius}
+            innerRadius={radius * 0.45}
+            paddingAngle={3}
+            strokeWidth={2}
+            stroke="hsl(var(--background))"
+            label={({ name, value }) => `${name}: ${value.toLocaleString()}`}
+            labelLine={{ strokeWidth: 1, stroke: "hsl(var(--muted-foreground))" }}
+            style={{ fontSize: 10, fontFamily: "Space Mono, monospace" }}
           >
-            {data.map((entry) => (
-              <Cell key={entry.name} fill={`var(--color-${entry.name})`} />
+            {data.map((entry, i) => (
+              <Cell key={i} fill={entry.fill} />
             ))}
           </Pie>
           <ChartTooltip content={<ChartTooltipContent />} />
