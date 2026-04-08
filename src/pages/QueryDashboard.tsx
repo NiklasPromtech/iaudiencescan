@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Loader2, AlertCircle, LayoutGrid } from "lucide-react";
+import { ExternalLink, Loader2, AlertCircle, LayoutGrid, ChevronsRight, ChevronsDown } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
