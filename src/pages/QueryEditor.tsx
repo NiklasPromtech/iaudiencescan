@@ -375,7 +375,7 @@ const SqlEditor = ({
   const tokens = useMemo(() => tokenizeSql(value), [value]);
 
   return (
-    <div ref={editorContainerRef} className="flex border border-border overflow-hidden font-mono text-xs leading-5 flex-1 min-h-0 relative">
+    <div ref={editorContainerRef} className="flex border border-border overflow-hidden font-mono text-xs flex-1 min-h-0 relative" style={{ lineHeight: `${LINE_HEIGHT}px` }}>
       {/* Gutter */}
       <div
         ref={gutterRef}
