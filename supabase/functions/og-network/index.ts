@@ -43,6 +43,13 @@ serve(async (req) => {
       return new Response('Missing study ID', { status: 400, headers: corsHeaders });
     }
 
+    // Validate studyId format to prevent injection
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const safeIdRegex = /^[a-zA-Z0-9_-]{1,128}$/;
+    if (!uuidRegex.test(studyId) && !safeIdRegex.test(studyId)) {
+      return new Response('Invalid study ID format', { status: 400, headers: corsHeaders });
+    }
+
     const appUrl = `https://audiencescan.io/network/${studyId}`;
     const ogImageUrl = 'https://audiencescan.io/og-network-preview.png';
 
