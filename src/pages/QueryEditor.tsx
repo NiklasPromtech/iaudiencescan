@@ -395,8 +395,8 @@ const SqlEditor = ({
         <pre
           ref={preRef}
           aria-hidden="true"
-          className="absolute inset-0 p-3 font-mono text-xs leading-5 whitespace-pre overflow-hidden pointer-events-none m-0"
-          style={{ tabSize: 2 }}
+          className="absolute inset-0 p-3 font-mono text-xs whitespace-pre overflow-hidden pointer-events-none m-0"
+          style={{ tabSize: 2, lineHeight: `${LINE_HEIGHT}px` }}
         >
           {renderTokens(tokens)}
           {/* trailing newline so height matches textarea */}
@@ -414,8 +414,8 @@ const SqlEditor = ({
           spellCheck={false}
           autoComplete="off"
           readOnly={readOnly}
-          className={cn("absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs", readOnly && "cursor-default")}
-          style={{ color: "transparent", caretColor: readOnly ? "transparent" : "hsl(var(--foreground))" }}
+          className={cn("absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none font-mono text-xs", readOnly && "cursor-default")}
+          style={{ color: "transparent", caretColor: readOnly ? "transparent" : "hsl(var(--foreground))", lineHeight: `${LINE_HEIGHT}px` }}
           placeholder="-- Write your SQL query here..."
         />
 
