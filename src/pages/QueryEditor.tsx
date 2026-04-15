@@ -383,7 +383,7 @@ const SqlEditor = ({
         style={{ overflowY: "hidden" }}
       >
         {Array.from({ length: lineCount }, (_, i) => (
-          <div key={i} className="text-right pr-3 leading-5">
+          <div key={i} className="text-right pr-3" style={{ lineHeight: `${LINE_HEIGHT}px`, height: LINE_HEIGHT }}>
             {i + 1}
           </div>
         ))}
