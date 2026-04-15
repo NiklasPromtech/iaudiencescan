@@ -375,7 +375,7 @@ const SqlEditor = ({
   const tokens = useMemo(() => tokenizeSql(value), [value]);
 
   return (
-    <div ref={editorContainerRef} className="flex border border-border overflow-hidden font-mono text-xs leading-5 flex-1 min-h-0 relative">
+    <div ref={editorContainerRef} className="flex border border-border overflow-hidden font-mono text-xs flex-1 min-h-0 relative" style={{ lineHeight: `${LINE_HEIGHT}px` }}>
       {/* Gutter */}
       <div
         ref={gutterRef}
@@ -383,7 +383,7 @@ const SqlEditor = ({
         style={{ overflowY: "hidden" }}
       >
         {Array.from({ length: lineCount }, (_, i) => (
-          <div key={i} className="text-right pr-3 leading-5">
+          <div key={i} className="text-right pr-3" style={{ lineHeight: `${LINE_HEIGHT}px`, height: LINE_HEIGHT }}>
             {i + 1}
           </div>
         ))}
@@ -395,8 +395,8 @@ const SqlEditor = ({
         <pre
           ref={preRef}
           aria-hidden="true"
-          className="absolute inset-0 p-3 font-mono text-xs leading-5 whitespace-pre overflow-hidden pointer-events-none m-0"
-          style={{ tabSize: 2 }}
+          className="absolute inset-0 p-3 font-mono text-xs whitespace-pre overflow-hidden pointer-events-none m-0"
+          style={{ tabSize: 2, lineHeight: `${LINE_HEIGHT}px` }}
         >
           {renderTokens(tokens)}
           {/* trailing newline so height matches textarea */}
@@ -414,8 +414,8 @@ const SqlEditor = ({
           spellCheck={false}
           autoComplete="off"
           readOnly={readOnly}
-          className={cn("absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none leading-5 font-mono text-xs", readOnly && "cursor-default")}
-          style={{ color: "transparent", caretColor: readOnly ? "transparent" : "hsl(var(--foreground))" }}
+          className={cn("absolute inset-0 w-full h-full resize-none bg-transparent p-3 focus:outline-none font-mono text-xs", readOnly && "cursor-default")}
+          style={{ color: "transparent", caretColor: readOnly ? "transparent" : "hsl(var(--foreground))", lineHeight: `${LINE_HEIGHT}px` }}
           placeholder="-- Write your SQL query here..."
         />
 
