@@ -126,9 +126,8 @@ ${schemaContext}`;
     );
   } catch (err) {
     console.error("sql-generate error:", err);
-    const message = err instanceof Error ? err.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
