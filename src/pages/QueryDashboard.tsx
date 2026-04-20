@@ -11,7 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import { BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, Table as TableIcon, Shapes } from "lucide-react";
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries, SavedQuery } from "@/hooks/use-queries";
@@ -310,15 +315,18 @@ function DashboardTileCard({
   onRename,
   onRemove,
   onReplace,
+  onChangeType,
 }: {
   tile: DashboardTile;
   onRerun?: (values: Record<string, string>) => void;
   onRename?: (newName: string) => Promise<void>;
   onRemove?: () => Promise<void>;
   onReplace?: () => void;
+  onChangeType?: (displayType: string) => Promise<void>;
 }) {
   const { query, loading, error, results } = tile;
   const chartHeight = (query.dash_h || 1) * 160;
+  const isSingleBlock = (query.dash_w || 1) === 1 && (query.dash_h || 1) === 1;
   const vars = parseVariables(query.sql);
   const defaults = buildDefaults(vars);
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
@@ -413,6 +421,43 @@ function DashboardTileCard({
                 <Replace className="h-3.5 w-3.5 mr-2" />
                 Replace with query
               </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="cursor-pointer font-mono text-[10px] uppercase tracking-widest">
+                  <Shapes className="h-3.5 w-3.5 mr-2" />
+                  Change type
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="rounded-none font-mono text-[10px] uppercase tracking-widest min-w-[160px]">
+                    {[
+                      { value: "table", label: "Table", Icon: TableIcon },
+                      { value: "bar_chart", label: "Bar chart", Icon: BarChart3 },
+                      { value: "line_chart", label: "Line chart", Icon: LineChartIcon },
+                      ...(isSingleBlock ? [{ value: "pie_chart", label: "Pie chart", Icon: PieChartIcon }] : []),
+                    ].map(({ value, label, Icon }) => {
+                      const active = (query.display_type || "table") === value;
+                      return (
+                        <DropdownMenuItem
+                          key={value}
+                          onClick={async () => {
+                            if (active) return;
+                            try {
+                              await onChangeType?.(value);
+                              toast.success(`Changed to ${label}`);
+                            } catch (e) {
+                              toast.error(e instanceof Error ? e.message : "Change failed");
+                            }
+                          }}
+                          className={`cursor-pointer ${active ? "text-primary" : ""}`}
+                        >
+                          <Icon className="h-3.5 w-3.5 mr-2" />
+                          {label}
+                          {active && <Check className="h-3 w-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={async () => {
@@ -756,6 +801,14 @@ export default function QueryDashboard() {
                         onReplace={() =>
                           setReplaceState({ open: true, tileIndex: idx, slot: null })
                         }
+                        onChangeType={async (displayType) => {
+                          await updateQuery(tile.query.id, { display_type: displayType });
+                          setTiles((prev) =>
+                            prev.map((t, i) =>
+                              i === idx ? { ...t, query: { ...t.query, display_type: displayType } } : t
+                            )
+                          );
+                        }}
                       />
                     </div>
                   );
