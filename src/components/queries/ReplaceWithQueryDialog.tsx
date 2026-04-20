@@ -58,8 +58,29 @@ export function ReplaceWithQueryDialog({
     const q = search.trim().toLowerCase();
     return queries
       .filter((qi) => !q || qi.name.toLowerCase().includes(q))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => {
+        const aT = new Date(a.updated_at || a.created_at || 0).getTime();
+        const bT = new Date(b.updated_at || b.created_at || 0).getTime();
+        return bT - aT;
+      });
   }, [queries, search]);
+
+  const formatRelative = (iso?: string) => {
+    if (!iso) return "";
+    const t = new Date(iso).getTime();
+    if (!t) return "";
+    const diff = Date.now() - t;
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `${d}d ago`;
+    const mo = Math.floor(d / 30);
+    if (mo < 12) return `${mo}mo ago`;
+    return `${Math.floor(mo / 12)}y ago`;
+  };
 
   const selected = queries.find((q) => q.id === selectedId) ?? null;
   const canConfirm = !!selected && !!displayType && !submitting;
@@ -132,11 +153,9 @@ export function ReplaceWithQueryDialog({
                         </p>
                       )}
                     </div>
-                    {isExcluded && (
-                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground shrink-0">
-                        On dashboard
-                      </span>
-                    )}
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground shrink-0">
+                      {isExcluded ? "On dashboard" : formatRelative(q.updated_at || q.created_at)}
+                    </span>
                   </button>
                 );
               })
