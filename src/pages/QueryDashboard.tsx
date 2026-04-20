@@ -801,6 +801,14 @@ export default function QueryDashboard() {
                         onReplace={() =>
                           setReplaceState({ open: true, tileIndex: idx, slot: null })
                         }
+                        onChangeType={async (displayType) => {
+                          await updateQuery(tile.query.id, { display_type: displayType });
+                          setTiles((prev) =>
+                            prev.map((t, i) =>
+                              i === idx ? { ...t, query: { ...t.query, display_type: displayType } } : t
+                            )
+                          );
+                        }}
                       />
                     </div>
                   );
