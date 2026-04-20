@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries, SavedQuery } from "@/hooks/use-queries";
+import { ReplaceWithQueryDialog } from "@/components/queries/ReplaceWithQueryDialog";
+import { Replace, Plus } from "lucide-react";
 import { executeQuery, QueryExecuteResponse } from "@/lib/api";
 import { parseVariables, buildDefaults, substituteVariables, allVariablesSatisfied } from "@/lib/query-variables";
 import {
