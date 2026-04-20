@@ -487,9 +487,17 @@ function DashboardTileCard({
 
 export default function QueryDashboard() {
   const { selectedWebsite } = useSelectedWebsite();
-  const { fetchDashboardQueries, seedDefaultQueries, updateQuery } = useQueries(selectedWebsite?.id);
+  const { queries: allQueries, fetchDashboardQueries, seedDefaultQueries, updateQuery } = useQueries(selectedWebsite?.id);
   const [tiles, setTiles] = useState<DashboardTile[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  // Replace dialog state. `tileIndex` is set when replacing an existing tile;
+  // `slot` is set when filling an empty cell.
+  const [replaceState, setReplaceState] = useState<{
+    open: boolean;
+    tileIndex: number | null;
+    slot: { col: number; row: number; w: number; h: number } | null;
+  }>({ open: false, tileIndex: null, slot: null });
 
   const runTile = useCallback(async (q: SavedQuery, idx: number, varValues?: Record<string, string>) => {
     const vars = parseVariables(q.sql);
