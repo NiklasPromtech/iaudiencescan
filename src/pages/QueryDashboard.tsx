@@ -644,6 +644,16 @@ export default function QueryDashboard() {
                           );
                           runTile(tile.query, idx, values);
                         }}
+                        onRename={async (newName) => {
+                          await updateQuery(tile.query.id, { name: newName });
+                          setTiles((prev) =>
+                            prev.map((t, i) => (i === idx ? { ...t, query: { ...t.query, name: newName } } : t))
+                          );
+                        }}
+                        onRemove={async () => {
+                          await updateQuery(tile.query.id, { on_dashboard: false });
+                          setTiles((prev) => prev.filter((_, i) => i !== idx));
+                        }}
                       />
                     </div>
                   );
