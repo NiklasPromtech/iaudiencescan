@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
 import { useQueries, SavedQuery } from "@/hooks/use-queries";
+import { ReplaceWithQueryDialog } from "@/components/queries/ReplaceWithQueryDialog";
+import { Replace, Plus } from "lucide-react";
 import { executeQuery, QueryExecuteResponse } from "@/lib/api";
 import { parseVariables, buildDefaults, substituteVariables, allVariablesSatisfied } from "@/lib/query-variables";
 import {
@@ -307,11 +309,13 @@ function DashboardTileCard({
   onRerun,
   onRename,
   onRemove,
+  onReplace,
 }: {
   tile: DashboardTile;
   onRerun?: (values: Record<string, string>) => void;
   onRename?: (newName: string) => Promise<void>;
   onRemove?: () => Promise<void>;
+  onReplace?: () => void;
 }) {
   const { query, loading, error, results } = tile;
   const chartHeight = (query.dash_h || 1) * 160;
@@ -400,6 +404,10 @@ function DashboardTileCard({
                 <Pencil className="h-3.5 w-3.5 mr-2" />
                 Rename
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onReplace?.()} className="cursor-pointer">
+                <Replace className="h-3.5 w-3.5 mr-2" />
+                Replace with query
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={async () => {
@@ -479,9 +487,17 @@ function DashboardTileCard({
 
 export default function QueryDashboard() {
   const { selectedWebsite } = useSelectedWebsite();
-  const { fetchDashboardQueries, seedDefaultQueries, updateQuery } = useQueries(selectedWebsite?.id);
+  const { queries: allQueries, fetchDashboardQueries, seedDefaultQueries, updateQuery } = useQueries(selectedWebsite?.id);
   const [tiles, setTiles] = useState<DashboardTile[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  // Replace dialog state. `tileIndex` is set when replacing an existing tile;
+  // `slot` is set when filling an empty cell.
+  const [replaceState, setReplaceState] = useState<{
+    open: boolean;
+    tileIndex: number | null;
+    slot: { col: number; row: number; w: number; h: number } | null;
+  }>({ open: false, tileIndex: null, slot: null });
 
   const runTile = useCallback(async (q: SavedQuery, idx: number, varValues?: Record<string, string>) => {
     const vars = parseVariables(q.sql);
@@ -553,6 +569,84 @@ export default function QueryDashboard() {
   useEffect(() => {
     loadAndRun();
   }, [loadAndRun]);
+
+  /** Replace tile at `tileIndex` OR pin a new tile into `slot` with the chosen query + display type. */
+  const handleReplaceConfirm = useCallback(
+    async (queryId: string, displayType: string) => {
+      const { tileIndex, slot } = replaceState;
+      const target = allQueries.find((q) => q.id === queryId);
+      if (!target) return;
+
+      try {
+        if (tileIndex != null) {
+          // Replacing an existing tile — preserve its grid position
+          const existing = tiles[tileIndex];
+          if (!existing) return;
+          const { dash_col, dash_row, dash_w, dash_h } = existing.query;
+
+          // 1. Demote the old tile from the dashboard
+          await updateQuery(existing.query.id, { on_dashboard: false });
+          // 2. Pin the new query into that slot
+          const isPie = displayType === "pie_chart";
+          const newW = isPie ? 1 : dash_w;
+          const newH = isPie ? 1 : dash_h;
+          await updateQuery(queryId, {
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col,
+            dash_row,
+            dash_w: newW,
+            dash_h: newH,
+          });
+
+          const updatedQuery: SavedQuery = {
+            ...target,
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col,
+            dash_row,
+            dash_w: newW,
+            dash_h: newH,
+          };
+          setTiles((prev) =>
+            prev.map((t, i) =>
+              i === tileIndex ? { query: updatedQuery, loading: true, error: null, results: null } : t
+            )
+          );
+          await runTile(updatedQuery, tileIndex);
+          toast.success("Tile replaced");
+        } else if (slot) {
+          const isPie = displayType === "pie_chart";
+          const newW = isPie ? 1 : slot.w;
+          const newH = isPie ? 1 : slot.h;
+          await updateQuery(queryId, {
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col: slot.col,
+            dash_row: slot.row,
+            dash_w: newW,
+            dash_h: newH,
+          });
+          const newQuery: SavedQuery = {
+            ...target,
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col: slot.col,
+            dash_row: slot.row,
+            dash_w: newW,
+            dash_h: newH,
+          };
+          const newIdx = tiles.length;
+          setTiles((prev) => [...prev, { query: newQuery, loading: true, error: null, results: null }]);
+          await runTile(newQuery, newIdx);
+          toast.success("Tile added");
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Failed to update dashboard");
+      }
+    },
+    [replaceState, allQueries, tiles, updateQuery, runTile]
+  );
 
   return (
     <DashboardLayout>
@@ -654,6 +748,9 @@ export default function QueryDashboard() {
                           await updateQuery(tile.query.id, { on_dashboard: false });
                           setTiles((prev) => prev.filter((_, i) => i !== idx));
                         }}
+                        onReplace={() =>
+                          setReplaceState({ open: true, tileIndex: idx, slot: null })
+                        }
                       />
                     </div>
                   );
@@ -682,22 +779,44 @@ export default function QueryDashboard() {
                       elements.push(
                         <div
                           key={`empty-${c}-${r}`}
-                          className="relative border border-dashed border-border/50 flex items-center justify-center group/cell"
+                          className="relative border border-dashed border-border/50 group/cell"
                           style={{
                             gridColumn: `${c} / span 1`,
                             gridRow: `${r} / span 1`,
                             height: 160 + 70,
                           }}
                         >
-                          <Link
-                            to={`/queries?new=1&col=${c}&row=${r}&w=1&h=1`}
-                            className="flex flex-col items-center justify-center gap-1.5 w-full h-full hover:bg-muted/30 transition-colors group"
-                          >
-                            <LayoutGrid className="h-4 w-4 text-muted-foreground/20 group-hover:text-primary/40 transition-colors" />
-                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 group-hover:text-primary/50 transition-colors">
-                              1 × 1
+                          <div className="flex flex-col items-center justify-center gap-2 w-full h-full">
+                            <LayoutGrid className="h-4 w-4 text-muted-foreground/20 group-hover/cell:text-primary/40 transition-colors" />
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30">
+                              1 × 1 · Empty
                             </span>
-                          </Link>
+                            <div className="flex items-center gap-1 opacity-60 group-hover/cell:opacity-100 transition-opacity">
+                              <Link
+                                to={`/queries?new=1&col=${c}&row=${r}&w=1&h=1`}
+                                className="font-mono text-[9px] uppercase tracking-widest border border-border px-2 py-1 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Create new query"
+                              >
+                                <Plus className="h-3 w-3" />
+                                New
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setReplaceState({
+                                    open: true,
+                                    tileIndex: null,
+                                    slot: { col: c, row: r, w: 1, h: 1 },
+                                  })
+                                }
+                                className="font-mono text-[9px] uppercase tracking-widest border border-border px-2 py-1 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Use existing query"
+                              >
+                                <Replace className="h-3 w-3" />
+                                Existing
+                              </button>
+                            </div>
+                          </div>
 
                           {/* Expand-right button — subtle arrow, visible on cell hover */}
                           {canMergeRight && (
@@ -731,6 +850,19 @@ export default function QueryDashboard() {
           )}
         </div>
       </div>
+
+      <ReplaceWithQueryDialog
+        open={replaceState.open}
+        onOpenChange={(open) =>
+          setReplaceState((prev) =>
+            open ? { ...prev, open } : { open: false, tileIndex: null, slot: null }
+          )
+        }
+        queries={allQueries}
+        excludeQueryIds={tiles.map((t) => t.query.id)}
+        title={replaceState.tileIndex != null ? "Replace tile" : "Add tile from existing query"}
+        onConfirm={handleReplaceConfirm}
+      />
     </DashboardLayout>
   );
 }
