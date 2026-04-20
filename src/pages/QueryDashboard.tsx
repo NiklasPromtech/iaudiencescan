@@ -302,7 +302,17 @@ function TilePieChart({ results, chartHeight }: { results: QueryExecuteResponse;
   );
 }
 
-function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (values: Record<string, string>) => void }) {
+function DashboardTileCard({
+  tile,
+  onRerun,
+  onRename,
+  onRemove,
+}: {
+  tile: DashboardTile;
+  onRerun?: (values: Record<string, string>) => void;
+  onRename?: (newName: string) => Promise<void>;
+  onRemove?: () => Promise<void>;
+}) {
   const { query, loading, error, results } = tile;
   const chartHeight = (query.dash_h || 1) * 160;
   const vars = parseVariables(query.sql);
@@ -310,19 +320,104 @@ function DashboardTileCard({ tile, onRerun }: { tile: DashboardTile; onRerun?: (
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
   const hasRequiredVars = vars.length > 0 && !allVariablesSatisfied(vars, defaults);
 
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState(query.name);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isRenaming) {
+      renameInputRef.current?.focus();
+      renameInputRef.current?.select();
+    }
+  }, [isRenaming]);
+
+  const commitRename = async () => {
+    const trimmed = nameDraft.trim();
+    if (!trimmed || trimmed === query.name) {
+      setIsRenaming(false);
+      setNameDraft(query.name);
+      return;
+    }
+    try {
+      await onRename?.(trimmed);
+      toast.success("Renamed");
+      setIsRenaming(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Rename failed");
+    }
+  };
+
   return (
     <div className="flex flex-col border border-border bg-card h-full">
-      <div className="px-4 py-3 flex items-center justify-between border-b border-border">
-        <span className="font-mono text-[10px] uppercase tracking-widest font-medium truncate text-foreground">
-          {query.name}
-        </span>
-        <Link
-          to={`/queries/${query.id}`}
-          className="text-muted-foreground hover:text-primary transition-colors shrink-0 ml-2"
-          title="Open in editor"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
+      <div className="px-4 py-3 flex items-center justify-between border-b border-border gap-2">
+        {isRenaming ? (
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            <Input
+              ref={renameInputRef}
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitRename();
+                if (e.key === "Escape") { setIsRenaming(false); setNameDraft(query.name); }
+              }}
+              className="h-6 rounded-none text-[10px] font-mono uppercase tracking-widest px-2"
+            />
+            <button onClick={commitRename} className="text-muted-foreground hover:text-primary p-0.5" title="Save">
+              <Check className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => { setIsRenaming(false); setNameDraft(query.name); }}
+              className="text-muted-foreground hover:text-destructive p-0.5"
+              title="Cancel"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <span className="font-mono text-[10px] uppercase tracking-widest font-medium truncate text-foreground">
+            {query.name}
+          </span>
+        )}
+
+        {!isRenaming && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="text-muted-foreground hover:text-primary transition-colors shrink-0 ml-2 p-0.5"
+                title="Tile actions"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-none font-mono text-[10px] uppercase tracking-widest min-w-[180px]">
+              <DropdownMenuItem asChild>
+                <Link to={`/queries/${query.id}`} className="flex items-center gap-2 cursor-pointer">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Open in editor
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { setNameDraft(query.name); setIsRenaming(true); }} className="cursor-pointer">
+                <Pencil className="h-3.5 w-3.5 mr-2" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => {
+                  try {
+                    await onRemove?.();
+                    toast.success("Removed from dashboard");
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Remove failed");
+                  }
+                }}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <EyeOff className="h-3.5 w-3.5 mr-2" />
+                Remove from dashboard
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Variable inputs for tiles with required (no-default) vars */}
