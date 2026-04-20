@@ -43,8 +43,11 @@ export function WebsiteSelector() {
       status: website.status,
     };
     selectWebsite(selected);
-    // Navigate to overview when switching websites
-    navigate("/overview");
+    // Stay on the current route after switching websites; only redirect from root.
+    const path = window.location.pathname;
+    if (path === "/" || path === "") {
+      navigate("/overview");
+    }
   };
 
   if (!selectedWebsite) {
