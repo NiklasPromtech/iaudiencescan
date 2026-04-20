@@ -570,6 +570,84 @@ export default function QueryDashboard() {
     loadAndRun();
   }, [loadAndRun]);
 
+  /** Replace tile at `tileIndex` OR pin a new tile into `slot` with the chosen query + display type. */
+  const handleReplaceConfirm = useCallback(
+    async (queryId: string, displayType: string) => {
+      const { tileIndex, slot } = replaceState;
+      const target = allQueries.find((q) => q.id === queryId);
+      if (!target) return;
+
+      try {
+        if (tileIndex != null) {
+          // Replacing an existing tile — preserve its grid position
+          const existing = tiles[tileIndex];
+          if (!existing) return;
+          const { dash_col, dash_row, dash_w, dash_h } = existing.query;
+
+          // 1. Demote the old tile from the dashboard
+          await updateQuery(existing.query.id, { on_dashboard: false });
+          // 2. Pin the new query into that slot
+          const isPie = displayType === "pie_chart";
+          const newW = isPie ? 1 : dash_w;
+          const newH = isPie ? 1 : dash_h;
+          await updateQuery(queryId, {
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col,
+            dash_row,
+            dash_w: newW,
+            dash_h: newH,
+          });
+
+          const updatedQuery: SavedQuery = {
+            ...target,
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col,
+            dash_row,
+            dash_w: newW,
+            dash_h: newH,
+          };
+          setTiles((prev) =>
+            prev.map((t, i) =>
+              i === tileIndex ? { query: updatedQuery, loading: true, error: null, results: null } : t
+            )
+          );
+          await runTile(updatedQuery, tileIndex);
+          toast.success("Tile replaced");
+        } else if (slot) {
+          const isPie = displayType === "pie_chart";
+          const newW = isPie ? 1 : slot.w;
+          const newH = isPie ? 1 : slot.h;
+          await updateQuery(queryId, {
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col: slot.col,
+            dash_row: slot.row,
+            dash_w: newW,
+            dash_h: newH,
+          });
+          const newQuery: SavedQuery = {
+            ...target,
+            on_dashboard: true,
+            display_type: displayType,
+            dash_col: slot.col,
+            dash_row: slot.row,
+            dash_w: newW,
+            dash_h: newH,
+          };
+          const newIdx = tiles.length;
+          setTiles((prev) => [...prev, { query: newQuery, loading: true, error: null, results: null }]);
+          await runTile(newQuery, newIdx);
+          toast.success("Tile added");
+        }
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Failed to update dashboard");
+      }
+    },
+    [replaceState, allQueries, tiles, updateQuery, runTile]
+  );
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full overflow-hidden">
