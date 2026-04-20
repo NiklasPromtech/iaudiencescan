@@ -748,6 +748,9 @@ export default function QueryDashboard() {
                           await updateQuery(tile.query.id, { on_dashboard: false });
                           setTiles((prev) => prev.filter((_, i) => i !== idx));
                         }}
+                        onReplace={() =>
+                          setReplaceState({ open: true, tileIndex: idx, slot: null })
+                        }
                       />
                     </div>
                   );
