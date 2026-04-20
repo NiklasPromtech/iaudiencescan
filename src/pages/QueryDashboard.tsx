@@ -315,15 +315,18 @@ function DashboardTileCard({
   onRename,
   onRemove,
   onReplace,
+  onChangeType,
 }: {
   tile: DashboardTile;
   onRerun?: (values: Record<string, string>) => void;
   onRename?: (newName: string) => Promise<void>;
   onRemove?: () => Promise<void>;
   onReplace?: () => void;
+  onChangeType?: (displayType: string) => Promise<void>;
 }) {
   const { query, loading, error, results } = tile;
   const chartHeight = (query.dash_h || 1) * 160;
+  const isSingleBlock = (query.dash_w || 1) === 1 && (query.dash_h || 1) === 1;
   const vars = parseVariables(query.sql);
   const defaults = buildDefaults(vars);
   const [varValues, setVarValues] = useState<Record<string, string>>(defaults);
