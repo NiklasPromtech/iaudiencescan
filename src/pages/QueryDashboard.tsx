@@ -309,11 +309,13 @@ function DashboardTileCard({
   onRerun,
   onRename,
   onRemove,
+  onReplace,
 }: {
   tile: DashboardTile;
   onRerun?: (values: Record<string, string>) => void;
   onRename?: (newName: string) => Promise<void>;
   onRemove?: () => Promise<void>;
+  onReplace?: () => void;
 }) {
   const { query, loading, error, results } = tile;
   const chartHeight = (query.dash_h || 1) * 160;
