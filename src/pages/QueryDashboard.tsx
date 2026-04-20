@@ -779,22 +779,44 @@ export default function QueryDashboard() {
                       elements.push(
                         <div
                           key={`empty-${c}-${r}`}
-                          className="relative border border-dashed border-border/50 flex items-center justify-center group/cell"
+                          className="relative border border-dashed border-border/50 group/cell"
                           style={{
                             gridColumn: `${c} / span 1`,
                             gridRow: `${r} / span 1`,
                             height: 160 + 70,
                           }}
                         >
-                          <Link
-                            to={`/queries?new=1&col=${c}&row=${r}&w=1&h=1`}
-                            className="flex flex-col items-center justify-center gap-1.5 w-full h-full hover:bg-muted/30 transition-colors group"
-                          >
-                            <LayoutGrid className="h-4 w-4 text-muted-foreground/20 group-hover:text-primary/40 transition-colors" />
-                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 group-hover:text-primary/50 transition-colors">
-                              1 × 1
+                          <div className="flex flex-col items-center justify-center gap-2 w-full h-full">
+                            <LayoutGrid className="h-4 w-4 text-muted-foreground/20 group-hover/cell:text-primary/40 transition-colors" />
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30">
+                              1 × 1 · Empty
                             </span>
-                          </Link>
+                            <div className="flex items-center gap-1 opacity-60 group-hover/cell:opacity-100 transition-opacity">
+                              <Link
+                                to={`/queries?new=1&col=${c}&row=${r}&w=1&h=1`}
+                                className="font-mono text-[9px] uppercase tracking-widest border border-border px-2 py-1 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Create new query"
+                              >
+                                <Plus className="h-3 w-3" />
+                                New
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setReplaceState({
+                                    open: true,
+                                    tileIndex: null,
+                                    slot: { col: c, row: r, w: 1, h: 1 },
+                                  })
+                                }
+                                className="font-mono text-[9px] uppercase tracking-widest border border-border px-2 py-1 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Use existing query"
+                              >
+                                <Replace className="h-3 w-3" />
+                                Existing
+                              </button>
+                            </div>
+                          </div>
 
                           {/* Expand-right button — subtle arrow, visible on cell hover */}
                           {canMergeRight && (
