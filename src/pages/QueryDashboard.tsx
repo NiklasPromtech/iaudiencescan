@@ -404,6 +404,10 @@ function DashboardTileCard({
                 <Pencil className="h-3.5 w-3.5 mr-2" />
                 Rename
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onReplace?.()} className="cursor-pointer">
+                <Replace className="h-3.5 w-3.5 mr-2" />
+                Replace with query
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={async () => {
