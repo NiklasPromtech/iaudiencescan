@@ -850,6 +850,19 @@ export default function QueryDashboard() {
           )}
         </div>
       </div>
+
+      <ReplaceWithQueryDialog
+        open={replaceState.open}
+        onOpenChange={(open) =>
+          setReplaceState((prev) =>
+            open ? { ...prev, open } : { open: false, tileIndex: null, slot: null }
+          )
+        }
+        queries={allQueries}
+        excludeQueryIds={tiles.map((t) => t.query.id)}
+        title={replaceState.tileIndex != null ? "Replace tile" : "Add tile from existing query"}
+        onConfirm={handleReplaceConfirm}
+      />
     </DashboardLayout>
   );
 }
