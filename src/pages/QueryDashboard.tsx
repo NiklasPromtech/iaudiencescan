@@ -378,9 +378,14 @@ function DashboardTileCard({
             </button>
           </div>
         ) : (
-          <span className="font-mono text-[10px] uppercase tracking-widest font-medium truncate text-foreground">
+          <button
+            type="button"
+            onClick={() => { setNameDraft(query.name); setIsRenaming(true); }}
+            title="Click to rename"
+            className="font-mono text-[10px] uppercase tracking-widest font-medium truncate text-foreground text-left hover:text-primary transition-colors min-w-0 flex-1"
+          >
             {query.name}
-          </span>
+          </button>
         )}
 
         {!isRenaming && (
