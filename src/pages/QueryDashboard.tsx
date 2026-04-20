@@ -479,7 +479,7 @@ function DashboardTileCard({
 
 export default function QueryDashboard() {
   const { selectedWebsite } = useSelectedWebsite();
-  const { fetchDashboardQueries, seedDefaultQueries } = useQueries(selectedWebsite?.id);
+  const { fetchDashboardQueries, seedDefaultQueries, updateQuery } = useQueries(selectedWebsite?.id);
   const [tiles, setTiles] = useState<DashboardTile[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
 
