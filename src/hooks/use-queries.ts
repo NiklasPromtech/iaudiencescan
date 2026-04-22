@@ -136,15 +136,6 @@ export function useQueries(websiteId?: string | null) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Check if any queries exist at all
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { count } = await (supabase as any)
-        .from("queries")
-        .select("id", { count: "exact", head: true })
-        .eq("website_id", websiteId);
-
-      if (count && count > 0) return [];
-
       // Fetch the canonical system templates (global, not tied to any website)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: templates, error: tplErr } = await (supabase as any)
@@ -155,29 +146,87 @@ export function useQueries(websiteId?: string | null) {
       if (tplErr) throw tplErr;
       if (!templates || templates.length === 0) return [];
 
-      const inserts = (templates as SavedQuery[]).map((tpl) => ({
-        name: tpl.name,
-        sql: tpl.sql,
-        display_type: tpl.display_type,
-        dash_col: tpl.dash_col,
-        dash_row: tpl.dash_row,
-        dash_w: tpl.dash_w,
-        dash_h: tpl.dash_h,
-        on_dashboard: true,
-        user_id: user.id,
-        website_id: websiteId,
-        is_system: false,
-        starred: false,
-      }));
-
+      // Check if user already has copies of these templates for this website
+      const templateNames = (templates as SavedQuery[]).map((t) => t.name);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error: err } = await (supabase as any)
+      const { data: existingCopies } = await (supabase as any)
         .from("queries")
-        .insert(inserts)
-        .select();
-      if (err) throw err;
-      const seeded = (data as SavedQuery[]) ?? [];
-      setQueries(seeded);
+        .select("*")
+        .eq("website_id", websiteId)
+        .in("name", templateNames);
+
+      const existingByName = new Map<string, SavedQuery>(
+        ((existingCopies as SavedQuery[]) ?? []).map((q) => [q.name, q])
+      );
+
+      // Re-pin existing copies that are off-dashboard
+      const toRepin = (templates as SavedQuery[])
+        .map((tpl) => {
+          const existing = existingByName.get(tpl.name);
+          if (!existing || existing.on_dashboard) return null;
+          return { existing, tpl };
+        })
+        .filter((x): x is { existing: SavedQuery; tpl: SavedQuery } => x !== null);
+
+      if (toRepin.length > 0) {
+        await Promise.all(
+          toRepin.map(({ existing, tpl }) =>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase as any)
+              .from("queries")
+              .update({
+                on_dashboard: true,
+                dash_col: tpl.dash_col,
+                dash_row: tpl.dash_row,
+                dash_w: tpl.dash_w,
+                dash_h: tpl.dash_h,
+                display_type: tpl.display_type,
+              })
+              .eq("id", existing.id)
+          )
+        );
+      }
+
+      // Insert new copies only for templates that have no existing copy
+      const inserts = (templates as SavedQuery[])
+        .filter((tpl) => !existingByName.has(tpl.name))
+        .map((tpl) => ({
+          name: tpl.name,
+          sql: tpl.sql,
+          display_type: tpl.display_type,
+          dash_col: tpl.dash_col,
+          dash_row: tpl.dash_row,
+          dash_w: tpl.dash_w,
+          dash_h: tpl.dash_h,
+          on_dashboard: true,
+          user_id: user.id,
+          website_id: websiteId,
+          is_system: false,
+          starred: false,
+        }));
+
+      if (inserts.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: err } = await (supabase as any)
+          .from("queries")
+          .insert(inserts);
+        if (err) throw err;
+      }
+
+      // Re-fetch the resulting dashboard queries
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: finalDash } = await (supabase as any)
+        .from("queries")
+        .select("*")
+        .eq("website_id", websiteId)
+        .eq("on_dashboard", true)
+        .order("updated_at", { ascending: false });
+      const seeded = (finalDash as SavedQuery[]) ?? [];
+      setQueries((prev) => {
+        const map = new Map(prev.map((q) => [q.id, q]));
+        seeded.forEach((q) => map.set(q.id, q));
+        return Array.from(map.values());
+      });
       return seeded;
     })().finally(() => {
       seedInFlight.delete(websiteId);
