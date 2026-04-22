@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -44,6 +45,7 @@ const botSignals = [
 const LandingPageV3 = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Header />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
