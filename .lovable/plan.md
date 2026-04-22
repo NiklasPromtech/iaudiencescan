@@ -1,24 +1,44 @@
 
 
-## Fix dashboard tile collision when resizing
+## Fix `seedDefaultQueries` to clone real templates instead of hardcoded SQL
 
 ### Problem
-On `/query-dashboard`, the "Add to dashboard" picker correctly grays out tiles already pinned, but the **resize controls (2W / 2H / 2W2H)** on an existing tile don't check whether the expanded footprint would overlap a neighbor. Result: two tiles end up occupying the same grid cell and stack on top of each other.
+`src/hooks/use-queries.ts` contains a hardcoded `SEED_QUERIES` array (7 entries with broken SQL like `wallet_connections`, `event_name`, `visit_count`). When a website has zero queries, `seedDefaultQueries()` inserts these hardcoded rows — NOT the 6 real `is_system = true` templates you authored in the database. That's why new websites get tiles with SQL you never wrote.
 
-### Approach
-Treat the dashboard grid as a 2D occupancy map. Before applying any resize, compute the cells the tile *would* occupy at the new width/height and reject the resize if any of those cells (other than the tile's own current cells) are taken.
+### Fix
+Replace the hardcoded seed list with a runtime clone of the actual `is_system = true` templates from the `queries` table.
 
-### Behavior changes
-1. **Disable resize buttons that would collide.** Each size button (1×1, 2×1, 1×2, 2×2) on a tile is greyed-out and non-clickable when expanding to that size would overlap another pinned tile or run off the grid's right edge.
-2. **Tooltip on disabled buttons**: `"Not enough space"` so the user understands why.
-3. **Defensive guard in the update handler**: even if a click slips through (race condition, stale state), the resize mutation re-checks collision and silently no-ops with a toast `"Tile would overlap another"`.
-4. No change to the "Add to dashboard" picker — it already correctly excludes pinned queries.
+### New behavior of `seedDefaultQueries(websiteId)`
+1. Check the website has zero queries (existing guard, unchanged).
+2. `SELECT * FROM queries WHERE is_system = true AND website_id IS NULL` to fetch the canonical templates.
+3. For each template, build an insert payload that:
+   - Copies: `name`, `sql`, `display_type`, `dash_col`, `dash_row`, `dash_w`, `dash_h`, `on_dashboard`
+   - Overrides: `user_id` = current user, `website_id` = current website, `is_system` = **false**, `starred` = false
+   - Drops: `id`, `created_at`, `updated_at` (let DB regenerate)
+4. Bulk-insert and return the new rows.
+5. If no templates exist (`is_system = true` set is empty), seed nothing and return `[]` — empty dashboard with empty state.
+
+### Side effects
+- Going forward, every new website gets exact copies of YOUR 6 working templates, owned by that website, editable/deletable like normal queries.
+- No more cross-website leakage via the `is_system.eq.true` OR-clause for seeded content (because the copies have `is_system = false`).
+- The existing `fetchDashboardQueries` OR-clause (`website_id.eq.X OR is_system.eq.true`) keeps working — but consider whether system templates should appear directly on every dashboard or only as templates to clone. **Recommendation:** keep the OR-clause as-is for now; you can decide later if templates should be picker-only.
+
+### Database cleanup (one migration)
+Delete the 14 contradictory rows created today (rows that are both `is_system = true` AND have a `website_id`):
+
+```sql
+DELETE FROM queries
+WHERE is_system = true
+  AND website_id IS NOT NULL;
+```
+
+This preserves your 6 real templates (`is_system = true`, `website_id IS NULL`) and removes the bad clones.
 
 ### Files to change
-- `src/pages/QueryDashboard.tsx` — add a `computeOccupancy(queries, excludeId)` helper, a `canFit(col, row, w, h, occupancy)` check, and pass per-tile `availableSizes` into the tile component.
-- `src/components/queries/DashboardTile.tsx` (or wherever the 2W / 2H / 2W2H buttons live — to be confirmed when implementing) — accept `availableSizes` prop and disable buttons accordingly with tooltip.
+- `src/hooks/use-queries.ts` — delete `SEED_QUERIES` constant; rewrite `seedDefaultQueries` to fetch + clone `is_system = true` rows.
+- `supabase/migrations/<new>.sql` — cleanup delete above.
 
-### Out of scope (per your direction)
-- Seed templates / `is_system` cleanup — you'll rebuild defaults yourself later.
-- Auto-reflow / auto-compact when a tile is removed.
+### Out of scope
+- Changing how `is_system` templates are surfaced in the UI (picker vs auto-show on dashboard).
+- Editing the templates themselves — you own those.
 
