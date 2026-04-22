@@ -21,7 +21,7 @@ export const GAComparison = () => {
           Beyond Google Analytics
         </p>
         <h2 className="font-bold text-3xl md:text-4xl text-center mb-12 text-foreground">
-          What we do that GA can't.
+          What we <span className="underline decoration-primary decoration-2 underline-offset-4">track</span> that GA can't.
         </h2>
         <div className="grid md:grid-cols-2 gap-5">
           {cards.map((c) => (
