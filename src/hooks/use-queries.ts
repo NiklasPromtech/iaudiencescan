@@ -30,6 +30,9 @@ export type QueryPatch = {
   dash_h?: number;
 };
 
+// Module-level guard to prevent concurrent seeding (e.g., React StrictMode double-effect)
+const seedInFlight = new Map<string, Promise<SavedQuery[]>>();
+
 export function useQueries(websiteId?: string | null) {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,52 +129,62 @@ export function useQueries(websiteId?: string | null) {
   /** Seed default dashboard queries if the user has none for this website. */
   const seedDefaultQueries = useCallback(async (): Promise<SavedQuery[]> => {
     if (!websiteId) return [];
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const existing = seedInFlight.get(websiteId);
+    if (existing) return existing;
 
-    // Check if any queries exist at all
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase as any)
-      .from("queries")
-      .select("id", { count: "exact", head: true })
-      .eq("website_id", websiteId);
+    const promise = (async (): Promise<SavedQuery[]> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
 
-    if (count && count > 0) return [];
+      // Check if any queries exist at all
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (supabase as any)
+        .from("queries")
+        .select("id", { count: "exact", head: true })
+        .eq("website_id", websiteId);
 
-    // Fetch the canonical system templates (global, not tied to any website)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: templates, error: tplErr } = await (supabase as any)
-      .from("queries")
-      .select("*")
-      .eq("is_system", true)
-      .is("website_id", null);
-    if (tplErr) throw tplErr;
-    if (!templates || templates.length === 0) return [];
+      if (count && count > 0) return [];
 
-    const inserts = (templates as SavedQuery[]).map((tpl) => ({
-      name: tpl.name,
-      sql: tpl.sql,
-      display_type: tpl.display_type,
-      dash_col: tpl.dash_col,
-      dash_row: tpl.dash_row,
-      dash_w: tpl.dash_w,
-      dash_h: tpl.dash_h,
-      on_dashboard: true,
-      user_id: user.id,
-      website_id: websiteId,
-      is_system: false,
-      starred: false,
-    }));
+      // Fetch the canonical system templates (global, not tied to any website)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: templates, error: tplErr } = await (supabase as any)
+        .from("queries")
+        .select("*")
+        .eq("is_system", true)
+        .is("website_id", null);
+      if (tplErr) throw tplErr;
+      if (!templates || templates.length === 0) return [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error: err } = await (supabase as any)
-      .from("queries")
-      .insert(inserts)
-      .select();
-    if (err) throw err;
-    const seeded = (data as SavedQuery[]) ?? [];
-    setQueries(seeded);
-    return seeded;
+      const inserts = (templates as SavedQuery[]).map((tpl) => ({
+        name: tpl.name,
+        sql: tpl.sql,
+        display_type: tpl.display_type,
+        dash_col: tpl.dash_col,
+        dash_row: tpl.dash_row,
+        dash_w: tpl.dash_w,
+        dash_h: tpl.dash_h,
+        on_dashboard: true,
+        user_id: user.id,
+        website_id: websiteId,
+        is_system: false,
+        starred: false,
+      }));
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: err } = await (supabase as any)
+        .from("queries")
+        .insert(inserts)
+        .select();
+      if (err) throw err;
+      const seeded = (data as SavedQuery[]) ?? [];
+      setQueries(seeded);
+      return seeded;
+    })().finally(() => {
+      seedInFlight.delete(websiteId);
+    });
+
+    seedInFlight.set(websiteId, promise);
+    return promise;
   }, [websiteId]);
 
   return {
