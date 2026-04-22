@@ -33,11 +33,8 @@ const pillars = [
 
 export const PillarsRow = () => {
   return (
-    <section className="py-16">
+    <section className="pt-8 pb-16">
       <div className="container mx-auto px-4 max-w-6xl">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground text-center mb-3">
-          What AudienceScan does
-        </p>
         <h2 className="font-bold text-3xl md:text-4xl text-center mb-12 text-foreground">
           <span className="underline decoration-primary decoration-2 underline-offset-4">Website analytics</span> for Web3. Three pillars. One tag.
         </h2>
