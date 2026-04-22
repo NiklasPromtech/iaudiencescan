@@ -1075,41 +1075,76 @@ export default function QueryEditor() {
                               );
                             })}
                           </div>
-                          {displayType !== "pie_chart" && (
-                            <div className="flex flex-col gap-1">
-                              <button
-                                onClick={() => {
-                                  if (dashW === 2) {
-                                    setDashW(1);
-                                    updateQuery(id, { dash_w: 1 });
-                                  } else {
-                                    setDashCol(1);
-                                    setDashW(2);
-                                    updateQuery(id, { dash_col: 1, dash_w: 2 });
-                                  }
-                                }}
-                                className={cn(
-                                  "font-mono text-[9px] px-1.5 py-0.5 border border-border transition-colors",
-                                  dashW === 2 ? "bg-primary text-primary-foreground" : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
-                                )}
-                              >
-                                2W
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const newH = dashH === 2 ? 1 : (dashRow <= 3 ? 2 : 1);
-                                  setDashH(newH);
-                                  updateQuery(id, { dash_h: newH });
-                                }}
-                                className={cn(
-                                  "font-mono text-[9px] px-1.5 py-0.5 border border-border transition-colors",
-                                  dashH === 2 ? "bg-primary text-primary-foreground" : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
-                                )}
-                              >
-                                2H
-                              </button>
-                            </div>
-                          )}
+                          {displayType !== "pie_chart" && (() => {
+                            // Check if expanding to 2W (col=1, w=2) at current row(s) would collide.
+                            // occupiedCells already excludes the current tile.
+                            const wouldCollide2W = (() => {
+                              if (dashW === 2) return false; // already 2W → button shrinks, always allowed
+                              for (let c = 1; c <= 2; c++) {
+                                for (let r = dashRow; r < dashRow + dashH; r++) {
+                                  if (occupiedCells.has(`${c},${r}`)) return true;
+                                }
+                              }
+                              return false;
+                            })();
+                            // Check if expanding to 2H at current col/row would collide or run off grid.
+                            const wouldCollide2H = (() => {
+                              if (dashH === 2) return false; // shrinking, always allowed
+                              if (dashRow > 3) return true; // off grid (max 4 rows)
+                              const newRow = dashRow + 1;
+                              for (let c = dashCol; c < dashCol + dashW; c++) {
+                                if (occupiedCells.has(`${c},${newRow}`)) return true;
+                              }
+                              return false;
+                            })();
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <button
+                                  disabled={wouldCollide2W}
+                                  title={wouldCollide2W ? "Not enough space" : undefined}
+                                  onClick={() => {
+                                    if (dashW === 2) {
+                                      setDashW(1);
+                                      updateQuery(id, { dash_w: 1 });
+                                    } else {
+                                      setDashCol(1);
+                                      setDashW(2);
+                                      updateQuery(id, { dash_col: 1, dash_w: 2 });
+                                    }
+                                  }}
+                                  className={cn(
+                                    "font-mono text-[9px] px-1.5 py-0.5 border border-border transition-colors",
+                                    dashW === 2
+                                      ? "bg-primary text-primary-foreground"
+                                      : wouldCollide2W
+                                        ? "bg-muted/10 text-muted-foreground/40 cursor-not-allowed"
+                                        : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                                  )}
+                                >
+                                  2W
+                                </button>
+                                <button
+                                  disabled={wouldCollide2H}
+                                  title={wouldCollide2H ? "Not enough space" : undefined}
+                                  onClick={() => {
+                                    const newH = dashH === 2 ? 1 : (dashRow <= 3 ? 2 : 1);
+                                    setDashH(newH);
+                                    updateQuery(id, { dash_h: newH });
+                                  }}
+                                  className={cn(
+                                    "font-mono text-[9px] px-1.5 py-0.5 border border-border transition-colors",
+                                    dashH === 2
+                                      ? "bg-primary text-primary-foreground"
+                                      : wouldCollide2H
+                                        ? "bg-muted/10 text-muted-foreground/40 cursor-not-allowed"
+                                        : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                                  )}
+                                >
+                                  2H
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
 
