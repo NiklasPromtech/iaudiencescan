@@ -138,11 +138,29 @@ export function useQueries(websiteId?: string | null) {
 
     if (count && count > 0) return [];
 
-    const inserts = SEED_QUERIES.map((sq) => ({
-      ...sq,
+    // Fetch the canonical system templates (global, not tied to any website)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: templates, error: tplErr } = await (supabase as any)
+      .from("queries")
+      .select("*")
+      .eq("is_system", true)
+      .is("website_id", null);
+    if (tplErr) throw tplErr;
+    if (!templates || templates.length === 0) return [];
+
+    const inserts = (templates as SavedQuery[]).map((tpl) => ({
+      name: tpl.name,
+      sql: tpl.sql,
+      display_type: tpl.display_type,
+      dash_col: tpl.dash_col,
+      dash_row: tpl.dash_row,
+      dash_w: tpl.dash_w,
+      dash_h: tpl.dash_h,
+      on_dashboard: tpl.on_dashboard,
       user_id: user.id,
       website_id: websiteId,
-      on_dashboard: true,
+      is_system: false,
+      starred: false,
     }));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
