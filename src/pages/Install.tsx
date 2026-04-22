@@ -325,7 +325,7 @@ const Install = () => {
                   tag_id: w.tag_id,
                   status: w.status,
                 });
-                navigate("/overview");
+                navigate("/query-dashboard");
               }}
               onArchive={handleArchive}
             />
