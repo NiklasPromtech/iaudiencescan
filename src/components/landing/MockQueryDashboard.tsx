@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 import img1 from "@/assets/build-dashboard-1.png";
 import img2 from "@/assets/build-dashboard-2.png";
 import img3 from "@/assets/build-dashboard-3.png";
@@ -48,7 +48,7 @@ export const MockQueryDashboard = ({ compact = false }: Props) => {
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-6xl p-0 overflow-hidden border-border">
-          <VisuallyHidden><DialogTitle>Build your own dashboard</DialogTitle></VisuallyHidden>
+          <DialogTitle className="sr-only">Build your own dashboard</DialogTitle>
           <Slideshow className="relative w-full bg-card aspect-[1920/1516]" />
         </DialogContent>
       </Dialog>

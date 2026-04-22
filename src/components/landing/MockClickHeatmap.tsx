@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 import img from "@/assets/extension-click-view.png";
 
 interface Props {
@@ -28,7 +28,7 @@ export const MockClickHeatmap = ({ compact = false }: Props) => {
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-6xl p-0 overflow-hidden border-border">
-          <VisuallyHidden><DialogTitle>See where people click</DialogTitle></VisuallyHidden>
+          <DialogTitle className="sr-only">See where people click</DialogTitle>
           <img
             src={img}
             alt="Browser extension showing click counts on a live page"

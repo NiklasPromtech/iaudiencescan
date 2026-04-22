@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+
 import img from "@/assets/telegram-chat-view.png";
 
 interface Props {
@@ -28,7 +28,7 @@ export const MockTelegramChat = ({ compact = false }: Props) => {
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-6xl p-0 overflow-hidden border-border">
-          <VisuallyHidden><DialogTitle>Ask in Telegram</DialogTitle></VisuallyHidden>
+          <DialogTitle className="sr-only">Ask in Telegram</DialogTitle>
           <img
             src={img}
             alt="Telegram chat with AudienceScan AI Assistant"
