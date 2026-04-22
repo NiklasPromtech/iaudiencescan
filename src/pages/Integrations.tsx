@@ -1,12 +1,13 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Plus, ShieldCheck, Copy, Terminal, Key, Bot, Chrome, ExternalLink, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, ShieldCheck, Copy, Terminal, Key, Bot, Chrome, ExternalLink, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateApiKeyDialog } from "@/components/settings/CreateApiKeyDialog";
 import { ApiKeyList } from "@/components/settings/ApiKeyList";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { downloadExtension } from "@/lib/download-extension";
 import { toast } from "sonner";
 
 const INFO_ENDPOINT = "https://cdn.audiencescan.io/auth/info";
@@ -28,6 +29,29 @@ const Integrations = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [expanded, setExpanded] = useState<Section>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  // Auto-expand extension card when arriving via #extension hash
+  useEffect(() => {
+    if (window.location.hash === "#extension") {
+      setExpanded("extension");
+      setTimeout(() => {
+        document.getElementById("extension")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, []);
+
+  const handleDownloadExtension = async () => {
+    setDownloading(true);
+    try {
+      await downloadExtension();
+      toast.success("Extension downloaded — unzip and follow the steps below");
+    } catch (err) {
+      toast.error("Download failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const copyPrompt = () => {
     navigator.clipboard.writeText(buildPrompt());
