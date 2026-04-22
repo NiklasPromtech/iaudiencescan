@@ -17,12 +17,7 @@ const Header = () => {
           <span className="font-semibold text-foreground text-sm tracking-tight">AudienceScan</span>
         </Link>
 
-        {/* Center nav links */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/how-it-works" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
-            How It Works
-          </Link>
-        </div>
+        {/* Center nav links removed — navigation lives below the pillars */}
 
         {/* Right: auth buttons */}
         <div className="flex items-center gap-3">
