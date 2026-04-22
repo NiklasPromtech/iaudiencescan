@@ -1,44 +1,35 @@
 
 
-## Fix `seedDefaultQueries` to clone real templates instead of hardcoded SQL
+## Fix seeded queries not appearing on dashboard after navigation
 
 ### Problem
-`src/hooks/use-queries.ts` contains a hardcoded `SEED_QUERIES` array (7 entries with broken SQL like `wallet_connections`, `event_name`, `visit_count`). When a website has zero queries, `seedDefaultQueries()` inserts these hardcoded rows — NOT the 6 real `is_system = true` templates you authored in the database. That's why new websites get tiles with SQL you never wrote.
+When `seedDefaultQueries()` clones the `is_system = true` templates, it copies `on_dashboard` from the template — but several templates have `on_dashboard = false`. Result: user lands on dashboard, sees the system templates rendered (via the `is_system.eq.true` OR-clause in `fetchDashboardQueries`), navigates to Queries and back, and the dashboard is now empty because their owned copies aren't pinned.
+
+On top of that, the OR-clause itself causes the "ghost templates" effect — the dashboard is showing global templates, not the user's own seeded copies.
 
 ### Fix
-Replace the hardcoded seed list with a runtime clone of the actual `is_system = true` templates from the `queries` table.
 
-### New behavior of `seedDefaultQueries(websiteId)`
-1. Check the website has zero queries (existing guard, unchanged).
-2. `SELECT * FROM queries WHERE is_system = true AND website_id IS NULL` to fetch the canonical templates.
-3. For each template, build an insert payload that:
-   - Copies: `name`, `sql`, `display_type`, `dash_col`, `dash_row`, `dash_w`, `dash_h`, `on_dashboard`
-   - Overrides: `user_id` = current user, `website_id` = current website, `is_system` = **false**, `starred` = false
-   - Drops: `id`, `created_at`, `updated_at` (let DB regenerate)
-4. Bulk-insert and return the new rows.
-5. If no templates exist (`is_system = true` set is empty), seed nothing and return `[]` — empty dashboard with empty state.
+**1. `src/hooks/use-queries.ts` — `seedDefaultQueries`**
+- When cloning each template, force `on_dashboard: true` (override the template's value) so every seeded copy is immediately pinned to the new website's dashboard.
+- Everything else stays the same: `is_system: false`, `starred: false`, fresh `user_id` + `website_id`.
 
-### Side effects
-- Going forward, every new website gets exact copies of YOUR 6 working templates, owned by that website, editable/deletable like normal queries.
-- No more cross-website leakage via the `is_system.eq.true` OR-clause for seeded content (because the copies have `is_system = false`).
-- The existing `fetchDashboardQueries` OR-clause (`website_id.eq.X OR is_system.eq.true`) keeps working — but consider whether system templates should appear directly on every dashboard or only as templates to clone. **Recommendation:** keep the OR-clause as-is for now; you can decide later if templates should be picker-only.
+**2. `src/hooks/use-queries.ts` — `fetchDashboardQueries`**
+- Remove `is_system.eq.true` from the OR-clause. Dashboard tiles should be **only** the user's own queries for this website (`website_id.eq.${websiteId}`). System templates are pure templates — they should never render directly on a dashboard, only get cloned via the seeder or a future "Add from template" picker.
+- This eliminates the "tiles appear then vanish" flicker and the cross-website leakage permanently.
 
-### Database cleanup (one migration)
-Delete the 14 contradictory rows created today (rows that are both `is_system = true` AND have a `website_id`):
+**3. `src/hooks/use-queries.ts` — `fetchQueries` (list view)**
+- Keep the OR-clause here so the Queries page still shows system templates as starting points the user can clone manually. (No change — leave as-is.)
 
-```sql
-DELETE FROM queries
-WHERE is_system = true
-  AND website_id IS NOT NULL;
-```
-
-This preserves your 6 real templates (`is_system = true`, `website_id IS NULL`) and removes the bad clones.
+### Resulting flow
+- New website → seeder clones the 6 templates with `on_dashboard = true`, `is_system = false`, owned by the website.
+- Dashboard query: `website_id = X` only → shows the 6 seeded copies.
+- User edits/deletes one → it stays edited/deleted because they own it.
+- Navigating away and back → same 6 owned copies render, no flicker, no disappearing tiles.
 
 ### Files to change
-- `src/hooks/use-queries.ts` — delete `SEED_QUERIES` constant; rewrite `seedDefaultQueries` to fetch + clone `is_system = true` rows.
-- `supabase/migrations/<new>.sql` — cleanup delete above.
+- `src/hooks/use-queries.ts` — two small edits: force `on_dashboard: true` in the seed clone payload; drop `is_system.eq.true` from `fetchDashboardQueries` OR-clause.
 
 ### Out of scope
-- Changing how `is_system` templates are surfaced in the UI (picker vs auto-show on dashboard).
-- Editing the templates themselves — you own those.
+- A "Start from template" picker in the dashboard (can be added later if you want users to re-pull templates after deleting copies).
+- Touching the Queries list view behavior.
 
