@@ -51,7 +51,7 @@ export const PillarsRow = () => {
                   </span>
                 </div>
                 <h3 className="font-semibold text-lg text-foreground mb-2">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed min-h-[2.75rem]">{p.body}</p>
               </div>
               <div className="flex-1 bg-foreground/[0.02] border-t border-border">
                 {p.visual}
