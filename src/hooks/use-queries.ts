@@ -30,79 +30,6 @@ export type QueryPatch = {
   dash_h?: number;
 };
 
-const SEED_QUERIES = [
-  {
-    name: "Pageviews (last 14 days)",
-    sql: `SELECT DATE(created_at) AS day, COUNT(*) AS views\nFROM pageviews\nWHERE DATE(created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL {{days_back, "14"}} DAY)\nGROUP BY day\nORDER BY day`,
-    display_type: "bar_chart",
-    dash_col: 1,
-    dash_row: 1,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Top Referrers",
-    sql: `SELECT referrer, COUNT(*) AS visits\nFROM pageviews\nWHERE referrer IS NOT NULL AND referrer != ''\nGROUP BY referrer\nORDER BY visits DESC\nLIMIT {{limit, "20"}}`,
-    display_type: "table",
-    dash_col: 2,
-    dash_row: 1,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Wallet Connections by Day",
-    sql: `SELECT DATE(created_at) AS day, COUNT(*) AS connections\nFROM wallet_connections\nWHERE DATE(created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL {{days_back, "14"}} DAY)\nGROUP BY day\nORDER BY day`,
-    display_type: "line_chart",
-    dash_col: 1,
-    dash_row: 2,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Top Events",
-    sql: `SELECT event_name, COUNT(*) AS occurrences\nFROM events\nGROUP BY event_name\nORDER BY occurrences DESC\nLIMIT {{limit, "20"}}`,
-    display_type: "table",
-    dash_col: 2,
-    dash_row: 2,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Wallet List",
-    sql: `SELECT wallet_id, type, first_seen, last_seen, visit_count\nFROM wallets\nORDER BY last_seen DESC\nLIMIT {{limit, "50"}}`,
-    display_type: "table",
-    dash_col: 1,
-    dash_row: 3,
-    dash_w: 2,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Top Wallet Balances",
-    sql: `SELECT wallet_id, total_balance_usd, chains\nFROM wallet_balances\nWHERE total_balance_usd > 0\nORDER BY total_balance_usd DESC\nLIMIT {{limit, "20"}}`,
-    display_type: "table",
-    dash_col: 1,
-    dash_row: 4,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-  {
-    name: "Wallets by Chain",
-    sql: `SELECT chain, COUNT(*) AS wallets\nFROM wallet_balances\nGROUP BY chain\nORDER BY wallets DESC`,
-    display_type: "pie_chart",
-    dash_col: 2,
-    dash_row: 4,
-    dash_w: 1,
-    dash_h: 1,
-    is_system: true,
-  },
-];
-
 export function useQueries(websiteId?: string | null) {
   const [queries, setQueries] = useState<SavedQuery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,11 +138,29 @@ export function useQueries(websiteId?: string | null) {
 
     if (count && count > 0) return [];
 
-    const inserts = SEED_QUERIES.map((sq) => ({
-      ...sq,
+    // Fetch the canonical system templates (global, not tied to any website)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: templates, error: tplErr } = await (supabase as any)
+      .from("queries")
+      .select("*")
+      .eq("is_system", true)
+      .is("website_id", null);
+    if (tplErr) throw tplErr;
+    if (!templates || templates.length === 0) return [];
+
+    const inserts = (templates as SavedQuery[]).map((tpl) => ({
+      name: tpl.name,
+      sql: tpl.sql,
+      display_type: tpl.display_type,
+      dash_col: tpl.dash_col,
+      dash_row: tpl.dash_row,
+      dash_w: tpl.dash_w,
+      dash_h: tpl.dash_h,
+      on_dashboard: tpl.on_dashboard,
       user_id: user.id,
       website_id: websiteId,
-      on_dashboard: true,
+      is_system: false,
+      starred: false,
     }));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
