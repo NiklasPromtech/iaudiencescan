@@ -45,6 +45,26 @@ const botSignals = [
 ];
 
 const LandingPageV3 = () => {
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active) return;
+      if (session) {
+        navigate("/query-dashboard", { replace: true });
+      } else {
+        setChecking(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  if (checking) return null;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
