@@ -876,26 +876,70 @@ export default function QueryDashboard() {
                             </div>
                           </div>
 
-                          {/* Expand-right button — subtle arrow, visible on cell hover */}
+                          {/* Expand-right merge zone — New + Existing */}
                           {canMergeRight && (
-                            <Link
-                              to={`/queries?new=1&col=1&row=${r}&w=2&h=1`}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/cell:opacity-100 p-1.5 hover:bg-primary/10 transition-all"
+                            <div
+                              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/cell:opacity-100 transition-opacity flex flex-col items-center gap-1 bg-background/90 border border-border p-1"
                               title="Create full-width tile"
                             >
-                              <ChevronsRight className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
-                            </Link>
+                              <ChevronsRight className="h-3 w-3 text-primary" />
+                              <Link
+                                to={`/queries?new=1&col=1&row=${r}&w=2&h=1`}
+                                className="font-mono text-[8px] uppercase tracking-widest border border-border px-1.5 py-0.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Create new full-width tile"
+                              >
+                                <Plus className="h-2.5 w-2.5" />
+                                New
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setReplaceState({
+                                    open: true,
+                                    tileIndex: null,
+                                    slot: { col: 1, row: r, w: 2, h: 1 },
+                                  })
+                                }
+                                className="font-mono text-[8px] uppercase tracking-widest border border-border px-1.5 py-0.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Use existing query as full-width tile"
+                              >
+                                <Replace className="h-2.5 w-2.5" />
+                                Existing
+                              </button>
+                            </div>
                           )}
 
-                          {/* Expand-down button — subtle arrow, visible on cell hover */}
+                          {/* Expand-down merge zone — New + Existing */}
                           {canMergeDown && (
-                            <Link
-                              to={`/queries?new=1&col=${c}&row=${r}&w=1&h=2`}
-                              className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover/cell:opacity-100 p-1.5 hover:bg-primary/10 transition-all"
+                            <div
+                              className="absolute bottom-1 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover/cell:opacity-100 transition-opacity flex items-center gap-1 bg-background/90 border border-border p-1"
                               title="Create tall tile"
                             >
-                              <ChevronsDown className="h-3.5 w-3.5 text-muted-foreground/40 hover:text-primary transition-colors" />
-                            </Link>
+                              <ChevronsDown className="h-3 w-3 text-primary" />
+                              <Link
+                                to={`/queries?new=1&col=${c}&row=${r}&w=1&h=2`}
+                                className="font-mono text-[8px] uppercase tracking-widest border border-border px-1.5 py-0.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Create new tall tile"
+                              >
+                                <Plus className="h-2.5 w-2.5" />
+                                New
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setReplaceState({
+                                    open: true,
+                                    tileIndex: null,
+                                    slot: { col: c, row: r, w: 1, h: 2 },
+                                  })
+                                }
+                                className="font-mono text-[8px] uppercase tracking-widest border border-border px-1.5 py-0.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors flex items-center gap-1"
+                                title="Use existing query as tall tile"
+                              >
+                                <Replace className="h-2.5 w-2.5" />
+                                Existing
+                              </button>
+                            </div>
                           )}
                         </div>
                       );
