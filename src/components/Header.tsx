@@ -22,17 +22,6 @@ const Header = () => {
           <Link to="/how-it-works" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
             How It Works
           </Link>
-          <Link to="/resources" className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
-            Resources
-          </Link>
-          <a
-            href="https://calendly.com/niklas-audiencescan/audiencescan-demo"
-            target="_blank"
-            rel="nofollow noopener noreferrer"
-            className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Demo
-          </a>
         </div>
 
         {/* Right: auth buttons */}
