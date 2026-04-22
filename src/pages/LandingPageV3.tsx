@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TrendingUp as TrendUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
-  Eye, Wallet, BarChart3, Shield, Bot, TrendingUp, DollarSign, Activity,
-  Layers, Search, Megaphone, Check, X as XIcon,
-  ArrowRight, Zap, Clock, CreditCard, Users, Target, Database, Code2
+  Shield, Check, X as XIcon,
+  ArrowRight, Clock, CreditCard, Target, Search,
 } from "lucide-react";
 import { InvestmentGradeBadge } from "@/components/overview/InvestmentGrade";
 import { MockDailyChart } from "@/components/landing/MockDailyChart";
