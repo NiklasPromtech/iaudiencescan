@@ -4,25 +4,8 @@ import telegramLogo from "@/assets/telegram-logo.png";
 
 const sections = [
   {
-    title: "Product",
-    links: [
-      { label: "How It Works", href: "/how-it-works" },
-      { label: "Resources", href: "/resources" },
-      { label: "Case Studies", href: "/case-studies" },
-    ],
-  },
-  {
-    title: "Learn",
-    links: [
-      { label: "Blog", href: "/blog" },
-      { label: "FAQ", href: "/faq" },
-      { label: "Book a Demo", href: "https://calendly.com/niklas-audiencescan/audiencescan-demo" },
-    ],
-  },
-  {
     title: "Company",
     links: [
-      { label: "Get Started", href: "/auth" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Support", href: "mailto:support@audiencescan.io" },
     ],
@@ -33,7 +16,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-border py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-5 gap-10">
+        <div className="grid md:grid-cols-3 gap-10">
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
