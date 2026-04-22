@@ -721,43 +721,6 @@ export default function QueryDashboard() {
                 </div>
               ))}
             </div>
-          ) : tiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-6 text-center max-w-lg mx-auto">
-              <LayoutGrid className="h-10 w-10 text-muted-foreground/20" />
-              <div>
-                <p className="font-mono text-sm text-foreground font-semibold uppercase tracking-widest">
-                  Your dashboard is empty
-                </p>
-                <p className="font-mono text-[10px] text-muted-foreground mt-2 leading-relaxed">
-                  Pin queries to your dashboard to track what matters. Start with one of the default queries below, or create your own from scratch.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-2 w-full">
-                {[
-                  { label: "Daily Pageviews", desc: "Traffic trends over the last 14 days" },
-                  { label: "Visitor Wallet Breakdown", desc: "Total vs detected vs connected" },
-                  { label: "Human vs Bot Traffic", desc: "See how much traffic is real" },
-                  { label: "Top Referrers", desc: "Where your visitors come from" },
-                ].map((card) => (
-                  <Link
-                    key={card.label}
-                    to="/queries"
-                    className="border border-border hover:border-primary/40 p-3 text-left transition-colors group"
-                  >
-                    <p className="font-mono text-[10px] uppercase tracking-widest font-medium text-foreground group-hover:text-primary transition-colors">
-                      {card.label}
-                    </p>
-                    <p className="font-mono text-[9px] text-muted-foreground mt-1">{card.desc}</p>
-                  </Link>
-                ))}
-              </div>
-              <Link
-                to="/queries"
-                className="font-mono text-[10px] text-primary hover:underline uppercase tracking-widest"
-              >
-                Browse all queries →
-              </Link>
-            </div>
           ) : (
             <>
               <div
