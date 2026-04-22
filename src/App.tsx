@@ -94,6 +94,7 @@ const App = () => (
             <Route path="/blog/what-am-i-looking-at" element={<BlogPostWhatAmILookingAt />} />
             <Route path="/blog/founders-letter" element={<BlogPostFoundersLetter />} />
             <Route path="/sd-terms" element={<SDTerms />} />
+            <Route path="/sdterms" element={<SDTerms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/sitemap.xml" element={<Sitemap />} />
             <Route path="/auth" element={<Auth />} />
