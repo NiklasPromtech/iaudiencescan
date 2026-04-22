@@ -42,33 +42,6 @@ const botSignals = [
   { label: "Render engine", value: "Unknown", bad: true },
 ];
 
-const outcomeCards = [
-  {
-    icon: Shield,
-    title: "Stop paying for bots",
-    desc: "See exactly which campaigns brought bots. Block them. Claim back your budget — or take it to your supplier.",
-    stat: "Avg 23% bot rate detected",
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-  },
-  {
-    icon: Target,
-    title: "Know your real CPA",
-    desc: "Attach spend to UTMs. Know the cost per real wallet connected — not just the cost per click.",
-    stat: "CPA visible within 48h of install",
-    color: "text-primary",
-    bg: "bg-primary/10",
-  },
-  {
-    icon: Search,
-    title: "Find your next buyers",
-    desc: "Run a scan. Get X accounts, Telegram groups, and subreddits your holders already follow — ready to target.",
-    stat: "Avg 12 communities found per scan",
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-  },
-];
-
 const LandingPageV3 = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
