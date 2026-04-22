@@ -49,6 +49,9 @@ const DataExplorer = lazy(() => import("./pages/DataExplorer"));
 const SDTerms = lazy(() => import("./pages/SDTerms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Sitemap = lazy(() => import("./pages/Sitemap"));
+const HowDashboard = lazy(() => import("./pages/HowDashboard"));
+const HowExtension = lazy(() => import("./pages/HowExtension"));
+const HowTelegram = lazy(() => import("./pages/HowTelegram"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PageLoader = () => (
@@ -80,6 +83,9 @@ const App = () => (
             <Route path="/" element={<LandingPageV3 />} />
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/how/dashboard" element={<HowDashboard />} />
+            <Route path="/how/extension" element={<HowExtension />} />
+            <Route path="/how/telegram" element={<HowTelegram />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/blog" element={<Blog />} />
