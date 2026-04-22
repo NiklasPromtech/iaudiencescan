@@ -1,4 +1,4 @@
-import { Bot, Wallet } from "lucide-react";
+import { Bot, Wallet, MousePointerClick } from "lucide-react";
 
 const cards = [
   {
@@ -10,6 +10,11 @@ const cards = [
     icon: Wallet,
     title: "Wallet enrichment",
     body: "When an EVM wallet connects, we capture the address and enrich it with token holdings + USD value. GA shows you a session — we show you a buyer.",
+  },
+  {
+    icon: MousePointerClick,
+    title: "Click text tracking",
+    body: "We capture the exact text people click — every button, link, and CTA. GA tells you a page was viewed; we tell you which words actually got the click.",
   },
 ];
 
@@ -23,7 +28,7 @@ export const GAComparison = () => {
         <h2 className="font-bold text-3xl md:text-4xl text-center mb-12 text-foreground">
           What we <span className="underline decoration-primary decoration-2 underline-offset-4">track</span> that GA can't.
         </h2>
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-3 gap-5">
           {cards.map((c) => (
             <div key={c.title} className="border border-border bg-card p-6">
               <div className="w-10 h-10 border border-primary/30 flex items-center justify-center mb-4">
