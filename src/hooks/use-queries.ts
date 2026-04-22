@@ -116,7 +116,7 @@ export function useQueries(websiteId?: string | null) {
     const { data, error: err } = await (supabase as any)
       .from("queries")
       .select("*")
-      .or(`website_id.eq.${websiteId},is_system.eq.true`)
+      .eq("website_id", websiteId)
       .eq("on_dashboard", true)
       .order("updated_at", { ascending: false });
     if (err) throw err;
@@ -156,7 +156,7 @@ export function useQueries(websiteId?: string | null) {
       dash_row: tpl.dash_row,
       dash_w: tpl.dash_w,
       dash_h: tpl.dash_h,
-      on_dashboard: tpl.on_dashboard,
+      on_dashboard: true,
       user_id: user.id,
       website_id: websiteId,
       is_system: false,
