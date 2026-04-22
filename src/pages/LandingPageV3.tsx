@@ -1,22 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { TrendingUp as TrendUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  Shield, Check, X as XIcon,
-  ArrowRight, Clock, CreditCard, Target, Search,
-} from "lucide-react";
-import { InvestmentGradeBadge } from "@/components/overview/InvestmentGrade";
-import { MockDailyChart } from "@/components/landing/MockDailyChart";
-import { MockHolderTrend } from "@/components/landing/MockHolderTrend";
+import { Check, ArrowRight, Clock, CreditCard } from "lucide-react";
 import { MockBotSummary } from "@/components/landing/MockBotSummary";
-import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
 import { PillarsRow } from "@/components/landing/PillarsRow";
 import { GAComparison } from "@/components/landing/GAComparison";
-
-import { DashboardFrame } from "@/components/landing/DashboardFrame";
-import { mockDimensionRows } from "@/components/landing/mock-data";
 
 import bitmex from "@/assets/client-logos/bitmex.png";
 import flare from "@/assets/client-logos/flare.png";
