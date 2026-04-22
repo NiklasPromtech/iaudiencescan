@@ -19,13 +19,13 @@ export const MockQueryDashboard = ({ compact = false }: Props) => {
   }, []);
 
   return (
-    <div className="relative w-full border border-border bg-card overflow-hidden aspect-[4/3]">
+    <div className="relative w-full border border-border bg-card overflow-hidden aspect-[1920/1516]">
       {frames.map((src, i) => (
         <img
           key={src}
           src={src}
           alt={`Build dashboard step ${i + 1}`}
-          className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
           style={{ opacity: i === index ? 1 : 0 }}
           loading="lazy"
         />
