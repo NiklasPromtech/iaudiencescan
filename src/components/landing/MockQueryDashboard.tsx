@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import img1 from "@/assets/build-dashboard-1.png";
 import img2 from "@/assets/build-dashboard-2.png";
 import img3 from "@/assets/build-dashboard-3.png";
@@ -10,16 +12,14 @@ interface Props {
   compact?: boolean;
 }
 
-export const MockQueryDashboard = ({ compact = false }: Props) => {
+const Slideshow = ({ className }: { className?: string }) => {
   const [index, setIndex] = useState(0);
-
   useEffect(() => {
     const id = setInterval(() => setIndex((i) => (i + 1) % frames.length), 1800);
     return () => clearInterval(id);
   }, []);
-
   return (
-    <div className="relative w-full border border-border bg-card overflow-hidden aspect-[1920/1516]">
+    <div className={className}>
       {frames.map((src, i) => (
         <img
           key={src}
@@ -31,5 +31,27 @@ export const MockQueryDashboard = ({ compact = false }: Props) => {
         />
       ))}
     </div>
+  );
+};
+
+export const MockQueryDashboard = ({ compact = false }: Props) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="block w-full cursor-zoom-in"
+        aria-label="View full Build dashboard preview"
+      >
+        <Slideshow className="relative w-full border border-border bg-card overflow-hidden aspect-[1920/1516]" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-6xl p-0 overflow-hidden border-border">
+          <VisuallyHidden><DialogTitle>Build your own dashboard</DialogTitle></VisuallyHidden>
+          <Slideshow className="relative w-full bg-card aspect-[1920/1516]" />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
