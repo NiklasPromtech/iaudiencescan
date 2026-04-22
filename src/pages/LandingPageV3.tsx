@@ -1,25 +1,22 @@
-import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TrendingUp as TrendUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
-  Eye, Wallet, BarChart3, Shield, Bot, TrendingUp, DollarSign, Activity,
-  Layers, Search, Megaphone, Check, X as XIcon,
-  ArrowRight, Zap, Clock, CreditCard, Users, Target, Database, Code2
+  Shield, Check, X as XIcon,
+  ArrowRight, Clock, CreditCard, Target, Search,
 } from "lucide-react";
 import { InvestmentGradeBadge } from "@/components/overview/InvestmentGrade";
 import { MockDailyChart } from "@/components/landing/MockDailyChart";
 import { MockHolderTrend } from "@/components/landing/MockHolderTrend";
 import { MockBotSummary } from "@/components/landing/MockBotSummary";
 import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
+import { PillarsRow } from "@/components/landing/PillarsRow";
+import { GAComparison } from "@/components/landing/GAComparison";
 
 import { DashboardFrame } from "@/components/landing/DashboardFrame";
-import {
-  mockScorecard, mockDimensionRows, mockCostRows,
-} from "@/components/landing/mock-data";
+import { mockDimensionRows } from "@/components/landing/mock-data";
 
 import bitmex from "@/assets/client-logos/bitmex.png";
 import flare from "@/assets/client-logos/flare.png";
@@ -83,29 +80,7 @@ const outcomeCards = [
   },
 ];
 
-const heroMessages = [
-  { text: "Stop paying for bot traffic.", className: "text-foreground" },
-  { text: "Start reaching real buyers.", className: "text-primary" },
-  { text: "Optimise to wallet balance.", className: "text-foreground" },
-  { text: "Partner with the right tokens.", className: "text-primary" },
-  { text: "Optimise to token holders.", className: "text-foreground" },
-];
-
 const LandingPageV3 = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [phase, setPhase] = useState<"in" | "out">("in");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPhase("out");
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % heroMessages.length);
-        setPhase("in");
-      }, 500);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -113,18 +88,12 @@ const LandingPageV3 = () => {
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-16">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
-            <span className="block relative overflow-hidden" style={{ height: "2.4em" }}>
-              <span
-                className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[currentIndex].className} ${phase === "in" ? "opacity-100" : "opacity-0"}`}
-              >
-                {heroMessages[currentIndex].text}
-              </span>
-            </span>
+            Web3 analytics that respects your time.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            The only analytics tool built for Web3 teams — free to start, with bot detection, wallet attribution, and ready-to-use audience targeting lists.
+            Build your view once. Reuse it forever. We cut the number of times you have to dig for the same numbers.
           </p>
           <Button asChild size="lg" className="rounded-full font-mono text-sm uppercase tracking-wider px-8 py-6 shadow-elegant">
             <Link to="/auth">
@@ -140,28 +109,11 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* ── BOT MONEY SECTION ── */}
-      <section className="relative z-10 pt-12 pb-0">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-destructive mb-3">The problem</p>
-              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
-                If 20–40% of your traffic is bots, you're overpaying by thousands every month.
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                The average Web3 campaign has <span className="text-foreground font-medium">23% bot traffic</span>. At $2,000/mo in ad spend, that's <span className="text-destructive font-semibold">$460/mo wasted</span> — paid to suppliers who sent you fake clicks. Most teams never know.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                AudienceScan detects bots across 12+ signals and surfaces exactly which campaigns, sources, and suppliers are responsible — so you can stop paying for traffic that will never convert.
-              </p>
-            </div>
-            <div>
-              <MockBotSummary />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── THREE PILLARS ── */}
+      <PillarsRow />
+
+      {/* ── BEYOND GA ── */}
+      <GAComparison />
 
       {/* ── $25K TESTIMONIAL ── */}
       <section className="pt-10 pb-6">
@@ -411,50 +363,7 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* ── SQL / QUERIES SECTION ── */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Query workspace</p>
-              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
-                Query your data like a data analyst — not a marketer
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                A built-in SQL workspace with schema explorer, autocomplete, and one-click CSV export. Ask your own questions. Get your own answers.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                The only Web3 analytics platform that gives you the raw power of a data warehouse — without needing a data team.
-              </p>
-            </div>
-            <div className="rounded-lg border border-border bg-card overflow-hidden shadow-elegant">
-              <div className="px-4 py-2.5 bg-foreground/[0.03] border-b border-border flex items-center gap-2">
-                <Code2 className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="font-mono text-xs text-muted-foreground">query.sql</span>
-              </div>
-              <pre className="p-5 text-xs font-mono leading-relaxed overflow-x-auto text-foreground">
-                <span className="text-primary">SELECT</span>{"\n"}
-                {"  "}utm_source,{"\n"}
-                {"  "}COUNT(*) <span className="text-primary">AS</span> visitors,{"\n"}
-                {"  "}COUNT(<span className="text-primary">DISTINCT</span> wallet_address){"\n"}
-                {"    "}<span className="text-primary">AS</span> wallets,{"\n"}
-                {"  "}ROUND(AVG(bot_score), 2){"\n"}
-                {"    "}<span className="text-primary">AS</span> avg_bot_score{"\n"}
-                <span className="text-primary">FROM</span> pageviews{"\n"}
-                <span className="text-primary">WHERE</span> created_at {">"} NOW(){"\n"}
-                {"  "}- INTERVAL <span className="text-amber-500">'30 days'</span>{"\n"}
-                <span className="text-primary">GROUP BY</span> utm_source{"\n"}
-                <span className="text-primary">ORDER BY</span> wallets <span className="text-primary">DESC</span>
-              </pre>
-              <div className="px-5 py-3 border-t border-border bg-muted/30 flex items-center justify-between">
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">5 rows · 0.3s</span>
-                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">↓ Export CSV</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      {/* SQL teaser moved to /how-it-works */}
       {/* ── "Like GA wrapped in Dune" testimonial ── */}
       <section className="py-6">
         <div className="container mx-auto px-4 max-w-3xl">

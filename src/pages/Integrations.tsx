@@ -1,12 +1,13 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Plus, ShieldCheck, Copy, Terminal, Key, Bot, Chrome, ExternalLink, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, ShieldCheck, Copy, Terminal, Key, Bot, Chrome, ExternalLink, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateApiKeyDialog } from "@/components/settings/CreateApiKeyDialog";
 import { ApiKeyList } from "@/components/settings/ApiKeyList";
 import { useSelectedWebsite } from "@/hooks/use-selected-website";
+import { downloadExtension } from "@/lib/download-extension";
 import { toast } from "sonner";
 
 const INFO_ENDPOINT = "https://cdn.audiencescan.io/auth/info";
@@ -28,6 +29,29 @@ const Integrations = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [expanded, setExpanded] = useState<Section>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  // Auto-expand extension card when arriving via #extension hash
+  useEffect(() => {
+    if (window.location.hash === "#extension") {
+      setExpanded("extension");
+      setTimeout(() => {
+        document.getElementById("extension")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, []);
+
+  const handleDownloadExtension = async () => {
+    setDownloading(true);
+    try {
+      await downloadExtension();
+      toast.success("Extension downloaded — unzip and follow the steps below");
+    } catch (err) {
+      toast.error("Download failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const copyPrompt = () => {
     navigator.clipboard.writeText(buildPrompt());
@@ -220,7 +244,8 @@ const Integrations = () => {
 
           {/* ── Browser Extension Card ── */}
           <Card
-            className="border border-border overflow-hidden cursor-pointer transition-colors hover:border-primary/30"
+            id="extension"
+            className="border border-border overflow-hidden cursor-pointer transition-colors hover:border-primary/30 scroll-mt-24"
             onClick={() => toggle("extension")}
           >
             <div className="p-4 flex items-center gap-4">
@@ -230,7 +255,7 @@ const Integrations = () => {
               <div className="flex-1">
                 <h3 className="text-p1 font-medium text-foreground">Browser Extension</h3>
                 <p className="text-p3 text-muted-foreground">
-                  See AudienceScan data while browsing — overlay analytics on any page.
+                  Overlay live click counts on every button while you browse your own site.
                 </p>
               </div>
               <ChevronRight
@@ -239,15 +264,29 @@ const Integrations = () => {
             </div>
 
             {expanded === "extension" && (
-              <div className="border-t border-border px-4 py-5 space-y-3" onClick={(e) => e.stopPropagation()}>
-                <p className="text-p2 text-muted-foreground">
-                  Download and install the AudienceScan browser extension for Chrome, Brave, Arc, or any Chromium browser.
-                </p>
-                <p className="text-p3 text-muted-foreground">
-                  You'll need your <strong>API key</strong> and <strong>Tag ID</strong> (shown above) to connect the extension.
-                </p>
+              <div className="border-t border-border px-4 py-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                <Button size="sm" onClick={handleDownloadExtension} disabled={downloading}>
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  {downloading ? "Downloading…" : "Download extension (.zip)"}
+                </Button>
+
+                <div className="space-y-3">
+                  {[
+                    "Unzip the file somewhere stable — don't unzip then delete. Chrome loads the extension from that folder.",
+                    <>Open <code className="font-mono text-xs bg-muted px-1.5 py-0.5">chrome://extensions</code> in Chrome.</>,
+                    "Toggle Developer mode on in the top-right.",
+                    <>Click <strong>Load unpacked</strong> and select the <code className="font-mono text-xs bg-muted px-1.5 py-0.5">audiencescan-extension</code> folder.</>,
+                    <>Pin the extension, open the popup, and paste your <strong>API key</strong> and <strong>Tag ID</strong> (shown above).</>,
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="text-p1 font-mono text-primary font-bold mt-0.5">{i + 1}</span>
+                      <p className="text-p2 text-foreground">{step}</p>
+                    </div>
+                  ))}
+                </div>
+
                 <p className="text-p3 text-muted-foreground italic">
-                  Download link coming soon.
+                  Works in all Chromium browsers (Chrome, Brave, Arc, Edge). One-click Chrome Web Store install coming soon.
                 </p>
               </div>
             )}
