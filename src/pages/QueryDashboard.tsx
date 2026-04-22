@@ -824,11 +824,8 @@ export default function QueryDashboard() {
                       }
                     }
                   });
-                  const lastUsedRow = tiles.length
-                    ? Math.max(...tiles.map((t) => (t.query.dash_row || 1) + (t.query.dash_h || 1) - 1))
-                    : 0;
-                  // Always show one extra empty row below the last tile so users can keep adding tiles.
-                  const maxRow = lastUsedRow + 1;
+                  // Always expose all 4 dashboard rows so users can see every available slot.
+                  const maxRow = 4;
                   const empty = (c: number, r: number) => !occupied.has(`${c},${r}`) && r >= 1 && r <= maxRow;
                   const elements: React.ReactNode[] = [];
 
