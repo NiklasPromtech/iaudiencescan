@@ -19,7 +19,7 @@ export const MockQueryDashboard = ({ compact = false }: Props) => {
   }, []);
 
   return (
-    <div className="relative border border-border bg-card overflow-hidden aspect-[4/3]">
+    <div className="relative w-full border border-border bg-card overflow-hidden aspect-[4/3]">
       {frames.map((src, i) => (
         <img
           key={src}
