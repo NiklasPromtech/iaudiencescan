@@ -47,49 +47,11 @@ const LandingPageV3 = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-16">
-          <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
-            Web3 analytics that respects your time.
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Build your view once. Reuse it forever. We cut the number of times you have to dig for the same numbers.
-          </p>
-          <Button asChild size="lg" className="rounded-full font-mono text-sm uppercase tracking-wider px-8 py-6 shadow-elegant">
-            <Link to="/auth">
-              Get Started Free
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Link>
-          </Button>
-          <div className="flex items-center justify-center flex-wrap gap-4 md:gap-6 mt-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5"><CreditCard className="w-4 h-4" /> No credit card</span>
-            <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> 5-minute setup</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Free forever on core features</span>
-          </div>
-        </div>
-      </section>
-
       {/* ── THREE PILLARS ── */}
       <PillarsRow />
 
       {/* ── BEYOND GA ── */}
       <GAComparison />
-
-      {/* ── $25K TESTIMONIAL ── */}
-      <section className="pt-10 pb-6">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="rounded-lg border-2 border-primary/20 bg-primary/[0.03] p-8">
-            <blockquote className="text-foreground font-medium leading-relaxed mb-4">
-              "Our bot detection data is currently the foundation of a{" "}
-              <span className="text-primary font-bold">$25K+ legal claim</span>{" "}
-              against a fraudulent marketing provider. Analytics you can defend in court."
-            </blockquote>
-            <p className="text-sm text-muted-foreground">— AudienceScan client, token project</p>
-          </div>
-        </div>
-      </section>
 
       {/* ── LOGO MARQUEE ── */}
       <section className="py-10 overflow-hidden">
