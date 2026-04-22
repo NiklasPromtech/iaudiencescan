@@ -11,7 +11,7 @@ const pillars = [
     title: "Build your own dashboard",
     body: "Pin queries as tiles. They update themselves.",
     visual: <MockQueryDashboard compact />,
-    link: "/how-it-works#dashboard",
+    link: "/how/dashboard",
   },
   {
     eyebrow: "Pillar 02",
@@ -19,7 +19,7 @@ const pillars = [
     title: "See where people click",
     body: "Browser extension overlays real click counts on every button.",
     visual: <MockClickHeatmap />,
-    link: "/how-it-works#extension",
+    link: "/how/extension",
   },
   {
     eyebrow: "Pillar 03",
@@ -27,7 +27,7 @@ const pillars = [
     title: "Ask in Telegram",
     body: "DM the bot or invite it to a group. /ask and get the number.",
     visual: <MockTelegramChat />,
-    link: "/how-it-works#telegram",
+    link: "/how/telegram",
   },
 ];
 
