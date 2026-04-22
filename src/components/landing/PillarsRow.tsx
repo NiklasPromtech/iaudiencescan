@@ -39,7 +39,7 @@ export const PillarsRow = () => {
           What AudienceScan does
         </p>
         <h2 className="font-bold text-3xl md:text-4xl text-center mb-12 text-foreground">
-          Website analytics for Web3. Three pillars. One tag.
+          <span className="underline decoration-primary decoration-2 underline-offset-4">Website analytics</span> for Web3. Three pillars. One tag.
         </h2>
         <div className="grid md:grid-cols-3 gap-5">
           {pillars.map((p) => (
