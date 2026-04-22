@@ -15,6 +15,8 @@ import { MockDailyChart } from "@/components/landing/MockDailyChart";
 import { MockHolderTrend } from "@/components/landing/MockHolderTrend";
 import { MockBotSummary } from "@/components/landing/MockBotSummary";
 import { MockPlatformCards } from "@/components/landing/MockPlatformCards";
+import { PillarsRow } from "@/components/landing/PillarsRow";
+import { GAComparison } from "@/components/landing/GAComparison";
 
 import { DashboardFrame } from "@/components/landing/DashboardFrame";
 import {
@@ -83,29 +85,7 @@ const outcomeCards = [
   },
 ];
 
-const heroMessages = [
-  { text: "Stop paying for bot traffic.", className: "text-foreground" },
-  { text: "Start reaching real buyers.", className: "text-primary" },
-  { text: "Optimise to wallet balance.", className: "text-foreground" },
-  { text: "Partner with the right tokens.", className: "text-primary" },
-  { text: "Optimise to token holders.", className: "text-foreground" },
-];
-
 const LandingPageV3 = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [phase, setPhase] = useState<"in" | "out">("in");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPhase("out");
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % heroMessages.length);
-        setPhase("in");
-      }, 500);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -113,18 +93,12 @@ const LandingPageV3 = () => {
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-8">
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl pt-24 pb-16">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight mb-5 text-foreground leading-[1.15]">
-            <span className="block relative overflow-hidden" style={{ height: "2.4em" }}>
-              <span
-                className={`absolute inset-0 flex items-center justify-center text-center transition-opacity duration-500 ${heroMessages[currentIndex].className} ${phase === "in" ? "opacity-100" : "opacity-0"}`}
-              >
-                {heroMessages[currentIndex].text}
-              </span>
-            </span>
+            Web3 analytics that respects your time.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            The only analytics tool built for Web3 teams — free to start, with bot detection, wallet attribution, and ready-to-use audience targeting lists.
+            Build your view once. Reuse it forever. We cut the number of times you have to dig for the same numbers.
           </p>
           <Button asChild size="lg" className="rounded-full font-mono text-sm uppercase tracking-wider px-8 py-6 shadow-elegant">
             <Link to="/auth">
@@ -140,28 +114,11 @@ const LandingPageV3 = () => {
         </div>
       </section>
 
-      {/* ── BOT MONEY SECTION ── */}
-      <section className="relative z-10 pt-12 pb-0">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-destructive mb-3">The problem</p>
-              <h2 className="font-bold text-2xl md:text-3xl text-foreground mb-4 leading-snug">
-                If 20–40% of your traffic is bots, you're overpaying by thousands every month.
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                The average Web3 campaign has <span className="text-foreground font-medium">23% bot traffic</span>. At $2,000/mo in ad spend, that's <span className="text-destructive font-semibold">$460/mo wasted</span> — paid to suppliers who sent you fake clicks. Most teams never know.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                AudienceScan detects bots across 12+ signals and surfaces exactly which campaigns, sources, and suppliers are responsible — so you can stop paying for traffic that will never convert.
-              </p>
-            </div>
-            <div>
-              <MockBotSummary />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── THREE PILLARS ── */}
+      <PillarsRow />
+
+      {/* ── BEYOND GA ── */}
+      <GAComparison />
 
       {/* ── $25K TESTIMONIAL ── */}
       <section className="pt-10 pb-6">
