@@ -16,9 +16,7 @@ import { PillarsRow } from "@/components/landing/PillarsRow";
 import { GAComparison } from "@/components/landing/GAComparison";
 
 import { DashboardFrame } from "@/components/landing/DashboardFrame";
-import {
-  mockScorecard, mockDimensionRows, mockCostRows,
-} from "@/components/landing/mock-data";
+import { mockDimensionRows } from "@/components/landing/mock-data";
 
 import bitmex from "@/assets/client-logos/bitmex.png";
 import flare from "@/assets/client-logos/flare.png";
