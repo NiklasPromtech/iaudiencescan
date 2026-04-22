@@ -71,57 +71,6 @@ const LandingPageV3 = () => {
 
       {/* Removed: What you get free, Dashboard preview, Period comparison, Wallet value, Find more buyers — keeping landing page SIMPLE */}
 
-      {/* ── "Like GA wrapped in Dune" testimonial ── */}
-      <section className="py-6">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="rounded-lg border border-border bg-card p-8">
-            <blockquote className="text-foreground font-medium leading-relaxed mb-4">
-              "It's like Google Analytics wrapped in Dune. Genuinely the first dashboard I actually <span className="text-primary font-bold">want</span> to open every morning."
-            </blockquote>
-            <p className="text-sm text-muted-foreground">— Head of Growth, DeFi protocol</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Ned testimonial + book demo ── */}
-      <section className="pb-16 pt-4">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="rounded-lg border border-border bg-card p-8">
-            <blockquote className="text-foreground font-medium leading-relaxed mb-4">
-              "He got some really good ideas on how to maximize value from your visitor data — it's worth grabbing 30 minutes with him."
-            </blockquote>
-            <p className="text-sm text-muted-foreground mb-3">— Ned, Token Project</p>
-            <Link to="/auth" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-mono">
-              Book a Demo <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FINAL CTA ── */}
-      <section className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="font-bold text-3xl md:text-4xl mb-4 text-foreground">
-            Free to start.{" "}
-            <span className="text-primary">No credit card. Takes 5 minutes.</span>
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Most teams see their first wallet data within an hour of installing the tag.
-          </p>
-          <Button asChild size="lg" className="rounded-full font-mono text-sm uppercase tracking-wider px-8 py-6 shadow-elegant">
-            <Link to="/auth">
-              Get Started Free
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Link>
-          </Button>
-          <div className="flex items-center justify-center flex-wrap gap-4 md:gap-6 mt-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5"><CreditCard className="w-4 h-4" /> No credit card</span>
-            <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> 5-minute setup</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Free forever on core features</span>
-          </div>
-        </div>
-      </section>
-
       <Footer />
 
       <style>{`
