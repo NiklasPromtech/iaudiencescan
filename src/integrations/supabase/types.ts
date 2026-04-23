@@ -10,57 +10,683 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
-      subscriptions: {
+      _prisma_migrations: {
         Row: {
-          cancel_at_period_end: boolean
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
+          applied_steps_count: number
+          checksum: string
+          finished_at: string | null
           id: string
-          owner_user_id: string | null
-          status: string | null
-          stripe_customer_id: string | null
-          stripe_price_id: string | null
-          stripe_subscription_id: string | null
-          trial_ends_at: string | null
+          logs: string | null
+          migration_name: string
+          rolled_back_at: string | null
+          started_at: string
+        }
+        Insert: {
+          applied_steps_count?: number
+          checksum: string
+          finished_at?: string | null
+          id: string
+          logs?: string | null
+          migration_name: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Update: {
+          applied_steps_count?: number
+          checksum?: string
+          finished_at?: string | null
+          id?: string
+          logs?: string | null
+          migration_name?: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
+      audiences: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+          wallets: string[] | null
+          website_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+          wallets?: string[] | null
+          website_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+          wallets?: string[] | null
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audiences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audiences_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      covalent_request_queue: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          priority: number
+          processed_at: string | null
+          request_type: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count: number
+          scan_id: string | null
+          status: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address: string
+          website_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          priority?: number
+          processed_at?: string | null
+          request_type: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count?: number
+          scan_id?: string | null
+          status?: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address: string
+          website_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          priority?: number
+          processed_at?: string | null
+          request_type?: Database["public"]["Enums"]["CovalentRequestType"]
+          retry_count?: number
+          scan_id?: string | null
+          status?: Database["public"]["Enums"]["CovalentQueueStatus"]
+          wallet_address?: string
+          website_id?: string | null
+        }
+        Relationships: []
+      }
+      email_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      entitlements: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          period_start: string
+          plan: Database["public"]["Enums"]["Plan"]
+          scans_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id: string
+          period_start?: string
+          plan?: Database["public"]["Enums"]["Plan"]
+          scans_used?: number
+          updated_at: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          period_start?: string
+          plan?: Database["public"]["Enums"]["Plan"]
+          scans_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          last_selected_website_id: string | null
+          starred_metrics: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_selected_website_id?: string | null
+          starred_metrics?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_selected_website_id?: string | null
+          starred_metrics?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scans: {
+        Row: {
+          archived_at: string | null
+          audience_id: string | null
+          chain: string
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          name: string | null
+          processed_count: number
+          progress: number
+          status: Database["public"]["Enums"]["ScanStatus"]
+          step: Database["public"]["Enums"]["ScanStep"]
+          updated_at: string
+          user_id: string
+          wallet_count: number
+          wallets: string[] | null
+          website_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          audience_id?: string | null
+          chain: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          name?: string | null
+          processed_count?: number
+          progress?: number
+          status?: Database["public"]["Enums"]["ScanStatus"]
+          step?: Database["public"]["Enums"]["ScanStep"]
+          updated_at?: string
+          user_id: string
+          wallet_count: number
+          wallets?: string[] | null
+          website_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          audience_id?: string | null
+          chain?: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          name?: string | null
+          processed_count?: number
+          progress?: number
+          status?: Database["public"]["Enums"]["ScanStatus"]
+          step?: Database["public"]["Enums"]["ScanStep"]
+          updated_at?: string
+          user_id?: string
+          wallet_count?: number
+          wallets?: string[] | null
+          website_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "audiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          domain: string | null
+          id: string
+          name: string
+          site_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name: string
+          site_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          name?: string
+          site_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      studies: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_limited: boolean
+          name: string
+          result_url: string | null
+          status: Database["public"]["Enums"]["StudyStatus"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          id: string
+          is_limited?: boolean
+          name: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["StudyStatus"]
+          updated_at: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_limited?: boolean
+          name?: string
+          result_url?: string | null
+          status?: Database["public"]["Enums"]["StudyStatus"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_shares: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          share_token: string
+          study_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id: string
+          share_token: string
+          study_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          share_token?: string
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_shares_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          telegram_handle: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          telegram_handle: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          telegram_handle?: string
+        }
+        Relationships: []
+      }
+      tokens: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          metadata: Json
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      touchpoints: {
+        Row: {
+          color: string | null
+          cost_amount: number | null
+          cost_currency: string | null
+          created_at: string
+          end_date: string | null
+          event_type: string
+          id: string
+          name: string
+          notes: string | null
+          start_date: string | null
+          timestamp: string | null
+          updated_at: string
+          user_id: string
+          website_id: string
+        }
+        Insert: {
+          color?: string | null
+          cost_amount?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id: string
+          website_id: string
+        }
+        Update: {
+          color?: string | null
+          cost_amount?: number | null
+          cost_currency?: string | null
+          created_at?: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          timestamp?: string | null
+          updated_at?: string
+          user_id?: string
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "touchpoints_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          supabase_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          supabase_id: string
+          updated_at: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          supabase_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_shares: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          shared_by_id: string
+          user_id: string | null
+          website_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          shared_by_id: string
+          user_id?: string | null
+          website_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          shared_by_id?: string
+          user_id?: string | null
+          website_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "website_shares_shared_by_id_fkey"
+            columns: ["shared_by_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "website_shares_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      website_tag_contracts: {
+        Row: {
+          chain: string
+          chain_id: string | null
+          contract_address: string
+          created_at: string
+          id: string
+          name: string
+          start_date: string | null
           updated_at: string
           website_id: string
         }
         Insert: {
-          cancel_at_period_end?: boolean
+          chain: string
+          chain_id?: string | null
+          contract_address: string
           created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          owner_user_id?: string | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_subscription_id?: string | null
-          trial_ends_at?: string | null
-          updated_at?: string
+          id: string
+          name: string
+          start_date?: string | null
+          updated_at: string
           website_id: string
         }
         Update: {
-          cancel_at_period_end?: boolean
+          chain?: string
+          chain_id?: string | null
+          contract_address?: string
           created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
           id?: string
-          owner_user_id?: string | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_subscription_id?: string | null
-          trial_ends_at?: string | null
+          name?: string
+          start_date?: string | null
           updated_at?: string
           website_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "website_tag_contracts_website_id_fkey"
+            columns: ["website_id"]
+            isOneToOne: false
+            referencedRelation: "websites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      websites: {
+        Row: {
+          archived_at: string | null
+          base_url: string
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          base_url: string
+          created_at?: string
+          id: string
+          name: string
+          status?: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id: string
+          updated_at: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          base_url?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["WebsiteStatus"]
+          tag_id?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "websites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -70,7 +696,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      CovalentQueueStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+      CovalentRequestType: "WALLET_ENRICHMENT" | "SCAN_WALLET"
+      Plan: "FREE" | "PRO" | "ENTERPRISE"
+      ScanStatus: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
+      ScanStep:
+        | "QUEUED"
+        | "FETCHING_BALANCES"
+        | "FETCHING_TRANSACTIONS"
+        | "BUILDING_NETWORK"
+        | "ENRICHING_SOCIALS"
+        | "FETCHING_NEWS"
+        | "FINALIZING"
+        | "DONE"
+      StudyStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED"
+      WebsiteStatus: "PENDING" | "VERIFIED" | "FAILED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -197,6 +837,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      CovalentQueueStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+      CovalentRequestType: ["WALLET_ENRICHMENT", "SCAN_WALLET"],
+      Plan: ["FREE", "PRO", "ENTERPRISE"],
+      ScanStatus: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+      ScanStep: [
+        "QUEUED",
+        "FETCHING_BALANCES",
+        "FETCHING_TRANSACTIONS",
+        "BUILDING_NETWORK",
+        "ENRICHING_SOCIALS",
+        "FETCHING_NEWS",
+        "FINALIZING",
+        "DONE",
+      ],
+      StudyStatus: ["PENDING", "RUNNING", "COMPLETED", "FAILED"],
+      WebsiteStatus: ["PENDING", "VERIFIED", "FAILED"],
+    },
   },
 } as const

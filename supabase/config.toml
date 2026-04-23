@@ -1,1 +1,23 @@
-project_id = "dvyugojygfartcfpgkck"
+project_id = "wksyyydmgpcaxdijalqf"
+
+[functions.send-notification-email]
+verify_jwt = false
+
+[functions.og-network]
+verify_jwt = false
+
+[functions.send-invite-email]
+verify_jwt = false
+
+[functions.api-proxy]
+verify_jwt = false
+
+[functions.sql-generate]
+verify_jwt = false
+
+[functions.send-scheduled-report]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+# updated: 2026-04-23-billing-v1
