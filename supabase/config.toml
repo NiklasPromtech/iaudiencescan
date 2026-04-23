@@ -17,4 +17,7 @@ verify_jwt = false
 
 [functions.send-scheduled-report]
 verify_jwt = false
-# updated: 2026-03-08-v5
+
+[functions.stripe-webhook]
+verify_jwt = false
+# updated: 2026-04-23-billing-v1
