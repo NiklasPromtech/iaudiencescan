@@ -1,89 +1,35 @@
 
 
-# AudienceScan — Tag-Level Paywall (Phase 1)
+## Fix seeded queries not appearing on dashboard after navigation
 
-Scope is intentionally narrow: **gate access to a verified tag's data behind a Stripe subscription tied to that tag**. No free tier logic, no usage metering, no trial-vs-free decisions yet — just "verified tag + no subscription = paywall".
+### Problem
+When `seedDefaultQueries()` clones the `is_system = true` templates, it copies `on_dashboard` from the template — but several templates have `on_dashboard = false`. Result: user lands on dashboard, sees the system templates rendered (via the `is_system.eq.true` OR-clause in `fetchDashboardQueries`), navigates to Queries and back, and the dashboard is now empty because their owned copies aren't pinned.
 
----
+On top of that, the OR-clause itself causes the "ghost templates" effect — the dashboard is showing global templates, not the user's own seeded copies.
 
-## How it works
+### Fix
 
-```
-User opens /overview (or any data page) for selected website
-        │
-        ▼
-Is the tag verified?
-   ├─ NO  → existing flow: redirect to /install
-   └─ YES → Does the website have an active subscription?
-              ├─ YES (trialing | active) → show data
-              └─ NO → show <PaywallScreen> with "Start free trial" CTA
-```
+**1. `src/hooks/use-queries.ts` — `seedDefaultQueries`**
+- When cloning each template, force `on_dashboard: true` (override the template's value) so every seeded copy is immediately pinned to the new website's dashboard.
+- Everything else stays the same: `is_system: false`, `starred: false`, fresh `user_id` + `website_id`.
 
-The subscription is keyed on **`website_id`**, so any user with shared access to the tag inherits the same paid status.
+**2. `src/hooks/use-queries.ts` — `fetchDashboardQueries`**
+- Remove `is_system.eq.true` from the OR-clause. Dashboard tiles should be **only** the user's own queries for this website (`website_id.eq.${websiteId}`). System templates are pure templates — they should never render directly on a dashboard, only get cloned via the seeder or a future "Add from template" picker.
+- This eliminates the "tiles appear then vanish" flicker and the cross-website leakage permanently.
 
----
+**3. `src/hooks/use-queries.ts` — `fetchQueries` (list view)**
+- Keep the OR-clause here so the Queries page still shows system templates as starting points the user can clone manually. (No change — leave as-is.)
 
-## What I'll build
+### Resulting flow
+- New website → seeder clones the 6 templates with `on_dashboard = true`, `is_system = false`, owned by the website.
+- Dashboard query: `website_id = X` only → shows the 6 seeded copies.
+- User edits/deletes one → it stays edited/deleted because they own it.
+- Navigating away and back → same 6 owned copies render, no flicker, no disappearing tiles.
 
-### Backend (Lovable Cloud)
+### Files to change
+- `src/hooks/use-queries.ts` — two small edits: force `on_dashboard: true` in the seed clone payload; drop `is_system.eq.true` from `fetchDashboardQueries` OR-clause.
 
-1. **`subscriptions` table**
-   - `id`, `website_id` (unique, fk), `owner_user_id`, `stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`, `status`, `trial_ends_at`, `current_period_end`, `cancel_at_period_end`, timestamps
-   - **RLS:** SELECT allowed for anyone with access to the website (owner or shared user, via existing sharing table). INSERT/UPDATE only via edge functions (service role).
-
-2. **3 edge functions** (BYOK Stripe, using your existing connection)
-   - `billing-create-checkout` — takes `website_id`, verifies caller owns it, creates Stripe Checkout session with `metadata.website_id`, 30-day trial
-   - `billing-portal` — opens Stripe Customer Portal for owner to manage/cancel
-   - `stripe-webhook` — listens for `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`; upserts the `subscriptions` row by `website_id` from metadata
-   - `verify_jwt = false` for `stripe-webhook` in `supabase/config.toml`
-
-3. **Helper hook** `useWebsiteSubscription(websiteId)` — returns `{ status, isPaywalled, isOwner, loading }`
-
-### Frontend
-
-4. **`<PaywallScreen>` component** — shown in place of data pages when `isPaywalled === true`
-   - Headline: "Unlock {website.domain}"
-   - Subhead: "Start your 30-day free trial to access analytics for this tag"
-   - Primary CTA: "Start free trial" → calls `billing-create-checkout` → redirects to Stripe
-   - Secondary: "Manage other websites" → `/settings`
-   - If caller is **not** the website owner: shows "Ask {owner email} to start a subscription" instead of CTA
-
-5. **Gate the data pages**
-   Wrap these routes' content with the paywall check (only when tag is verified):
-   - `/overview`, `/change`, `/events`, `/audiences`, `/wallets`, `/bots`, `/queries`, `/query-dashboard`, `/data-explorer`
-   - `/install`, `/settings`, `/settings/integrations` stay **open** (you need them to set up / pay)
-   - Labs pages (`/scans`, `/costs`, `/touchpoints`, `/contracts`) — TBD, default to gated
-
-6. **`/billing/success` page** — landing after Stripe Checkout, polls `subscriptions` row, redirects to `/overview` once `status = trialing`
-
-7. **Subscription card in `/settings`** — shows current website's plan, [Manage subscription] button (owner only), opens Stripe Portal
-
----
-
-## What I need from you
-
-### Now
-- **"Go"** to switch to default mode and build everything above
-- Confirm: **don't gate `/install` or `/settings`** (sounds obvious but want to be explicit)
-
-### After deployment (I'll prompt securely — don't paste in chat)
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET` (rotate first, then paste the new one)
-- `STRIPE_PRICE_ID` (your Volume-tiered price from Stripe Step 0)
-
-### Stripe Step 0 (you, in Stripe dashboard — can do in parallel)
-- Create the Meter (`pageview`), Product, and Volume-tiered Price
-- Finish the webhook config screen with endpoint URL: `https://wksyyydmgpcaxdijalqf.supabase.co/functions/v1/stripe-webhook`
-
----
-
-## Out of scope (Phase 2, later)
-
-- Usage metering / reporting pageviews to Stripe
-- Free tier (20k pageviews)
-- Daily cron
-- Trial-end-early-on-overage logic
-- Past-due / dunning UI
-
-We'll layer those on once Phase 1 is live and you can actually subscribe a tag.
+### Out of scope
+- A "Start from template" picker in the dashboard (can be added later if you want users to re-pull templates after deleting copies).
+- Touching the Queries list view behavior.
 
