@@ -1,110 +1,121 @@
-# Landing Page: /ga-alternative
+# Landing Page: /compare (Competitor Conquest)
 
-A dedicated landing page optimized for the Google Ads campaign targeting "Google Analytics alternative" keywords. Pure frontend — no backend changes needed, so this is unblocked by the database situation.
+A second Google Ads landing page, this time targeting "Plausible / Fathom / Simple Analytics / Matomo / Umami / Cookie3 / Spindl / Absolute Labs / Addressable / Dune alternative" searches. Same playbook as `/ga-alternative` — pure frontend, no backend touched, no database risk.
 
-## Why a dedicated landing page (not just /)
+## Strategy: one page, many competitors
 
-Google Ads quality score (and conversion rate) goes up when the landing page **mirrors the ad's promise**. Sending "GA Alternative for Web3" traffic to the generic homepage wastes budget. This page will:
+Google Ads keyword list spans ~12 different competitors. Building 12 pages is overkill and dilutes SEO. Instead:
 
-- Match the ad headlines word-for-word (Quality Score boost → cheaper clicks)
-- Lead with the offer ("Free until 20K pageviews")
-- Have a single goal: signup. No nav distractions.
-- Be indexable for organic traffic on the same keywords later
+- **One canonical page** at `/compare` that ranks for "Web3 analytics comparison" / "Plausible alternative" / etc.
+- A **competitor switcher** at the top — pills like `Plausible · Fathom · Simple Analytics · Matomo · Umami · Cookie3 · Spindl · Absolute Labs · Dune`
+- Clicking a pill swaps the comparison column + headline copy in place (no route change, instant).
+- Deep-link via query string: `/compare?vs=plausible` lands directly on the Plausible view. The ad's Final URL stays `/compare` but we can later point ad groups to `/compare?vs=plausible` for tighter Quality Score.
+
+This gives us SEO concentration on one URL while still feeling tailored per competitor.
 
 ## Page structure
 
 ```text
 ┌──────────────────────────────────────────────┐
-│  Slim header (logo + Sign in only, no nav)   │
+│  Slim header (logo + Sign in + Start Free)   │
 ├──────────────────────────────────────────────┤
 │  HERO                                         │
-│   H1: GA Alternative for Web3                 │
-│   Sub: Cookieless. Privacy-first.             │
-│        Free until 20K monthly pageviews.      │
+│   Eyebrow: "Looking at Plausible?"           │
+│   H1: Compare Web3 Analytics                 │
+│   Sub: Wallet-aware. Cookieless.             │
+│        Free under 20K monthly pageviews.     │
 │   [Start Free — No Credit Card]  [See Demo]  │
-│   Trust line: "Set up in under 5 minutes •   │
-│   GDPR-ready • No cookie banner needed"      │
 ├──────────────────────────────────────────────┤
-│  LOGO MARQUEE (reused from homepage)          │
-│  "Trusted by 50+ Web3 teams"                  │
+│  COMPETITOR SWITCHER (pills)                  │
+│   Plausible · Fathom · Simple Analytics ·    │
+│   Matomo · Umami · Cookie3 · Spindl ·        │
+│   Absolute Labs · Addressable · Dune · GA4   │
 ├──────────────────────────────────────────────┤
-│  GA vs AudienceScan COMPARISON TABLE          │
-│   Feature           | GA4      | AudienceScan │
-│   Cookieless        | ✗        | ✓            │
-│   Cookie banner     | Required | Not needed   │
-│   Bot filtering     | Weak     | Built-in     │
-│   Wallet tracking   | ✗        | ✓            │
-│   Click-text track  | ✗        | ✓            │
-│   GDPR out of box   | ✗        | ✓            │
-│   Free tier         | 10M evts | 20K pv/mo    │
-│   Setup time        | Hours    | <5 min       │
+│  COMPARISON TABLE (3 cols: Feature | <Comp> | AudienceScan)
+│   Wallet connects tracked                     │
+│   Cookieless                                  │
+│   No cookie banner                            │
+│   GDPR out of the box                         │
+│   Bot filtering                               │
+│   Click-text tracking                         │
+│   On-chain holder data                        │
+│   Free tier                                   │
+│   Setup time                                  │
 ├──────────────────────────────────────────────┤
-│  THREE PILLARS (reused: Bot / Wallet / Click) │
-│  "What we track that GA can't"                │
+│  WHY WEB3 TEAMS SWITCH (3 cards)              │
+│   Wallet visibility · Privacy by default ·   │
+│   One snippet, full insights                  │
 ├──────────────────────────────────────────────┤
-│  HOW IT WORKS — 3 steps                       │
-│   1. Drop one snippet  2. See real users      │
-│   3. Stay free until 20K pv/mo                │
+│  HOW IT WORKS (3 steps, reused pattern)       │
 ├──────────────────────────────────────────────┤
-│  FAQ (4-5 ad-relevant questions)              │
+│  FAQ                                          │
+│   - Can I migrate from <competitor>?         │
 │   - Is it really free?                        │
 │   - Do I need a cookie banner?                │
-│   - Is it GDPR compliant?                     │
-│   - How long to migrate from GA4?             │
-│   - Will I lose my historical GA data?        │
+│   - How is this different from a generic      │
+│     privacy analytics tool?                   │
 ├──────────────────────────────────────────────┤
 │  FINAL CTA banner                             │
-│   "Replace Google Analytics in 5 minutes"     │
-│   [Start Free]                                │
 ├──────────────────────────────────────────────┤
-│  Slim footer (legal links only)               │
+│  Slim footer                                  │
 └──────────────────────────────────────────────┘
 ```
 
-## Design
+## Per-competitor data (driving the switcher)
 
-- Reuse existing design tokens — Space Mono headings, Bai Jamjuree body, flat borders, primary accent. Matches the rest of the site, no new visual language.
-- Reuse existing components where possible: `PillarsRow`, `GAComparison`, logo marquee block, `Footer`.
-- New components built fresh: `GAAltHero`, `GAvsTable`, `GAAltHowItWorks`, `GAAltFAQ`, `GAAltCTA`.
-- **Slim header**: a stripped-down version of `Header` — just logo + "Sign in" + "Start Free" button. No links to /blog, /resources, /how-it-works (those leak conversions away from the ad goal).
+A single TypeScript map keyed by slug, each entry contains:
 
-## SEO & ad-targeting details
+- `name` — display name
+- `eyebrow` — e.g. "Looking at Plausible?", "Coming from Fathom?"
+- `tagline` — one-liner positioning ("Privacy-first generic analytics, no Web3 layer")
+- `rows` — values for each comparison row (✓ / ✗ / short text)
+- `migrationNote` — one sentence shown in FAQ ("Migrating from Plausible takes ~5 minutes — drop in one script.")
 
-- Route: `/ga-alternative` (matches the ad Final URL).
-- `<title>`: "Google Analytics Alternative for Web3 — Free Until 20K Pageviews | AudienceScan"
-- Meta description: pulled from ad description #1.
-- Use `react-helmet-async` if already installed, otherwise set via a small inline `<head>` effect. (I'll check on implementation.)
-- H1 = "GA Alternative for Web3" (exact ad H1 #1).
-- Body copy naturally includes target keywords: "Google Analytics alternative", "GA4 alternative", "replace Google Analytics", "lightweight web analytics", "simple website analytics", "free Google Analytics alternative".
-- Internal link from homepage footer → "/ga-alternative" so it's crawlable.
-- Add to `public/sitemap.xml`.
+Competitors covered: `plausible`, `fathom`, `simple-analytics`, `matomo`, `umami`, `cookie3`, `spindl`, `absolute-labs`, `addressable`, `dune`, `ga4`.
+
+The factual rows for each will be conservative and accurate — the wedge is consistent across all of them: **none of them combine privacy-first web analytics with wallet/on-chain context in one drop-in script**. We will NOT make pricing claims about competitors (those change), only feature presence.
+
+## SEO & ad targeting
+
+- Route: `/compare` (matches Final URL).
+- `<title>`: "Web3 Analytics Comparison — AudienceScan vs Plausible, Fathom, GA4 & more"
+- Meta description: from ad description #1.
+- H1: "Compare Web3 Analytics" (exact ad H1 #2).
+- Body naturally contains every keyword from the list (each competitor name + "alternative").
+- Add `/compare` to `public/sitemap.xml`.
+- Footer link added for crawlability ("Compare").
+- Selecting a competitor pill updates the URL query (`?vs=plausible`) via `history.replaceState` so each variant is shareable but doesn't trigger a route change.
+
+## Reuse vs new
+
+**Reuse:**
+- `SlimHeader` (already built for `/ga-alternative`)
+- `Footer`
+- Existing design tokens, fonts, button styles
+
+**New components (`src/components/compare/`):**
+- `CompareHero.tsx`
+- `CompetitorSwitcher.tsx`
+- `CompareTable.tsx`
+- `WhyWeb3Switch.tsx` (3 cards)
+- `CompareHowItWorks.tsx`
+- `CompareFAQ.tsx`
+- `CompareCTA.tsx`
+- `competitors.ts` (data map)
+
+**New page:** `src/pages/Compare.tsx`
+
+**Edited:**
+- `src/App.tsx` — lazy route for `/compare`
+- `public/sitemap.xml` — add `/compare`
+- `src/components/Footer.tsx` — add "Compare" link next to "GA Alternative"
 
 ## What I will NOT build now
 
-- A/B variants of the page (ship one, iterate after we see ad performance).
-- Conversion tracking / GTM events (separate task; needs decisions on what events).
-- Pricing page link from this page (don't show price ladders — the offer is "free", let them sign up first).
+- Per-competitor static routes (`/compare/plausible` etc.) — query string is enough until we see ad performance.
+- Conversion tracking events — separate task.
+- Pricing detail per competitor — too volatile, not worth maintaining.
 
-## Open question before building
+## Open question
 
-One thing to confirm — want me to proceed with the assumption above, or:
-
-- Should the primary CTA button go to `/auth` (signup form) or to `/install` (the install guide)?
-
-I'll default to `/auth` (signup) since that's the conversion event the campaign optimizes for, but tell me if you'd prefer otherwise.
-
-## Files
-
-**New**
-- `src/pages/GAAlternative.tsx`
-- `src/components/ga-alt/GAAltHero.tsx`
-- `src/components/ga-alt/GAvsTable.tsx`
-- `src/components/ga-alt/GAAltHowItWorks.tsx`
-- `src/components/ga-alt/GAAltFAQ.tsx`
-- `src/components/ga-alt/GAAltCTA.tsx`
-- `src/components/ga-alt/SlimHeader.tsx`
-
-**Edited**
-- `src/App.tsx` — add lazy route for `/ga-alternative`
-- `public/sitemap.xml` — add the new URL
-- `src/components/Footer.tsx` — add a discreet link (for crawlability)
+Same as before: primary CTA → `/auth` (signup) by default. Tell me if you want `/install` instead.
