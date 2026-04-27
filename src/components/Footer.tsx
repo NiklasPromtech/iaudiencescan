@@ -6,6 +6,7 @@ const sections = [
   {
     title: "Company",
     links: [
+      { label: "GA Alternative", href: "/ga-alternative" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Support", href: "mailto:support@audiencescan.io" },
     ],
