@@ -14,6 +14,7 @@ const CaseStudies = lazy(() => import("./pages/CaseStudies"));
 const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
 const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
+const GAAlternative = lazy(() => import("./pages/GAAlternative"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const BlogPostTracking = lazy(() => import("./pages/BlogPostTracking"));
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/how/telegram" element={<HowTelegram />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/faq" element={<FAQPage />} />
+            <Route path="/ga-alternative" element={<GAAlternative />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/personal-letter" element={<BlogPost />} />
             <Route path="/blog/tutorials" element={<BlogPostTutorials />} />
