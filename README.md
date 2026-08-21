@@ -2,7 +2,7 @@
 
 A web-analytics tool that connects marketing sources to the *financial value* of the audience they bring in — not just how many visitors, but how much on-chain capital those visitors actually hold.
 
-**Live app:** https://audiencescan.io <!-- replace with the correct AudienceScan URL -->
+**Live app:** https://audiencescan.io
 
 ## The idea
 
@@ -22,6 +22,7 @@ AudienceScan closes that gap: it ties marketing source to measured wallet value,
 
 - **Frontend:** TypeScript / React (built with [Lovable](https://lovable.dev))
 - **Backend:** Supabase — session capture, enrichment, and attribution storage
+- **Data warehouse:** BigQuery, with a schema-aware AI layer that translates plain-language questions into correct SQL — natural-language querying over the full dataset
 - On-chain data enrichment to turn wallet addresses into transaction and balance signals
 - UTM-based source attribution linking value back to marketing effort
 
