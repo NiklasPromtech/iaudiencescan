@@ -1,73 +1,34 @@
-# Welcome to your Lovable project
+# AudienceScan
 
-## Project info
+A web-analytics tool that connects marketing sources to the *financial value* of the audience they bring in — not just how many visitors, but how much on-chain capital those visitors actually hold.
 
-**URL**: https://lovable.dev/projects/7cabda9d-f091-407e-b66e-8100933cac81
+**Live app:** https://audiencescan.io <!-- replace with the correct AudienceScan URL -->
 
-## How can I edit this code?
+## The idea
 
-There are several ways of editing your application.
+Standard analytics tells you *how many* people a campaign brought in. It can't tell you *who's worth it*. For products where the audience holds on-chain assets, that's the more valuable question — a thousand visitors with empty wallets are worth less than fifty who can actually transact.
 
-**Use Lovable**
+AudienceScan closes that gap: it ties marketing source to measured wallet value, so you can optimise toward the audience that matters instead of raw volume.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7cabda9d-f091-407e-b66e-8100933cac81) and start prompting.
+## How it works
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Capture:** when a visitor shares their wallet address, the tool records it against their session
+- **Enrich:** it scans that wallet for transaction history and current holdings — turning an address into a value signal
+- **Attribute:** UTM parameters connect each wallet back to the exact marketing source that brought that visitor in
+- **Query, in plain language:** the data lands in BigQuery, and an AI layer that knows the full schema generates the SQL for you — so you can ask a question in plain language ("which channel brought the highest-value wallets last month?") and get the answer, without writing SQL or knowing the table structure
+- **Result:** a view of how much real capital each campaign, channel, or creative is actually reaching — value-based attribution instead of vanity metrics
 
-**Use your preferred IDE**
+## How it's built
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend:** TypeScript / React (built with [Lovable](https://lovable.dev))
+- **Backend:** Supabase — session capture, enrichment, and attribution storage
+- On-chain data enrichment to turn wallet addresses into transaction and balance signals
+- UTM-based source attribution linking value back to marketing effort
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## The thinking behind it
 
-Follow these steps:
+This came out of 15 years in data-driven marketing: the recurring frustration that attribution optimises for *reach* when what actually matters is *value*. It's an attempt to measure the thing that counts — and the same instinct (find where the real signal is, build the thing that measures it) runs through most of what I build.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/7cabda9d-f091-407e-b66e-8100933cac81) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*One of a number of things I've built — mostly AI-powered tools, data systems, and small apps that solve a real problem. Built solo, shipped live.*
